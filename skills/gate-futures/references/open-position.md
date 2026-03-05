@@ -8,7 +8,8 @@ Gate.io 合约开仓场景示例和预期行为。
 
 | 用户单位 | 转换公式 | 说明 |
 |----------|----------|------|
-| **U（USDT 金额）** | 张 = u ÷ 标记价格 ÷ 合约乘数 | `size_contracts = u / mark_price / quanto_multiplier` |
+| **U（USDT 金额）** | 张 = u ÷ 标记价格 ÷ 合约乘数 | 无杠杆或全仓时：`size_contracts = u / mark_price / quanto_multiplier` |
+| **U（USDT 金额）+ 杠杆** | 张 = u × 杠杆 ÷ 标记价格 ÷ 合约乘数 | 有杠杆时：`size_contracts = u * leverage / mark_price / quanto_multiplier` |
 | **币种（基础资产数量，如 BTC、ETH）** | 张 = 币种 ÷ 合约乘数 | `size_contracts = base_amount / quanto_multiplier` |
 
 - **数据来源**: 调用 `get_futures_contract(settle, contract)` 获取 `mark_price`、`quanto_multiplier`。
@@ -18,7 +19,8 @@ Gate.io 合约开仓场景示例和预期行为。
 
 **开仓前必须**先向用户展示**最终下单信息**，待用户确认后再调用 `create_futures_order`。
 
-- **展示内容**：合约、方向（开多/开空）、数量（张）、价格（限价或“市价”）、仓位模式（全仓/逐仓）、杠杆（若逐仓）、预估保证金、预估强平价格；市价单另提示滑点风险。
+- **杠杆查询**：根据**仓位上的合约 + 下单方向**查询当前杠杆——调用 `get_position(settle, contract)`，若有该方向持仓则取该仓位杠杆展示；无该方向持仓则取该合约下该方向的杠杆设置或默认杠杆并展示。
+- **展示内容**：合约、方向（开多/开空）、数量（张）、价格（限价或“市价”）、仓位模式（全仓/逐仓）、**杠杆**（由上一步查询得到）、预估保证金、预估强平价格；市价单另提示滑点风险。
 - **确认话术**：*「请确认以上信息无误后回复“确认”再下单。」* 仅当用户明确确认（如回复“确认”“可以”“下单”等）后再执行下单。
 
 ## Scenario 1: 限价单开多仓（全仓模式）
@@ -33,10 +35,11 @@ Gate.io 合约开仓场景示例和预期行为。
 **Expected Behavior**:
 1. Fetch contract info via `get_futures_contract(settle="usdt", contract="BTC_USDT")`
 2. Switch to cross mode via `update_futures_position_cross_mode(settle="usdt", cross=true)`
-3. **展示最终下单信息**（合约、方向、数量、价格、模式、预估强平价/保证金），请用户确认。
-4. 用户确认后，Place order via `create_futures_order(settle="usdt", contract="BTC_USDT", size="1", price="65000", tif="gtc")`
-5. Query position via `get_futures_position(settle="usdt", contract="BTC_USDT")`
-6. Output 开仓结果报告
+3. Query leverage via `get_position(settle="usdt", contract="BTC_USDT")`（按合约+开多方向），取该方向仓位/杠杆。
+4. **展示最终下单信息**（合约、方向、数量、价格、模式、**杠杆**、预估强平价/保证金），请用户确认。
+5. 用户确认后，Place order via `create_futures_order(settle="usdt", contract="BTC_USDT", size="1", price="65000", tif="gtc")`
+6. Query position via `get_futures_position(settle="usdt", contract="BTC_USDT")`
+7. Output 开仓结果报告
 
 **Response Template**:
 ```
@@ -49,6 +52,7 @@ Gate.io 合约开仓场景示例和预期行为。
 价格: 65000 USDT
 状态: open (挂单中)
 模式: 全仓
+杠杆: 10x（据当前仓位查询）
 ```
 
 ---
@@ -241,7 +245,7 @@ FOK 订单未能成交
 
 **Expected Behavior**:
 1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")`，取得 `mark_price`、`quanto_multiplier`。
-2. 计算张数: 张 = u ÷ mark_price ÷ quanto_multiplier（按合约精度与 `order_size_min` 处理）。
+2. 计算张数：无杠杆时 张 = u ÷ mark_price ÷ quanto_multiplier；**有杠杆时** 张 = u × 杠杆 ÷ mark_price ÷ quanto_multiplier（按合约精度与 `order_size_min` 处理）。
 3. 若张数 &lt; order_size_min，提示「金额换算后不足最小下单量」。
 4. 按所得张数执行开仓流程（模式切换、杠杆、`create_futures_order` 等）。
 5. 报告中可同时展示「约 xxx U」与「yy 张」。
