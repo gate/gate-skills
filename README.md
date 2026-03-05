@@ -30,9 +30,9 @@ Analyze cryptocurrency market data on Gate.io, covering two core modes:
 | **Multi-Coin Screener** | Filter and rank coins across the entire market by volume, price change, funding rate, spread, and more |
 
 **Example Prompts**:
-- `帮我分析一下 BTC` / `Analyze SOL`
-- `找出24h涨幅超过10%的币` / `Top coins by volume`
-- `对比 ETH 和 SOL`
+- `Analyze BTC in detail` / `Analyze SOL`
+- `Find coins with 24h gain above 10%` / `Top coins by volume`
+- `Compare ETH and SOL`
 
 ---
 
@@ -49,9 +49,9 @@ Monitor trading opportunities and risks in Gate.io derivatives markets across th
 | **Liquidation Monitor** | Liquidation spike detection, directional squeeze, and pin-bar event analysis |
 
 **Example Prompts**:
-- `BTC 基差怎么样` / `Check BTC basis`
-- `资金费率套利扫描` / `Funding rate arbitrage opportunities`
-- `爆仓监控` / `Show liquidation anomalies`
+- `How is BTC basis?` / `Check BTC basis`
+- `Run a funding rate arbitrage scan` / `Funding rate arbitrage opportunities`
+- `Monitor liquidations` / `Show liquidation anomalies`
 
 ---
 
