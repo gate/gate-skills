@@ -86,59 +86,59 @@ For each qualified opportunity, compute a composite score:
 ## Report Template
 
 ```
-# 资金费率套利扫描报告
+# Funding Rate Arbitrage Scan Report
 
-> 扫描时间: {current_datetime}
-> 结算币种: USDT
-> 扫描范围: 全部 USDT 永续合约
-> 筛选条件: 24h成交量 > $10M, |资金费率| > 0.05%
-
----
-
-## 筛选概览
-
-- 合约总数: {total_contracts}
-- 通过成交量筛选: {volume_passed}
-- 通过费率筛选: {rate_passed}
-- 最终候选: {final_candidates}
+> Scan time: {current_datetime}
+> Settlement currency: USDT
+> Scope: all USDT perpetual contracts
+> Filtering conditions: 24h volume > $10M, |funding rate| > 0.05%
 
 ---
 
-## 套利机会列表
+## Screening Overview
+
+- Total contracts: {total_contracts}
+- Passed volume filter: {volume_passed}
+- Passed rate filter: {rate_passed}
+- Final candidates: {final_candidates}
+
+---
+
+## Arbitrage Opportunity List
 
 ### 🥇 {rank}. {COIN}_USDT
 
-| 指标 | 数值 |
+| Metric | Value |
 |------|------|
-| 当前资金费率 | {funding_rate}% |
-| 预估年化收益 | {annualized_return}% |
-| 合约价格 | {futures_price} USDT |
-| 现货价格 | {spot_price} USDT |
-| 期现价差 | {basis}% |
-| 24h合约成交量 | ${futures_volume} |
-| 盘口深度 | 买盘 ${bid_depth} / 卖盘 ${ask_depth} |
-| 套利方向 | {direction: 正向套利(做空合约+买入现货) / 反向套利(做多合约+卖出现货)} |
+| Current funding rate | {funding_rate}% |
+| Estimated annualized return | {annualized_return}% |
+| Futures price | {futures_price} USDT |
+| Spot price | {spot_price} USDT |
+| spot-futures spread | {basis}% |
+| 24h futures volume | ${futures_volume} |
+| Order book depth | bid ${bid_depth} / ask ${ask_depth} |
+| Arbitrage direction | {direction: forward (short futures + buy spot) / reverse (long futures + sell spot)} |
 
-**风险标注**:
+**Risk Flags**:
 {risk_flags}
 
 (Repeat for each candidate, ranked by annualized return)
 
 ---
 
-## 风险提示
+## Risk Alerts
 
-1. 资金费率会动态变化，实际收益可能低于预估年化
-2. 需考虑开仓/平仓手续费、滑点成本
-3. 极端行情下可能触发强平，需合理控制仓位和保证金
-4. 盘口深度不足的币种，大额操作可能产生较大滑点
-5. 以上分析基于实时数据，仅供参考，不构成投资建议
+1. Funding rates are dynamic; actual returns may be lower than estimated annualized values.
+2. Include open/close fees and slippage costs.
+3. Extreme markets may trigger forced liquidation; manage position size and margin carefully.
+4. Thin depth can create high slippage on large orders.
+5. This analysis is based on real-time data, for reference only, and not investment advice.
 ```
 
 ## Direction Logic
 
-- If funding rate > 0: Longs pay shorts → **正向套利**: Short futures + Buy spot (collect funding)
-- If funding rate < 0: Shorts pay longs → **反向套利**: Long futures + Sell/short spot (collect funding)
+- If funding rate > 0: Longs pay shorts → **forward arbitrage**: Short futures + Buy spot (collect funding)
+- If funding rate < 0: Shorts pay longs → **reverse arbitrage**: Long futures + Sell/short spot (collect funding)
 
 ## Important Notes
 

@@ -60,10 +60,10 @@ If tools are listed, Gate MCP is ready to use!
 
 After installation, use Gate MCP with queries like:
 
-- "查询 BTC/USDT 的价格"
-- "用 gate mcp 分析 SOL"
-- "Gate 有什么套利机会？"
-- "查看 ETH 的资金费率"
+- "check BTC/USDT price"
+- "use gate mcp to analyze SOL"
+- "what arbitrage opportunities are there on Gate?"
+- "check ETH funding rate"
 
 ## Troubleshooting
 

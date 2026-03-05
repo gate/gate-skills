@@ -85,9 +85,9 @@ if mcporter list gate --schema &> /dev/null; then
     mcporter list gate --schema 2>&1 | head -30
     echo ""
     echo "You can now use Gate MCP in OpenClaw with queries like:"
-    echo "  • '查询 BTC/USDT 的价格'"
-    echo "  • '用 gate mcp 分析 SOL'"
-    echo "  • 'Gate 有什么套利机会？'"
+    echo "  • 'check BTC/USDT price'"
+    echo "  • 'use gate mcp to analyze SOL'"
+    echo "  • 'what arbitrage opportunities are there on Gate?'"
 else
     echo -e "${RED}✗ Connection test failed${NC}"
     echo "Please check your internet connection and try again."

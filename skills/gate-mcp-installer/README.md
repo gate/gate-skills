@@ -8,10 +8,10 @@ An AI Agent skill that provides one-click installation and configuration for Gat
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **One-Click Install** | Automated mcporter CLI + Gate MCP setup | "帮我安装 Gate MCP" |
-| **Config Management** | Configure Gate MCP server endpoint | "配置 Gate MCP" |
-| **Connectivity Verification** | Verify MCP tools are accessible | "Gate MCP 安装好了吗？" |
-| **Troubleshooting** | Diagnose and fix common setup issues | "MCP 连不上怎么办？" |
+| **One-Click Install** | Automated mcporter CLI + Gate MCP setup | "help me install Gate MCP" |
+| **Config Management** | Configure Gate MCP server endpoint | "configure Gate MCP" |
+| **Connectivity Verification** | Verify MCP tools are accessible | "is Gate MCP installed correctly?" |
+| **Troubleshooting** | Diagnose and fix common setup issues | "what if MCP cannot connect?" |
 
 > 🚀 **One command**: `bash scripts/install-gate-mcp.sh` handles the entire setup — install mcporter, configure endpoint, verify connectivity.
 
@@ -20,7 +20,7 @@ An AI Agent skill that provides one-click installation and configuration for Gat
 ## Architecture
 
 ```
-User Request ("帮我安装 Gate MCP")
+User Request ("help me install Gate MCP")
     ↓
 AI Agent
     ↓
@@ -41,28 +41,28 @@ Gate MCP Ready → Other skills can use Gate MCP tools
 ## Agent Use Cases
 
 ### 1. First-Time Setup
-> "帮我安装 Gate MCP"
+> "help me install Gate MCP"
 
 - Full automated installation and configuration
 - Verify connectivity and show available tools
 - For: new users setting up Gate AI skills
 
 ### 2. Health Check
-> "Gate MCP 安装好了吗？"
+> "is Gate MCP installed correctly?"
 
 - Verify config and connectivity
 - Report status with actionable suggestions
 - For: users troubleshooting other skills
 
 ### 3. Troubleshooting
-> "Gate MCP 连不上"
+> "Gate MCP cannot connect"
 
 - Step-by-step diagnosis
 - Automated fix attempts
 - For: users experiencing connectivity issues
 
 ### 4. Update / Reinstall
-> "更新一下 mcporter"
+> "update mcporter"
 
 - Reinstall latest mcporter version
 - Re-verify configuration
@@ -84,7 +84,7 @@ Gate MCP Ready → Other skills can use Gate MCP tools
 bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
 
 # Or just ask the agent
-"帮我安装 Gate MCP"
+"help me install Gate MCP"
 ```
 
 ### Manual Steps (if script fails)

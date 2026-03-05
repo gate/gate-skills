@@ -8,11 +8,11 @@ An AI Agent skill that monitors trading opportunities and risks in [Gate.io](htt
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **Basis Monitor** | Spot-futures basis analysis with Z-Score deviation detection | "BTC 基差怎么样？" |
-| **Funding Rate Arbitrage** | Full-market scan for funding rate arbitrage opportunities | "有没有套利机会？" |
-| **Liquidation Monitor** | Abnormal liquidation spike and squeeze detection | "最近爆仓情况怎么样？" |
-| **Arbitrage Signals** | Ranked opportunities with annualized return estimates | "费率套利扫描" |
-| **Pin-Bar Detection** | Liquidation-driven wick events with price recovery analysis | "BTC 是插针了吗？" |
+| **Basis Monitor** | Spot-futures basis analysis with Z-Score deviation detection | "how is BTC basis?" |
+| **Funding Rate Arbitrage** | Full-market scan for funding rate arbitrage opportunities | "are there arbitrage opportunities?" |
+| **Liquidation Monitor** | Abnormal liquidation spike and squeeze detection | "how are recent liquidations?" |
+| **Arbitrage Signals** | Ranked opportunities with annualized return estimates | "funding-rate arbitrage scan" |
+| **Pin-Bar Detection** | Liquidation-driven wick events with price recovery analysis | "did BTC have a wick event?" |
 
 > 📈 **Three dimensions**: Basis analysis reveals market structure, funding rates expose positioning, liquidation data detects squeezes. Together they provide a comprehensive derivatives market picture.
 
@@ -49,35 +49,35 @@ Structured Report → Agent interprets → Natural language response
 ## Agent Use Cases
 
 ### 1. Arbitrage Opportunity Scanner
-> "资金费率套利扫描"
+> "funding-rate arbitrage scan"
 
 - Full-market scan with multi-step filtering pipeline
 - Ranked by estimated annualized return
 - For: quantitative traders, arbitrageurs
 
 ### 2. Market Sentiment Gauge
-> "市场整体是正基差还是负基差？"
+> "is the market mostly positive or negative basis?"
 
 - Full-market basis scan showing contango vs backwardation distribution
 - Funding rate direction analysis
 - For: macro traders, market analysts
 
 ### 3. Risk Monitor
-> "最近爆仓情况怎么样？"
+> "how are recent liquidations?"
 
 - Aggregate liquidation data with anomaly detection
 - Directional squeeze identification
 - For: risk managers, position holders
 
 ### 4. Flash Crash Investigator
-> "BTC 刚才闪崩是怎么回事？"
+> "what caused BTC's recent flash crash?"
 
 - Liquidation cascade analysis with pin-bar detection
 - Price context and recovery assessment
 - For: active traders, risk analysts
 
 ### 5. Multi-Dimension Analysis
-> "BTC 的基差、费率和爆仓情况"
+> "BTC basis, funding rate, and liquidation status"
 
 - Cross-reference all three dimensions for comprehensive view
 - Unified sentiment interpretation
@@ -96,20 +96,20 @@ Structured Report → Agent interprets → Natural language response
 
 ```
 # Basis analysis
-"BTC 基差怎么样？"
-"全市场基差扫描"
+"how is BTC basis?"
+"full-market basis scan"
 
 # Funding rate arbitrage
-"现在有没有套利机会？"
-"费率最高的币"
+"are there arbitrage opportunities now?"
+"coins with highest funding rates"
 
 # Liquidation monitoring
-"最近爆仓情况怎么样？"
-"哪个币爆得最多？"
+"how are recent liquidations?"
+"which coin had the most liquidations?"
 
 # Multi-dimension
-"BTC 合约市场全面分析"
-"衍生品市场怎么样？"
+"comprehensive BTC derivatives analysis"
+"how is the derivatives market?"
 ```
 
 See `references/scenarios.md` for more detailed scenario examples.

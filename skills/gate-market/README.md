@@ -8,11 +8,11 @@ An AI Agent skill that provides comprehensive market data analysis on [Gate.io](
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **Coin Deep Analysis** | 6-step data pipeline covering trend, liquidity, sentiment, risk | "帮我分析一下 BTC" |
-| **Multi-Coin Screener** | Dynamic filtering by volume, price change, funding rate, etc. | "找出涨幅最大的币" |
-| **Comparative Analysis** | Side-by-side comparison of multiple coins | "对比 BTC 和 ETH" |
-| **Volume Anomaly Detection** | Spike detection vs 7-day average | "哪些币今天放量了？" |
-| **Risk Flag System** | Quantitative risk checks (多头拥挤, 卖压较重, 异常放量) | "BTC 有什么风险？" |
+| **Coin Deep Analysis** | 6-step data pipeline covering trend, liquidity, sentiment, risk | "analyze BTC in detail" |
+| **Multi-Coin Screener** | Dynamic filtering by volume, price change, funding rate, etc. | "find the top-gaining coin" |
+| **Comparative Analysis** | Side-by-side comparison of multiple coins | "compare BTC and ETH" |
+| **Volume Anomaly Detection** | Spike detection vs 7-day average | "which coins have volume spikes today?" |
+| **Risk Flag System** | Quantitative risk checks (Long Crowding, Heavy Selling Pressure, Abnormal Volume Spike) | "what are the risks for BTC?" |
 
 > 📊 **Two modes**: Ask about a specific coin for a deep dive, or describe criteria to screen across the entire market. The skill automatically routes to the right analysis mode.
 
@@ -49,35 +49,35 @@ Structured Report → Agent interprets → Natural language response
 ## Agent Use Cases
 
 ### 1. Comprehensive Coin Research
-> "帮我分析一下 BTC"
+> "analyze BTC in detail"
 
 - Full 6-step data pipeline with structured report
 - Covers fundamentals, technicals, liquidity, and sentiment
 - For: researchers, long-term investors
 
 ### 2. Market Scanning
-> "今天涨幅最大的币有哪些？"
+> "which coins are top gainers today?"
 
 - Scan entire spot market for top movers
 - Rank by change percentage, volume, or custom metric
 - For: day traders, market watchers
 
 ### 3. Alpha Discovery
-> "找出放量上涨的币"
+> "find coins rising with volume expansion"
 
 - Composite conditions to find coins with momentum
 - Volume spike detection combined with price movement
 - For: swing traders, alpha hunters
 
 ### 4. Pre-Trade Due Diligence
-> "我想做多 ETH，帮我看看"
+> "I want to long ETH, please check it for me"
 
 - Emphasis on risk flags and key levels
 - Include funding cost for futures positions
 - For: active traders evaluating entries
 
 ### 5. Screen-to-Analyze Pipeline
-> "找出涨幅最大的币，然后详细分析第一名"
+> "find the top-gaining coin, then analyze #1 in detail"
 
 - Screen first, then deep dive into selected results
 - Seamless flow between screening and analysis
@@ -96,17 +96,17 @@ Structured Report → Agent interprets → Natural language response
 
 ```
 # Single-coin analysis
-"帮我分析一下 BTC"
-"ETH 怎么样？"
-"SOL 深度分析"
+"analyze BTC in detail"
+"how is ETH?"
+"deep analysis of SOL"
 
 # Multi-coin screening
-"今天涨幅最大的币有哪些？"
-"成交量最大的20个币"
-"价格低于1美元且涨幅超过5%的币"
+"which coins are top gainers today?"
+"top 20 coins by volume"
+"coins under $1 with gain above 5%"
 
 # Combined
-"找出涨幅最大的10个币，然后帮我分析第一名"
+"find top 10 gainers, then analyze the first one"
 ```
 
 See `references/scenarios.md` for more detailed scenario examples.

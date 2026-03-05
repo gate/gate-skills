@@ -9,14 +9,14 @@
 **Context**: User wants a comprehensive analysis of a specific cryptocurrency.
 
 **Prompt Examples**:
-- "帮我分析一下 BTC"
-- "分析 ETH"
-- "SOL 深度分析"
+- "analyze BTC in detail"
+- "analyze ETH"
+- "deep analysis of SOL"
 - "Analyze BTC for me"
 
 **Expected Behavior**:
 1. Execute full 6-step data pipeline (currency → pair → candlesticks → order book → trades → funding rate)
-2. Apply all three judgment checks (多头拥挤, 卖压较重, 异常放量)
+2. Apply all three judgment checks (Long Crowding, Heavy Selling Pressure, Abnormal Volume Spike)
 3. Generate complete structured report covering all six sections
 4. Include risk flags and overall summary
 
@@ -27,9 +27,9 @@
 **Context**: User wants a brief opinion on whether a coin is worth looking at, not a full deep dive.
 
 **Prompt Examples**:
-- "DOGE 怎么样？"
-- "看看 PEPE"
-- "XRP 值得买吗？"
+- "how is DOGE?"
+- "check PEPE"
+- "is XRP worth buying?"
 - "What do you think about SOL?"
 
 **Expected Behavior**:
@@ -45,9 +45,9 @@
 **Context**: User asks about a less well-known coin that may not have a futures contract.
 
 **Prompt Examples**:
-- "帮我看看 PEPE2"
-- "分析一下 FLOKI"
-- "这个新币 XXX 怎么样？"
+- "帮我check PEPE2"
+- "analyze FLOKI"
+- "这个新币 how is XXX？"
 - "Analyze this small-cap token: ARB"
 
 **Expected Behavior**:
@@ -64,9 +64,9 @@
 **Context**: User is considering a trade and wants data-driven input before deciding.
 
 **Prompt Examples**:
-- "我想做多 ETH，帮我看看"
-- "BTC 能不能做空？"
-- "现在买 SOL 合适吗？"
+- "I want to long ETH, please check it for me"
+- "can BTC be shorted now?"
+- "is it a good time to buy SOL now?"
 - "Should I long BTC here?"
 
 **Expected Behavior**:
@@ -83,8 +83,8 @@
 **Context**: User wants to compare two or more coins to decide which to focus on.
 
 **Prompt Examples**:
-- "BTC 和 ETH 哪个更值得关注？"
-- "对比一下 SOL 和 AVAX"
+- "which deserves more attention, BTC or ETH?"
+- "compare SOL and AVAX"
 - "Compare BTC vs ETH"
 
 **Expected Behavior**:
@@ -100,9 +100,9 @@
 **Context**: User notices something unusual and wants to understand what's happening with a coin.
 
 **Prompt Examples**:
-- "BTC 今天怎么突然放量了？"
-- "ETH 为什么跌了？帮我看看"
-- "DOGE 异动分析"
+- "why did BTC volume suddenly spike today?"
+- "why did ETH drop? please check"
+- "analyze DOGE unusual move"
 - "BTC volume spiked, what's going on?"
 
 **Expected Behavior**:
@@ -121,9 +121,9 @@
 **Context**: User wants to find the biggest movers in the market.
 
 **Prompt Examples**:
-- "今天涨幅最大的币有哪些？"
-- "找出24h涨幅超过10%的币"
-- "哪些币跌得最多？"
+- "which coins are top gainers today?"
+- "find24hcoins with gain above 10%"
+- "which coins dropped the most?"
 - "Top 20 gainers today"
 - "Show me coins that dropped more than 5%"
 
@@ -141,9 +141,9 @@
 **Context**: User wants to find coins with the highest trading activity.
 
 **Prompt Examples**:
-- "成交量最大的20个币"
-- "哪些币今天放量了？"
-- "成交额超过1亿美元的币"
+- "top 20 coins by volume"
+- "which coins have volume spikes today?"
+- "coins with turnover above $100M"
 - "Find coins with volume over $100M"
 
 **Expected Behavior**:
@@ -159,9 +159,9 @@
 **Context**: User wants to find coins with extreme funding rates across the futures market.
 
 **Prompt Examples**:
-- "费率最高的币有哪些？"
-- "哪些币的资金费率超过0.1%？"
-- "找出负费率的币"
+- "which coins have the highest funding rate?"
+- "which coins have funding rate above 0.1%?"
+- "find coins with negative funding rate"
 - "Which coins have the highest funding rates?"
 
 **Expected Behavior**:
@@ -169,7 +169,7 @@
 2. For candidates, fetch funding rate via `get_futures_funding_rate`
 3. Filter by |funding_rate| threshold
 4. Sort by rate descending
-5. Include rate direction (多头付费 / 空头付费) in output
+5. Include rate direction (longs pay / shorts pay) in output
 
 ---
 
@@ -178,9 +178,9 @@
 **Context**: User applies multiple criteria simultaneously to find coins matching a complex profile.
 
 **Prompt Examples**:
-- "跌了很多但量很大的币"
-- "价格低于1美元且涨幅超过5%的币"
-- "找出放量上涨的币"
+- "coins down a lot but with huge volume"
+- "coins under $1 with gain above 5%"
+- "find coins rising with volume expansion"
 - "Coins under $1 with >10% gain and >$10M volume"
 
 **Expected Behavior**:
@@ -197,9 +197,9 @@
 **Context**: User wants to identify market-wide patterns or sector trends from screening results.
 
 **Prompt Examples**:
-- "今天哪个板块涨得多？"
-- "AI 概念币表现怎么样？"
-- "有没有集体异动的板块？"
+- "which sector gained the most today?"
+- "how are AI-themed coins performing?"
+- "any sectors showing collective unusual moves?"
 - "Are there any sector-wide moves today?"
 
 **Expected Behavior**:
@@ -215,9 +215,9 @@
 **Context**: User gives an imprecise query that requires reasonable default thresholds.
 
 **Prompt Examples**:
-- "帮我找找有意思的币"
-- "有什么值得关注的？"
-- "最近有什么异动？"
+- "help me find interesting coins"
+- "what is worth watching?"
+- "any recent unusual moves?"
 - "Anything interesting in the market?"
 
 **Expected Behavior**:

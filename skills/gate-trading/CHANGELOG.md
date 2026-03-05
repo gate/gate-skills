@@ -16,12 +16,12 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
   - Single-coin deep basis analysis with premium index history
   - Multi-coin basis scan with Top-N ranking
   - Basis deviation analysis (Z-Score) and trend detection
-  - Signal generation (正基差走阔, 负基差走阔, 基差回归, 基差极端偏离, 基差翻转)
+  - Signal generation (positive basis widening, negative basis widening, basis mean reversion, extreme basis deviation, basis flip)
 - **Funding Rate Arbitrage module** (`references/funding-rate-arbitrage.md`):
   - Full-market funding rate arbitrage opportunity scanning
   - Multi-step filtering pipeline (volume → rate → basis → depth)
   - Annualized return estimation with composite scoring
-  - Directional arbitrage guidance (正向套利 / 反向套利)
+  - Directional arbitrage guidance (forward arbitrage / reverse arbitrage)
 - **Liquidation Monitor module** (`references/liquidation-monitor.md`):
   - Real-time liquidation event monitoring
   - Abnormal liquidation spike detection (3x daily average threshold)
