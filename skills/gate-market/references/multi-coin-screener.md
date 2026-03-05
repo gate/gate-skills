@@ -4,7 +4,7 @@ Screen and filter cryptocurrencies across the entire Gate.io market based on use
 
 ## Workflow
 
-When the user asks to find or filter coins (e.g., "帮我找出24h涨幅超过10%的币"), parse their criteria first, then execute the data collection and filtering pipeline.
+When the user asks to find or filter coins (e.g., "help me find24hcoins with gain above 10%"), parse their criteria first, then execute the data collection and filtering pipeline.
 
 ### Step 1: Parse user criteria
 
@@ -12,12 +12,12 @@ Extract filtering and sorting conditions from the user's request. Common criteri
 
 | Criteria Type | Examples | Data Source |
 |---------------|----------|-------------|
-| Price change | 涨幅 > 10%, 跌幅 > 5% | spot tickers |
-| Volume | 成交量 > $1M, 成交额排名 | spot tickers |
-| Funding rate | 费率 > 0.1%, 负费率 | futures funding rate |
-| Price range | 价格 < $1, 价格 > $100 | spot tickers |
-| Spread | 买卖价差 < 0.1% | spot tickers |
-| Volume change | 放量 > 200% | spot tickers (compare) |
+| Price change | gain > 10%, drop > 5% | spot tickers |
+| Volume | volume > $1M, turnover rank | spot tickers |
+| Funding rate | rate > 0.1%, negative rate | futures funding rate |
+| Price range | price < $1, price > $100 | spot tickers |
+| Spread | bid-ask spread < 0.1% | spot tickers |
+| Volume change | volume expansion > 200% | spot tickers (compare) |
 
 Determine:
 - **Filter conditions**: What thresholds to apply
@@ -60,7 +60,7 @@ Then for candidates requiring funding rate data, call `get_futures_funding_rate`
 
 Apply funding rate filters:
 - **Rate filter**: Compare `|funding_rate|` against user threshold
-- **Rate direction**: Positive (多头付费) vs negative (空头付费)
+- **Rate direction**: Positive (longs pay) vs negative (shorts pay)
 
 ### Step 5: Sort and select Top N
 
@@ -74,31 +74,31 @@ Here are common user queries and how to translate them into filters:
 
 | User Query | Filters Applied |
 |------------|----------------|
-| "涨幅超过10%的币" | change_pct > 10%, sort by change_pct desc |
-| "成交量最大的20个币" | top 20 by quote_volume desc |
-| "费率超过0.1%的币" | \|funding_rate\| > 0.1%, sort by rate desc |
-| "跌了很多但量很大的币" | change_pct < -5%, quote_volume > $5M, sort by change_pct asc |
-| "价格低于1美元且涨幅大的" | last < 1, change_pct > 5%, sort by change_pct desc |
-| "找出放量上涨的币" | change_pct > 0, volume_ratio > 2x, sort by volume_ratio desc |
+| "coins with gain above 10%" | change_pct > 10%, sort by change_pct desc |
+| "top 20 coins by volume" | top 20 by quote_volume desc |
+| "coins with funding rate above 0.1%" | \|funding_rate\| > 0.1%, sort by rate desc |
+| "coins down a lot but with huge volume" | change_pct < -5%, quote_volume > $5M, sort by change_pct asc |
+| "coins under $1 with strong gains" | last < 1, change_pct > 5%, sort by change_pct desc |
+| "find coins rising with volume expansion" | change_pct > 0, volume_ratio > 2x, sort by volume_ratio desc |
 
-When the user's criteria are vague (e.g., "涨得多"), use reasonable defaults and explain the thresholds chosen.
+When the user's criteria are vague (e.g., "strong gainers"), use reasonable defaults and explain the thresholds chosen.
 
 ## Report Template
 
 ```
-# 多币种筛选结果
+# Multi-Coin Screening Results
 
-> 筛选时间: {current_datetime}
-> 数据来源: Gate.io
-> 筛选条件: {conditions_summary}
-> 排序方式: {sort_description}
-> 结果数量: {result_count} / {total_scanned}
+> Screening time: {current_datetime}
+> Data source: Gate.io
+> Screening conditions: {conditions_summary}
+> Sorting method: {sort_description}
+> Result count: {result_count} / {total_scanned}
 
 ---
 
-## 筛选结果
+## Screening Results
 
-| # | 币种 | 价格 (USDT) | 24h涨跌幅 | 24h成交额 | {extra_columns} |
+| # | Coin | Price (USDT) | 24h Change | 24h Turnover | {extra_columns} |
 |---|------|-------------|-----------|-----------|-----------------|
 | 1 | {coin} | {price} | {change}% | ${volume} | {extra_data} |
 | 2 | ... | ... | ... | ... | ... |
@@ -106,26 +106,26 @@ When the user's criteria are vague (e.g., "涨得多"), use reasonable defaults 
 
 ---
 
-## 数据亮点
+## Data Highlights
 
 {Highlight notable patterns in the filtered results:}
-- 板块集中度 (are the results concentrated in a sector?)
-- 共性特征 (common traits among the results)
-- 异常值 (outliers worth noting)
+- Sector concentration (are the results concentrated in a sector?)
+- Common traits (common traits among the results)
+- Outliers (outliers worth noting)
 
 ---
 
-## 备注
+## Notes
 
-- 数据为实时快照，市场变化迅速
-- 筛选结果仅基于量化指标，不代表投资建议
-- 如需更详细的单币分析，可以说"帮我分析一下 XXX"
+- Data is a real-time snapshot; markets can change quickly.
+- Screening results are based on quantitative indicators only and are not investment advice.
+- For deeper single-coin analysis, say "analyze XXX in detail".
 ```
 
 ## Important Notes
 
 - The table columns should adapt to the user's query. If they ask about funding rates, include a funding rate column. If they ask about volume, prominently show volume data.
-- For very broad queries that return too many results (e.g., "所有涨的币"), cap at a reasonable number (50) and inform the user.
+- For very broad queries that return too many results (e.g., "all rising coins"), cap at a reasonable number (50) and inform the user.
 - If the user's criteria are too strict and return zero results, suggest relaxing the thresholds and show the closest matches.
 - Always show the filtering criteria used so the user can refine their query.
 - When comparing to averages or historical values, clearly state the comparison baseline.

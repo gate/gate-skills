@@ -60,75 +60,75 @@ Apply these three checks to each contract and collect all triggered flags:
 
 | Condition | Flag | Meaning |
 |-----------|------|---------|
-| 1h liquidation volume > 3x daily average hourly volume | 爆仓异常 | Liquidation spike significantly above normal levels |
-| Long (or short) liquidations > 80% of total | 多头清洗 / 空头清洗 | Directional squeeze — one side being wiped out |
-| Price has recovered > 50% of the drop/spike that caused liquidations | 插针行情 | Pin-bar / wick event — price spiked to liquidate and reversed |
+| 1h liquidation volume > 3x daily average hourly volume | abnormal liquidation | Liquidation spike significantly above normal levels |
+| Long (or short) liquidations > 80% of total | Long Squeeze / Short Squeeze | Directional squeeze — one side being wiped out |
+| Price has recovered > 50% of the drop/spike that caused liquidations | wick event | Pin-bar / wick event — price spiked to liquidate and reversed |
 
 ### Detailed judgment:
 
-**爆仓异常 (Abnormal Liquidation)**:
+**abnormal liquidation (Abnormal Liquidation)**:
 - Calculate: `hourly_liq_volume` for the most recent hour
 - Calculate: `avg_hourly_liq_volume` = total liquidation volume in available data / number of hours
 - If `hourly_liq_volume > 3 * avg_hourly_liq_volume` → flag
 
-**多头清洗 / 空头清洗 (Long/Short Squeeze)**:
+**Long Squeeze / Short Squeeze (Long/Short Squeeze)**:
 - Calculate: `long_liq_pct` = long liquidation volume / total liquidation volume
-- If `long_liq_pct > 80%` → flag "多头清洗" (Long Squeeze)
-- If `short_liq_pct > 80%` (i.e., `long_liq_pct < 20%`) → flag "空头清洗" (Short Squeeze)
+- If `long_liq_pct > 80%` → flag "Long Squeeze" (Long Squeeze)
+- If `short_liq_pct > 80%` (i.e., `long_liq_pct < 20%`) → flag "Short Squeeze" (Short Squeeze)
 
-**插针行情 (Pin-bar / Wick Event)**:
+**wick event (Pin-bar / Wick Event)**:
 - Identify the candle with the largest liquidation activity
 - Check if the candle has a long wick: `wick_ratio = |high - low| / |open - close|`
 - Check if current price has recovered: compare current price to the extreme price of that candle
-- If current price recovered > 50% of the move → flag "插针行情"
+- If current price recovered > 50% of the move → flag "wick event"
 
 ## Report Template
 
 ```
-# 爆仓异常监控报告
+# Liquidation Anomaly Monitoring Report
 
-> 监控时间: {current_datetime}
-> 数据范围: 近 24 小时
-> 结算币种: USDT
-
----
-
-## 全局概览
-
-- 监控合约数: {total_contracts}
-- 总爆仓金额: ${total_liq_value}
-- 多头爆仓占比: {long_liq_pct}%
-- 空头爆仓占比: {short_liq_pct}%
-- 异常合约数: {anomaly_count}
+> Monitoring time: {current_datetime}
+> Data range: last 24 hours
+> Settlement currency: USDT
 
 ---
 
-## 异常合约详情
+## Global Overview
+
+- Monitored contracts: {total_contracts}
+- Total liquidation value: ${total_liq_value}
+- Long liquidation share: {long_liq_pct}%
+- Short liquidation share: {short_liq_pct}%
+- Anomalous contracts: {anomaly_count}
+
+---
+
+## Anomalous Contract Details
 
 ### ⚠️ {rank}. {COIN}_USDT
 
-| 指标 | 数值 |
+| Metric | Value |
 |------|------|
-| 近1h爆仓量 | ${hourly_liq_volume} |
-| 日均小时爆仓量 | ${avg_hourly_liq_volume} |
-| 爆仓倍数 | {liq_ratio}x (日均) |
-| 多头爆仓占比 | {long_pct}% |
-| 空头爆仓占比 | {short_pct}% |
-| 当前价格 | {current_price} USDT |
-| 爆仓时价格 | {liq_price} USDT |
-| 价格恢复情况 | {recovery_description} |
+| Last 1h liquidation volume | ${hourly_liq_volume} |
+| Daily average hourly liquidation volume | ${avg_hourly_liq_volume} |
+| Liquidation multiple | {liq_ratio}x (vs daily average) |
+| Long liquidation share | {long_pct}% |
+| Short liquidation share | {short_pct}% |
+| Current price | {current_price} USDT |
+| Liquidation-time price | {liq_price} USDT |
+| Price recovery status | {recovery_description} |
 
-**异常标记**:
+**Anomaly Flags**:
 {flags with explanations}
 
-**行情背景**:
+**Market Context**:
 {brief price context from candlestick data}
 
 (Repeat for each anomalous contract, sorted by liquidation volume)
 
 ---
 
-## 市场解读
+## Market Interpretation
 
 {Overall market liquidation analysis:}
 - Which side (long/short) is getting hurt more across the market
@@ -137,12 +137,12 @@ Apply these three checks to each contract and collect all triggered flags:
 
 ---
 
-## 风险提示
+## Risk Alerts
 
-1. 大规模爆仓后市场波动可能加剧，需谨慎操作
-2. 插针行情表明市场存在流动性缺口，需注意止损设置
-3. 多头/空头集中清洗后，可能出现趋势反转
-4. 以上分析基于链上清算数据，仅供参考，不构成投资建议
+1. After large liquidation events, volatility can intensify; trade cautiously.
+2. Wick events indicate liquidity gaps; pay attention to stop-loss setup.
+3. After concentrated long/short squeezes, trend reversals may occur.
+4. This analysis is based on on-chain liquidation data, for reference only, and not investment advice.
 ```
 
 ## Important Notes

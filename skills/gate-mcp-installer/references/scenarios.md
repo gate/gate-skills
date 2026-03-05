@@ -5,8 +5,8 @@
 **Context**: User wants to set up Gate MCP from scratch in their environment.
 
 **Prompt Examples**:
-- "帮我安装 Gate MCP"
-- "配置一下 Gate MCP"
+- "help me install Gate MCP"
+- "configure Gate MCP"
 - "I want to set up Gate MCP"
 - "Install Gate MCP for me"
 
@@ -24,8 +24,8 @@
 **Context**: User already has Gate MCP installed and wants to verify it's working correctly.
 
 **Prompt Examples**:
-- "Gate MCP 安装好了吗？"
-- "检查一下 MCP 连接"
+- "is Gate MCP installed correctly?"
+- "check MCP connectivity"
 - "Verify my Gate MCP setup"
 - "Is Gate MCP working?"
 
@@ -42,9 +42,9 @@
 **Context**: User encounters errors when using Gate MCP and needs help diagnosing the issue.
 
 **Prompt Examples**:
-- "Gate MCP 连不上"
-- "mcporter 命令找不到"
-- "MCP 报错了怎么办？"
+- "Gate MCP cannot connect"
+- "mcporter command not found"
+- "what to do when MCP errors occur?"
 - "Gate MCP connection timeout, help"
 
 **Expected Behavior**:
@@ -61,8 +61,8 @@
 **Context**: User wants to reinstall or update their Gate MCP setup.
 
 **Prompt Examples**:
-- "重新安装 Gate MCP"
-- "更新一下 mcporter"
+- "reinstall Gate MCP"
+- "update mcporter"
 - "Reinstall Gate MCP"
 - "Update mcporter to latest version"
 

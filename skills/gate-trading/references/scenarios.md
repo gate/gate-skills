@@ -9,9 +9,9 @@
 **Context**: User wants to quickly check the current basis status of a specific coin.
 
 **Prompt Examples**:
-- "BTC 基差怎么样？"
-- "看看 ETH 的期现价差"
-- "SOL 合约现在是溢价还是折价？"
+- "how is BTC basis?"
+- "check ETH spot-futures spread"
+- "is SOL futures at premium or discount now?"
 - "What's the current BTC basis?"
 
 **Expected Behavior**:
@@ -28,9 +28,9 @@
 **Context**: User wants to scan the entire market for coins with unusual basis levels.
 
 **Prompt Examples**:
-- "全市场基差扫描"
-- "哪些币的期现价差比较大？"
-- "帮我找出基差异常的币"
+- "full-market basis scan"
+- "which coins have large spot-futures spreads?"
+- "help me find coins with abnormal basis"
 - "Scan all coins for extreme basis"
 
 **Expected Behavior**:
@@ -47,9 +47,9 @@
 **Context**: User is interested in basis-based arbitrage and wants to evaluate whether the current basis provides a tradeable opportunity.
 
 **Prompt Examples**:
-- "BTC 基差套利现在能做吗？"
-- "期现套利有没有机会？"
-- "ETH 正向套利年化大概多少？"
+- "is BTC basis arbitrage tradable now?"
+- "are there cash-and-carry opportunities?"
+- "what is ETH carry annualized return roughly?"
 - "Is there a cash-and-carry opportunity on BTC right now?"
 
 **Expected Behavior**:
@@ -66,9 +66,9 @@
 **Context**: User wants to understand how the basis has been changing over time, not just the current snapshot.
 
 **Prompt Examples**:
-- "BTC 基差最近是在走阔还是收窄？"
-- "ETH 期现价差趋势怎么样？"
-- "SOL 基差有没有回归的迹象？"
+- "is BTC basis widening or narrowing recently?"
+- "how is ETH spot-futures spread trend?"
+- "is SOL basis showing mean-reversion signs?"
 - "Show me the BTC basis trend over the past week"
 
 **Expected Behavior**:
@@ -84,8 +84,8 @@
 **Context**: User wants to compare the basis of several specific coins side by side.
 
 **Prompt Examples**:
-- "对比一下 BTC、ETH、SOL 的基差"
-- "主流币的期现价差分别是多少？"
+- "compare basis for BTC, ETH, and SOL"
+- "what are spot-futures spreads for major coins?"
 - "Compare basis for BTC ETH SOL DOGE"
 
 **Expected Behavior**:
@@ -104,9 +104,9 @@
 **Context**: User wants to scan all contracts for the best funding rate arbitrage opportunities.
 
 **Prompt Examples**:
-- "现在有没有套利机会？"
-- "资金费率套利扫描"
-- "帮我找找费率套利的机会"
+- "are there arbitrage opportunities now?"
+- "funding-rate arbitrage scan"
+- "help me find funding arbitrage opportunities"
 - "Scan for funding rate arbitrage opportunities"
 
 **Expected Behavior**:
@@ -124,9 +124,9 @@
 **Context**: User wants to find coins with abnormally high or low funding rates, not necessarily for arbitrage.
 
 **Prompt Examples**:
-- "哪些币费率异常？"
-- "费率最高的币"
-- "有没有负费率很大的币？"
+- "which coinsabnormal funding rate？"
+- "coins with highest funding rates"
+- "any coins with large negative funding rates?"
 - "Which coins have extreme funding rates?"
 
 **Expected Behavior**:
@@ -143,9 +143,9 @@
 **Context**: User wants to evaluate whether a specific coin presents an arbitrage opportunity.
 
 **Prompt Examples**:
-- "BTC 费率套利能做吗？"
-- "ETH 的资金费率套利收益大概多少？"
-- "SOL 现在做套利划算吗？"
+- "is BTC funding-rate arbitrage tradable?"
+- "what is ETH funding-rate arbitrage return roughly?"
+- "is arbitrage in SOL worth it now?"
 - "Is BTC funding rate arbitrage worth it right now?"
 
 **Expected Behavior**:
@@ -162,9 +162,9 @@
 **Context**: User is considering executing an arbitrage but wants to understand the risks first.
 
 **Prompt Examples**:
-- "费率套利有什么风险？"
-- "做 ETH 套利需要注意什么？"
-- "资金费率会不会突然反转？"
+- "what are risks of funding arbitrage?"
+- "what should I watch when doing ETH arbitrage?"
+- "can funding rate suddenly reverse?"
 - "What are the risks of funding rate arbitrage on BTC?"
 
 **Expected Behavior**:
@@ -181,9 +181,9 @@
 **Context**: User wants to understand the funding rate direction and what it implies about market sentiment.
 
 **Prompt Examples**:
-- "大部分币的费率是正还是负？"
-- "市场整体费率情况怎么样？"
-- "费率分布怎么样？"
+- "are funding rates mostly positive or negative?"
+- "how are overall market funding rates?"
+- "how is funding rate distribution?"
 - "What's the overall funding rate sentiment across the market?"
 
 **Expected Behavior**:
@@ -202,9 +202,9 @@
 **Context**: User wants a broad picture of liquidation activity across the entire futures market.
 
 **Prompt Examples**:
-- "最近爆仓情况怎么样？"
-- "全市场爆仓数据"
-- "今天爆仓了多少？"
+- "how are recent liquidations?"
+- "full-market liquidation data"
+- "how much was liquidated today?"
 - "Give me the overall liquidation summary"
 
 **Expected Behavior**:
@@ -221,9 +221,9 @@
 **Context**: User is interested in liquidation events for a specific coin.
 
 **Prompt Examples**:
-- "BTC 爆仓情况怎么样？"
-- "ETH 最近有多少爆仓？"
-- "看看 SOL 的清算数据"
+- "how are BTC liquidations?"
+- "how much ETH got liquidated recently?"
+- "check SOL liquidation data"
 - "How much BTC got liquidated today?"
 
 **Expected Behavior**:
@@ -241,16 +241,16 @@
 **Context**: User suspects or has heard about a major liquidation event and wants details.
 
 **Prompt Examples**:
-- "刚才是不是有大规模爆仓？"
-- "爆仓异常的币有哪些？"
-- "哪个币爆得最多？"
+- "was there a large liquidation event just now?"
+- "which coins have abnormal liquidation?"
+- "which coin had the most liquidations?"
 - "Which coins had abnormal liquidations recently?"
 
 **Expected Behavior**:
 1. Fetch all recent liquidation orders
 2. Apply the 3x daily average threshold to detect spikes
 3. For each anomalous contract, fetch price and market data
-4. Flag all triggered conditions (爆仓异常, 多头/空头清洗, 插针行情)
+4. Flag all triggered conditions (abnormal liquidation, Long Squeeze / Short Squeeze, wick event)
 5. Sort anomalous contracts by liquidation volume
 
 ---
@@ -260,10 +260,10 @@
 **Context**: User wants to know if one side (longs or shorts) is getting disproportionately liquidated.
 
 **Prompt Examples**:
-- "多头被清洗了吗？"
-- "空头爆仓多还是多头爆仓多？"
+- "were longs squeezed?"
+- "were short or long liquidations larger?"
 - "Is there a short squeeze happening?"
-- "哪些币的多头在被清洗？"
+- "which coins have longs being squeezed?"
 
 **Expected Behavior**:
 1. Fetch liquidation data
@@ -279,9 +279,9 @@
 **Context**: User saw a sudden price spike and wants to know if it was a liquidation-driven wick event.
 
 **Prompt Examples**:
-- "BTC 刚才是插针了吗？"
-- "有没有插针行情？"
-- "SOL 价格闪崩又拉回了，爆仓了多少？"
+- "did BTC just have a wick event?"
+- "are there wick events?"
+- "SOL flash-crashed and rebounded; how much got liquidated?"
 - "Was that BTC move a liquidation wick?"
 
 **Expected Behavior**:

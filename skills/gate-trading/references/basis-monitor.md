@@ -41,8 +41,8 @@ basis = futures_price - spot_price
 basis_rate = (futures_price - spot_price) / spot_price * 100%
 ```
 
-- **Positive basis (期货溢价/正基差)**: Futures price > Spot price → Contango, typical in bullish markets
-- **Negative basis (期货折价/负基差)**: Futures price < Spot price → Backwardation, typical in bearish or uncertain markets
+- **Positive basis (futures premium / positive basis)**: Futures price > Spot price → Contango, typical in bullish markets
+- **Negative basis (futures discount / negative basis)**: Futures price < Spot price → Backwardation, typical in bearish or uncertain markets
 
 ### Step 4: Get premium index history
 
@@ -68,88 +68,88 @@ Key data to extract:
 
 **Trend analysis**:
 - Compare recent basis (last 24h average) vs longer-term basis (7-day average)
-- If recent > long-term: Basis is **走阔** (widening)
-- If recent < long-term: Basis is **收窄** (narrowing)
-- If roughly equal (within 10%): Basis is **稳定** (stable)
+- If recent > long-term: Basis is **widening** (widening)
+- If recent < long-term: Basis is **narrowing** (narrowing)
+- If roughly equal (within 10%): Basis is **stable** (stable)
 
 **Signal generation**:
 
 | Condition | Signal | Implication |
 |-----------|--------|-------------|
-| Basis rate > 0.3% and widening | 正基差走阔 | Bullish sentiment strengthening, potential short futures arbitrage |
-| Basis rate < -0.1% and widening | 负基差走阔 | Bearish sentiment strengthening, potential long futures arbitrage |
-| \|z_score\| > 2 and basis narrowing | 基差回归 | Basis reverting to mean, trend may be changing |
-| \|z_score\| > 3 | 基差极端偏离 | Extreme deviation, high-probability reversion opportunity |
-| Basis flipped sign recently | 基差翻转 | Sentiment shift signal |
+| Basis rate > 0.3% and widening | positive basis widening | Bullish sentiment strengthening, potential short futures arbitrage |
+| Basis rate < -0.1% and widening | negative basis widening | Bearish sentiment strengthening, potential long futures arbitrage |
+| \|z_score\| > 2 and basis narrowing | basis mean reversion | Basis reverting to mean, trend may be changing |
+| \|z_score\| > 3 | extreme basis deviation | Extreme deviation, high-probability reversion opportunity |
+| Basis flipped sign recently | basis flip | Sentiment shift signal |
 
 ## Report Template
 
 ### Single-Coin Report
 
 ```
-# {COIN} 基差分析报告
+# {COIN} Basis Analysis Report
 
-> 分析时间: {current_datetime}
-> 交易对: {COIN}_USDT
-> 数据来源: Gate.io
+> Analysis time: {current_datetime}
+> Trading pair: {COIN}_USDT
+> Data source: Gate.io
 
 ---
 
-## 当前基差状态
+## Current Basis Status
 
-| 指标 | 数值 |
+| Metric | Value |
 |------|------|
-| 现货价格 | {spot_price} USDT |
-| 合约价格 | {futures_price} USDT |
-| 标记价格 | {mark_price} USDT |
-| 基差 | {basis} USDT |
-| 基差率 | {basis_rate}% |
-| 基差方向 | {正基差(溢价) / 负基差(折价)} |
+| Spot price | {spot_price} USDT |
+| Futures price | {futures_price} USDT |
+| Mark price | {mark_price} USDT |
+| basis | {basis} USDT |
+| Basis rate | {basis_rate}% |
+| Basis direction | {positive basis (premium) / negative basis (discount)} |
 
 ---
 
-## 历史基差分析 (近7日)
+## Historical Basis Analysis (Last 7 Days)
 
-| 指标 | 数值 |
+| Metric | Value |
 |------|------|
-| 7日平均基差率 | {avg_basis_rate}% |
-| 基差标准差 | {std_basis}% |
-| 当前偏离度 (Z-Score) | {z_score} |
-| 7日最大基差 | {max_basis}% |
-| 7日最小基差 | {min_basis}% |
+| 7-day average basis rate | {avg_basis_rate}% |
+| Basis standard deviation | {std_basis}% |
+| Current deviation (Z-Score) | {z_score} |
+| 7-day max basis | {max_basis}% |
+| 7-day min basis | {min_basis}% |
 
-### 基差趋势
-- 近24h均值: {recent_avg}%
-- 近7日均值: {weekly_avg}%
-- 趋势判断: {走阔 / 收窄 / 稳定}
+### Basis Trend
+- Last 24h average: {recent_avg}%
+- Last 7d average: {weekly_avg}%
+- Trend assessment: {widening / narrowing / stable}
 
 ---
 
-## 信号与解读
+## Signals and Interpretation
 
 {Generated signals based on the analysis}
 
-**当前状态解读**:
+**Current State Interpretation**:
 {Interpretation of what the current basis level and trend implies about market sentiment and potential opportunities}
 
 ---
 
-## 套利参考
+## Arbitrage Reference
 
 {If basis presents arbitrage opportunity:}
-- 套利方向: {正向套利: 买现货+空合约 / 反向套利: 卖现货+多合约}
-- 当前基差收益: {basis_rate}%
-- 年化参考 (假设基差维持): {annualized}%
-- 执行建议: {practical considerations}
+- Arbitrage direction: {forward arbitrage: buy spot + short futures / reverse arbitrage: sell spot + long futures}
+- Current basis yield: {basis_rate}%
+- Annualized reference (assuming basis persists): {annualized}%
+- Execution suggestions: {practical considerations}
 
 ---
 
-## 风险提示
+## Risk Alerts
 
-1. 基差会随市场情绪快速变化，历史数据不代表未来走势
-2. 极端行情下基差可能大幅波动，套利策略存在风险
-3. 需考虑交易手续费和资金费率对套利收益的影响
-4. 以上分析基于市场公开数据，仅供参考，不构成投资建议
+1. Basis can change quickly with sentiment; history does not guarantee future moves.
+2. Basis may swing sharply in extreme markets; arbitrage carries risk.
+3. Include trading fees and funding impact in arbitrage returns.
+4. This analysis is based on public market data, for reference only, and not investment advice.
 ```
 
 ### Multi-Coin Scan Report
@@ -157,38 +157,38 @@ Key data to extract:
 When scanning multiple coins, use a summary table format:
 
 ```
-# 全市场基差扫描报告
+# Full-Market Basis Scan Report
 
-> 扫描时间: {current_datetime}
-> 扫描范围: 全部 USDT 永续合约
-> 数据来源: Gate.io
-
----
-
-## 基差排行
-
-### 正基差 Top 10 (期货溢价)
-
-| # | 币种 | 现货价 | 合约价 | 基差率 | 趋势 | 信号 |
-|---|------|--------|--------|--------|------|------|
-| 1 | {coin} | {spot} | {futures} | {rate}% | {trend} | {signal} |
-
-### 负基差 Top 10 (期货折价)
-
-| # | 币种 | 现货价 | 合约价 | 基差率 | 趋势 | 信号 |
-|---|------|--------|--------|--------|------|------|
-| 1 | {coin} | {spot} | {futures} | {rate}% | {trend} | {signal} |
+> Scan time: {current_datetime}
+> Scope: all USDT perpetual contracts
+> Data source: Gate.io
 
 ---
 
-## 市场总览
+## Basis Ranking
 
-- 正基差合约数: {positive_count} ({positive_pct}%)
-- 负基差合约数: {negative_count} ({negative_pct}%)
-- 平均基差率: {avg_rate}%
-- 基差极端偏离 (|Z| > 2) 数量: {extreme_count}
+### Top 10 Positive Basis (Futures Premium)
 
-## 总结
+| # | Coin | Spot | Futures | Basis Rate | Trend | Signal |
+|---|------|--------|--------|--------|------|------|
+| 1 | {coin} | {spot} | {futures} | {rate}% | {trend} | {signal} |
+
+### Top 10 Negative Basis (Futures Discount)
+
+| # | Coin | Spot | Futures | Basis Rate | Trend | Signal |
+|---|------|--------|--------|--------|------|------|
+| 1 | {coin} | {spot} | {futures} | {rate}% | {trend} | {signal} |
+
+---
+
+## Market Overview
+
+- Positive-basis contracts: {positive_count} ({positive_pct}%)
+- Negative-basis contracts: {negative_count} ({negative_pct}%)
+- Average basis rate: {avg_rate}%
+- Extreme basis deviation count (|Z| > 2): {extreme_count}
+
+## Summary
 
 {Overall market basis sentiment interpretation}
 ```

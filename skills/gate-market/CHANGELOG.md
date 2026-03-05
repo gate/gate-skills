@@ -19,7 +19,7 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
   - Recent trade analysis with whale activity detection
   - Funding rate sentiment analysis with crowding detection
   - Volume anomaly detection (3x 7-day average threshold)
-  - Three quantitative risk flags (多头拥挤, 卖压较重, 异常放量)
+  - Three quantitative risk flags (Long Crowding, Heavy Selling Pressure, Abnormal Volume Spike)
 - **Multi-Coin Screener module** (`references/multi-coin-screener.md`):
   - Dynamic multi-criteria coin screening (price change, volume, funding rate, price range, spread)
   - Automatic criteria parsing from natural language queries
