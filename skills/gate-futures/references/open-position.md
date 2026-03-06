@@ -25,6 +25,8 @@ When the user does not specify size in **contracts**, convert to **contracts** b
 
 ## Margin Mode Switch API (update_futures_dual_comp_position_cross_mode)
 
+**Switch margin mode only when the user explicitly requests it**: switch to isolated only when user asks for isolated (e.g. "isolated", "逐仓"); switch to cross only when user asks for cross (e.g. "cross", "全仓"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode.**
+
 When switching cross/isolated margin, call MCP **`update_futures_dual_comp_position_cross_mode`** with **`settle`**, **`contract`**, **`mode`**:
 
 - **`mode`**: `"CROSS"` = cross margin, `"ISOLATED"` = isolated margin (required; do not use a `cross` boolean).
@@ -39,7 +41,9 @@ If the **user specifies leverage** and it **differs from current** for that cont
 
 ## Margin Mode vs Position Mode
 
-When **target margin mode** (cross/isolated) **differs from** the **current margin mode** of the existing position for that contract, check **position mode** first:
+**Switch to isolated only when the user explicitly requests isolated; switch to cross only when the user explicitly requests cross.** If the user does not specify margin mode, **do not switch — place the order in the current margin mode.**
+
+When **target margin mode** is explicitly requested and **differs from** the **current margin mode** of the existing position for that contract, check **position mode** first:
 
 - **Position mode**: Call MCP **`get_futures_accounts(settle)`**. From **`position_mode`**: `single` = single position mode, `dual` = dual (hedge) position mode.
 - **Margin mode**: From **position** — call `get_futures_position(settle, contract)` and use `pos_margin_mode` (cross/isolated).
@@ -85,7 +89,7 @@ Leverage: 10x (from position query)
 
 ---
 
-## Scenario 2: Market order open short (isolated 10x)
+## Scenario 2: Market order open short isolated 10x
 
 **Context**: User wants to open short at market, isolated margin, 10x leverage.
 
