@@ -1,712 +1,746 @@
-# Scenarios
+# Gate Market Tape Intelligence — Scenarios & MCP Call Specs
 
-本文档约定各场景的 **MCP 调用顺序、参数、必取字段与输出格式**。实现时请严格按各 Case 下的「MCP 调用规范」依次调用 Gate MCP，并按「计算与判断」「输出」要求生成报告，以保证与文档一致。
+This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
-| Case | 场景 | 核心 MCP 调用顺序 |
-|------|------|-------------------|
-| 1 | 流动性分析 | list_order_book → list_candlesticks → list_tickers（用户提永续/合约则用合约接口） |
-| 2 | 动能判断 | list_trades → list_tickers → list_candlesticks → list_order_book → list_futures_funding_rate（合约则用合约接口） |
-| 3 | 爆仓异常监控 | list_futures_liq_orders → list_futures_candlesticks → list_futures_tickers |
-| 4 | 资金费率套利 | list_futures_tickers → list_futures_funding_rate → list_tickers → list_order_book |
-| 5 | 基差监控 | list_tickers(现货) → list_futures_tickers → list_futures_premium_index |
-| 6 | 操控风险 | list_order_book → list_tickers → list_trades |
-| 7 | 订单簿解读 | list_order_book(limit=10) → list_tickers |
-
----
-
-## Case 1: 流动性分析
-
-### MCP 调用规范（与文档一致）
-
-执行流动性分析时，**必须按以下顺序调用** Gate MCP，并提取指定字段，输出符合下方 Report Template。
-
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_order_book`（现货） | `currency_pair={BASE}_USDT`, `limit=20` | asks/bids 档位数量；前 10 档买卖深度总量；bid1/ask1（用于价差与滑点） |
-| 2 | `list_candlesticks`（现货） | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | 近 30 日成交量（用于 30 日均量）；最近一根为 24h 成交量参考 |
-| 3 | `list_tickers`（现货） | `currency_pair={BASE}_USDT` | `last` 最新价；`quoteVolume` 24h 成交额（USDT）；`changePercentage` 24h 涨跌；`high24h`/`low24h` |
-| 4（可选） | `list_trades`（现货） | `currency_pair={BASE}_USDT`, `limit=100` | 近期单笔大小分布，用于描述「近期成交流」、中大户参与度 |
-
-**计算与判断**（与 SKILL 一致）：
-
-- **接口选择**：用户提及「永续、合约」时使用合约接口（list_futures_order_book 等），否则现货。
-- **滑点率** = `2×(ask1−bid1)/(bid1+ask1)×100%`；&gt; 0.5% → 标记「滑点风险高」。
-- **订单簿深度**：asks/bids 深度 &lt; 10 档 → 标记「流动性低」。
-- **24h 成交量** &lt; 30 日成交量均值 → 标记「冷门对」。
-- **流动性评级**：综合上述指标给出 1～5 ⭐。
-
-**输出**：必须包含「核心指标」表（订单簿深度、24h 成交量、30日均量、买卖价差、滑点风险 + 状态）、「评估结论」（流动性评级 x/5 ⭐）、以及简短「建议」。
+| Case | Scenario | Core MCP Call Order |
+|------|----------|---------------------|
+| 1 | Liquidity analysis | list_order_book → list_candlesticks → list_tickers (use futures APIs when user says perpetual/contract) |
+| 2 | Momentum (buy vs sell) | list_trades → list_tickers → list_candlesticks → list_order_book → list_futures_funding_rate (futures APIs when contract) |
+| 3 | Liquidation monitoring | list_futures_liq_orders → list_futures_candlesticks → list_futures_tickers |
+| 4 | Funding rate arbitrage | list_futures_tickers → list_futures_funding_rate → list_tickers → list_order_book |
+| 5 | Basis (spot vs futures) | list_tickers(spot) → list_futures_tickers → list_futures_premium_index |
+| 6 | Manipulation risk | Spot: list_order_book → list_tickers → list_trades. When user says perpetual/contract: list_futures_order_book → list_futures_tickers → list_futures_trades |
+| 7 | Order book explainer | list_order_book(limit=10) → list_tickers |
 
 ---
 
-### Scenario 1.1: 现货流动性查询
+## Case 1: Liquidity Analysis
 
-**User Prompt**: "当前 ETH 的流动性如何"
+### MCP Call Spec (document-aligned)
 
-**Context**: 用户想了解 ETH 现货的交易条件
+For liquidity analysis, **call Gate MCP in this order** and extract the listed fields; output must follow the Report Template below.
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_order_book` → `list_candlesticks` → `list_tickers`（可选 `list_trades`）
-2. 从订单簿提取档位数、前 10 档深度、bid1/ask1
-3. 从 K 线计算 30 日均量、24h 成交量
-4. 从 tickers 取最新价、24h 成交额、涨跌
-5. 计算滑点率，按文档判断逻辑打状态与评级
-6. 按 Report Template 输出核心指标表 + 评估结论 + 建议
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_order_book` (spot) | `currency_pair={BASE}_USDT`, `limit=20` | Number of ask/bid levels; top 10 bid/ask depth totals; bid1/ask1 (for spread and slippage) |
+| 2 | `list_candlesticks` (spot) | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | Last 30 days volume (for 30d avg); latest candle for 24h volume reference |
+| 3 | `list_tickers` (spot) | `currency_pair={BASE}_USDT` | `last`; `quoteVolume` 24h (USDT); `changePercentage` 24h; `high24h`/`low24h` |
+| 4 (optional) | `list_trades` (spot) | `currency_pair={BASE}_USDT`, `limit=100` | Recent trade size distribution for "recent flow" and participation |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **API choice**: Use futures APIs (e.g. list_futures_order_book) when user says "perpetual" or "contract"; otherwise spot.
+- **Slippage** = `2×(ask1−bid1)/(bid1+ask1)×100%`; if > 0.5% → flag "high slippage risk".
+- **Depth**: asks/bids depth < 10 levels → flag "low liquidity".
+- **24h volume** < 30-day volume average → flag "cold pair".
+- **Liquidity rating**: Combine above into 1–5 ⭐.
+
+**Output**: Must include a "Core metrics" table (order book depth, 24h volume, 30d avg volume, bid-ask spread, slippage + status), "Assessment" (liquidity rating x/5 ⭐), and short "Recommendation".
+
+---
+
+### Scenario 1.1: Spot liquidity query
+
+**Context**: User wants to know ETH spot trading conditions.
+
+**Prompt examples**:
+- "How is ETH liquidity?"
+- "当前 ETH 的流动性如何"
+
+**Expected behavior**:
+1. Call in order per **MCP Call Spec**: `list_order_book` → `list_candlesticks` → `list_tickers` (optional `list_trades`).
+2. From order book: level count, top 10 depth, bid1/ask1.
+3. From candlesticks: 30d avg volume, 24h volume.
+4. From tickers: last, 24h quote volume, change.
+5. Compute slippage; apply document logic for status and rating.
+6. Output core metrics table + assessment + recommendation per Report Template.
 
 **Output**:
-```
-## ETH 流动性分析
+```markdown
+## ETH Liquidity Analysis
 
-### 📊 核心指标
+### Core metrics
 
-| 指标 | 值 | 状态 |
-|------|-----|------|
-| 订单簿深度 | 20 档 | 🟢 正常 |
-| 24h 成交量 | $485M | 🟢 活跃 |
-| 30日均量 | $320M | - |
-| 买卖价差 | 0.02% | 🟢 极佳 |
-| 滑点风险 | 0.03% | 🟢 极低 |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Order book depth | 20 levels | OK |
+| 24h volume | $485M | Active |
+| 30d avg volume | $320M | - |
+| Bid-ask spread | 0.02% | Excellent |
+| Slippage risk | 0.03% | Very low |
 
-### 📈 评估结论
+### Assessment
 
-**流动性评级**: 5/5 ⭐
+**Liquidity rating**: 5/5 ⭐
 
-ETH 流动性极佳，适合大额交易。
+ETH liquidity is excellent, suitable for large size.
 ```
 
 ---
 
-### Scenario 1.2: 合约流动性查询
+### Scenario 1.2: Futures liquidity query
 
-**User Prompt**: "BTC永续合约深度怎么样"
+**Context**: User asks about perpetual/contract depth.
 
-**Context**: 用户询问合约，触发合约接口
+**Prompt examples**:
+- "How is BTC perpetual depth?"
+- "BTC永续合约深度怎么样"
 
-**Expected Behavior**:
-1. 识别「永续/合约」关键词，使用**合约** MCP：`list_futures_order_book`（`settle=usdt`, `contract=BTC_USDT`, `limit=20`）→ 可选 `list_futures_tickers`、`list_futures_candlesticks`(1d, 30)
-2. 提取档位数、前 10 档深度、bid1/ask1，计算滑点率
-3. 按流动性评估标准输出核心指标表 + 流动性评级
+**Expected behavior**:
+1. Detect "perpetual/contract" and use **futures** MCP: `list_futures_order_book` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `list_futures_tickers`, `list_futures_candlesticks`(1d, 30).
+2. Extract level count, top 10 depth, bid1/ask1; compute slippage.
+3. Output core metrics table + liquidity rating per liquidity criteria.
 
 **Output**:
-```
-## BTC_USDT 永续合约 流动性分析
+```markdown
+## BTC_USDT Perpetual — Liquidity Analysis
 
-| 指标 | 值 | 状态 |
-|------|-----|------|
-| 订单簿深度 | 50 档 | 🟢 极佳 |
-| 滑点风险 | 0.01% | 🟢 极低 |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Order book depth | 50 levels | Excellent |
+| Slippage risk | 0.01% | Very low |
 
-流动性评级: 5/5 ⭐
+Liquidity rating: 5/5 ⭐
 ```
 
 ---
 
-### Scenario 1.3: 冷门币流动性警告
+### Scenario 1.3: Low-liquidity / cold pair warning
 
-**User Prompt**: "XYZ币的流动性如何"
+**Context**: User queries a low-cap or illiquid pair.
 
-**Context**: 用户查询冷门小市值币种
+**Prompt examples**:
+- "How is XYZ liquidity?"
+- "XYZ币的流动性如何"
 
-**Expected Behavior**:
-1. 仍按 **Case 1 MCP 调用规范** 调用 order_book → candlesticks → tickers
-2. 若档位 &lt; 10、或 24h 量 &lt; 30 日均值、或滑点率 &gt; 0.5%，在核心指标表标注 🔴，并输出风险提示与低流动性评级
+**Expected behavior**:
+1. Still follow **Case 1 MCP Call Spec**: order_book → candlesticks → tickers.
+2. If depth < 10 levels, or 24h volume < 30d avg, or slippage > 0.5%, mark 🔴 in core metrics and output risk note + low liquidity rating.
 
 **Output**:
-```
-## XYZ 流动性分析
+```markdown
+## XYZ Liquidity Analysis
 
-### ⚠️ 风险提示
+### Risk notice
 
-| 指标 | 值 | 状态 |
-|------|-----|------|
-| 订单簿深度 | 5 档 | 🔴 深度不足 |
-| 24h 成交量 | $15K | 🔴 冷门币 |
-| 滑点风险 | 2.3% | 🔴 滑点高 |
+| Metric | Value | Status |
+|--------|-------|--------|
+| Order book depth | 5 levels | Insufficient depth |
+| 24h volume | $15K | Cold pair |
+| Slippage risk | 2.3% | High |
 
-**流动性评级**: 1/5 ⭐
+**Liquidity rating**: 1/5 ⭐
 
-⚠️ 该币种流动性差，大额交易会产生严重滑点！
+⚠️ This pair has poor liquidity; large orders will incur significant slippage.
 ```
 
 ---
 
-## Case 2: 动能判断
+## Case 2: Momentum (buy vs sell)
 
-### MCP 调用规范（与文档一致）
+### MCP Call Spec (document-aligned)
 
-**触发词**："BTC 近 24h 多头厉害还是空头厉害，可持续吗"。执行动能分析时，**必须按以下顺序调用** Gate MCP；若用户询问**合约**则选用合约接口。
+**Trigger**: "Is BTC more long or short in 24h, and is it sustainable?" For momentum analysis, **call in this order**; use futures APIs when user asks about contract.
 
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_trades`（现货/合约） | `currency_pair` 或 `contract`+`settle`, `limit=1000` | 买入/卖出量；买盘占比 = buy_volume / total_volume |
-| 2 | `list_tickers`（现货/合约） | 同交易对 | 24h 成交量、24h 涨跌 |
-| 3 | `list_candlesticks`（现货/合约） | `interval=1d`, `limit=30` | 30 日日均成交量 |
-| 4 | `list_order_book`（现货/合约） | `limit=20` | 前 10 档买卖深度，用于多空订单数量对比 |
-| 5 | `list_futures_funding_rate` 或等价 | 合约时 | 资金费率；正→多头占优，负→空头占优 |
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_trades` (spot/futures) | `currency_pair` or `contract`+`settle`, `limit=1000` | Buy/sell volume; buy share = buy_volume / total_volume |
+| 2 | `list_tickers` (spot/futures) | Same pair | 24h volume, 24h change |
+| 3 | `list_candlesticks` (spot/futures) | `interval=1d`, `limit=30` | 30-day average volume |
+| 4 | `list_order_book` (spot/futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
+| 5 | `list_futures_funding_rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
 
-**计算与判断**（与 SKILL 一致）：
+**Calculation & judgment** (aligned with SKILL):
 
-- 24h 中 **buy &gt; 70%** → 标记「买盘强势」；卖盘 &gt; 70% → 卖盘强势。
-- **24h 成交量 &gt; 30 日日均成交量** → 标记「活跃」。
-- **资金费率** 正/负 → 多头/空头占优；**订单簿前 10 档** 多空订单数量辅助判断。
+- **Buy share > 70%** → "buy-side strong"; sell share > 70% → "sell-side strong".
+- **24h volume > 30d avg** → "active".
+- **Funding rate** sign + **order book top 10** balance → overall bias and sustainability.
 
-**输出**：必须包含「多空力量」表、动能方向、可持续性、分析说明。
+**Output**: Must include "Buy/sell forces" table, momentum direction, sustainability, and short analysis.
 
 ---
 
-### Scenario 2.1: 基础动能查询
+### Scenario 2.1: Basic momentum query
 
-**User Prompt**: "BTC 近 24h 多头厉害还是空头厉害，可持续吗"
+**Context**: User wants to judge short-term long vs short strength.
 
-**Context**: 用户想判断短期多空力量
+**Prompt examples**:
+- "Is BTC more long or short in 24h, and is it sustainable?"
+- "BTC 近 24h 多头厉害还是空头厉害，可持续吗"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_trades` → `list_tickers` → `list_candlesticks` → `list_order_book` → `list_futures_funding_rate`（合约则用合约接口）
-2. 从 trades 统计买卖量、买盘占比；从 tickers 取 24h 成交量与涨跌；从 candlesticks 得 30 日日均量；从 order_book 取前 10 档多空深度；从 funding_rate 看多空占优
-3. 按文档判断逻辑（买盘&gt;70%→买盘强势，24h 量&gt;30 日均→活跃，资金费率+订单簿多空）给出动能方向与可持续性
-4. 按 Report Template 输出多空力量表 + 判断 + 分析说明
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_trades` → `list_tickers` → `list_candlesticks` → `list_order_book` → `list_futures_funding_rate` (futures when contract).
+2. From trades: buy/sell volume, buy share; tickers: 24h volume and change; candlesticks: 30d avg; order book: top 10 long/short depth; funding rate for bias.
+3. Apply logic (buy > 70% → buy-side strong; 24h > 30d avg → active; funding + book → direction and sustainability).
+4. Output buy/sell table + direction + analysis per Report Template.
 
 **Output**:
-```
-## BTC 动能分析
+```markdown
+## BTC Momentum Analysis
 
-### 📊 多空力量
+### Buy/sell forces
 
-| 指标 | 值 |
-|------|-----|
-| 买盘占比 | 65% |
-| 卖盘占比 | 35% |
-| 24h 成交量 | $2.1B |
-| 30日均量 | $1.8B |
-| 活跃度 | 🔥 活跃 |
+| Metric | Value |
+|--------|-------|
+| Buy share | 65% |
+| Sell share | 35% |
+| 24h volume | $2.1B |
+| 30d avg volume | $1.8B |
+| Activity | Active |
 
-### 📈 判断
+### Conclusion
 
-**动能方向**: 📈 买盘略占优
+**Momentum direction**: Buy-side slightly ahead
 
-买盘占比 65%，但未达到 70% 的"强势"阈值，
-目前处于多头占优但非单边行情。
-
-成交量高于 30 日均值，市场活跃度上升。
+Buy share 65% but below 70% "strong" threshold; currently long-leaning but not one-sided. Volume above 30d avg; activity is rising.
 ```
 
 ---
 
-### Scenario 2.2: 单边强势行情
+### Scenario 2.2: One-sided strong buy
 
-**User Prompt**: "ETH买盘强吗"
+**Context**: User asks whether buy side is strong.
 
-**Context**: 用户询问买盘情况
+**Prompt examples**:
+- "Is ETH buy side strong?"
+- "ETH买盘强吗"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_trades`（ETH_USDT）→ `list_tickers` → `list_candlesticks`
-2. 统计买卖比例，若买盘占比 &gt; 70% 则标记为买盘强势
-3. 输出多空力量表 + 动能方向（📈 买盘强势）
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_trades`(ETH_USDT) → `list_tickers` → `list_candlesticks`.
+2. Compute buy/sell share; if buy > 70% mark as buy-side strong.
+3. Output buy/sell table + direction (buy-side strong).
 
 **Output**:
-```
-## ETH 动能分析
+```markdown
+## ETH Momentum Analysis
 
-### 📊 多空力量
+### Buy/sell forces
 
-| 指标 | 值 |
-|------|-----|
-| 买盘占比 | 78% |
-| 卖盘占比 | 22% |
+| Metric | Value |
+|--------|-------|
+| Buy share | 78% |
+| Sell share | 22% |
 
-### 📈 判断
+### Conclusion
 
-**动能方向**: 📈 买盘强势
+**Momentum direction**: Buy-side strong
 
-买盘占比达到 78%，远超 70% 阈值，
-当前处于明显的多头主导行情。
-
-配合成交量放大，趋势可能延续。
+Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume expansion, trend may extend.
 ```
 
 ---
 
-### Scenario 2.3: 合约动能查询
+### Scenario 2.3: Futures momentum query
 
-**User Prompt**: "BTC合约动能判断"
+**Context**: User explicitly asks about contract momentum.
 
-**Context**: 用户明确询问合约
+**Prompt examples**:
+- "BTC contract momentum"
+- "BTC合约动能判断"
 
-**Expected Behavior**:
-1. 识别「合约」关键词，使用合约 MCP：`list_trades`（futures，`settle=usdt`, `contract=BTC_USDT`）→ `list_futures_tickers` → `list_futures_candlesticks`
-2. 按 **MCP 调用规范** 提取买卖占比、24h 量、30 日均量，输出格式同上
-
-**Output**: 同上结构，数据来源为合约
-
----
-
-## Case 3: 爆仓异常监控
-
-### MCP 调用规范（与文档一致）
-
-**触发词**："最近爆仓情况"、"哪些币爆得多"。执行爆仓监控时，**必须按以下顺序调用** Gate MCP（仅合约）。
-
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_futures_liq_orders` | `settle=usdt`, 时间范围（含最近 1h，可选 24h 作日均基准） | 按 contract 聚合爆仓量；多头(size&gt;0)/空头(size&lt;0)；1h 总爆仓 |
-| 2 | `list_futures_candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | 爆仓时段价格、当前价、价格恢复程度 |
-| 3 | `list_futures_tickers` | `settle=usdt`（或指定 contract） | 当前价、24h 涨跌 |
-
-**计算与判断**（与 SKILL 一致）：
-
-- **1h 爆仓量 &gt; 日均×3** → 标记「异常」。
-- **爆仓方向集中 &gt; 80%**（多头或空头）→ 标记「多头清洗」或「空头清洗」。
-- **价格已恢复**（相对插针低/高点）→ 标记「插针行情」。
-
-**输出**：必须包含「全市场概览」表、「异常合约」表，必要时插针分析（最低点、当前价、恢复程度）。
+**Expected behavior**:
+1. Detect "contract" and use **futures** MCP: `list_trades` (futures, `settle=usdt`, `contract=BTC_USDT`) → `list_futures_tickers` → `list_futures_candlesticks`.
+2. Extract buy/sell share, 24h volume, 30d avg per MCP Call Spec; same output structure, data from futures.
 
 ---
 
-### Scenario 3.1: 全市场爆仓概览
+## Case 3: Liquidation Monitoring
 
-**User Prompt**: "最近爆仓情况"
+### MCP Call Spec (document-aligned)
 
-**Context**: 用户想了解全市场爆仓
+**Trigger**: "Recent liquidations?", "Which coins liquidated most?" For liquidation monitoring, **call in this order** (futures only).
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_futures_liq_orders` → `list_futures_candlesticks` → `list_futures_tickers`
-2. 按合约聚合爆仓量，计算多空占比；若有日均基准则算 1h 相对日均倍数
-3. 按判断逻辑：1h 爆仓&gt;日均×3→异常；爆仓方向集中&gt;80%→多头/空头清洗；价格已恢复→插针行情
-4. 输出全市场概览表 + 异常合约表
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_futures_liq_orders` | `settle=usdt`, time range (last 1h; optional 24h for daily baseline) | Liq volume by contract; long (size>0) / short (size<0); 1h total liq |
+| 2 | `list_futures_candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | Price during liq window, current price, recovery |
+| 3 | `list_futures_tickers` | `settle=usdt` (or specific contract) | Current price, 24h change |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **1h liq > 3× daily avg** → flag "anomaly".
+- **One-sided liq > 80%** (long or short) → flag "long squeeze" or "short squeeze".
+- **Price recovered** (vs wick low/high) → flag "wick / spike".
+
+**Output**: Must include "Market overview" table, "Anomaly contracts" table, and wick analysis when relevant (low, current price, recovery).
+
+---
+
+### Scenario 3.1: Market-wide liquidation overview
+
+**Context**: User wants a market-wide liquidation view.
+
+**Prompt examples**:
+- "Recent liquidations?"
+- "最近爆仓情况"
+
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_futures_liq_orders` → `list_futures_candlesticks` → `list_futures_tickers`.
+2. Aggregate liq by contract; long/short share; if daily baseline available, compute 1h vs daily multiple.
+3. Apply logic: 1h liq > 3× daily → anomaly; one-sided > 80% → long/short squeeze; price recovered → wick.
+4. Output market overview table + anomaly contracts table.
 
 **Output**:
-```
-## 爆仓异常监控
+```markdown
+## Liquidation Monitoring
 
-**监控时间**: 2026-03-05 15:30
+**Time**: 2026-03-05 15:30
 
-### 📊 全市场概览
+### Market overview
 
-| 指标 | 值 |
-|------|-----|
-| 1h 总爆仓 | $45M |
-| 多头爆仓 | $38M (84%) |
-| 空头爆仓 | $7M (16%) |
+| Metric | Value |
+|--------|-------|
+| 1h total liq | $45M |
+| Long liq | $38M (84%) |
+| Short liq | $7M (16%) |
 
-### 🔴 异常合约
+### Anomaly contracts
 
-| 合约 | 爆仓量 | 倍数 | 类型 |
-|------|--------|------|------|
-| ETH_USDT | $18M | 4.2x | 📉 多头清洗 |
-| SOL_USDT | $8M | 3.5x | 📉 多头清洗 |
+| Contract | Liq volume | Multiple | Type |
+|----------|------------|----------|------|
+| ETH_USDT | $18M | 4.2x | Long squeeze |
+| SOL_USDT | $8M | 3.5x | Long squeeze |
 
-多头爆仓占比 84%，当前行情正在清洗多头杠杆。
+Long liq 84%; current move is squeezing long leverage.
 ```
 
 ---
 
-### Scenario 3.2: 插针行情识别
+### Scenario 3.2: Wick / spike detection
 
-**User Prompt**: "刚才BTC是不是插针了"
+**Context**: User suspects a wick/spike (e.g. BTC).
 
-**Context**: 用户怀疑发生插针
+**Prompt examples**:
+- "Did BTC just wick?"
+- "刚才BTC是不是插针了"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用：`list_futures_liq_orders`(1h，可筛 contract=BTC_USDT) → `list_futures_candlesticks`(BTC_USDT, 5m, 12) → `list_futures_tickers`
-2. 从爆仓数据看多空爆仓占比；从 K 线取最低点、当前价，计算恢复程度 = (当前价 - 最低) / (爆仓前高 - 最低) 或类似
-3. 若多头集中爆仓且价格恢复 &gt; 80%，输出插针分析（爆仓数据表 + 最低点/当前价/恢复程度 + 📌 插针判断）
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_futures_liq_orders`(1h, optional filter contract=BTC_USDT) → `list_futures_candlesticks`(BTC_USDT, 5m, 12) → `list_futures_tickers`.
+2. From liq: long/short share; from candlesticks: low, current price; recovery = (current − low) / (pre-spike high − low) or similar.
+3. If long-dominated liq and recovery > 80%, output wick analysis (liq table + low/current/recovery + wick conclusion).
 
 **Output**:
-```
-## BTC 插针分析
+```markdown
+## BTC Wick Analysis
 
-### 📊 爆仓数据
+### Liquidation data
 
-| 指标 | 值 |
-|------|-----|
-| 1h 爆仓 | $25M |
-| 多头爆仓 | $23M (92%) |
-| 最低点 | $62,100 |
-| 当前价 | $63,800 |
-| 恢复程度 | 85% |
+| Metric | Value |
+|--------|-------|
+| 1h liq | $25M |
+| Long liq | $23M (92%) |
+| Low | $62,100 |
+| Current | $63,800 |
+| Recovery | 85% |
 
-### 📌 判断
+### Conclusion
 
-**类型**: 📌 插针行情
+**Type**: Wick / spike
 
-特征:
-- 多头集中爆仓 (92%)
-- 价格已恢复 85%
-- 典型的短期插针清洗多头杠杆
+- Long-dominated liq (92%)
+- Price recovered 85%
+- Typical short wick squeezing long leverage
 ```
 
 ---
 
-## Case 4: 资金费率套利扫描
+## Case 4: Funding Rate Arbitrage Scan
 
-### MCP 调用规范（与文档一致）
+### MCP Call Spec (document-aligned)
 
-**触发词**："现在有没有套利机会"、"费率异常的币"。执行套利扫描时，**必须按以下顺序调用** Gate MCP。
+**Trigger**: "Any arbitrage opportunities?", "Which coins have extreme funding?" For arbitrage scan, **call in this order**.
 
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_futures_tickers` | `settle=usdt` | 所有合约 funding_rate、24h 成交量 |
-| 2 | `list_futures_funding_rate` 或等价 | 对候选/全市场 | 费率明细 |
-| 3 | `list_tickers`（现货） | 对每个候选 `currency_pair={BASE}_USDT` | 现货 last；现货合约价差 |
-| 4 | `list_order_book`（现货） | 对 Top 候选 `currency_pair`, `limit=20` | 前 10 档深度；depth 太薄则排除 |
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_futures_tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
+| 2 | `list_futures_funding_rate` or equivalent | For candidates / full market | Rate details |
+| 3 | `list_tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
+| 4 | `list_order_book` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
 
-**计算与判断**（与 SKILL 一致）：
+**Calculation & judgment** (aligned with SKILL):
 
-- **\|rate\| &gt; 0.05% 且 24h vol &gt; $10M** → 进入候选。
-- **现货合约价差 &gt; 0.2%** → 加分。
-- **book depth 太薄** → 排除。
+- **|rate| > 0.05% and 24h vol > $10M** → candidate.
+- **Spot–futures spread > 0.2%** → bonus.
+- **Book depth too thin** → exclude.
 
-**输出**：必须包含「套利机会」表、策略说明（正套/反套）、风险提示。
+**Output**: Must include "Arbitrage opportunities" table, strategy note (long basis / short basis), and risk disclaimer.
 
 ---
 
-### Scenario 4.1: 全市场套利扫描
+### Scenario 4.1: Market-wide arbitrage scan
 
-**User Prompt**: "现在有没有套利机会"
+**Context**: User wants to find funding arbitrage opportunities.
 
-**Context**: 用户想寻找套利机会
+**Prompt examples**:
+- "Any arbitrage opportunities?"
+- "现在有没有套利机会"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_futures_tickers` → `list_futures_funding_rate` → `list_tickers`(候选) → `list_order_book`(Top 候选)
-2. 判断逻辑：\|rate\|&gt;0.05% 且 24h vol&gt;$10M→候选；现货合约价差&gt;0.2%→加分；depth 太薄→排除
-3. 输出套利机会表 + 策略说明 + 风险提示
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_futures_tickers` → `list_futures_funding_rate` → `list_tickers`(candidates) → `list_order_book`(top candidates).
+2. Logic: |rate|>0.05% and 24h vol>$10M → candidate; spot–futures spread>0.2% → bonus; thin depth → exclude.
+3. Output arbitrage table + strategy + risk note.
 
 **Output**:
-```
-## 资金费率套利扫描
+```markdown
+## Funding Rate Arbitrage Scan
 
-**扫描时间**: 2026-03-05 15:30
+**Time**: 2026-03-05 15:30
 
-### 🎯 套利机会 (Top 5)
+### Top 5 opportunities
 
-| 合约 | 费率 | 年化 | 基差 | 深度 | 策略 |
-|------|------|------|------|------|------|
-| DOGE_USDT | +0.15% | 164% | +0.3% | 🟢 | 正套 |
-| PEPE_USDT | +0.12% | 131% | +0.2% | 🟡 | 正套 |
-| WIF_USDT | -0.10% | 109% | -0.1% | 🟢 | 反套 |
+| Contract | Rate | Ann. | Basis | Depth | Strategy |
+|----------|------|------|-------|-------|----------|
+| DOGE_USDT | +0.15% | 164% | +0.3% | OK | Long basis |
+| PEPE_USDT | +0.12% | 131% | +0.2% | Fair | Long basis |
+| WIF_USDT | -0.10% | 109% | -0.1% | OK | Short basis |
 
-### 📖 策略说明
+### Strategy
 
-**正套**: 空合约 + 多现货
-**反套**: 多合约 + 空现货 (需借币)
+**Long basis**: Short futures + long spot  
+**Short basis**: Long futures + short spot (borrow)
 
-⚠️ 风险提示: 实际收益需扣除交易成本
+⚠️ Risk: Actual PnL must account for fees and execution.
 ```
 
 ---
 
-### Scenario 4.2: 费率异常查询
+### Scenario 4.2: Extreme funding query
 
-**User Prompt**: "哪些币费率异常"
+**Context**: User wants coins with extreme funding rates.
 
-**Context**: 用户想找费率极端的币
+**Prompt examples**:
+- "Which coins have extreme funding?"
+- "哪些币费率异常"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_futures_tickers`(settle=usdt)，筛选 \|funding_rate\| &gt; 0.001 (0.1%) 的合约
-2. 按费率绝对值排序，标注异常程度（如极端正费率、高负费率）
-3. 输出「费率异常币种」表（合约、费率、状态）
+**Expected behavior**:
+1. Call `list_futures_tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
+2. Sort by |rate|; label severity (e.g. extreme positive, high negative).
+3. Output "Extreme funding" table (contract, rate, status).
 
 **Output**:
-```
-## 费率异常币种
+```markdown
+## Extreme Funding
 
-| 合约 | 费率 | 状态 |
-|------|------|------|
-| DOGE_USDT | +0.18% | 🔴 极端正费率 |
-| SHIB_USDT | +0.15% | 🔴 高正费率 |
-| WIF_USDT | -0.12% | 🔵 高负费率 |
+| Contract | Rate | Status |
+|----------|------|--------|
+| DOGE_USDT | +0.18% | Extreme positive |
+| SHIB_USDT | +0.15% | High positive |
+| WIF_USDT | -0.12% | High negative |
 
-正费率 > 0.1% 表示做多成本高，
-可能预示短期回调风险。
+Positive rate > 0.1% means high cost to long; may signal short-term pullback risk.
 ```
 
 ---
 
-## Case 5: 现货 vs 合约基差监控
+## Case 5: Basis (Spot vs Futures) Monitoring
 
-### MCP 调用规范（与文档一致）
+### MCP Call Spec (document-aligned)
 
-**触发词**："基差怎么样"、"期现价差"。执行基差监控时，**必须按以下顺序调用** Gate MCP。
+**Trigger**: "What is the basis?", "Spot–futures spread." For basis monitoring, **call in this order**.
 
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_tickers`（现货） | `currency_pair={BASE}_USDT` | 现货 `last` 价格 |
-| 2 | `list_futures_tickers` | `settle=usdt`，可指定 `contract={BASE}_USDT` | 合约价、mark_price、index_price |
-| 3 | `list_futures_premium_index` 或等价 | `settle=usdt`, `contract={BASE}_USDT` | premium_index；若有历史则用于均值与偏离度 |
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
+| 2 | `list_futures_tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
+| 3 | `list_futures_premium_index` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
 
-**计算与判断**（与 SKILL 一致）：
+**Calculation & judgment** (aligned with SKILL):
 
-- **当前基差 vs 历史均值偏离度**。
-- **基差走阔/收窄趋势判断**（走阔→情绪升温，收窄→回归均值）。
+- **Current basis vs historical mean** (deviation).
+- **Basis widening / narrowing** (widening → sentiment heating; narrowing → mean reversion).
 
-**输出**：必须包含「基差数据」表、当前基差与历史均值比较、基差走阔/收窄结论及简短建议。
+**Output**: Must include "Basis data" table, current vs historical mean, widening/narrowing conclusion, and short recommendation.
 
 ---
 
-### Scenario 5.1: 单币基差查询
+### Scenario 5.1: Single-coin basis query
 
-**User Prompt**: "BTC基差怎么样"
+**Context**: User asks for BTC spot–futures spread.
 
-**Context**: 用户查询 BTC 的期现价差
+**Prompt examples**:
+- "What is BTC basis?"
+- "BTC基差怎么样"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_tickers`(BTC_USDT) → `list_futures_tickers`(usdt, BTC_USDT) → 可选 `list_futures_premium_index`
-2. 计算基差、基差率；若有历史溢价数据可算历史均值
-3. 按 Report Template 输出基差数据表 + 分析 + 建议
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_tickers`(BTC_USDT) → `list_futures_tickers`(usdt, BTC_USDT) → optional `list_futures_premium_index`.
+2. Compute basis, basis rate; if premium history available, historical mean.
+3. Output basis table + analysis + recommendation per Report Template.
 
 **Output**:
-```
-## BTC 期现基差分析
+```markdown
+## BTC Spot–Futures Basis
 
-### 📊 基差数据
+### Basis data
 
-| 指标 | 值 |
-|------|-----|
-| 现货价格 | $63,500 |
-| 合约价格 | $63,700 |
-| 基差 | +$200 |
-| 基差率 | +0.31% |
-| 历史均值 | +0.15% |
+| Metric | Value |
+|--------|-------|
+| Spot | $63,500 |
+| Futures | $63,700 |
+| Basis | +$200 |
+| Basis rate | +0.31% |
+| Historical mean | +0.15% |
 
-### 📈 分析
+### Analysis
 
-当前基差率 0.31%，高于历史均值 0.15%，
-处于**高正基差**状态。
-
-可能原因:
-- 市场看涨情绪较强
-- 适合套利者做正套
+Current basis rate 0.31%, above historical mean 0.15%; **elevated positive basis**. Possible reasons: strong bullish sentiment; suitable for long-basis arbitrage.
 ```
 
 ---
 
-### Scenario 5.2: 负基差警示
+### Scenario 5.2: Negative basis warning
 
-**User Prompt**: "ETH期现价差"
+**Context**: User queries ETH basis.
 
-**Context**: 查询 ETH 基差
+**Prompt examples**:
+- "ETH spot–futures spread"
+- "ETH期现价差"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_tickers`(ETH_USDT) → `list_futures_tickers`(usdt, ETH_USDT)
-2. 计算基差、基差率；若基差率为负，输出基差数据表 + ⚠️ 负基差警示（看跌/空头拥挤等说明）
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_tickers`(ETH_USDT) → `list_futures_tickers`(usdt, ETH_USDT).
+2. Compute basis and basis rate; if negative, output basis table + ⚠️ negative basis warning (bearish / short crowding).
 
 **Output**:
-```
-## ETH 期现基差分析
+```markdown
+## ETH Spot–Futures Basis
 
-### 📊 基差数据
+### Basis data
 
-| 指标 | 值 |
-|------|-----|
-| 现货价格 | $3,200 |
-| 合约价格 | $3,185 |
-| 基差 | -$15 |
-| 基差率 | -0.47% |
+| Metric | Value |
+|--------|-------|
+| Spot | $3,200 |
+| Futures | $3,185 |
+| Basis | -$15 |
+| Basis rate | -0.47% |
 
-### ⚠️ 异常提示
+### Notice
 
-当前处于**负基差**，合约价低于现货价，
-这通常表示:
-- 市场看跌情绪浓厚
-- 或空头拥挤
+Currently **negative basis** (futures below spot), which often indicates:
+- Bearish sentiment
+- Or short crowding
 ```
 
 ---
 
-## Case 6: 币种操控风险分析
+## Case 6: Manipulation Risk Analysis (Is the coin easy to manipulate?)
 
-### MCP 调用规范（与文档一致）
+### MCP Call Spec (document-aligned)
 
-**触发词**："这个币深度和成交比怎么样"、"容易操控吗"。执行操控风险分析时，**必须按以下顺序调用** Gate MCP（现货）。
+**Trigger**: "这个币深度和成交比怎么样" / "容易操控吗" / "How is this coin’s depth vs volume?" / "Is it easy to manipulate?"
 
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_order_book` | `currency_pair={BASE}_USDT`, `limit=20` | 前 10 档买深度总和、前 10 档卖深度总和 |
-| 2 | `list_tickers` | `currency_pair={BASE}_USDT` | 24h 成交额（quoteVolume） |
-| 3 | `list_trades` | `currency_pair={BASE}_USDT`, `limit=500` | 单笔分布；连续同方向大单 |
+**API choice**: When user mentions **perpetual, contract, futures** (永续、合约), use **futures** tools; otherwise use **spot** tools.
 
-**计算与判断**（与 SKILL 一致）：
+| Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
+|------|-----------------|--------------------------------------------------------|------------|----------------|
+| 1 | `list_order_book` | `list_futures_order_book` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `limit=20` | Top 10 bid depth sum, top 10 ask depth sum |
+| 2 | `list_tickers` | `list_futures_tickers` | Same pair / contract + settle | 24h quote volume (quoteVolume) |
+| 3 | `list_trades` | `list_futures_trades` or equivalent | Same pair; `limit=500` (or 24h window) | Trade size distribution; consecutive same-direction large orders |
 
-- **前 10 档深度总量 / 24h volume &lt; 0.5%** → 「深度薄」。
-- **24h trades 中有连续同方向大单** → 「可能有主力在控盘」。
+**Calculation & judgment** (aligned with SKILL):
 
-**输出**：必须包含「深度分析」表（前10档深度、24h 成交量、深度比、评估）、「大单追踪」简述、「操控风险」结论。
+- **Top 10 depth total / 24h volume < 0.5%** → "thin depth" (深度薄).
+- **24h trades have consecutive same-direction large orders** → "possible manipulation / 可能有主力在控盘".
+
+**Output**: Must include "Depth analysis" table (top 10 depth, 24h volume, depth ratio, assessment), "Large order" summary, and "Manipulation risk" conclusion.
 
 ---
 
-### Scenario 6.1: 操控风险查询
+### Scenario 6.1: Manipulation risk query
 
-**User Prompt**: "PEPE这个币容易被操控吗"
+**Context**: User is concerned about small-cap coin manipulation.
 
-**Context**: 用户担心小市值币被操控
+**Prompt examples**:
+- "Is PEPE easy to manipulate?"
+- "PEPE这个币容易被操控吗"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 依次调用：`list_order_book`(PEPE_USDT) → `list_tickers` → `list_trades`(limit=500)
-2. 计算深度比；从 trades 中识别大单与连续同向
-3. 按 Report Template 输出深度分析表 + 大单追踪 + 风险评估
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_order_book`(PEPE_USDT) → `list_tickers` → `list_trades`(limit=500).
+2. Compute depth ratio; from trades identify large and consecutive same-side.
+3. Output depth table + large order summary + risk conclusion per Report Template.
 
 **Output**:
-```
-## PEPE 操控风险分析
+```markdown
+## PEPE Manipulation Risk
 
-### 📊 深度分析
+### Depth analysis
 
-| 指标 | 值 | 评估 |
-|------|-----|------|
-| 前10档深度 | $850K | - |
-| 24h 成交量 | $320M | - |
-| 深度比 | 0.27% | 🔴 深度薄 |
+| Metric | Value | Assessment |
+|--------|-------|------------|
+| Top 10 depth | $850K | - |
+| 24h volume | $320M | - |
+| Depth ratio | 0.27% | Thin |
 
-### 🔍 大单追踪
+### Large orders
 
-最近 500 笔交易中发现:
-- 3 笔大单连续买入 (占比 15%)
-- 单笔最大: $125K
+In last 500 trades:
+- 3 consecutive large buys (15% of sample)
+- Max single: $125K
 
-### ⚠️ 风险评估
+### Risk conclusion
 
-**操控风险**: 🔴 高
+**Manipulation risk**: High
 
-- 深度比 < 0.5%，意味着较小资金即可影响价格
-- 检测到连续同方向大单，可能存在主力控盘
+- Depth ratio < 0.5% implies small size can move price
+- Consecutive same-side large orders suggest possible manipulation
 ```
 
 ---
 
-### Scenario 6.2: 正常币种
+### Scenario 6.2: Healthy pair (low risk)
 
-**User Prompt**: "BTC深度成交比怎么样"
+**Context**: User queries a major pair (e.g. BTC).
 
-**Context**: 查询主流币
+**Prompt examples**:
+- "How is BTC depth vs volume?"
+- "BTC深度成交比怎么样"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_order_book`(BTC_USDT) → `list_tickers` → 可选 `list_trades`
-2. 计算深度比；若 &gt; 2% 则评估为深度好、操控风险低
-3. 输出深度分析表 + 风险评估（🟢 低）
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_order_book`(BTC_USDT) → `list_tickers` → optional `list_trades`.
+2. Compute depth ratio; if > 2% assess as good depth, low manipulation risk.
+3. Output depth table + risk conclusion (low).
 
 **Output**:
-```
-## BTC 操控风险分析
+```markdown
+## BTC Manipulation Risk
 
-### 📊 深度分析
+### Depth analysis
 
-| 指标 | 值 | 评估 |
-|------|-----|------|
-| 前10档深度 | $85M | - |
-| 24h 成交量 | $2.1B | - |
-| 深度比 | 4.0% | 🟢 深度好 |
+| Metric | Value | Assessment |
+|--------|-------|------------|
+| Top 10 depth | $85M | - |
+| 24h volume | $2.1B | - |
+| Depth ratio | 4.0% | Good |
 
-### ⚠️ 风险评估
+### Risk conclusion
 
-**操控风险**: 🟢 低
+**Manipulation risk**: Low
 
-BTC 深度充足，需要大量资金才能影响价格，
-操控风险极低。
+BTC has ample depth; large size would be needed to move price; manipulation risk is low.
 ```
 
 ---
 
-## Case 7: 订单簿解读
+### Scenario 6.3: Futures manipulation risk (perpetual/contract)
 
-### MCP 调用规范（与文档一致）
+**Context**: User asks about manipulation for a **perpetual/contract** (e.g. "BTC contract easy to manipulate?").
 
-**触发词**："解释订单簿示例"、"订单簿是什么"、"怎么看盘口"。执行订单簿解读时，**必须按以下顺序调用** Gate MCP。
+**Prompt examples**:
+- "BTC永续容易操控吗"
+- "ETH合约深度和成交比怎么样"
 
-| 步骤 | MCP 工具 | 参数 | 必取字段 |
-|------|----------|------|----------|
-| 1 | `list_order_book`（现货/合约） | `currency_pair` 或 `contract`+`settle`, `limit=10` | bids/asks 深度示例（每档价格与数量） |
-| 2 | `list_tickers`（同市场） | 对应交易对 | `last` 最新价，用于解释 spread |
+**Expected behavior**:
+1. Detect "永续" or "合约" (or "perpetual"/"contract") and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `list_futures_tickers` → `list_futures_trades` (or equivalent, limit=500).
+2. Extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
+3. Apply same judgment: depth ratio < 0.5% → thin; consecutive same-side large → possible manipulation.
+4. Output depth analysis table + large order summary + manipulation risk conclusion (same structure as 6.1/6.2, data from futures).
 
-**判断/解读逻辑**（与 SKILL 一致）：
-
-- **示例 bids/asks 深度**（档位与数量）。
-- **结合 ticker 价解释 spread**（买卖价差）。
-- **价格波动快、深度深** → 流动性好。
-
-**输出**：必须包含订单簿教学、实时订单簿表示例、关键指标（买一、卖一、价差）、解读要点。
+**Output**: Same structure as Scenario 6.1 or 6.2; data source is futures order book, tickers, and trades.
 
 ---
 
-### Scenario 7.1: 入门解读
+## Case 7: Order Book Explainer
 
-**User Prompt**: "帮我解释一下订单簿"
+### MCP Call Spec (document-aligned)
 
-**Context**: 用户是新手，需要教学
+**Trigger**: "Explain the order book", "What is the order book?", "How to read the book?" For order book explainer, **call in this order**.
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_order_book`（可用 BTC_USDT，limit=10）→ `list_tickers`
-2. 用真实数据填写订单簿表与关键指标，配合教学文案（Bids/Asks/Spread、价差含义）
-3. 输出教学 + 实时示例 + 解读要点
+| Step | MCP Tool | Parameters | Required Fields |
+|------|----------|------------|----------------|
+| 1 | `list_order_book` (spot/futures) | `currency_pair` or `contract`+`settle`, `limit=10` | bids/asks sample (price and size per level) |
+| 2 | `list_tickers` (same market) | Same pair | `last` for spread explanation |
+
+**Interpretation** (aligned with SKILL):
+
+- Show sample bids/asks (levels and sizes).
+- Explain **spread** (bid–ask) using ticker last.
+- Fast moves + deep depth → good liquidity.
+
+**Output**: Must include order book tutorial, live order book example, key metrics (best bid, best ask, spread), and short takeaways.
+
+---
+
+### Scenario 7.1: Beginner explainer
+
+**Context**: User is new and needs a tutorial.
+
+**Prompt examples**:
+- "Explain the order book"
+- "帮我解释一下订单簿"
+
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_order_book` (e.g. BTC_USDT, limit=10) → `list_tickers`.
+2. Fill order book table and key metrics with live data; add tutorial text (Bids/Asks/Spread, what spread means).
+3. Output tutorial + live example + takeaways.
 
 **Output**:
-```
-## 订单簿解读
+```markdown
+## Order Book Explained
 
-### 📖 什么是订单簿
+### What is the order book
 
-订单簿是交易所的"挂单列表":
+The order book is the exchange’s "list of orders":
 
-- **Asks (卖单)**: 想卖出的人挂的单，价格从低到高
-- **Bids (买单)**: 想买入的人挂的单，价格从高到低
-- **Spread (价差)**: 最低卖价和最高买价的差距
+- **Asks**: Sell orders, sorted by price low to high
+- **Bids**: Buy orders, sorted by price high to low
+- **Spread**: Gap between best ask and best bid
 
-### 📊 BTC 实时订单簿示例
+### Live example (BTC)
 
-**卖单 (Asks)** ↑
-| 价格 | 数量 | 累计 |
-|------|------|------|
+**Asks** ↑
+| Price | Size | Cumulative |
+|-------|------|------------|
 | 63,550 | 2.5 | 7.8 |
 | 63,530 | 1.8 | 5.3 |
-| 63,510 | 3.5 | 3.5 | ← 卖一 (最低卖价)
+| 63,510 | 3.5 | 3.5 | ← Best ask
 
-------- 当前价: 63,505 -------
+------- Last: 63,505 -------
 
-**买单 (Bids)** ↓
-| 价格 | 数量 | 累计 |
-|------|------|------|
-| 63,500 | 4.2 | 4.2 | ← 买一 (最高买价)
+**Bids** ↓
+| Price | Size | Cumulative |
+|-------|------|------------|
+| 63,500 | 4.2 | 4.2 | ← Best bid
 | 63,480 | 2.1 | 6.3 |
 | 63,460 | 3.0 | 9.3 |
 
-### 💡 关键概念
+### Takeaways
 
-- **价差** = 63,510 - 63,500 = $10 (0.016%)
-- 价差越小，流动性越好
-- 深度越厚，大单影响越小
+- **Spread** = 63,510 − 63,500 = $10 (0.016%)
+- Tighter spread → better liquidity
+- Deeper book → less impact from large orders
 ```
 
 ---
 
-### Scenario 7.2: 特定币种订单簿
+### Scenario 7.2: Specific pair order book
 
-**User Prompt**: "看下ETH的盘口"
+**Context**: User wants to see a specific pair’s book (e.g. ETH).
 
-**Context**: 用户想看特定币种
+**Prompt examples**:
+- "Show ETH order book"
+- "看下ETH的盘口"
 
-**Expected Behavior**:
-1. 按 **MCP 调用规范** 调用 `list_order_book`(ETH_USDT, limit=10) → `list_tickers`(ETH_USDT)
-2. 输出 ETH 实时订单簿表（卖单/买单、价格、数量、累计）+ 当前价 + 价差与简短解读（如流动性良好、支撑强弱）
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `list_order_book`(ETH_USDT, limit=10) → `list_tickers`(ETH_USDT).
+2. Output ETH live table (asks/bids, price, size, cumulative) + last + spread and short comment (e.g. liquidity, support).
 
 **Output**:
-```
-## ETH 订单簿
+```markdown
+## ETH Order Book
 
-**卖单 (Asks)**
-| 价格 | 数量 | 累计 |
-|------|------|------|
+**Asks**
+| Price | Size | Cumulative |
+|-------|------|------------|
 | 3,205 | 45 | 120 |
 | 3,203 | 32 | 75 |
-| 3,201 | 43 | 43 | ← 卖一
+| 3,201 | 43 | 43 | ← Best ask
 
---- 当前价: 3,200 ---
+--- Last: 3,200 ---
 
-**买单 (Bids)**
-| 价格 | 数量 | 累计 |
-|------|------|------|
-| 3,200 | 55 | 55 | ← 买一
+**Bids**
+| Price | Size | Cumulative |
+|-------|------|------------|
+| 3,200 | 55 | 55 | ← Best bid
 | 3,198 | 28 | 83 |
 | 3,196 | 40 | 123 |
 
-价差: $1 (0.03%) - 流动性良好
-买单深度厚于卖单，下方支撑较强
+Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support below is stronger.
 ```
