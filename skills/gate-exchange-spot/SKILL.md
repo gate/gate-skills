@@ -89,6 +89,7 @@ Required execution flow:
 2. Wait for explicit user approval
 3. Only after approval, submit the real order
 4. Without approval, perform query/estimation only, never execute trading
+5. Treat confirmation as single-use: after one execution, request confirmation again for any next order
 
 Required confirmation fields:
 - trading pair (`currency_pair`)
@@ -103,6 +104,11 @@ Recommended draft wording:
 
 Allowed confirmation responses (examples):
 - `Confirm order`, `Confirm`, `Proceed`, `Yes, place it`
+
+Hard blocking rules (non-bypassable):
+- NEVER call `create_spot_order` unless the user explicitly confirms in the immediately previous turn.
+- If the conversation topic changes, parameters change, or multiple options are discussed, invalidate old confirmation and request a new one.
+- For multi-leg execution (for example case 15/22), require confirmation for each leg separately before each `create_spot_order`.
 
 If user confirmation is missing, ambiguous, or negative:
 - do not place the order
@@ -159,7 +165,7 @@ The response must include:
 
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 17 | Raise price for unfilled order | Find open order, then amend price | `list_spot_orders`(status=open) → `amend_spot_order` |
+| 17 | Raise price for unfilled order | Confirm how much to raise (or target price), locate unfilled buy orders, confirm which order to amend if multiple, then amend limit price | `list_spot_orders`(status=open) → `amend_spot_order` |
 | 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `list_spot_my_trades` → `get_spot_accounts` |
 | 19 | Cancel if not filled | If still open, cancel and then recheck balance | `list_spot_orders`(status=open) → `cancel_spot_order` → `get_spot_accounts` |
 | 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `list_spot_my_trades` → `get_spot_accounts` → `create_spot_order` |
@@ -181,6 +187,10 @@ The response must include:
 | User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
 | Any order placement request | Require explicit final user confirmation before `create_spot_order` |
 | User has not replied with clear confirmation | Keep order as draft; no trading execution |
+| Confirmation is stale or not from the immediately previous turn | Invalidate it and require a fresh confirmation |
+| Multi-leg trading flow | Require per-leg confirmation before each `create_spot_order` |
+| User asks to amend an unfilled buy order | Confirm price increase amount or exact target price before `amend_spot_order` |
+| Multiple open buy orders match amendment request | Ask user to choose which order to amend before executing |
 | User amount is too small | Check `min_quote_amount`; if not met, ask user to increase amount |
 | User requests all-in buy/sell | Use available balance, then trim by minimum trade rules |
 | Trigger condition not met | Do not place order; return current vs target price gap |
@@ -215,7 +225,9 @@ Example `decision_text`:
 | Minimum trade constraint | Below minimum amount/size | Return threshold and suggest increasing order size |
 | Unsupported capability | User asks for TP/SL | Clearly state unsupported, propose manual limit-order workflow |
 | Missing final confirmation | User has not clearly approved final order summary | Keep order pending and request explicit confirmation |
+| Stale confirmation | Confirmation does not match the current draft or is not in the previous turn | Reject execution and ask for reconfirmation |
 | Draft-only mode | User has not confirmed yet | Only run query/estimation tools; do not call `create_spot_order` |
+| Ambiguous amendment target | Multiple candidate open buy orders | Keep pending and ask user to confirm order ID/row |
 | Order missing/already filled | Amendment/cancellation target is invalid | Ask user to refresh open orders and retry |
 | Market condition not met | Trigger condition is not satisfied | Return current price, target price, and difference |
 | Pair unavailable | Currency suspended or abnormal status | Clearly state pair is currently not tradable |
@@ -239,6 +251,7 @@ Example `decision_text`:
 - If user asks for TP/SL, do not pretend support; clearly state it is not supported.
 - Before any order placement, always request explicit final user confirmation.
 - Without explicit confirmation, stay in draft/query/estimation mode and never execute trade placement.
+- Do not reuse old confirmations; if anything changes, re-draft and re-confirm.
 - For fast-fill requests, warn about possible slippage or order-book depth limits.
 - For chained actions (sell then buy), report step-by-step results clearly.
 - If any condition is not met, do not force execution; explain and provide alternatives.
