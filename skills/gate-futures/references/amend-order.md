@@ -1,6 +1,6 @@
-# Gate.io Futures Amend Order — Scenarios & Prompt Examples
+# Gate Futures Amend Order — Scenarios & Prompt Examples
 
-Gate.io futures amend-order scenarios and expected behavior.
+Gate futures amend-order scenarios and expected behavior.
 
 ## MCP tools and parameters
 

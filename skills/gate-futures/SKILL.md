@@ -5,9 +5,9 @@ updated: "2026-03-05"
 description: "The USDT perpetual futures trading function of Gate Exchange: open position, close position, cancel order, amend order. Trigger phrases: open position, close position, cancel order, amend order, reverse, close all."
 ---
 
-# Gate.io Futures Trading Suite
+# Gate Futures Trading Suite
 
-This skill is the single entry for Gate.io USDT perpetual futures. It supports **four operations only**: open position, close position, cancel order, amend order. User intent is routed to the matching workflow.
+This skill is the single entry for Gate USDT perpetual futures. It supports **four operations only**: open position, close position, cancel order, amend order. User intent is routed to the matching workflow.
 
 ## Module overview
 

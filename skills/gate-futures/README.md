@@ -1,8 +1,8 @@
-# Gate.io Futures Trading
+# Gate Futures Trading
 
 ## Overview
 
-AI Agent skill for [Gate.io](https://www.gate.io) USDT perpetual futures. Supports **four operations only**: open position, close position, cancel order, amend order. No market monitoring or arbitrage scanning.
+AI Agent skill for [Gate](https://www.gate.com) USDT perpetual futures. Supports **four operations only**: open position, close position, cancel order, amend order. No market monitoring or arbitrage scanning.
 
 ### Core Capabilities
 
