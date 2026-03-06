@@ -1,5 +1,27 @@
 # Changelog
 
+## [2026.3.6-1] - 2026-03-06
+
+### Added
+- **Skill 命名规范校验**:
+  - 新增 `gate-{category}-{title}` 命名格式检查
+  - 验证 `gate-` 品牌前缀
+  - 验证 category 枚举值（exchange/dex/wallet/news/info）
+  - 验证 title 格式（全小写，无下划线，无短横线）
+  - 验证三部分结构（必须是 3 个部分，用 `-` 分隔）
+- Report Template 新增「Name Format Validation」章节
+- Judgment Logic Summary 新增 5 条命名规范相关校验规则
+
+### Changed
+- Frontmatter 校验中的 name 字段从 `kebab-case` 更新为 `gate-{category}-{title}` 格式
+- README.md 核心能力表新增「命名规范校验」
+- README.md 新增详细的命名规范说明和示例
+
+### Audit
+- ✅ 命名规范校验覆盖所有要求
+- ✅ 错误提示明确具体
+- ✅ 向后兼容现有校验逻辑
+
 ## [2026.3.5-2] - 2026-03-05
 
 ### Added

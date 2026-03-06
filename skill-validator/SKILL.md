@@ -1,7 +1,7 @@
 ---
 name: skill-validator
-version: "2026.3.5-2"
-updated: "2026-03-05"
+version: "2026.3.6-1"
+updated: "2026-03-06"
 description: 校验 Skill 是否符合标准模板规范，支持标准架构和路由式架构的识别与校验。Use this skill whenever you need to validate a skill's structure and content. Trigger phrases include "校验skill", "检查skill格式", "validate skill", or any request involving skill validation or template compliance check.
 ---
 
@@ -60,10 +60,45 @@ Validate based on detected architecture type.
 **4.1 Frontmatter 校验** (Both architectures):
 | Field | Format | Validation |
 |-------|--------|------------|
-| `name` | kebab-case | Must match directory name |
+| `name` | `gate-{category}-{title}` | Must follow naming convention (see below) |
 | `version` | `YYYY.M.DD-N` | e.g., "2026.3.4-1" |
 | `updated` | `YYYY-MM-DD` | Valid date format |
 | `description` | String | Must contain "Use this skill whenever" and "Trigger phrases include" |
+
+**Name Format Convention**:
+
+Pattern: `gate-{category}-{title}`
+
+- All lowercase, no underscores, no hyphens in title
+- `gate`: Fixed brand prefix
+- `category`: Must be one of the following enums:
+  - `exchange`: CEX/on-site business (trading, finance, assets, account, security, VIP, activities, etc.)
+  - `dex`: Dex domain
+  - `wallet`: Gate Wallet
+  - `news`: Data research side (news content, market anomaly interpretation, etc.)
+  - `info`: Data research side (information & research, reports, in-depth research, K-line, alerts, on-chain info, etc.)
+- `title`: Lowercase official product/function name, no spaces, no underscores, no hyphens
+
+**Valid examples**:
+- `gate-exchange-market` ✅
+- `gate-exchange-spot` ✅
+- `gate-exchange-activitycenter` ✅
+- `gate-wallet-transfer` ✅
+- `gate-info-research` ✅
+
+**Invalid examples**:
+- `gate-exchange-activity-center` ❌ (hyphens in title)
+- `gate-exchange-Activity_Center` ❌ (uppercase & underscore)
+- `gate-invalid-test` ❌ (invalid category)
+- `exchange-market` ❌ (missing gate prefix)
+- `gate-exchange` ❌ (missing title)
+
+**Name validation checks**:
+1. Must match directory name exactly
+2. Must start with `gate-`
+3. Must have exactly 3 parts separated by `-`
+4. Second part (category) must be in the valid enum list
+5. Third part (title) must be all lowercase letters, no special characters
 
 **4.2 必需章节校验 (Standard Architecture)**:
 
@@ -155,6 +190,11 @@ Compile all validation results and generate report.
 | Missing required file | ❌ ERROR | 缺少必需文件，必须添加 |
 | Missing frontmatter field | ❌ ERROR | frontmatter 缺少必需字段 |
 | Invalid frontmatter format | ❌ ERROR | frontmatter 格式不正确 |
+| name 格式不符合 `gate-{category}-{title}` | ❌ ERROR | name 必须符合命名规范 |
+| name 未以 `gate-` 开头 | ❌ ERROR | 必须以 gate 品牌前缀开头 |
+| name 的 category 不在枚举列表 | ❌ ERROR | category 必须是: exchange/dex/wallet/news/info |
+| name 的 title 包含大写/下划线/短横线 | ❌ ERROR | title 必须全小写，无下划线无短横线 |
+| name 部分数量不是 3 个 | ❌ ERROR | 必须是 gate-{category}-{title} 三部分 |
 | Standard: Missing Workflow/Judgment/Report | ❌ ERROR | 标准架构缺少必需章节 |
 | Routing: Missing Routing Rules/Sub-modules | ❌ ERROR | 路由架构缺少路由规则或子模块 |
 | Missing recommended section | ⚠️ WARNING | 缺少推荐章节，建议添加 |
@@ -201,6 +241,16 @@ Compile all validation results and generate report.
 | version | ✅/❌ | {value} | {issue or "OK"} |
 | updated | ✅/❌ | {value} | {issue or "OK"} |
 | description | ✅/❌ | {truncated} | {issue or "OK"} |
+
+### Name Format Validation
+
+| 检查项 | 状态 | 说明 |
+|--------|------|------|
+| 格式 `gate-{category}-{title}` | ✅/❌ | {是否符合三部分结构} |
+| `gate-` 前缀 | ✅/❌ | {是否以 gate- 开头} |
+| Category 枚举 | ✅/❌ | {当前: {category}, 是否在 exchange/dex/wallet/news/info 中} |
+| Title 格式 | ✅/❌ | {是否全小写，无下划线，无短横线} |
+| 与目录名匹配 | ✅/❌ | {name 是否与目录名完全一致} |
 
 ### 必需章节 (Standard Architecture)
 

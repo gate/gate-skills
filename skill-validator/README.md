@@ -9,6 +9,7 @@ An AI Agent skill that validates whether a skill conforms to the standard templa
 | Capability | Description | Example |
 |------------|-------------|---------|
 | **目录结构校验** | 检查必需文件是否存在 | "校验 my-skill 是否有完整的文件结构" |
+| **命名规范校验** | 检查 skill 名称是否符合 `gate-{category}-{title}` 格式 | "检查 gate-exchange-market 命名是否规范" |
 | **Frontmatter 校验** | 检查 SKILL.md 的 frontmatter 格式 | "检查 name、version、description 是否正确" |
 | **章节完整性校验** | 检查各文件是否包含必需/推荐章节 | "校验 SKILL.md 是否有 Workflow 章节" |
 | **Workflow 格式校验** | 检查 MCP tool 调用格式 | "Call \`{tool}\` with: 格式是否正确" |
@@ -41,12 +42,34 @@ skill-validator/
 **SKILL.md Frontmatter 要求**:
 ```yaml
 ---
-name: {skill-name}           # kebab-case，与目录名一致
-version: "{YYYY.M.DD-N}"     # 日期版本格式
-updated: "{YYYY-MM-DD}"      # 最后更新日期
-description: ...             # 必须包含触发场景说明
+name: gate-{category}-{title}   # 必须符合命名规范
+version: "{YYYY.M.DD-N}"        # 日期版本格式
+updated: "{YYYY-MM-DD}"         # 最后更新日期
+description: ...                # 必须包含触发场景说明
 ---
 ```
+
+**Name Format Convention**:
+- Pattern: `gate-{category}-{title}`
+- All lowercase, no underscores, no hyphens in title
+- `gate`: Fixed brand prefix
+- `category`: Must be one of:
+  - `exchange`: CEX/on-site business (trading, finance, assets, account, etc.)
+  - `dex`: Dex domain
+  - `wallet`: Gate Wallet
+  - `news`: Data research (news content, market anomaly interpretation)
+  - `info`: Data research (information & research, reports, K-line, alerts)
+- `title`: Lowercase official product/function name, no spaces/underscores/hyphens
+
+**Valid examples**:
+- `gate-exchange-market` ✅
+- `gate-exchange-activitycenter` ✅
+- `gate-wallet-transfer` ✅
+
+**Invalid examples**:
+- `gate-exchange-activity-center` ❌ (hyphens in title)
+- `gate-invalid-test` ❌ (invalid category)
+- `exchange-market` ❌ (missing gate prefix)
 
 **SKILL.md 必需章节**:
 - `# {Title}` — 一级标题
