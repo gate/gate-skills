@@ -1,106 +1,100 @@
 ---
-name: gate-futures-trading
+name: gate-exchange-FuturesTrading
 version: "2026.3.5-1"
 updated: "2026-03-05"
-description: "Gate.io 合约交易全能助手。涵盖开仓、平仓、撤单、改单。Use this skill for any futures trading operation including opening/closing positions, canceling/amending orders. Trigger phrases: '开仓', '平仓', '撤单', '改单', '反手', '全平', 'open position', 'close position', 'cancel order', 'amend order'."
+description: "The USDT perpetual futures trading function of Gate Exchange: open position, close position, cancel order, amend order. Trigger phrases: open position, close position, cancel order, amend order, reverse, close all."
 ---
 
 # Gate.io Futures Trading Suite
 
-本 Skill 是 Gate.io 合约交易的统一入口，仅包含开仓、平仓、撤单、改单四类操作，根据用户意图自动路由到相应的工作流。
+This skill is the single entry for Gate.io USDT perpetual futures. It supports **four operations only**: open position, close position, cancel order, amend order. User intent is routed to the matching workflow.
 
-## 📦 子模块概览
+## Module overview
 
-| 模块 | 功能描述 | 触发关键词                                   |
-|------|---------|-----------------------------------------|
-| **🚀 开仓 (Open)** | 限价/市价开多开空，自动处理全/逐仓切换 | `开多`, `开空`, `下单`, `buy`, `sell`, `open` |
-| **🛑 平仓 (Close)** | 全平、部分平仓、反手开仓 | `平仓`, `全平`, `反手`, `close`, `reverse`    |
-| **❌ 撤单 (Cancel)** | 撤销指定订单或批量撤单 | `撤单`, `取消`, `cancel`, `revoke`          |
-| **✏️ 改单 (Amend)** | 修改挂单价格或数量 | `改单`, `修改`, `amend`, `modify`           |
+| Module | Description | Trigger keywords |
+|--------|-------------|------------------|
+| **Open** | Limit/market open long or short, cross/isolated mode | `long`, `short`, `buy`, `sell`, `open` |
+| **Close** | Full close, partial close, reverse position | `close`, `close all`, `reverse` |
+| **Cancel** | Cancel one or many orders | `cancel`, `revoke` |
+| **Amend** | Change order price or size | `amend`, `modify` |
 
-## 🔄 智能路由规则 (Routing Rules)
+## Routing rules
 
-系统将根据用户输入的**意图**和**关键词**自动加载对应子流程：
+| Intent | Example phrases | Route to |
+|--------|-----------------|----------|
+| **Open position** | "BTC long 1 contract", "market short ETH", "10x leverage long" | Read `references/open-position.md` |
+| **Close position** | "close all BTC", "close half", "reverse to short", "close everything" | Read `references/close-position.md` |
+| **Cancel orders** | "cancel that buy order", "cancel all orders", "list my orders" | Read `references/cancel-order.md` |
+| **Amend order** | "change price to 60000", "change order size" | Read `references/amend-order.md` |
+| **Unclear** | "help with futures", "show my position" | **Clarify**: query position/orders, then guide user |
 
-| 用户意图场景 | 匹配关键词示例 | 路由目标                                                    |
-|--------------|----------------|---------------------------------------------------------|
-| **新开仓位** | "BTC 开多 1 张", "市价开空 ETH", "10 倍杠杆做多" | Read `references/open-position.md`, follow its workflow |
-| **减平仓位** | "全平 BTC", "平掉一半", "反手做空", "一键清仓" | Read `references/close-position.md`, follow its workflow |
-| **管理挂单** | "撤掉那个买单", "撤销所有订单", "我有哪些挂单" | Read `references/cancel-order.md`, follow its workflow |
-| **调整挂单** | "把价格改成 60000", "修改订单数量" | Read `references/amend-order.md`, follow its workflow |
-| **模糊指令** | "帮我操作一下合约", "查看我的持仓" | **追问模式**: 先查询持仓/挂单，再引导用户选择操作                            |
+## Execution workflow
 
-## ⚙️ 执行工作流 (Execution Workflow)
+### 1. Intent and parameters
 
-### 1. 意图识别与参数提取
-- 分析用户输入，确定目标模块（Open/Close/Cancel/Amend）。
-- 提取关键参数：`contract` (合约), `side` (方向), `size` (数量), `price` (价格), `leverage` (杠杆)。
-- **缺失处理**: 如果关键参数缺失（如未指定数量），进入**追问模式**。
+- Determine module (Open/Close/Cancel/Amend).
+- Extract: `contract`, `side`, `size`, `price`, `leverage`.
+- **Missing**: if required params missing (e.g. size), ask user (clarify mode).
 
-### 2. 前置检查 (Pre-Flight Checks)
-在执行具体操作前，统一执行以下检查：
-- **合约有效性**: 调用 `get_futures_contract` 确认合约存在且未下架。
-- **账户状态**: 检查余额是否充足，是否有冲突持仓（如切换仓位模式时）。
-- **风险控制**:
-    - 限价单检查是否超出 `order_price_deviate` 保护范围。
-    - 大额头寸提示分批下单。
+### 2. Pre-flight checks
 
-### 3. 模块执行逻辑
+- **Contract**: call `get_futures_contract` to ensure contract exists and is tradeable.
+- **Account**: check balance and conflicting positions (e.g. when switching margin mode).
+- **Risk**: limit orders must be within `order_price_deviate`; warn on large size.
 
-#### 🚀 Module A: 开仓 (Open Position)
-1. **数量单位转换**: 若用户未以「张」为单位，先调用 `get_futures_contract` 获取 `mark_price`、`quanto_multiplier`，再按对应公式转换为张数后下单：
-   - **以 U（USDT 金额）为单位**: 无杠杆时 张 = u ÷ 标记价格 ÷ 合约乘数；**有杠杆时** 张 = u × 杠杆 ÷ 标记价格 ÷ 合约乘数
-   - **以币种（基础资产数量，如 BTC、ETH）为单位**: 张 = 币种 ÷ 合约乘数
-   - 转换结果按合约 `order_size_min` 与精度要求截断。
-2. **模式确认**: 默认全仓 (`cross`)，若用户指定逐仓则检查杠杆倍数。
-3. **模式切换**: 若当前模式与目标不符且无持仓，自动调用 `update_futures_position_cross_mode`。
-4. **杠杆设置**: 逐仓模式下调用 `update_futures_position_leverage`。
-5. **下单前确认**: 根据**合约 + 下单方向**调用 `get_position(settle, contract)` 查询该方向上的当前杠杆（若有持仓则取该仓位杠杆，无持仓则取该合约该方向下的默认/当前杠杆设置），并在确认内容中展示。向用户展示**最终下单信息**（合约、方向、数量/张、价格或市价、仓位模式、**杠杆**、预估保证金/强平价等），并请求确认（如「请确认以上信息无误后回复“确认”再下单」）。**用户确认后再执行下单**。
-6. **下单执行**: 调用 `create_futures_order` (市价单自动设 `tif=ioc`, `price=0`)。
-7. **结果验证**: 调用 `get_futures_position` 确认仓位已建立。
+### 3. Module logic
 
-#### 🛑 Module B: 平仓 (Close Position)
-1. **持仓查询**: 调用 `get_futures_position` 获取当前 `size` 和方向。
-2. **策略分支**:
-    - **全平**: 先查持仓再逐笔平仓（`get_futures_position` + `create_futures_order` reduce_only），或使用合约全平流程。
-    - **部分平**: 计算反向数量，调用 `create_futures_order` (`reduce_only=true`)。
-    - **反手**: 无专用 MCP。先 `create_futures_order`（`reduce_only=true`）平掉当前仓，再 `create_futures_order` 开反向仓（两步完成）。
-3. **结果验证**: 确认剩余仓位符合预期。
+#### Module A: Open position
 
-#### ❌ Module C: 撤单 (Cancel Order)
-1. **订单定位**:
-    - 有 ID: 直接定位。
-    - 无 ID: 调用 `list_futures_orders` 展示列表供用户选择。
-2. **执行撤单**:
-    - 单笔: `cancel_futures_order`。
-    - 批量: `cancel_futures_batch_orders` 或 `cancel_all_futures_orders` (支持按合约过滤)。
-3. **状态确认**: 验证 `finish_as` == `cancelled`。
+1. **Unit conversion**: if user does not specify size in **contracts**, get `mark_price`, `quanto_multiplier` from `get_futures_contract`, then convert:
+   - **U (USDT notional)**: contracts = u ÷ mark_price ÷ quanto_multiplier (no leverage); **with leverage**: contracts = u × leverage ÷ mark_price ÷ quanto_multiplier
+   - **Base (e.g. BTC, ETH)**: contracts = base_amount ÷ quanto_multiplier
+   - Round/truncate to `order_size_min` and size precision.
+2. **Mode**: default cross; if user wants isolated, check leverage.
+3. **Mode switch**: if current mode differs and no position, call `update_futures_position_cross_mode`.
+4. **Leverage**: in isolated mode call `update_futures_position_leverage`.
+5. **Pre-order confirmation**: call `get_position(settle, contract)` for **contract + side** to get current leverage (from position or default), and show it. Show **final order summary** (contract, side, size, price or market, mode, **leverage**, estimated margin/liq price). Ask user to confirm (e.g. "Reply 'confirm' to place the order."). **Only after user confirms**, place order.
+6. **Place order**: call `create_futures_order` (market: `tif=ioc`, `price=0`).
+7. **Verify**: call `get_futures_position` to confirm position.
 
-#### ✏️ Module D: 改单 (Amend Order)
-1. **订单检查**: 确认订单状态为 `open`。
-2. **精度校验**: 根据合约配置校验新价格/数量的精度。
-3. **执行修改**: 调用 `amend_futures_order` 更新 price 或 size。
+#### Module B: Close position
 
+1. **Position**: call `get_futures_position` for current `size` and side.
+2. **Branch**: full close (query then close with reduce_only); partial (compute size, `create_futures_order` reduce_only); reverse (close then open opposite in two steps).
+3. **Verify**: confirm remaining position.
 
-## 📝 统一回复模板 (Report Template)
+#### Module C: Cancel order
 
-所有操作完成后，必须输出标准化结论：
+1. **Locate**: by order_id, or `list_futures_orders` and let user choose.
+2. **Cancel**: single `cancel_futures_order`; batch `cancel_futures_batch_orders` or `cancel_all_futures_orders` (by contract if needed).
+3. **Verify**: `finish_as` == `cancelled`.
 
-## 🛡️ 安全与风控规则 (Safety Rules)
+#### Module D: Amend order
 
-### 二次确认
-- **开仓**：必须先展示**最终下单信息**（合约、方向、数量、价格/市价、模式、杠杆、预估强平价与保证金），待用户确认后再执行 `create_futures_order`。示例话术：*「请确认以上信息无误后回复“确认”再下单。」*
-- **全平、反手、批量撤单**等高风险操作，必须先展示影响范围并请求用户确认。
-- 示例话术：*「确定要平掉所有仓位吗？」*、*「将撤销该合约下全部挂单，是否继续？」*
+1. **Check**: order status must be `open`.
+2. **Precision**: validate new price/size against contract.
+3. **Amend**: call `amend_futures_order` to update price or size.
 
-### 风险警示
-- **开仓时**：强制显示预估强平价格和保证金占用。
-- **市价单**：必须提示滑点风险。
+## Report template
 
-### 错误处理
-| 错误码 | 处理方式 |
-|--------|----------|
-| `BALANCE_NOT_ENOUGH` | 提示充值或降低杠杆/数量。 |
-| `PRICE_TOO_DEVIATED` | 自动计算合法价格区间并建议用户调整。 |
-| `POSITION_NOT_EMPTY`（切换模式时） | 提示先平仓。 |
+After each operation, output a short standardized result.
 
+## Safety rules
+
+### Confirmation
+
+- **Open**: show final order summary (contract, side, size, price/market, mode, leverage, estimated liq/margin), then ask for confirmation before `create_futures_order`. Example: *"Reply 'confirm' to place the order."*
+- **Close all, reverse, batch cancel**: show scope and ask for confirmation. Example: *"Close all positions? Reply to confirm."* / *"Cancel all orders for this contract. Continue?"*
+
+### Warnings
+
+- **Open**: show estimated liquidation price and margin.
+- **Market order**: warn about slippage.
+
+### Errors
+
+| Code | Action |
+|------|--------|
+| `BALANCE_NOT_ENOUGH` | Suggest deposit or lower leverage/size. |
+| `PRICE_TOO_DEVIATED` | Show valid price range and suggest adjustment. |
+| `POSITION_NOT_EMPTY` (mode switch) | Ask user to close position first. |
