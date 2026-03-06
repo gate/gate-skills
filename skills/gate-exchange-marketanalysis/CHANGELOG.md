@@ -1,17 +1,24 @@
 # Changelog
 
-All notable changes to the gate-exchange-MarketAnalysis skill are documented here.  
-本文档记录 gate-exchange-MarketAnalysis 技能的所有变更。
+All notable changes to the gate-exchange-MarketAnalysis skill are documented here.
 
-Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.  
-版本格式：`YYYY.M.DD-N`。
+Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.
+
+---
+
+## [2026.3.5-8] - 2026-03-05
+
+### Changed
+- **English-only documentation:** Removed all Chinese content from SKILL.md, README.md, CHANGELOG.md, and references/scenarios.md. Documentation is now full English.
+
+---
 
 ## [2026.3.5-1] - 2026-03-05
 
 ### Added
-- Initial release (market tape analysis, seven scenarios) 首次发布（行情分析，七大场景）
+- Initial release (market tape analysis, seven scenarios)
 - Routing-based SKILL.md with document loading from `references/scenarios.md`
-- **Seven analysis modules 七大分析模块:** Liquidity 流动性, Momentum 动能, Liquidation 爆仓, Funding arbitrage 费率套利, Basis 基差, Manipulation risk 操控风险, Order book explainer 订单簿解读
-- Smart spot/futures market detection (perpetual/contract keywords) 现货/合约识别（永续、合约等关键词）
+- **Seven analysis modules:** Liquidity, Momentum, Liquidation monitoring, Funding arbitrage, Basis, Manipulation risk, Order book explainer
+- Smart spot/futures market detection (perpetual/contract keywords)
 - MCP call order and Report Template defined in `references/scenarios.md`
-- Domain knowledge and safety rules 领域知识与安全规则
+- Domain knowledge and safety rules

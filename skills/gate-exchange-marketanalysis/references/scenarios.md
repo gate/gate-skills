@@ -1,10 +1,6 @@
 # gate-exchange-MarketAnalysis — Scenarios & MCP Call Specs
 
-**Language / 语言：** This document is the single source for MCP call order and report templates. Report output may be in 中文 with English technical terms; scenario descriptions below are in English, with 中文 used where helpful. 本文档为 MCP 调用顺序与报告模板的唯一来源；报告输出可为中文、术语保留英文；下文场景以英文为主，必要时辅以中文。
-
-**EN:** This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
-
-**中文：** 本文约定各场景的 **MCP 调用顺序、参数、必取字段与输出格式**。实现须按各 Case 规定顺序调用 Gate MCP，并按下方模板生成报告。
+This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
@@ -49,7 +45,6 @@ For liquidity analysis, **call Gate MCP in this order** and extract the listed f
 
 **Prompt examples**:
 - "How is ETH liquidity?"
-- "当前 ETH 的流动性如何"
 
 **Expected behavior**:
 1. Call in order per **MCP Call Spec**: `list_order_book` → `list_candlesticks` → `list_tickers` (optional `list_trades`).
@@ -88,7 +83,6 @@ ETH liquidity is excellent, suitable for large size.
 
 **Prompt examples**:
 - "How is BTC perpetual depth?"
-- "BTC永续合约深度怎么样"
 
 **Expected behavior**:
 1. Detect "perpetual/contract" and use **futures** MCP: `list_futures_order_book` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `list_futures_tickers`, `list_futures_candlesticks`(1d, 30).
@@ -115,7 +109,6 @@ Liquidity rating: 5/5 ⭐
 
 **Prompt examples**:
 - "How is XYZ liquidity?"
-- "XYZ币的流动性如何"
 
 **Expected behavior**:
 1. Still follow **Case 1 MCP Call Spec**: order_book → candlesticks → tickers.
@@ -170,7 +163,6 @@ Liquidity rating: 5/5 ⭐
 
 **Prompt examples**:
 - "Is BTC more long or short in 24h, and is it sustainable?"
-- "BTC 近 24h 多头厉害还是空头厉害，可持续吗"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_trades` → `list_tickers` → `list_candlesticks` → `list_order_book` → `list_futures_funding_rate` (futures when contract).
@@ -207,7 +199,6 @@ Buy share 65% but below 70% "strong" threshold; currently long-leaning but not o
 
 **Prompt examples**:
 - "Is ETH buy side strong?"
-- "ETH买盘强吗"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_trades`(ETH_USDT) → `list_tickers` → `list_candlesticks`.
@@ -240,7 +231,6 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 
 **Prompt examples**:
 - "BTC contract momentum"
-- "BTC合约动能判断"
 
 **Expected behavior**:
 1. Detect "contract" and use **futures** MCP: `list_trades` (futures, `settle=usdt`, `contract=BTC_USDT`) → `list_futures_tickers` → `list_futures_candlesticks`.
@@ -276,7 +266,6 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 
 **Prompt examples**:
 - "Recent liquidations?"
-- "最近爆仓情况"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_futures_liq_orders` → `list_futures_candlesticks` → `list_futures_tickers`.
@@ -316,7 +305,6 @@ Long liq 84%; current move is squeezing long leverage.
 
 **Prompt examples**:
 - "Did BTC just wick?"
-- "刚才BTC是不是插针了"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_futures_liq_orders`(1h, optional filter contract=BTC_USDT) → `list_futures_candlesticks`(BTC_USDT, 5m, 12) → `list_futures_tickers`.
@@ -377,7 +365,6 @@ Long liq 84%; current move is squeezing long leverage.
 
 **Prompt examples**:
 - "Any arbitrage opportunities?"
-- "现在有没有套利机会"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_futures_tickers` → `list_futures_funding_rate` → `list_tickers`(candidates) → `list_order_book`(top candidates).
@@ -414,7 +401,6 @@ Long liq 84%; current move is squeezing long leverage.
 
 **Prompt examples**:
 - "Which coins have extreme funding?"
-- "哪些币费率异常"
 
 **Expected behavior**:
 1. Call `list_futures_tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
@@ -463,7 +449,6 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 
 **Prompt examples**:
 - "What is BTC basis?"
-- "BTC基差怎么样"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_tickers`(BTC_USDT) → `list_futures_tickers`(usdt, BTC_USDT) → optional `list_futures_premium_index`.
@@ -497,7 +482,6 @@ Current basis rate 0.31%, above historical mean 0.15%; **elevated positive basis
 
 **Prompt examples**:
 - "ETH spot–futures spread"
-- "ETH期现价差"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_tickers`(ETH_USDT) → `list_futures_tickers`(usdt, ETH_USDT).
@@ -529,9 +513,9 @@ Currently **negative basis** (futures below spot), which often indicates:
 
 ### MCP Call Spec (document-aligned)
 
-**Trigger**: "这个币深度和成交比怎么样" / "容易操控吗" / "How is this coin’s depth vs volume?" / "Is it easy to manipulate?"
+**Trigger**: "How is this coin’s depth vs volume?" / "Is it easy to manipulate?"
 
-**API choice**: When user mentions **perpetual, contract, futures** (永续、合约), use **futures** tools; otherwise use **spot** tools.
+**API choice**: When user mentions **perpetual, contract, futures**, use **futures** tools; otherwise use **spot** tools.
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
@@ -541,8 +525,8 @@ Currently **negative basis** (futures below spot), which often indicates:
 
 **Calculation & judgment** (aligned with SKILL):
 
-- **Top 10 depth total / 24h volume < 0.5%** → "thin depth" (深度薄).
-- **24h trades have consecutive same-direction large orders** → "possible manipulation / 可能有主力在控盘".
+- **Top 10 depth total / 24h volume < 0.5%** → "thin depth".
+- **24h trades have consecutive same-direction large orders** → "possible manipulation".
 
 **Output**: Must include "Depth analysis" table (top 10 depth, 24h volume, depth ratio, assessment), "Large order" summary, and "Manipulation risk" conclusion.
 
@@ -554,7 +538,6 @@ Currently **negative basis** (futures below spot), which often indicates:
 
 **Prompt examples**:
 - "Is PEPE easy to manipulate?"
-- "PEPE这个币容易被操控吗"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_order_book`(PEPE_USDT) → `list_tickers` → `list_trades`(limit=500).
@@ -595,7 +578,6 @@ In last 500 trades:
 
 **Prompt examples**:
 - "How is BTC depth vs volume?"
-- "BTC深度成交比怎么样"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_order_book`(BTC_USDT) → `list_tickers` → optional `list_trades`.
@@ -628,11 +610,9 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 **Context**: User asks about manipulation for a **perpetual/contract** (e.g. "BTC contract easy to manipulate?").
 
 **Prompt examples**:
-- "BTC永续容易操控吗"
-- "ETH合约深度和成交比怎么样"
 
 **Expected behavior**:
-1. Detect "永续" or "合约" (or "perpetual"/"contract") and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `list_futures_tickers` → `list_futures_trades` (or equivalent, limit=500).
+1. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `list_futures_tickers` → `list_futures_trades` (or equivalent, limit=500).
 2. Extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
 3. Apply same judgment: depth ratio < 0.5% → thin; consecutive same-side large → possible manipulation.
 4. Output depth analysis table + large order summary + manipulation risk conclusion (same structure as 6.1/6.2, data from futures).
@@ -668,7 +648,6 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 
 **Prompt examples**:
 - "Explain the order book"
-- "帮我解释一下订单簿"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_order_book` (e.g. BTC_USDT, limit=10) → `list_tickers`.
@@ -720,7 +699,6 @@ The order book is the exchange’s "list of orders":
 
 **Prompt examples**:
 - "Show ETH order book"
-- "看下ETH的盘口"
 
 **Expected behavior**:
 1. Call per **MCP Call Spec**: `list_order_book`(ETH_USDT, limit=10) → `list_tickers`(ETH_USDT).
