@@ -2,12 +2,12 @@
 name: gate-spot-trading-assistant
 version: "2026.3.5-1"
 updated: "2026-03-05"
-description: "Gate.io spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
+description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
 ---
 
-# Gate.io Spot Trading Assistant
+# Gate Spot Trading Assistant
 
-Execute integrated operations for Gate.io spot workflows, including:
+Execute integrated operations for Gate spot workflows, including:
 - Buy and account queries (balance checks, asset valuation, minimum order checks)
 - Smart monitoring and trading (automatic price-condition limit orders, no take-profit/stop-loss support)
 - Order management and amendment (price updates, cancellations, fill verification, cost-basis checks, swaps)
