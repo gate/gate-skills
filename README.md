@@ -12,27 +12,8 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-market](#-gate-exchange-market) | Single-coin deep analysis & multi-coin screening | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, and order book explainer | `2026.3.5-1` | ✅ Active |
 | [gate-mcp-installer](#-gate-mcp-installer) | One-click Gate MCP setup & configuration | `2026.3.4-1` | ✅ Active |
-
----
-
-## 📊 gate-exchange-market
-
-> **Path**: `skills/gate-exchange-market/`
-
-Analyze cryptocurrency market data on Gate.io, covering two core modes:
-
-| Sub-Module | What It Does |
-|------------|-------------|
-| **Coin Deep Analysis** | Comprehensive single-coin report covering trend, liquidity, sentiment, and risk assessment |
-| **Multi-Coin Screener** | Filter and rank coins across the entire market by volume, price change, funding rate, spread, and more |
-
-**Example Prompts**:
-- `Analyze BTC in detail` / `Analyze SOL`
-- `Find coins with 24h gain above 10%` / `Top coins by volume`
-- `Compare ETH and SOL`
 
 ---
 
@@ -111,21 +92,13 @@ bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
 gate-github-skills/
 ├── README.md
 └── skills/
-    ├── gate-exchange-market/    # Market intelligence skill
-    │   ├── SKILL.md             # Skill definition & routing rules
-    │   ├── CHANGELOG.md
-    │   ├── README.md
-    │   └── references/
-    │       ├── coin-deep-analysis.md
-    │       ├── multi-coin-screener.md
-    │       └── scenarios.md
     ├── gate-exchange-marketanalysis/ # Market tape analysis skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
     │   └── references/
     │       └── scenarios.md
-    └── gate-mcp-installer/      # MCP setup skill
+    ├── gate-mcp-installer/      # MCP setup skill
         ├── SKILL.md
         ├── CHANGELOG.md
         ├── README.md
