@@ -6,16 +6,6 @@ All notable changes to the gate-exchange-MarketAnalysis skill are documented her
 Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.  
 版本格式：`YYYY.M.DD-N`。
 
----
-
-## [2026.3.5-8] - 2026-03-05
-
-### Changed
-- **Skill name 技能命名：** Renamed to **gate-exchange-MarketAnalysis** per convention gate-{Category}-{Title} (Category: exchange; Title: MarketAnalysis, PascalCase). 按规范 gate-{Category}-{Title} 更名为 gate-exchange-MarketAnalysis。
-- **description** already uses “The market analysis function of Gate Exchange” for brand and domain. 简介已体现品牌与领域（Gate Exchange）。
-
----
-
 ## [2026.3.5-1] - 2026-03-05
 
 ### Added
