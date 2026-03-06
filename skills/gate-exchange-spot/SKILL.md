@@ -9,7 +9,7 @@ description: "Gate.io 现货买卖与账户运营 Skill。Use this skill wheneve
 
 在 Gate.io 现货场景中执行一体化操作，覆盖：
 - 买币与账户查询（余额检查、资产估值、最小下单检查）
-- 智能盯盘与买卖（按价格条件自动挂单、止损止盈逻辑）
+- 智能盯盘与买卖（按价格条件自动挂单，不支持止盈止损）
 - 订单管理与改价（改价、撤单、成交核实、成本价判断、置换）
 
 ## Domain Knowledge
@@ -32,6 +32,20 @@ description: "Gate.io 现货买卖与账户运营 Skill。Use this skill wheneve
 - 金额类买入需要满足 `min_quote_amount`（常见门槛 10U）。
 - 数量类买卖需要满足最小数量与数量精度（`min_base_amount` / `amount_precision`）。
 - 条件型需求（“跌 2% 买”“涨 500 卖”）通过计算目标价格后创建限价单实现，不依赖后台持续盯盘进程。
+- 不支持止盈止损（TP/SL）功能：不创建价格触发单，不执行“到价自动止盈/止损”。
+
+### 市价单参数提取与填充规则（强制）
+
+`POST /spot/orders` 的 `type=market` 时，`amount` 字段按方向填写：
+
+| side | amount 含义 | 示例 |
+|------|-------------|------|
+| `buy` | 计价币金额（USDT） | “买 100U BTC” -> `amount="100"` |
+| `sell` | 基础币数量（BTC/ETH 等） | “卖 0.01 BTC” -> `amount="0.01"` |
+
+执行前校验：
+- `buy` 市价单：检查计价币余额是否覆盖 `amount`（USDT）。
+- `sell` 市价单：检查基础币可用数量是否覆盖 `amount`（币数量）。
 
 ## Workflow
 
@@ -41,7 +55,7 @@ When the user asks for any spot trading operation, follow this sequence.
 
 将用户请求归类到以下 6 类之一：
 1. 买入（市价/限价/全仓买入）
-2. 卖出（清仓卖出/止损止盈）
+2. 卖出（清仓卖出/条件卖出）
 3. 账户查询（总资产、余额回查、交易可用性）
 4. 订单管理（查挂单、改单、撤单）
 5. 交易后核验（是否成交、到账数量、当前持仓）
@@ -55,6 +69,10 @@ When the user asks for any spot trading operation, follow this sequence.
 - `amount`（按币数量）或 `quote_amount`（按 USDT 金额）
 - `price` 或价格条件（如“现价下浮 2%”）
 - 触发条件（是否满足再执行）
+
+当 `type=market` 时，参数归一化为：
+- `side=buy`：`amount = quote_amount`（USDT 金额）
+- `side=sell`：`amount = base_amount`（基础币数量）
 
 预检查优先顺序：
 1. 交易对与币种可交易状态
@@ -128,6 +146,9 @@ When the user asks for any spot trading operation, follow this sequence.
 | 用户要求“先检查余额再买” | 必须先 `GET /spot/accounts`，余额足够才下单 |
 | 用户要求“指定价格买/卖” | 使用 `type=limit`，按用户价格挂单 |
 | 用户要求“按当前价最快成交” | 优先 `market`；若指定“限价最快成交”，取盘口最优价 |
+| 市价买单（buy） | `amount` 填 USDT 金额，不填基础币数量 |
+| 市价卖单（sell） | `amount` 填基础币数量，不填 USDT 金额 |
+| 用户要求“止盈/止损” | 明确告知当前 skill 不支持 TP/SL，提供限价替代方案 |
 | 用户金额太小 | 检查 `min_quote_amount`，不满足则提示补足 |
 | 用户要“全仓买/全仓卖” | 读取可用余额，按最小交易规则裁剪 |
 | 触发条件未满足 | 不下单，返回当前价格与目标差值 |
@@ -159,6 +180,7 @@ When the user asks for any spot trading operation, follow this sequence.
 |----------|----------|----------|
 | 余额不足 | 账户可用 USDT/币不足 | 返回缺口金额，建议降低下单量 |
 | 最小交易限制 | 小于最小金额或数量 | 返回门槛值，建议补足后再下单 |
+| 不支持的能力 | 用户要求止盈止损（TP/SL） | 明确告知不支持，改为手动限价单方案 |
 | 订单不存在/已成交 | 改单或撤单目标失效 | 提示刷新挂单列表后重试 |
 | 行情条件不成立 | 条件单触发逻辑未满足 | 返回现价、目标价、差值 |
 | 交易对不可用 | 币种暂停交易或状态异常 | 明确提示“当前不可交易” |
@@ -179,6 +201,7 @@ When the user asks for any spot trading operation, follow this sequence.
 
 - 涉及“全仓/全部/一键”操作时，先复述关键金额与币种再执行。
 - 对条件单类请求，必须展示“触发阈值如何计算”。
+- 用户提出止盈止损需求时，不要伪装支持，必须明确告知当前不支持。
 - 对“快速成交”请求，提示可能存在滑点或吃单深度不足。
 - 对连续组合动作（先卖后买）明确两步执行结果，避免用户误判。
 - 任何条件不满足时不强行下单，优先解释并给出可执行替代方案。
