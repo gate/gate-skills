@@ -1,4 +1,4 @@
-# gate-exchange-MarketAnalysis
+# gate-exchange-marketanalysis
 
 ## Overview
 
@@ -125,7 +125,7 @@ See `references/scenarios.md` for full MCP call order and report templates.
 ## File Structure
 
 ```
-gate-exchange-MarketAnalysis/
+gate-exchange-marketanalysis/
 ├── README.md                          # This file
 ├── SKILL.md                           # Skill routing and instructions
 ├── CHANGELOG.md                       # Version history
