@@ -44,11 +44,11 @@ gate-exchange-spot/
 ## Scenario Test Script
 
 - Real API integration mode (default, read checks only):
-  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py`
+  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-exchange-spot/tests/run_spot_skill_scenarios.py`
 - Real API integration mode (with write smoke checks):
-  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py --mode real --real-allow-write --pair BTC_USDT --real-quote-amount 3.5`
+  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-exchange-spot/tests/run_spot_skill_scenarios.py --mode real --real-allow-write --pair BTC_USDT --real-quote-amount 3.5`
 - Mock mode (optional, local logic regression only):
-  - `python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py --mode mock`
+  - `python3 spot-skills/gate-exchange-spot/tests/run_spot_skill_scenarios.py --mode mock`
 
 Report output default:
-- `spot-skills/gate-spot-trading-assistant/tests/TEST_RESULTS.md`
+- `spot-skills/gate-exchange-spot/tests/TEST_RESULTS.md`

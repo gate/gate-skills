@@ -44,10 +44,10 @@ If confirmation is not explicit, the order must not be submitted.
 - Tools: `get_spot_accounts` → `get_currency_pair` → `create_spot_order`
 - Logic: Read all available DOGE; sell only if it meets minimum size, otherwise return a clear warning.
 
-### Scenario 8: Minimum Buy Check
-- User Prompt: `Can I buy 5 USDT worth of ETH?`
-- Tools: `get_currency_pair` → `create_spot_order`
-- Logic: Validate `min_quote_amount` first; if below threshold (for example <10U), ask the user to increase amount instead of forcing execution.
+### Scenario 8: Balance Check Before Buy
+- User Prompt: `I want to buy 5U of ETH. If I can buy it, place the order for me.`
+- Tools: `get_spot_accounts` → `get_currency_pair` → `create_spot_order`
+- Logic: Check account balance and the pair minimum order amount. Place the order only if both conditions are satisfied; otherwise, tell the user the amount does not meet trading requirements and ask them to increase it.
 
 ## II. Smart Monitoring and Trading (9-16)
 

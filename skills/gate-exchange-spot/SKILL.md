@@ -1,5 +1,5 @@
 ---
-name: gate-spot-trading-assistant
+name: gate-exchange-spot
 version: "2026.3.5-1"
 updated: "2026-03-05"
 description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
@@ -82,21 +82,32 @@ Pre-check order:
 
 ### Step 3: Final User Confirmation Before Any Order Placement (Mandatory)
 
-Before every `create_spot_order`, present an order summary and require explicit user confirmation.
+Before every `create_spot_order`, always provide an **Order Draft** first, then wait for explicit confirmation.
+
+Required execution flow:
+1. Send order draft (no trading call yet)
+2. Wait for explicit user approval
+3. Only after approval, submit the real order
+4. Without approval, perform query/estimation only, never execute trading
 
 Required confirmation fields:
 - trading pair (`currency_pair`)
 - side and order type (`buy/sell`, `market/limit`)
 - `amount` meaning and value
 - limit price (if applicable) or pricing basis
-- estimated cost/proceeds and main risk note (for example slippage)
+- estimated fill / estimated cost or proceeds
+- main risk note (for example slippage)
+
+Recommended draft wording:
+- `Order Draft: BTC_USDT, buy, market, amount=100 USDT, estimated fill around current ask, risk: slippage in fast markets. Reply "Confirm order" to place it.`
 
 Allowed confirmation responses (examples):
-- `Confirm`, `Proceed`, `Yes, place it`
+- `Confirm order`, `Confirm`, `Proceed`, `Yes, place it`
 
 If user confirmation is missing, ambiguous, or negative:
 - do not place the order
 - return a pending status and ask for explicit confirmation
+- continue with read-only actions only (balance checks, market quotes, fee estimation)
 
 ### Step 4: Call Tools by Scenario
 
@@ -129,7 +140,7 @@ The response must include:
 | 5 | Asset summary | Convert all holdings to USDT value | `get_spot_accounts` → `get_spot_tickers` |
 | 6 | Cancel all then check balance | Cancel all open orders and return balances | `cancel_all_spot_orders` → `get_spot_accounts` |
 | 7 | Sell dust | Sell only if minimum size is met | `get_spot_accounts` → `get_currency_pair` → `create_spot_order` |
-| 8 | Minimum buy check | Warn if below `min_quote_amount` | `get_currency_pair` → `create_spot_order` |
+| 8 | Balance + minimum buy check | Place order only if account balance and `min_quote_amount` are both satisfied | `get_spot_accounts` → `get_currency_pair` → `create_spot_order` |
 
 ### B. Smart Monitoring and Trading (9-16)
 
@@ -169,6 +180,7 @@ The response must include:
 | Market sell (`sell`) | Fill `amount` with base-coin quantity, not USDT amount |
 | User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
 | Any order placement request | Require explicit final user confirmation before `create_spot_order` |
+| User has not replied with clear confirmation | Keep order as draft; no trading execution |
 | User amount is too small | Check `min_quote_amount`; if not met, ask user to increase amount |
 | User requests all-in buy/sell | Use available balance, then trim by minimum trade rules |
 | Trigger condition not met | Do not place order; return current vs target price gap |
@@ -191,6 +203,7 @@ The response must include:
 
 Example `decision_text`:
 - `✅ Condition met. Your order has been placed.`
+- `📝 Order draft ready. Reply "Confirm order" to execute.`
 - `⏸️ No order placed yet: current price is 60200, above your target 60000.`
 - `❌ Not executed: minimum order amount is 10U, your input is 5U.`
 
@@ -202,6 +215,7 @@ Example `decision_text`:
 | Minimum trade constraint | Below minimum amount/size | Return threshold and suggest increasing order size |
 | Unsupported capability | User asks for TP/SL | Clearly state unsupported, propose manual limit-order workflow |
 | Missing final confirmation | User has not clearly approved final order summary | Keep order pending and request explicit confirmation |
+| Draft-only mode | User has not confirmed yet | Only run query/estimation tools; do not call `create_spot_order` |
 | Order missing/already filled | Amendment/cancellation target is invalid | Ask user to refresh open orders and retry |
 | Market condition not met | Trigger condition is not satisfied | Return current price, target price, and difference |
 | Pair unavailable | Currency suspended or abnormal status | Clearly state pair is currently not tradable |
@@ -210,7 +224,7 @@ Example `decision_text`:
 
 ### Workflow A: Buy Then Amend
 
-1. Place order with `gate-spot-trading-assistant` (Case 2/9/23)
+1. Place order with `gate-exchange-spot` (Case 2/9/23)
 2. If still unfilled, amend price (Case 17)
 
 ### Workflow B: Cancel Then Rebuy
@@ -224,6 +238,7 @@ Example `decision_text`:
 - For condition-based requests, explicitly show how the trigger threshold is calculated.
 - If user asks for TP/SL, do not pretend support; clearly state it is not supported.
 - Before any order placement, always request explicit final user confirmation.
+- Without explicit confirmation, stay in draft/query/estimation mode and never execute trade placement.
 - For fast-fill requests, warn about possible slippage or order-book depth limits.
 - For chained actions (sell then buy), report step-by-step results clearly.
 - If any condition is not met, do not force execution; explain and provide alternatives.
