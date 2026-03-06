@@ -80,7 +80,25 @@ Pre-check order:
 3. Available balance sufficiency
 4. User condition satisfaction (for example "buy only below 60000")
 
-### Step 3: Call APIs by Scenario
+### Step 3: Final User Confirmation Before Any Order Placement (Mandatory)
+
+Before every `POST /spot/orders`, present an order summary and require explicit user confirmation.
+
+Required confirmation fields:
+- trading pair (`currency_pair`)
+- side and order type (`buy/sell`, `market/limit`)
+- `amount` meaning and value
+- limit price (if applicable) or pricing basis
+- estimated cost/proceeds and main risk note (for example slippage)
+
+Allowed confirmation responses (examples):
+- `Confirm`, `Proceed`, `Yes, place it`
+
+If user confirmation is missing, ambiguous, or negative:
+- do not place the order
+- return a pending status and ask for explicit confirmation
+
+### Step 4: Call APIs by Scenario
 
 Use only the minimal API set required for the task:
 - Balance and available funds: `GET /spot/accounts`
@@ -90,7 +108,7 @@ Use only the minimal API set required for the task:
 - Cancel/amend: `DELETE /spot/orders` / `PATCH /spot/orders`
 - Fill verification: `GET /spot/my_trades`
 
-### Step 4: Return Actionable Result and Status
+### Step 5: Return Actionable Result and Status
 
 The response must include:
 - Whether execution succeeded (or why it did not execute)
@@ -149,6 +167,7 @@ The response must include:
 | Market buy (`buy`) | Fill `amount` with USDT quote amount, not base quantity |
 | Market sell (`sell`) | Fill `amount` with base-coin quantity, not USDT amount |
 | User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
+| Any order placement request | Require explicit final user confirmation before `POST /spot/orders` |
 | User amount is too small | Check `min_quote_amount`; if not met, ask user to increase amount |
 | User requests all-in buy/sell | Use available balance, then trim by minimum trade rules |
 | Trigger condition not met | Do not place order; return current vs target price gap |
@@ -181,6 +200,7 @@ Example `decision_text`:
 | Insufficient balance | Not enough available USDT/coins | Return shortfall and suggest reducing order size |
 | Minimum trade constraint | Below minimum amount/size | Return threshold and suggest increasing order size |
 | Unsupported capability | User asks for TP/SL | Clearly state unsupported, propose manual limit-order workflow |
+| Missing final confirmation | User has not clearly approved final order summary | Keep order pending and request explicit confirmation |
 | Order missing/already filled | Amendment/cancellation target is invalid | Ask user to refresh open orders and retry |
 | Market condition not met | Trigger condition is not satisfied | Return current price, target price, and difference |
 | Pair unavailable | Currency suspended or abnormal status | Clearly state pair is currently not tradable |
@@ -202,6 +222,7 @@ Example `decision_text`:
 - For all-in/full-balance/one-click requests, restate key amount and symbol before execution.
 - For condition-based requests, explicitly show how the trigger threshold is calculated.
 - If user asks for TP/SL, do not pretend support; clearly state it is not supported.
+- Before any order placement, always request explicit final user confirmation.
 - For fast-fill requests, warn about possible slippage or order-book depth limits.
 - For chained actions (sell then buy), report step-by-step results clearly.
 - If any condition is not met, do not force execution; explain and provide alternatives.

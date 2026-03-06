@@ -2,6 +2,11 @@
 
 This document provides standardized test inputs, API call order, and decision logic for all 25 cases.
 
+## Global Execution Gate (Mandatory)
+
+For every scenario that includes `POST /spot/orders`, the assistant must ask for explicit final user confirmation immediately before placing the order.  
+If confirmation is not explicit, the order must not be submitted.
+
 ## I. Buy and Account Queries (1-8)
 
 ### Scenario 1: Market Buy
