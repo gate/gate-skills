@@ -1,6 +1,6 @@
-# Gate.io Futures Cancel Order — Scenarios & Prompt Examples
+# Gate Futures Cancel Order — Scenarios & Prompt Examples
 
-Gate.io futures cancel-order scenarios and expected behavior.
+Gate futures cancel-order scenarios and expected behavior.
 
 ## Scenario 1: List orders then choose to cancel (recommended)
 

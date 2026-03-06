@@ -1,6 +1,6 @@
-# Gate.io Futures Open Position — Scenarios & Prompt Examples
+# Gate Futures Open Position — Scenarios & Prompt Examples
 
-Gate.io futures open-position scenarios and expected behavior.
+Gate futures open-position scenarios and expected behavior.
 
 ## Unit Conversion
 

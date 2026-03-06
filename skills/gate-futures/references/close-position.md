@@ -1,6 +1,6 @@
-# Gate.io Futures Close Position — Scenarios & Prompt Examples
+# Gate Futures Close Position — Scenarios & Prompt Examples
 
-Gate.io futures close-position scenarios and expected behavior.
+Gate futures close-position scenarios and expected behavior.
 
 ## Scenario 1: Close all (one-click)
 

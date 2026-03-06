@@ -2,7 +2,7 @@
 
 ## Overview
 
-An AI Agent skill that provides market tape analysis on [Gate.io](https://www.gate.io), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
+An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.com), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
 
 ---
 
