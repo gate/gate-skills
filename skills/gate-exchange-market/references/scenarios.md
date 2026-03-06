@@ -1,6 +1,10 @@
 # Gate-Exchange-Market — Scenarios & MCP Call Specs
 
-This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
+**Language / 语言：** This document is the single source for MCP call order and report templates. Report output may be in 中文 with English technical terms; scenario descriptions below are in English, with 中文 used where helpful. 本文档为 MCP 调用顺序与报告模板的唯一来源；报告输出可为中文、术语保留英文；下文场景以英文为主，必要时辅以中文。
+
+**EN:** This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
+
+**中文：** 本文约定各场景的 **MCP 调用顺序、参数、必取字段与输出格式**。实现须按各 Case 规定顺序调用 Gate MCP，并按下方模板生成报告。
 
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
