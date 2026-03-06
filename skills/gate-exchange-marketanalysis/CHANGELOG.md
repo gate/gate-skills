@@ -6,13 +6,6 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ---
 
-## [2026.3.5-8] - 2026-03-05
-
-### Changed
-- **English-only documentation:** Removed all Chinese content from SKILL.md, README.md, CHANGELOG.md, and references/scenarios.md. Documentation is now full English.
-
----
-
 ## [2026.3.5-1] - 2026-03-05
 
 ### Added
