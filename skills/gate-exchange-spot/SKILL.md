@@ -14,16 +14,16 @@ Execute integrated operations for Gate.io spot workflows, including:
 
 ## Domain Knowledge
 
-### Common API Groups
+### Tool Mapping by Domain
 
-| Group | Endpoints |
+| Group | Tool Calls (`jsonrpc: call.method`) |
 |------|------|
-| Account and balances | `GET /spot/accounts` |
-| Place/cancel/amend orders | `POST /spot/orders`, `DELETE /spot/orders`, `PATCH /spot/orders` |
-| Orders and fills | `GET /spot/open_orders`, `GET /spot/my_trades` |
-| Market data | `GET /spot/tickers`, `GET /spot/order_book`, `GET /spot/candlesticks` |
-| Trading rules | `GET /spot/currencies/{currency}`, `GET /spot/currency_pairs/{pair}` |
-| Fees | `GET /wallet/fee` |
+| Account and balances | `get_spot_accounts` |
+| Place/cancel/amend orders | `create_spot_order`, `cancel_all_spot_orders`, `cancel_spot_order`, `amend_spot_order` |
+| Open orders and fills | `list_spot_orders`, `list_spot_my_trades` |
+| Market data | `get_spot_tickers`, `get_spot_order_book`, `get_spot_candlesticks` |
+| Trading rules | `get_currency`, `get_currency_pair` |
+| Fees | `get_wallet_fee` |
 
 ### Key Trading Rules
 
@@ -36,7 +36,7 @@ Execute integrated operations for Gate.io spot workflows, including:
 
 ### Market Order Parameter Extraction Rules (Mandatory)
 
-When calling `POST /spot/orders` with `type=market`, fill `amount` by side:
+When calling `create_spot_order` with `type=market`, fill `amount` by side:
 
 | side | `amount` meaning | Example |
 |------|-------------|------|
@@ -82,7 +82,7 @@ Pre-check order:
 
 ### Step 3: Final User Confirmation Before Any Order Placement (Mandatory)
 
-Before every `POST /spot/orders`, present an order summary and require explicit user confirmation.
+Before every `create_spot_order`, present an order summary and require explicit user confirmation.
 
 Required confirmation fields:
 - trading pair (`currency_pair`)
@@ -98,15 +98,16 @@ If user confirmation is missing, ambiguous, or negative:
 - do not place the order
 - return a pending status and ask for explicit confirmation
 
-### Step 4: Call APIs by Scenario
+### Step 4: Call Tools by Scenario
 
-Use only the minimal API set required for the task:
-- Balance and available funds: `GET /spot/accounts`
-- Rule validation: `GET /spot/currency_pairs/{pair}`
-- Live price and moves: `GET /spot/tickers`
-- Order placement: `POST /spot/orders`
-- Cancel/amend: `DELETE /spot/orders` / `PATCH /spot/orders`
-- Fill verification: `GET /spot/my_trades`
+Use only the minimal tool set required for the task:
+- Balance and available funds: `get_spot_accounts`
+- Rule validation: `get_currency_pair`
+- Live price and moves: `get_spot_tickers`
+- Order placement: `create_spot_order`
+- Cancel/amend: `cancel_all_spot_orders` / `cancel_spot_order` / `amend_spot_order`
+- Open order query: `list_spot_orders` (use `status=open`)
+- Fill verification: `list_spot_my_trades`
 
 ### Step 5: Return Actionable Result and Status
 
@@ -119,55 +120,55 @@ The response must include:
 
 ### A. Buy and Account Queries (1-8)
 
-| Case | User Intent | Core Decision | API Sequence |
+| Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 1 | Market buy | Place market buy if USDT is sufficient | `GET /spot/accounts` → `POST /spot/orders` |
-| 2 | Buy at target price | Create a `limit buy` order | `GET /spot/accounts` → `POST /spot/orders` |
-| 3 | Buy with all balance | Use all available USDT balance to buy | `GET /spot/accounts` → `POST /spot/orders` |
-| 4 | Buy readiness check | Currency status + min size + current unit price | `GET /spot/currencies/{currency}` → `GET /spot/currency_pairs/{pair}` → `GET /spot/tickers` |
-| 5 | Asset summary | Convert all holdings to USDT value | `GET /spot/accounts` → `GET /spot/tickers` |
-| 6 | Cancel all then check balance | Cancel all open orders and return balances | `DELETE /spot/orders` → `GET /spot/accounts` |
-| 7 | Sell dust | Sell only if minimum size is met | `GET /spot/accounts` → `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
-| 8 | Minimum buy check | Warn if below `min_quote_amount` | `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
+| 1 | Market buy | Place market buy if USDT is sufficient | `get_spot_accounts` → `create_spot_order` |
+| 2 | Buy at target price | Create a `limit buy` order | `get_spot_accounts` → `create_spot_order` |
+| 3 | Buy with all balance | Use all available USDT balance to buy | `get_spot_accounts` → `create_spot_order` |
+| 4 | Buy readiness check | Currency status + min size + current unit price | `get_currency` → `get_currency_pair` → `get_spot_tickers` |
+| 5 | Asset summary | Convert all holdings to USDT value | `get_spot_accounts` → `get_spot_tickers` |
+| 6 | Cancel all then check balance | Cancel all open orders and return balances | `cancel_all_spot_orders` → `get_spot_accounts` |
+| 7 | Sell dust | Sell only if minimum size is met | `get_spot_accounts` → `get_currency_pair` → `create_spot_order` |
+| 8 | Minimum buy check | Warn if below `min_quote_amount` | `get_currency_pair` → `create_spot_order` |
 
 ### B. Smart Monitoring and Trading (9-16)
 
-| Case | User Intent | Core Decision | API Sequence |
+| Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 9 | Buy 2% lower | Place limit buy at current price -2% | `GET /spot/tickers` → `POST /spot/orders` |
-| 10 | Sell at +500 | Place limit sell at current price +500 | `GET /spot/tickers` → `POST /spot/orders` |
-| 11 | Buy near today's low | Buy only if current price is near 24h low | `GET /spot/tickers` → `POST /spot/orders` |
-| 12 | Sell on 5% drop request | Calculate target drop price and place sell limit order | `GET /spot/tickers` → `POST /spot/orders` |
-| 13 | Buy top gainer | Auto-pick highest 24h gainer and buy | `GET /spot/tickers` → `POST /spot/orders` |
-| 14 | Buy larger loser | Compare BTC/ETH daily drop and buy the bigger loser | `GET /spot/tickers` → `POST /spot/orders` |
-| 15 | Buy then place sell | Market buy, then place sell at +2% reference price | `POST /spot/orders` → `POST /spot/orders` |
-| 16 | Fee estimate | Estimate total cost from fee rate and live price | `GET /wallet/fee` → `GET /spot/tickers` |
+| 9 | Buy 2% lower | Place limit buy at current price -2% | `get_spot_tickers` → `create_spot_order` |
+| 10 | Sell at +500 | Place limit sell at current price +500 | `get_spot_tickers` → `create_spot_order` |
+| 11 | Buy near today's low | Buy only if current price is near 24h low | `get_spot_tickers` → `create_spot_order` |
+| 12 | Sell on 5% drop request | Calculate target drop price and place sell limit order | `get_spot_tickers` → `create_spot_order` |
+| 13 | Buy top gainer | Auto-pick highest 24h gainer and buy | `get_spot_tickers` → `create_spot_order` |
+| 14 | Buy larger loser | Compare BTC/ETH daily drop and buy the bigger loser | `get_spot_tickers` → `create_spot_order` |
+| 15 | Buy then place sell | Market buy, then place sell at +2% reference price | `create_spot_order` → `create_spot_order` |
+| 16 | Fee estimate | Estimate total cost from fee rate and live price | `get_wallet_fee` → `get_spot_tickers` |
 
 ### C. Order Management and Amendment (17-25)
 
-| Case | User Intent | Core Decision | API Sequence |
+| Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 17 | Raise price for unfilled order | Find open order, then amend price | `GET /spot/open_orders` → `PATCH /spot/orders` |
-| 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `GET /spot/my_trades` → `GET /spot/accounts` |
-| 19 | Cancel if not filled | If still open, cancel and then recheck balance | `GET /spot/open_orders` → `DELETE /spot/orders` → `GET /spot/accounts` |
-| 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `GET /spot/my_trades` → `GET /spot/accounts` → `POST /spot/orders` |
-| 21 | Sell at break-even or better | Sell only if current price is above cost basis | `GET /spot/my_trades` → `GET /spot/tickers` → `POST /spot/orders` |
-| 22 | Asset swap | Estimate value, if >=10U then sell then buy | `GET /spot/accounts` → `GET /spot/tickers` → `POST /spot/orders`(sell) → `POST /spot/orders`(buy) |
-| 23 | Buy if price condition met | Buy only when `current < 60000`, then report balance | `GET /spot/tickers` → `POST /spot/orders` → `GET /spot/accounts` |
-| 24 | Buy on trend condition | Buy only if 3 of last 4 hourly candles are bullish | `GET /spot/candlesticks` → `POST /spot/orders` |
-| 25 | Fast-fill limit buy | Use best opposite-book price for fast execution | `GET /spot/order_book` → `POST /spot/orders` |
+| 17 | Raise price for unfilled order | Find open order, then amend price | `list_spot_orders`(status=open) → `amend_spot_order` |
+| 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `list_spot_my_trades` → `get_spot_accounts` |
+| 19 | Cancel if not filled | If still open, cancel and then recheck balance | `list_spot_orders`(status=open) → `cancel_spot_order` → `get_spot_accounts` |
+| 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `list_spot_my_trades` → `get_spot_accounts` → `create_spot_order` |
+| 21 | Sell at break-even or better | Sell only if current price is above cost basis | `list_spot_my_trades` → `get_spot_tickers` → `create_spot_order` |
+| 22 | Asset swap | Estimate value, if >=10U then sell then buy | `get_spot_accounts` → `get_spot_tickers` → `create_spot_order`(sell) → `create_spot_order`(buy) |
+| 23 | Buy if price condition met | Buy only when `current < 60000`, then report balance | `get_spot_tickers` → `create_spot_order` → `get_spot_accounts` |
+| 24 | Buy on trend condition | Buy only if 3 of last 4 hourly candles are bullish | `get_spot_candlesticks` → `create_spot_order` |
+| 25 | Fast-fill limit buy | Use best opposite-book price for fast execution | `get_spot_order_book` → `create_spot_order` |
 
 ## Judgment Logic Summary
 
 | Condition | Action |
 |-----------|--------|
-| User asks to check balance before buying | Must call `GET /spot/accounts` first; place order only if sufficient |
+| User asks to check balance before buying | Must call `get_spot_accounts` first; place order only if sufficient |
 | User specifies buy/sell at target price | Use `type=limit` at user-provided price |
 | User asks for fastest fill at current market | Prefer `market`; if "fast limit" is requested, use best book price |
 | Market buy (`buy`) | Fill `amount` with USDT quote amount, not base quantity |
 | Market sell (`sell`) | Fill `amount` with base-coin quantity, not USDT amount |
 | User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
-| Any order placement request | Require explicit final user confirmation before `POST /spot/orders` |
+| Any order placement request | Require explicit final user confirmation before `create_spot_order` |
 | User amount is too small | Check `min_quote_amount`; if not met, ask user to increase amount |
 | User requests all-in buy/sell | Use available balance, then trim by minimum trade rules |
 | Trigger condition not met | Do not place order; return current vs target price gap |
