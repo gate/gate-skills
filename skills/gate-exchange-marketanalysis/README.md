@@ -6,7 +6,7 @@
 
 ## Overview / 概述
 
-**EN:** An AI Agent skill that provides market tape analysis on [Gate.io](https://www.gate.io), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
+**EN:** An AI Agent skill that provides market analysis on [Gate.io](https://www.gate.io), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
 
 **中文：** Gate Exchange 行情分析技能，覆盖流动性、动能、爆仓监控、资金费率套利、基差（期现）监控、操控风险与订单簿解读。各场景的 **MCP 调用顺序与输出格式** 在 `references/scenarios.md` 中统一约定。
 
