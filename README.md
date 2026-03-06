@@ -13,7 +13,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
 | [gate-exchange-market](#-gate-exchange-market) | Single-coin deep analysis & multi-coin screening | `2026.3.5-1` | ✅ Active |
-| [gate-trading](#-gate-trading) | Derivatives monitoring: basis, funding rate, liquidation | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, and order book explainer | `2026.3.5-1` | ✅ Active |
 | [gate-mcp-installer](#-gate-mcp-installer) | One-click Gate MCP setup & configuration | `2026.3.4-1` | ✅ Active |
 
 ---
@@ -36,22 +36,30 @@ Analyze cryptocurrency market data on Gate.io, covering two core modes:
 
 ---
 
-## 📈 gate-trading
+## 📈 gate-exchange-marketanalysis
 
-> **Path**: `skills/gate-trading/`
+> **Path**: `skills/gate-exchange-marketanalysis/`
 
-Monitor trading opportunities and risks in Gate.io derivatives markets across three dimensions:
+Analyze Gate.io market tape and structure across seven dimensions:
 
 | Sub-Module | What It Does |
 |------------|-------------|
-| **Basis Monitor** | Spot-futures basis analysis, premium tracking, and arbitrage signals |
-| **Funding Rate Arbitrage** | Full-market funding rate scan with annualized return estimates and risk annotations |
-| **Liquidation Monitor** | Liquidation spike detection, directional squeeze, and pin-bar event analysis |
+| **Liquidity** | Order book depth, volume activity, and slippage risk assessment |
+| **Momentum** | Buy vs sell flow structure and funding bias analysis |
+| **Liquidation** | Liquidation anomaly detection and squeeze signal identification |
+| **Funding Arbitrage** | Funding-rate and volume-based arbitrage candidate screening |
+| **Basis** | Spot-futures premium/basis tracking and sentiment interpretation |
+| **Manipulation Risk** | Depth/volume mismatch and large-order behavior risk flags |
+| **Order Book Explainer** | Bids/asks, spread, and depth interpretation in plain language |
 
 **Example Prompts**:
-- `How is BTC basis?` / `Check BTC basis`
-- `Run a funding rate arbitrage scan` / `Funding rate arbitrage opportunities`
-- `Monitor liquidations` / `Show liquidation anomalies`
+- `Check BTC liquidity and slippage`
+- `What is the momentum of ETH?`
+- `Monitor BTC liquidations for squeeze risk`
+- `Run a funding arbitrage scan`
+- `What is the basis for SOL?`
+- `Is there manipulation risk on DOGE?`
+- `Explain the BTC order book and spread`
 
 ---
 
@@ -111,14 +119,11 @@ gate-github-skills/
     │       ├── coin-deep-analysis.md
     │       ├── multi-coin-screener.md
     │       └── scenarios.md
-    ├── gate-trading/            # Trading intelligence skill
+    ├── gate-exchange-marketanalysis/ # Market tape analysis skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
     │   └── references/
-    │       ├── basis-monitor.md
-    │       ├── funding-rate-arbitrage.md
-    │       ├── liquidation-monitor.md
     │       └── scenarios.md
     └── gate-mcp-installer/      # MCP setup skill
         ├── SKILL.md
