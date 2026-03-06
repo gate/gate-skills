@@ -1,0 +1,54 @@
+# Gate.io Spot Trading Assistant Skill
+
+## Overview
+
+An integrated execution skill for Gate.io spot trading, covering buy/sell actions, conditional monitoring orders, order management, fill verification, and account asset queries.
+
+## Core Capabilities
+
+- Buy and account queries (balance checks, full-balance buy, asset valuation, minimum order checks)
+- Smart monitoring and trading (place limit orders by percentage/fixed price spread)
+- Order management and amendments (list open orders, amend orders, cancel orders)
+- Post-trade verification (trade history + current holdings reconciliation)
+- Combined actions (buy then place sell order, sell then rebuy for asset swap)
+
+## Skill Structure
+
+```
+gate-spot-trading-assistant/
+├── SKILL.md
+├── README.md
+├── CHANGELOG.md
+└── references/
+    └── scenarios.md
+```
+
+## Usage Examples
+
+```
+"I want to buy 100 USDT of BTC. Check whether my balance is enough first."
+"Convert all my USDT into ETH."
+"If BTC drops by 5%, sell it for me."
+"Did my BTC buy just go through? How much do I hold now?"
+"Swap all my DOGE into BTC if it is worth at least 10 USDT."
+```
+
+## Trigger Phrases
+
+- buy / sell / rebalance
+- monitor market / buy at target price / sell at target price / stop-loss request
+- cancel order / amend order / unfilled order handling
+- did it fill / how much received / total account value
+- spot trading / buy / sell / amend / cancel
+
+## Scenario Test Script
+
+- Real API integration mode (default, read checks only):
+  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py`
+- Real API integration mode (with write smoke checks):
+  - `GATE_API_KEY=... GATE_API_SECRET=... python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py --mode real --real-allow-write --pair BTC_USDT --real-quote-amount 3.5`
+- Mock mode (optional, local logic regression only):
+  - `python3 spot-skills/gate-spot-trading-assistant/tests/run_spot_skill_scenarios.py --mode mock`
+
+Report output default:
+- `spot-skills/gate-spot-trading-assistant/tests/TEST_RESULTS.md`
