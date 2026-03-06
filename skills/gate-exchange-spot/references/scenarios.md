@@ -21,10 +21,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Buy 100U of BTC."
 - "I want to buy 100 USDT of BTC now."
 **Expected Behavior**:
-1. Call `get_spot_accounts` to verify quote balance.
-2. Build Order Draft with market buy semantics (`amount` = USDT quote amount).
-3. Wait for explicit confirmation, then call `create_spot_order`.
-4. Return execution outcome and post-trade key fields.
+1. Fetch data via `get_spot_accounts` `currency=USDT`.
+2. Calculate available quote balance and validate market-buy `amount` semantics (`amount=quote_amount`).
+3. Output `Order Draft` and then `Execution Result Report` after confirmation.
 **Unexpected Behavior**:
 1. Directly returns "Order placed" with an order id before any `Confirm order`.
 2. Sends `amount=0.001 BTC` for market buy request "buy 100U", causing wrong notional.
@@ -36,10 +35,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Buy 100U BTC at 60000."
 - "Place a limit buy for BTC at 60000."
 **Expected Behavior**:
-1. Call `get_spot_accounts` for affordability.
-2. Build a limit-buy Order Draft with target price.
-3. Execute only after confirmation via `create_spot_order`.
-4. Explain open-order status if not immediately filled.
+1. Fetch data via `get_spot_accounts` `currency=USDT`.
+2. Calculate affordability and validate target `limit_price` precision/constraints.
+3. Output `Limit Order Draft` and then `Open Order/Execution Report` after confirmation.
 **Unexpected Behavior**:
 1. Converts to market order and executes immediately even though user asked for limit price.
 2. Returns "open order created" without checking whether quote balance can support order value.
@@ -51,10 +49,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Use all my USDT to buy ETH."
 - "All-in USDT into ETH."
 **Expected Behavior**:
-1. Call `get_spot_accounts` and compute available USDT.
-2. Build Order Draft with full-amount basis and risk note.
-3. Execute after confirmation with `create_spot_order`.
-4. Report remaining balance after trade.
+1. Fetch data via `get_spot_accounts` `currency=USDT`.
+2. Calculate full available quote amount and executable order size.
+3. Output `All-in Order Draft` and then `Post-Trade Balance Report` after confirmation.
 **Unexpected Behavior**:
 1. Uses total balance instead of available balance, leading to `BALANCE_NOT_ENOUGH` at execution.
 2. Places full-size order without draft/confirmation despite all-in risk.
@@ -66,10 +63,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Can BTC be traded now? How much for one BTC?"
 - "Check ETH tradability and current unit price."
 **Expected Behavior**:
-1. Call `get_currency` for currency status.
-2. Call `get_currency_pair` for constraints.
-3. Call `get_spot_tickers` for current price.
-4. Return structured check result without trading.
+1. Fetch data via `get_currency` `currency=BASE`, `get_currency_pair` `currency_pair=BASE_USDT`, and `get_spot_tickers` `currency_pair=BASE_USDT`.
+2. Calculate tradability result, min-trade constraints, and current unit cost.
+3. Output `Readiness Check Report` (no order execution).
 **Unexpected Behavior**:
 1. Places an order in what should be a read-only "can I trade?" request.
 2. Ignores disabled/suspended trading status and answers "tradable" incorrectly.
@@ -81,9 +77,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "How much is my account worth now?"
 - "Give me my total USDT-equivalent value."
 **Expected Behavior**:
-1. Call `get_spot_accounts` for holdings.
-2. Call `get_spot_tickers` for conversion prices.
-3. Aggregate value into USDT and return breakdown + total.
+1. Fetch data via `get_spot_accounts` `currency=all` and `get_spot_tickers` `currency_pair=*USDT`.
+2. Calculate per-asset USDT valuation and aggregate portfolio total.
+3. Output `Portfolio Valuation Report`.
 **Unexpected Behavior**:
 1. Excludes low-liquidity or non-USDT assets from total, materially understating account value.
 2. Uses stale or mismatched pair prices, producing unrealistic valuation output.
@@ -95,9 +91,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Cancel all unfilled orders and show my balance."
 - "Clear open orders first."
 **Expected Behavior**:
-1. Call `cancel_all_spot_orders`.
-2. Call `get_spot_accounts` for post-cancel balances.
-3. Return cancellation and balance summary.
+1. Fetch data via `cancel_all_spot_orders` `currency_pair=optional` and `get_spot_accounts` `currency=all`.
+2. Calculate canceled-order summary and refreshed available balances.
+3. Output `Cancel Summary + Balance Report`.
 **Unexpected Behavior**:
 1. Cancels only one pair's orders but reports "all orders canceled."
 2. Fails to show which order ids were canceled vs already filled.
@@ -109,10 +105,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Sell all my DOGE to USDT."
 - "Convert my DOGE position to USDT."
 **Expected Behavior**:
-1. Call `get_spot_accounts` for available coin amount.
-2. Call `get_currency_pair` for min-size/precision checks.
-3. Build draft and execute `create_spot_order` after confirmation.
-4. If below minimum, return constraint warning and no trade.
+1. Fetch data via `get_spot_accounts` `currency=DOGE` and `get_currency_pair` `currency_pair=DOGE_USDT`.
+2. Calculate sellable amount against min-size/precision constraints.
+3. Output `Sell Draft` or `Constraint Warning Report`, then `Execution Result` after confirmation.
 **Unexpected Behavior**:
 1. Submits size below `min_base_amount`, then surfaces raw API error only.
 2. Rounds amount with wrong precision and creates unexpected partial leftover balance.
@@ -124,10 +119,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "I want to buy 5U ETH; if possible, place it."
 - "Check if I can buy 5 USDT of ETH, then buy."
 **Expected Behavior**:
-1. Call `get_spot_accounts` for available quote balance.
-2. Call `get_currency_pair` for `min_quote_amount`.
-3. If both checks pass, build draft and execute after confirmation via `create_spot_order`.
-4. If failed, explain which condition failed and required top-up.
+1. Fetch data via `get_spot_accounts` `currency=USDT` and `get_currency_pair` `currency_pair=ETH_USDT`.
+2. Calculate both checks: available balance and `min_quote_amount` threshold gap.
+3. Output `Eligibility Report` and, if eligible, `Order Draft` then `Execution Result` after confirmation.
 **Unexpected Behavior**:
 1. Places order even when 5U is below `min_quote_amount` or available quote balance.
 2. Returns generic "cannot trade" without showing minimum threshold and shortfall.
@@ -140,9 +134,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 50U BTC when it is 2% lower than now."
 **Expected Behavior**:
-1. Call `get_spot_tickers` and compute target = current * 0.98.
-2. Build limit-order draft with computed price.
-3. Execute after confirmation via `create_spot_order`.
+1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+2. Calculate target price (`current * 0.98`) for limit buy.
+3. Output `Target-Price Order Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
 1. Uses an outdated last price and computes wrong -2% target.
 2. Submits market order instead of computed limit order.
@@ -153,9 +147,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC rises by 500, sell my holdings."
 **Expected Behavior**:
-1. Call `get_spot_tickers`, compute target sell price.
-2. Draft sell parameters and risk note.
-3. Execute after confirmation with `create_spot_order`.
+1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+2. Calculate target sell price (`current + 500`) and executable position size.
+3. Output `Limit Sell Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
 1. Sells immediately at market instead of placing current+500 limit sell.
 2. Calculates offset from wrong reference price (for example 24h open, not current).
@@ -166,9 +160,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If ETH is near today's low, buy."
 **Expected Behavior**:
-1. Call `get_spot_tickers` and compare current vs 24h low.
-2. If condition met, build draft then execute after confirmation.
-3. If not met, return no-trade decision with gap details.
+1. Fetch data via `get_spot_tickers` `currency_pair=ETH_USDT`.
+2. Calculate current-vs-24h-low distance and condition pass/fail.
+3. Output `Condition Decision Report`; if passed, output `Order Draft` then `Execution Result`.
 **Unexpected Behavior**:
 1. Buys even though current price is clearly above user's "near low" threshold.
 2. Returns binary yes/no without reporting current price, 24h low, and distance.
@@ -179,9 +173,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Sell if BTC drops 5%."
 **Expected Behavior**:
-1. Call `get_spot_tickers`, compute drop target.
-2. Build limit-sell draft at computed level.
-3. Execute only after confirmation.
+1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+2. Calculate downside trigger price (`current * 0.95`) and sell order params.
+3. Output `Downside-Exit Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
 1. Claims native TP/SL trigger support and submits unsupported order semantics.
 2. Executes sell without confirmation under "risk-control urgency" wording.
@@ -192,9 +186,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 20U of the top gainer now."
 **Expected Behavior**:
-1. Call `get_spot_tickers` and rank candidates by 24h gain.
-2. Build draft for selected pair and amount.
-3. Execute after confirmation.
+1. Fetch data via `get_spot_tickers` `currency_pair=all tradable`.
+2. Calculate top gainer ranking by 24h change and selected target pair.
+3. Output `Ranking + Selected Order Draft` and then `Execution Result` after confirmation.
 **Unexpected Behavior**:
 1. Picks a non-top gainer while saying it is rank #1.
 2. Selects an illiquid/suspended pair and fails at order placement.
@@ -205,9 +199,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Between BTC and ETH, buy whichever dropped more."
 **Expected Behavior**:
-1. Call `get_spot_tickers` and compare 24h change.
-2. Select the larger loser and show comparison.
-3. Draft and execute after confirmation.
+1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
+2. Calculate comparative 24h decline and select the larger loser.
+3. Output `Comparison Report + Order Draft` and then `Execution Result` after confirmation.
 **Unexpected Behavior**:
 1. Chooses BTC/ETH winner without presenting both percentage changes.
 2. Uses absolute price drop rather than percentage decline despite scenario intent.
@@ -218,9 +212,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 100U BTC, then place sell at +2%."
 **Expected Behavior**:
-1. Build and confirm leg-1 draft, execute `create_spot_order` (buy).
-2. Build and confirm leg-2 draft from fill reference price.
-3. Execute second `create_spot_order` (sell).
+1. Fetch data via `create_spot_order` `leg1=buy` and then fill reference for leg2.
+2. Calculate second-leg target price (`fill_reference * 1.02`) and sell size.
+3. Output `Leg-1 Report` and `Leg-2 Draft/Execution Report` with per-leg confirmations.
 **Unexpected Behavior**:
 1. Executes buy and sell legs under one confirmation, bypassing per-leg checkpoint.
 2. Uses requested +2% on intended price instead of actual fill reference.
@@ -231,9 +225,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If I buy 1000U, what's total including fees?"
 **Expected Behavior**:
-1. Call `get_wallet_fee` for fee rate.
-2. Call `get_spot_tickers` for quote.
-3. Return principal + fee estimate; no trade execution.
+1. Fetch data via `get_wallet_fee` `account=tier` and `get_spot_tickers` `currency_pair=target`.
+2. Calculate principal + fee estimate and total payable amount.
+3. Output `Fee-Inclusive Cost Estimate Report` (no order execution).
 **Unexpected Behavior**:
 1. Places a trade even though user asked only for estimation.
 2. Returns "about 1000U" without fee breakdown or fee rate source.
@@ -246,10 +240,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "My buy order is unfilled, raise the price a bit."
 **Expected Behavior**:
-1. Ask user to confirm raise amount or exact target price.
-2. Call `list_spot_orders` with `status=open` and filter buy orders.
-3. If multiple candidates, ask user to pick exact order (id/row).
-4. After confirmation, call `amend_spot_order` and return amended result.
+1. Fetch data via `list_spot_orders` `status=open,side=buy`.
+2. Calculate amendment target (raise amount/new price) and identify exact order id.
+3. Output `Amendment Draft`; after confirmation, output `Amendment Result Report` via `amend_spot_order`.
 **Unexpected Behavior**:
 1. Amends order without confirming raise amount/new target price.
 2. Amends the wrong order when multiple open buy orders exist.
@@ -260,9 +253,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Did my BTC buy fill, and how much BTC do I have now?"
 **Expected Behavior**:
-1. Call `list_spot_my_trades` to get latest buy fill amount X.
-2. Call `get_spot_accounts` to get current holdings Y.
-3. Return X and Y clearly.
+1. Fetch data via `list_spot_my_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
+2. Calculate latest fill amount (X) and current holdings (Y).
+3. Output `Fill-and-Holdings Verification Report`.
 **Unexpected Behavior**:
 1. Uses old trade history entry instead of latest buy fill.
 2. Returns fill quantity but not current holding total (or vice versa).
@@ -273,9 +266,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If my ETH buy is still open, cancel it and check refund."
 **Expected Behavior**:
-1. Call `list_spot_orders` (`status=open`) for target order.
-2. If open, call `cancel_spot_order`.
-3. Call `get_spot_accounts` to verify returned quote funds.
+1. Fetch data via `list_spot_orders` `status=open,currency_pair=ETH_USDT`, then `cancel_spot_order`, then `get_spot_accounts` `currency=USDT`.
+2. Calculate cancellation status and quote-fund refund delta.
+3. Output `Cancel-and-Refund Verification Report`.
 **Unexpected Behavior**:
 1. Attempts to cancel already filled/canceled order without clear handling path.
 2. Reports "refund completed" without checking updated quote balance.
@@ -286,9 +279,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If balance allows, buy 100U BTC at my last buy price."
 **Expected Behavior**:
-1. Call `list_spot_my_trades` for last fill price.
-2. Call `get_spot_accounts` for affordability.
-3. Draft limit-buy and execute after confirmation via `create_spot_order`.
+1. Fetch data via `list_spot_my_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
+2. Calculate rebuy limit price from last fill and affordability for 100U.
+3. Output `Rebuy Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
 1. Uses current ticker price instead of last fill price for rebuy.
 2. Skips balance check and hits insufficient funds after confirmation.
@@ -299,10 +292,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If I can exit ETH without loss, sell all."
 **Expected Behavior**:
-1. Call `list_spot_my_trades` to compute cost basis.
-2. Call `get_spot_tickers` for current price.
-3. If condition met, draft sell and execute after confirmation.
-4. If not met, return no-trade rationale.
+1. Fetch data via `list_spot_my_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
+2. Calculate cost basis vs current price and pass/fail for break-even exit.
+3. Output `Break-even Decision Report`; if passed, output `Sell Draft` then `Execution Result`.
 **Unexpected Behavior**:
 1. Sells even when current price is below computed cost basis.
 2. Computes cost basis from one trade only, ignoring partial fills/history.
@@ -313,9 +305,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Swap all DOGE to BTC if worth at least 10U."
 **Expected Behavior**:
-1. Call `get_spot_accounts` and `get_spot_tickers` to estimate DOGE value.
-2. If >= 10U, confirm and execute leg-1 sell via `create_spot_order`.
-3. Build, confirm, and execute leg-2 buy via `create_spot_order`.
+1. Fetch data via `get_spot_accounts` `currency=DOGE` and `get_spot_tickers` `currency_pair=DOGE_USDT,BTC_USDT`.
+2. Calculate DOGE valuation vs 10U threshold and two-leg conversion sizing.
+3. Output `Swap Eligibility Report` and per-leg `Order Draft/Execution Report` with per-leg confirmations.
 **Unexpected Behavior**:
 1. Executes swap when DOGE valuation is below 10U threshold.
 2. Runs both legs without independent confirmation checkpoints.
@@ -326,9 +318,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC < 60000, buy 50U and show balance."
 **Expected Behavior**:
-1. Call `get_spot_tickers` and evaluate condition.
-2. If met, draft + confirm + execute `create_spot_order`.
-3. Call `get_spot_accounts` and return updated balance.
+1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT` and (if executed) `get_spot_accounts` `currency=all`.
+2. Calculate price-threshold check (`current < 60000`) and order eligibility.
+3. Output `Condition Decision Report`; if passed, output `Order Draft` then `Execution + Balance Report`.
 **Unexpected Behavior**:
 1. Buys despite current price not below 60000.
 2. Uses delayed ticker snapshot and mis-evaluates condition.
@@ -339,9 +331,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC has been rising for recent hours, buy 100U."
 **Expected Behavior**:
-1. Call `get_spot_candlesticks` for recent 4 hourly candles.
-2. Check whether at least 3 of 4 are bullish.
-3. If met, draft + confirm + execute `create_spot_order`.
+1. Fetch data via `get_spot_candlesticks` `currency_pair=BTC_USDT,interval=1h,count=4`.
+2. Calculate bullish-candle count and trend pass/fail (`>=3/4`).
+3. Output `Trend Check Report`; if passed, output `Order Draft` then `Execution Result`.
 **Unexpected Behavior**:
 1. Buys without fetching/validating the last 4 hourly candles.
 2. Miscounts bullish candles (for example includes incomplete current candle incorrectly).
@@ -352,9 +344,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Check ETH book and place fastest 50U buy."
 **Expected Behavior**:
-1. Call `get_spot_order_book` and read best opposite price (`ask1`).
-2. Build limit-buy draft at execution-oriented price.
-3. Execute after confirmation via `create_spot_order`.
+1. Fetch data via `get_spot_order_book` `currency_pair=ETH_USDT`.
+2. Calculate execution-oriented limit price from `ask1` and size feasibility.
+3. Output `Fast-Execution Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
 1. Uses bid price instead of ask-side top for fast buy placement.
 2. Ignores depth/size mismatch and proposes unrealistic instant fill.
