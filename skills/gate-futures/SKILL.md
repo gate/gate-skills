@@ -1,5 +1,5 @@
 ---
-name: gate-exchange-FuturesTrading
+name: gate-exchange-futurestrade
 version: "2026.3.5-1"
 updated: "2026-03-05"
 description: "The USDT perpetual futures trading function of Gate Exchange: open position, close position, cancel order, amend order. Trigger phrases: open position, close position, cancel order, amend order, reverse, close all."
