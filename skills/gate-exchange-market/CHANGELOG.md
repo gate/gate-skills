@@ -1,18 +1,18 @@
 # Changelog
 
-All notable changes to the Gate-Exchange-Market skill are documented here.  
-本文档记录 Gate-Exchange-Market 技能的所有变更。
+All notable changes to the gate-exchange-MarketAnalysis skill are documented here.  
+本文档记录 gate-exchange-MarketAnalysis 技能的所有变更。
 
 Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.  
 版本格式：`YYYY.M.DD-N`。
 
 ---
 
-## [2026.3.5-7] - 2026-03-05
+## [2026.3.5-8] - 2026-03-05
 
 ### Changed
-- **Bilingual documentation (中英双语文档):** SKILL.md and README.md support both English and 中文 in a single document. Section headers use "EN / 中文" or "Title / 中文标题"; key paragraphs and tables include both languages. Reports default to 中文 with English technical terms.
-- **description:** Trigger phrases now include 中文 examples (e.g. 流动性, 深度, 滑点, 动能, 爆仓, 套利, 基差, 操控, 订单簿).
+- **Skill name 技能命名：** Renamed to **gate-exchange-MarketAnalysis** per convention gate-{Category}-{Title} (Category: exchange; Title: MarketAnalysis, PascalCase). 按规范 gate-{Category}-{Title} 更名为 gate-exchange-MarketAnalysis。
+- **description** already uses “The market analysis function of Gate Exchange” for brand and domain. 简介已体现品牌与领域（Gate Exchange）。
 
 ---
 

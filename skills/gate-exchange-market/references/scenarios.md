@@ -1,4 +1,4 @@
-# Gate-Exchange-Market — Scenarios & MCP Call Specs
+# gate-exchange-MarketAnalysis — Scenarios & MCP Call Specs
 
 **Language / 语言：** This document is the single source for MCP call order and report templates. Report output may be in 中文 with English technical terms; scenario descriptions below are in English, with 中文 used where helpful. 本文档为 MCP 调用顺序与报告模板的唯一来源；报告输出可为中文、术语保留英文；下文场景以英文为主，必要时辅以中文。
 
