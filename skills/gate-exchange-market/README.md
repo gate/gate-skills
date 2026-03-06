@@ -1,8 +1,8 @@
-# Gate Market Tape Intelligence
+# Gate-Exchange-Market
 
 ## Overview
 
-An AI Agent skill for [Gate.io](https://www.gate.io) market tape analysis: liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md` so that implementations stay consistent.
+An AI Agent skill that provides market tape analysis on [Gate.io](https://www.gate.io), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md` so that implementations stay consistent.
 
 ### Core Capabilities
 
@@ -16,18 +16,18 @@ An AI Agent skill for [Gate.io](https://www.gate.io) market tape analysis: liqui
 | **Manipulation risk** | Depth / 24h volume ratio, large same-side trades | "Is this coin easy to manipulate?" |
 | **Order book explainer** | Bids/asks example, spread, depth vs volatility | "Explain the order book" |
 
-> 📊 **Seven scenarios**: Each has a fixed MCP call order and judgment logic; the skill routes user intent to the right case and follows `references/scenarios.md`.
+> 📊 **Seven scenarios**: Ask about liquidity, momentum, liquidation, arbitrage, basis, manipulation risk, or order book; the skill routes to the right case and follows `references/scenarios.md`.
 
 ---
 
 ## Architecture
 
 ```
-Natural language input
+Natural Language Input
     ↓
-Intent routing (Case 1–7, spot vs futures)
+Intent Routing (Case 1–7, spot vs futures)
     ↓
-Gate MCP (call order per scenarios.md)
+Gate MCP Tools
     ├── list_order_book / list_futures_order_book
     ├── list_tickers / list_futures_tickers
     ├── list_candlesticks / list_futures_candlesticks
@@ -35,12 +35,12 @@ Gate MCP (call order per scenarios.md)
     ├── list_futures_liq_orders (when available)
     └── list_futures_premium_index
     ↓
-Judgment logic (thresholds, flags)
+Analysis & Judgment Logic
     ↓
-Structured report (per case template) → natural language response
+Structured Report → Agent interprets → Natural language response
 ```
 
-**Reference:** `references/scenarios.md` — MCP call order, parameters, required fields, and report templates per case.
+**Sub-Modules:** `references/scenarios.md` — MCP call order, parameters, required fields, and report templates per case.
 
 ---
 
@@ -91,7 +91,7 @@ Structured report (per case template) → natural language response
 1. Gate MCP configured and connected (use the `gate-mcp-installer` skill if needed).
 2. No extra dependencies.
 
-### Example prompts
+### Example Prompts
 
 ```
 # Liquidity
@@ -121,50 +121,28 @@ See `references/scenarios.md` for full MCP call order and report templates.
 
 ---
 
-## MCP call order (quick reference)
-
-| Case | Scenario | MCP order |
-|------|----------|-----------|
-| 1 | Liquidity | list_order_book → list_candlesticks → list_tickers (futures APIs if user says perpetual/contract) |
-| 2 | Momentum | list_trades → list_tickers → list_candlesticks → list_order_book → list_futures_funding_rate |
-| 3 | Liquidation | list_futures_liq_orders → list_futures_candlesticks → list_futures_tickers |
-| 4 | Arbitrage | list_futures_tickers → list_futures_funding_rate → list_tickers → list_order_book |
-| 5 | Basis | list_tickers(spot) → list_futures_tickers → list_futures_premium_index |
-| 6 | Manipulation | Spot: list_order_book → list_tickers → list_trades. When user says perpetual/contract: list_futures_order_book → list_futures_tickers → list_futures_trades |
-| 7 | Order book | list_order_book(limit=10) → list_tickers |
-
-Details (parameters, required fields, output format): **`references/scenarios.md`**.
-
----
-
-## Key features
-
-- **Intent routing**: Map liquidity, momentum, liquidation, arbitrage, basis, manipulation, order book to Cases 1–7.
-- **Structured MCP use**: Call order and output format defined in scenarios; supports both spot and futures.
-- **Quantified rules**: Slippage, depth ratio, buy share, funding rate, and thresholds documented.
-- **Risk labels**: High slippage, thin depth, squeeze, manipulation risk called out; analysis is not investment advice.
-
----
-
-## File structure
+## File Structure
 
 ```
-gate-market-tape/
-├── README.md                 # This file
-├── SKILL.md                  # Routing, execution, domain knowledge
-├── CHANGELOG.md
+Gate-Exchange-Market/
+├── README.md                          # This file
+├── SKILL.md                           # Skill routing and instructions
+├── CHANGELOG.md                       # Version history
 └── references/
-    ├── scenarios.md          # MCP call order, judgment logic, report templates per case
-    └── case-test-report.md   # Optional: simulation test summary
+    ├── scenarios.md                   # MCP call order, judgment logic, report templates per case
+    └── case-test-report.md            # Optional: simulation test summary
 ```
 
 ---
 
 ## Security
 
-- Read-only market data via Gate MCP; no trading.
-- No credential handling in the skill; MCP must be configured separately.
-- No file system writes, telemetry, or analytics.
+- No external scripts or executable code
+- Uses Gate MCP tools only — no direct API calls
+- No credential handling or storage
+- Read-only market data analysis, no trading operations
+- No file system writes
+- No data collection, telemetry, or analytics
 
 ## License
 
