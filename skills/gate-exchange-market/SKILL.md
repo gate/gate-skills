@@ -1,5 +1,5 @@
 ---
-name: gate-market
+name: gate-exchange-market
 version: "2026.3.5-1"
 updated: "2026-03-05"
 description: Analyze cryptocurrency market data on Gate.io, including single-coin deep analysis and multi-coin screening/ranking. Use this skill whenever the user asks about a coin's price, trend, liquidity, market analysis, or wants to filter/rank coins by conditions. Trigger phrases include "analyze XXX", "how is XXX", "deep analysis of XXX", "help me find", "which coins are up", "screen coins", "volume ranking", "is XXX worth buying", "check XXX", "find the top gainers", "coins with highest volume", "analyze", "screen", "filter coins", "top coins", or any request involving market data inquiry, coin evaluation, coin screening, or multi-coin comparison.

@@ -116,7 +116,7 @@ See `references/scenarios.md` for more detailed scenario examples.
 ## File Structure
 
 ```
-gate-market/
+gate-exchange-market/
 ├── README.md                          # This file
 ├── SKILL.md                           # Skill routing and instructions
 ├── CHANGELOG.md                       # Version history

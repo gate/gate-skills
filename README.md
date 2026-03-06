@@ -12,15 +12,15 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-market](#-gate-market) | Single-coin deep analysis & multi-coin screening | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-market](#-gate-exchange-market) | Single-coin deep analysis & multi-coin screening | `2026.3.5-1` | ✅ Active |
 | [gate-trading](#-gate-trading) | Derivatives monitoring: basis, funding rate, liquidation | `2026.3.5-1` | ✅ Active |
 | [gate-mcp-installer](#-gate-mcp-installer) | One-click Gate MCP setup & configuration | `2026.3.4-1` | ✅ Active |
 
 ---
 
-## 📊 gate-market
+## 📊 gate-exchange-market
 
-> **Path**: `skills/gate-market/`
+> **Path**: `skills/gate-exchange-market/`
 
 Analyze cryptocurrency market data on Gate.io, covering two core modes:
 
@@ -103,7 +103,7 @@ bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
 gate-github-skills/
 ├── README.md
 └── skills/
-    ├── gate-market/             # Market intelligence skill
+    ├── gate-exchange-market/    # Market intelligence skill
     │   ├── SKILL.md             # Skill definition & routing rules
     │   ├── CHANGELOG.md
     │   ├── README.md
