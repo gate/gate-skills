@@ -41,6 +41,9 @@ This skill is the single entry for Gate.io USDT perpetual futures. It supports *
 - **Contract**: call `get_futures_contract` to ensure contract exists and is tradeable.
 - **Account**: check balance and conflicting positions (e.g. when switching margin mode).
 - **Risk**: limit orders must be within `order_price_deviate`; warn on large size.
+- **Margin mode vs position mode** (when target margin mode differs from current): call **`get_futures_accounts(settle)`** to get **position mode**. From response **`position_mode`**: `single` = single position mode, `dual` = dual (hedge) position mode. Margin mode from position: `get_futures_position` → `pos_margin_mode` (cross/isolated).
+  - **Single position** (`position_mode === "single"`): do **not** interrupt. Prompt user: *"You already have a {currency} position; switching margin mode will apply to this position too. Continue?"* (e.g. currency from contract: BTC_USDT → BTC). Wait for user confirmation, then continue.
+  - **Dual position** (`position_mode === "dual"`): **interrupt** flow. Tell user: *"Please close the position first, then open a new one."*
 
 ### 3. Module logic
 
@@ -51,11 +54,12 @@ This skill is the single entry for Gate.io USDT perpetual futures. It supports *
    - **Base (e.g. BTC, ETH)**: contracts = base_amount ÷ quanto_multiplier
    - Round/truncate to `order_size_min` and size precision.
 2. **Mode**: default cross; if user wants isolated, check leverage.
-3. **Mode switch**: if current mode differs and no position, call `update_futures_position_cross_mode`.
-4. **Leverage**: in isolated mode call `update_futures_position_leverage`.
-5. **Pre-order confirmation**: call `get_position(settle, contract)` for **contract + side** to get current leverage (from position or default), and show it. Show **final order summary** (contract, side, size, price or market, mode, **leverage**, estimated margin/liq price). Ask user to confirm (e.g. "Reply 'confirm' to place the order."). **Only after user confirms**, place order.
-6. **Place order**: call `create_futures_order` (market: `tif=ioc`, `price=0`).
-7. **Verify**: call `get_futures_position` to confirm position.
+3. **Mode switch**: if target margin mode differs from current (current from position: `pos_margin_mode`), then **before** calling `update_futures_dual_comp_position_cross_mode`: get **position mode** via `get_futures_accounts(settle)` → **`position_mode`** (single/dual); if `position_mode === "single"`, show prompt *"You already have a {currency} position; switching margin mode will apply to this position too. Continue?"* and continue only after user confirms; if `position_mode === "dual"`, **do not** switch—interrupt and tell user *"Please close the position first, then open a new one."*
+4. **Mode switch (no conflict)**: if current mode differs and no position, or single position and user confirmed, call `update_futures_dual_comp_position_cross_mode(settle, contract, mode)` with **`mode`**: `"CROSS"` = cross margin, `"ISOLATED"` = isolated margin (required: `settle`, `contract`, `mode`; do not use a `cross` boolean).
+5. **Leverage**: if user specified leverage and it **differs from current** (from `get_position`), call MCP **`update_futures_position_leverage`** (params: `settle`, `contract`, `leverage`) **first**, then proceed; in isolated mode always set via `update_futures_position_leverage` when switching.
+6. **Pre-order confirmation**: call `get_position(settle, contract)` for **contract + side** to get current leverage (from position or default), and show it. Show **final order summary** (contract, side, size, price or market, mode, **leverage**, estimated margin/liq price). Ask user to confirm (e.g. "Reply 'confirm' to place the order."). **Only after user confirms**, place order.
+7. **Place order**: call `create_futures_order` (market: `tif=ioc`, `price=0`).
+8. **Verify**: call `get_futures_position` to confirm position.
 
 #### Module B: Close position
 
@@ -83,13 +87,8 @@ After each operation, output a short standardized result.
 
 ### Confirmation
 
-- **Open**: show final order summary (contract, side, size, price/market, mode, leverage, estimated liq/margin), then ask for confirmation before `create_futures_order`. Example: *"Reply 'confirm' to place the order."*
+- **Open**: show final order summary (contract, side, size, price/market, mode, leverage, estimated liq/margin), then ask for confirmation before `create_futures_order`. Do **not** add text about mark price vs limit price, order_price_deviate, or suggesting to adjust price. Example: *"Reply 'confirm' to place the order."*
 - **Close all, reverse, batch cancel**: show scope and ask for confirmation. Example: *"Close all positions? Reply to confirm."* / *"Cancel all orders for this contract. Continue?"*
-
-### Warnings
-
-- **Open**: show estimated liquidation price and margin.
-- **Market order**: warn about slippage.
 
 ### Errors
 

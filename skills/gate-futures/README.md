@@ -8,10 +8,10 @@ AI Agent skill for [Gate.io](https://www.gate.io) USDT perpetual futures. Suppor
 
 | Module | Description | Example |
 |--------|-------------|---------|
-| **开仓 (Open)** | Limit/market open long or short, cross/isolated mode | "BTC_USDT 开多 100U，限价 65000" |
-| **平仓 (Close)** | Full close, partial close, reverse position | "全平 BTC", "反手做空" |
-| **撤单 (Cancel)** | Cancel single or batch orders | "撤销所有挂单", "撤掉那个买单" |
-| **改单 (Amend)** | Change order price or size | "把价格改成 60000" |
+| **Open** | Limit/market open long or short, cross/isolated mode | "BTC_USDT long 100U, limit 65000" |
+| **Close** | Full close, partial close, reverse position | "Close all BTC", "Reverse to short" |
+| **Cancel** | Cancel single or batch orders | "Cancel all orders", "Cancel that buy order" |
+| **Amend** | Change order price or size | "Change price to 60000" |
 
 ---
 
@@ -20,11 +20,11 @@ AI Agent skill for [Gate.io](https://www.gate.io) USDT perpetual futures. Suppor
 Intent is routed by keywords to the corresponding reference:
 
 | Intent | Keywords | Reference |
-|--------|-----------|-----------|
-| Open position | 开多, 开空, 下单, buy, sell, open | `references/open-position.md` |
-| Close position | 平仓, 全平, 反手, close, reverse | `references/close-position.md` |
-| Cancel order | 撤单, 取消, cancel, revoke | `references/cancel-order.md` |
-| Amend order | 改单, 修改, amend, modify | `references/amend-order.md` |
+|--------|----------|-----------|
+| Open position | long, short, buy, sell, open | `references/open-position.md` |
+| Close position | close, close all, reverse | `references/close-position.md` |
+| Cancel order | cancel, revoke | `references/cancel-order.md` |
+| Amend order | amend, modify | `references/amend-order.md` |
 
 ---
 
@@ -37,19 +37,19 @@ Intent is routed by keywords to the corresponding reference:
 ### Example Prompts
 
 ```
-# 开仓
-"帮我在 BTC_USDT 合约开多 1 张，限价 65000"
-"BTC_USDT 开多 100U，限价 65000"
+# Open
+"Open long 1 contract BTC_USDT at 65000"
+"BTC_USDT long 100U, limit 65000"
 
-# 平仓
-"全平 BTC_USDT"
-"平掉一半"
+# Close
+"Close all BTC_USDT"
+"Close half"
 
-# 撤单
-"撤销 BTC_USDT 所有挂单"
+# Cancel
+"Cancel all BTC_USDT orders"
 
-# 改单
-"把刚才的买单价格改成 64000"
+# Amend
+"Change that buy order price to 64000"
 ```
 
 ---

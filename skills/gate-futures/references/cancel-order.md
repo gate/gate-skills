@@ -1,262 +1,260 @@
 # Gate.io Futures Cancel Order — Scenarios & Prompt Examples
 
-Gate.io 合约撤单场景示例和预期行为。
+Gate.io futures cancel-order scenarios and expected behavior.
 
-## Scenario 1: 查询挂单并选择撤销（推荐流程）
+## Scenario 1: List orders then choose to cancel (recommended)
 
-**Context**: 用户想撤单但不知道订单 ID，需要先查看有哪些挂单。
+**Context**: User wants to cancel but does not know order ID; need to list open orders first.
 
 **Prompt Examples**:
-- "帮我撤单"
-- "我有哪些挂单"
-- "撤销订单"（不带 ID）
-- "查看我的挂单"
+- "Cancel my order"
+- "What open orders do I have"
+- "Cancel order" (no ID)
+- "Show my orders"
 
 **Expected Behavior**:
-1. Detect no order_id provided → query mode
-2. Call `list_futures_orders(settle="usdt", status="open")`
-3. Display order list to user with numbered options
-4. Wait for user selection
-5. Execute cancellation based on selection
+1. Detect no order_id → query mode.
+2. Call `list_futures_orders(settle="usdt", status="open")`.
+3. Show order list with numbered options.
+4. Wait for user selection.
+5. Cancel based on selection.
 
-**Response Template (查询阶段)**:
+**Response Template** (list phase):
 ```
-您当前有 3 个未完成订单：
+You have 3 open orders:
 
-| # | 合约 | 方向 | 数量 | 价格 | 未成交 | 下单时间 |
-|---|------|------|------|------|--------|----------|
-| 1 | BTC_USDT | 买入 | 1 | 50000 | 1 | 10:30:25 |
-| 2 | BTC_USDT | 卖出 | 2 | 80000 | 2 | 10:35:12 |
-| 3 | ETH_USDT | 买入 | 10 | 2800 | 10 | 11:02:45 |
+| # | Contract   | Side | Size | Price | Left  | Time     |
+|---|------------|------|------|-------|-------|----------|
+| 1 | BTC_USDT   | Buy  | 1    | 50000 | 1     | 10:30:25 |
+| 2 | BTC_USDT   | Sell | 2    | 80000 | 2     | 10:35:12 |
+| 3 | ETH_USDT   | Buy  | 10   | 2800  | 10    | 11:02:45 |
 
-请告诉我您要撤销哪个订单？
-- 输入序号（如 "1" 或 "1,2"）
-- 输入 "全部" 撤销所有订单
+Which order(s) do you want to cancel?
+- Enter number(s), e.g. "1" or "1,2"
+- Enter "all" to cancel all
 ```
 
 ---
 
-## Scenario 2: 根据序号撤销订单
+## Scenario 2: Cancel by list number
 
-**Context**: 用户看到订单列表后，选择序号撤销。
+**Context**: User selects by number from the list.
 
 **Prompt Examples**:
-- "撤销第 1 个"
+- "Cancel #1"
 - "1"
-- "撤销 1 和 3"
+- "Cancel 1 and 3"
 - "1,2"
 
 **Expected Behavior**:
-1. Parse user selection: sequence number(s)
-2. Map to order_id from the displayed list
-3. Call `cancel_futures_order` for each selected order
-4. Output cancellation results
+1. Parse selection (one or more numbers).
+2. Map to order_id from the list.
+3. Call `cancel_futures_order` for each.
+4. Output result.
 
 **Response Template**:
 ```
-撤单成功！
+Order cancelled.
 
-已撤销订单 #1:
-- 订单ID: 94294117235059656
-- 合约: BTC_USDT
-- 方向: 买入
-- 价格: 50000
-- 结果: ✅ 已撤销
+Cancelled #1:
+- Order ID: 94294117235059656
+- Contract: BTC_USDT
+- Side: Buy
+- Price: 50000
+- Result: Cancelled
 ```
 
 ---
 
-## Scenario 3: 撤销所有订单（批量撤单）
+## Scenario 3: Cancel all orders (batch)
 
-**Context**: 用户想一次性撤销所有挂单。
+**Context**: User wants to cancel all open orders.
 
 **Prompt Examples**:
-- "撤销所有订单"
-- "全部撤单"
-- "取消全部挂单"
-- "清空所有订单"
-- "全部"（在订单列表后）
+- "Cancel all orders"
+- "Cancel all"
+- "Clear all orders"
+- "All" (after seeing the list)
 
 **Expected Behavior**:
-1. Confirm with user: "确定要撤销所有订单吗？"
-2. 先 `list_futures_orders(settle="usdt", status="open")` 得到有挂单的合约；对每个有挂单的合约调用 `cancel_all_futures_orders(settle="usdt", contract=合约)`（**必填入参**: `settle`, `contract`）。
-3. Output batch cancellation results
+1. Confirm: "Confirm cancel all orders?"
+2. Call `list_futures_orders(settle="usdt", status="open")` to get contracts with orders; for each, call `cancel_all_futures_orders(settle="usdt", contract=...)` (required: `settle`, `contract`).
+3. Output batch result.
 
 **Response Template**:
 ```
-确定要撤销所有订单吗？当前共 3 个挂单。
+Confirm cancel all orders? You have 3 open orders.
 
-（用户确认后）
+(After user confirms)
 
-批量撤单完成！
+Batch cancel done.
 
-| 订单ID | 合约 | 方向 | 价格 | 结果 |
-|--------|------|------|------|------|
-| 94294117235059656 | BTC_USDT | 买入 | 50000 | ✅ 已撤销 |
-| 94294117235059657 | BTC_USDT | 卖出 | 80000 | ✅ 已撤销 |
-| 94294117235059658 | ETH_USDT | 买入 | 2800 | ✅ 已撤销 |
+| Order ID         | Contract   | Side | Price | Result    |
+|------------------|------------|------|-------|-----------|
+| 94294117235059656| BTC_USDT   | Buy  | 50000 | Cancelled |
+| 94294117235059657| BTC_USDT   | Sell | 80000 | Cancelled |
+| 94294117235059658| ETH_USDT   | Buy  | 2800  | Cancelled |
 
-✅ 共撤销 3 个订单
+3 orders cancelled.
 ```
 
 ---
 
-## Scenario 4: 撤销指定合约的所有订单
+## Scenario 4: Cancel all for one contract
 
-**Context**: 用户只想撤销某个合约的挂单。
+**Context**: User wants to cancel only orders for a specific contract.
 
 **Prompt Examples**:
-- "撤销 BTC_USDT 的所有订单"
-- "取消 ETH 合约的挂单"
-- "撤销所有 BTC 订单"
+- "Cancel all BTC_USDT orders"
+- "Cancel ETH contract orders"
+- "Cancel all BTC orders"
 
 **Expected Behavior**:
-1. Parse contract: `BTC_USDT`
-2. Call `cancel_all_futures_orders(settle="usdt", contract="BTC_USDT")`（**必填入参**: `settle`, `contract`；可选: `side`, `exclude_reduce_only`, `text`）
-3. Output results for that contract only
+1. Parse contract: e.g. `BTC_USDT`.
+2. Call `cancel_all_futures_orders(settle="usdt", contract="BTC_USDT")` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`).
+3. Output result for that contract.
 
 **Response Template**:
 ```
-已撤销 BTC_USDT 的所有订单：
+All BTC_USDT orders cancelled:
 
-| 订单ID | 方向 | 价格 | 结果 |
-|--------|------|------|------|
-| 94294117235059656 | 买入 | 50000 | ✅ 已撤销 |
-| 94294117235059657 | 卖出 | 80000 | ✅ 已撤销 |
+| Order ID         | Side | Price | Result    |
+|------------------|------|-------|-----------|
+| 94294117235059656| Buy  | 50000 | Cancelled |
+| 94294117235059657| Sell | 80000 | Cancelled |
 
-✅ 共撤销 2 个订单
+2 orders cancelled.
 ```
 
 ---
 
-## Scenario 5: 通过订单 ID 直接撤单
+## Scenario 5: Cancel by order ID
 
-**Context**: 用户知道订单 ID，直接撤销。
+**Context**: User provides order ID directly.
 
 **Prompt Examples**:
-- "撤销订单 94294117235059656"
-- "取消订单 94294117235059656"
+- "Cancel order 94294117235059656"
 - "cancel order 94294117235059656"
 
 **Expected Behavior**:
-1. Parse order_id: `94294117235059656`
-2. Call `cancel_futures_order(settle="usdt", order_id="94294117235059656")`
-3. Verify `finish_as == "cancelled"`
-4. Output cancellation result
+1. Parse order_id: `94294117235059656`.
+2. Call `cancel_futures_order(settle="usdt", order_id="94294117235059656")`.
+3. Verify `finish_as == "cancelled"`.
+4. Output result.
 
 **Response Template**:
 ```
-撤单成功！
+Order cancelled.
 
-订单ID: 94294117235059656
-合约: BTC_USDT
-方向: 买入
-价格: 50000
-状态: finished
-结果: ✅ 已撤销
+Order ID: 94294117235059656
+Contract: BTC_USDT
+Side: Buy
+Price: 50000
+Status: finished
+Result: Cancelled
 ```
 
 ---
 
-## Scenario 6: 通过自定义 text 撤单
+## Scenario 6: Cancel by custom text
 
-**Context**: 用户下单时使用了自定义 text 标识，现在想通过该标识撤单。
+**Context**: User identified the order with custom text and wants to cancel by that text.
 
 **Prompt Examples**:
-- "撤销订单 t-my-order-001"
-- "取消 t-my-order-001"
+- "Cancel order t-my-order-001"
+- "Cancel t-my-order-001"
 
 **Expected Behavior**:
-1. Detect order_id starts with `t-`, use as text identifier
-2. Call `cancel_futures_order(settle="usdt", order_id="t-my-order-001")`
-3. Output cancellation result
+1. Detect order_id starts with `t-`, treat as text.
+2. Call `cancel_futures_order(settle="usdt", order_id="t-my-order-001")` (if API supports).
+3. Output result.
 
 **Response Template**:
 ```
-撤单成功！
+Order cancelled.
 
-自定义标识: t-my-order-001
-订单ID: 94294117235059656
-合约: BTC_USDT
-结果: ✅ 已撤销
+Custom text: t-my-order-001
+Order ID: 94294117235059656
+Contract: BTC_USDT
+Result: Cancelled
 ```
 
 ---
 
-## Scenario 7: 没有待撤销订单
+## Scenario 7: No open orders
 
-**Context**: 用户想撤单，但当前没有挂单。
+**Context**: User wants to cancel but there are no open orders.
 
 **Prompt Examples**:
-- "帮我撤单"
-- "撤销所有订单"
+- "Cancel my order"
+- "Cancel all orders"
 
 **Expected Behavior**:
-1. Call `list_futures_orders(settle="usdt", status="open")`
-2. Return empty list
-3. Inform user no orders to cancel
+1. Call `list_futures_orders(settle="usdt", status="open")`.
+2. Get empty list.
+3. Inform user.
 
 **Response Template**:
 ```
-当前没有未完成的挂单，无需撤销。
+No open orders to cancel.
 
-如需下单，可以说：
-- "BTC_USDT 开多 1 张，限价 50000"
+To place an order you can say:
+- "BTC_USDT long 1 contract, limit 50000"
 ```
 
 ---
 
-## Scenario 8: 撤销已成交订单（失败）
+## Scenario 8: Cancel already filled order (fail)
 
-**Context**: 用户尝试撤销一个已经成交的订单。
+**Context**: User tries to cancel an order that is already filled.
 
 **Prompt Examples**:
-- "撤销订单 94294117235059656"（该订单已成交）
+- "Cancel order 94294117235059656" (order already filled)
 
 **Expected Behavior**:
-1. Call `cancel_futures_order(settle="usdt", order_id="94294117235059656")`
-2. Receive ORDER_NOT_FOUND error
-3. Output failure message
+1. Call `cancel_futures_order(settle="usdt", order_id="94294117235059656")`.
+2. Receive ORDER_NOT_FOUND (or similar).
+3. Output failure.
 
 **Response Template**:
 ```
-撤单失败
+Cancel failed.
 
-订单ID: 94294117235059656
-原因: 订单不存在或已完成
+Order ID: 94294117235059656
+Reason: Order not found or already finished.
 
-可能的情况：
-1. 订单已全部成交
-2. 订单已被撤销
-3. 订单 ID 错误
+Possible reasons:
+1. Order was fully filled
+2. Order was already cancelled
+3. Wrong order ID
 
-建议查看订单历史确认订单状态。
+Check order history for status.
 ```
 
 ---
 
-## Scenario 9: 只撤销买单或卖单
+## Scenario 9: Cancel only bids or only asks
 
-**Context**: 用户只想撤销特定方向的订单。
+**Context**: User wants to cancel only buy or only sell orders.
 
 **Prompt Examples**:
-- "撤销所有买单"
-- "取消全部卖单"
-- "撤销 BTC 的买单"
+- "Cancel all buy orders"
+- "Cancel all sell orders"
+- "Cancel BTC buy orders"
 
 **Expected Behavior**:
-1. Parse side: `bid` (买) or `ask` (卖)
-2. 按合约撤单时调用 `cancel_all_futures_orders(settle="usdt", contract=合约, side="bid")`（**必填**: `settle`, `contract`；**可选**: `side`, `exclude_reduce_only`, `text`）。若撤销「所有合约的某方向」需先 list 再对每个合约带 side 调用。
-3. Output results
+1. Parse side: `bid` (buy) or `ask` (sell).
+2. For one contract use `cancel_all_futures_orders(settle="usdt", contract=..., side="bid")` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`). For "all contracts one side" list then cancel per contract with side.
+3. Output result.
 
 **Response Template**:
 ```
-已撤销所有买单：
+All buy orders cancelled:
 
-| 订单ID | 合约 | 价格 | 结果 |
-|--------|------|------|------|
-| 94294117235059656 | BTC_USDT | 50000 | ✅ 已撤销 |
-| 94294117235059658 | ETH_USDT | 2800 | ✅ 已撤销 |
+| Order ID         | Contract   | Price | Result    |
+|------------------|------------|-------|-----------|
+| 94294117235059656| BTC_USDT   | 50000 | Cancelled |
+| 94294117235059658| ETH_USDT   | 2800  | Cancelled |
 
-✅ 共撤销 2 个买单
+2 buy orders cancelled.
 ```

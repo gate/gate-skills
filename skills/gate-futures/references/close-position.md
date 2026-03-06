@@ -1,326 +1,325 @@
 # Gate.io Futures Close Position — Scenarios & Prompt Examples
 
-Gate.io 合约平仓场景示例和预期行为。
+Gate.io futures close-position scenarios and expected behavior.
 
-## Scenario 1: 全平仓（一键清仓）
+## Scenario 1: Close all (one-click)
 
-**Context**: 用户想平掉所有仓位，不管具体持有多少。
+**Context**: User wants to close all positions regardless of size.
 
 **Prompt Examples**:
-- "全平"
-- "一键平仓"
-- "平掉所有仓位"
+- "Close all"
+- "One-click close"
+- "Close all positions"
 - "close all positions"
 
 **Expected Behavior**:
-1. Call `list_futures_positions(settle="usdt")` 获取当前全部持仓。
-2. 向用户展示持仓列表，确认话术：「确定要平掉所有仓位吗？」
-3. 用户确认后，对每个有持仓的合约：调用 `create_futures_order(settle="usdt", contract=合约, size=反向数量, reduce_only=true, ...)` 市价平仓（开多仓用负 size、开空仓用正 size，tif="ioc", price="0"）。
-4. 再次查询 `list_futures_positions` 验证已无持仓（或仅剩零头）。
-5. Output close result with realized PnL
+1. Call `list_futures_positions(settle="usdt")` to get all positions.
+2. Show position list and confirm: "Confirm close all positions?"
+3. After confirm, for each contract with position: call `create_futures_order(settle="usdt", contract=..., size=opposite size, reduce_only=true, ...)` market close (negative size to close long, positive to close short; tif="ioc", price="0").
+4. Query `list_futures_positions` again to verify no (or negligible) position left.
+5. Output close result with realized PnL.
 
 **Response Template**:
 ```
-确定要平掉所有仓位吗？当前持有：
-- BTC_USDT 多仓 5 张，未实现盈亏 +$200
+Confirm close all positions? Current positions:
+- BTC_USDT long 5 contracts, unrealised PnL +$200
 
-（用户确认后）
+(After user confirms)
 
-全部平仓完成！
+All positions closed.
 
-| 合约 | 方向 | 数量 | 成交价 | 实现盈亏 |
-|------|------|------|--------|---------|
-| BTC_USDT | 多仓 | 5 张 | $52,000 | +$200 |
+| Contract   | Side | Size | Fill price | Realised PnL |
+|------------|------|------|------------|--------------|
+| BTC_USDT   | Long | 5    | $52,000    | +$200        |
 
-✅ 当前无持仓
+No open positions.
 ```
 
 ---
 
-## Scenario 2: 部分平仓（指定数量）
+## Scenario 2: Partial close (specified size)
 
-**Context**: 用户只想平掉部分仓位，保留剩余仓位。
+**Context**: User wants to close part of the position and keep the rest.
 
 **Prompt Examples**:
-- "平掉 2 张"
-- "平掉 BTC 的 3 张"
-- "减仓 1 张"
-- "部分平仓，平 2 张多仓"
+- "Close 2 contracts"
+- "Close 3 BTC contracts"
+- "Reduce 1 contract"
+- "Partial close, close 2 long"
 
 **Expected Behavior**:
-1. Query current position to verify sufficient size
-2. Calculate close size (negative for long, positive for short)
-3. Call `create_futures_order(size=-2, reduce_only=true, tif="ioc")`
-4. Verify remaining position
+1. Query current position to verify sufficient size.
+2. Compute close size (negative for long, positive for short).
+3. Call `create_futures_order(size=-2, reduce_only=true, tif="ioc")` (or equivalent).
+4. Verify remaining position.
 
 **Response Template**:
 ```
-部分平仓成功！
+Partial close done.
 
-| 项目 | 值 |
-|------|-----|
-| 合约 | BTC_USDT |
-| 平仓数量 | 2 张 |
-| 成交价 | $52,000 |
-| 剩余仓位 | 多仓 3 张 |
+| Item        | Value        |
+|-------------|--------------|
+| Contract    | BTC_USDT     |
+| Closed size | 2 contracts |
+| Fill price  | $52,000      |
+| Remaining   | Long 3       |
 
-✅ 平仓完成，保留 3 张多仓
+Close done; 3 long contracts remaining.
 ```
 
 ---
 
-## Scenario 3: 平一半仓位
+## Scenario 3: Close half
 
-**Context**: 用户想平掉一半仓位。
+**Context**: User wants to close half of the position.
 
 **Prompt Examples**:
-- "平一半"
-- "平掉一半仓位"
-- "减仓 50%"
+- "Close half"
+- "Close half of position"
+- "Reduce 50%"
 
 **Expected Behavior**:
-1. Query current position: size = 10
-2. Calculate half: close_size = 5
-3. Call `create_futures_order(size=-5, reduce_only=true)`
-4. Verify remaining position = 5
+1. Query position: size = 10.
+2. Half: close_size = 5.
+3. Call `create_futures_order(size=-5, reduce_only=true)`.
+4. Verify remaining = 5.
 
 **Response Template**:
 ```
-已平掉一半仓位！
+Half closed.
 
-| 项目 | 原仓位 | 当前仓位 |
-|------|--------|---------|
-| 数量 | 10 张 | 5 张 |
-| 方向 | 多仓 | 多仓 |
-| 成交价 | - | $52,000 |
+| Item      | Before | After   |
+|-----------|--------|---------|
+| Size      | 10     | 5       |
+| Side      | Long   | Long    |
+| Fill price| -      | $52,000 |
 
-✅ 平仓完成，剩余 50% 仓位
+Close done; 50% position remaining.
 ```
 
 ---
 
-## Scenario 4: 反手开仓（多转空）
+## Scenario 4: Reverse (long to short)
 
-**Context**: 用户持有多仓，想反手做空。
+**Context**: User is long and wants to reverse to short.
 
 **Prompt Examples**:
-- "反手"
-- "反手做空"
-- "从多转空"
-- "多头反手空头"
-- "平多开空"
+- "Reverse"
+- "Reverse to short"
+- "Long to short"
+- "Close long open short"
 
 **Expected Behavior**:
-1. Query current position via `get_futures_position`: long +5
-2. 展示反手方案，请用户确认（含预估强平价/保证金）
-3. 用户确认后：先 `create_futures_order(settle, contract, size="-5", reduce_only=true, price="0", tif="ioc")` 市价平多仓，再 `create_futures_order(..., size="-5", price="0", tif="ioc")` 市价开 5 张空（无 reduce_only）
-4. Verify new position via `get_futures_position`: short -5
+1. Query position via `get_futures_position`: long +5.
+2. Show reverse plan and ask user to confirm (include estimated liq/margin).
+3. After confirm: first `create_futures_order(settle, contract, size="-5", reduce_only=true, price="0", tif="ioc")` to close long, then `create_futures_order(..., size="-5", price="0", tif="ioc")` to open 5 short (no reduce_only).
+4. Verify new position via `get_futures_position`: short -5.
 
 **Response Template**:
 ```
-反手开仓成功！
+Reverse done.
 
-| 项目 | 原仓位 | 新仓位 |
-|------|--------|--------|
-| 方向 | 多仓 | 空仓 |
-| 数量 | 5 张 | 5 张 |
-| 均价 | $50,000 | $52,000 |
+| Item   | Before | After   |
+|--------|--------|---------|
+| Side   | Long   | Short   |
+| Size   | 5      | 5       |
+| Avg    | $50,000| $52,000 |
 
-✅ 已从多仓反手至空仓
+Reversed from long to short.
 ```
 
 ---
 
-## Scenario 5: 反手开仓（空转多）
+## Scenario 5: Reverse (short to long)
 
-**Context**: 用户持有空仓，想反手做多。
+**Context**: User is short and wants to reverse to long.
 
 **Prompt Examples**:
-- "反手做多"
-- "空转多"
-- "平空开多"
+- "Reverse to long"
+- "Short to long"
+- "Close short open long"
 
 **Expected Behavior**:
-1. Query current position via `get_futures_position`: short -3
-2. 展示反手方案，请用户确认后：先 `create_futures_order(..., size="3", reduce_only=true, price="0", tif="ioc")` 市价平空仓，再 `create_futures_order(..., size="3", price="0", tif="ioc")` 市价开 3 张多
-3. Verify new position via `get_futures_position`: long +3
+1. Query position via `get_futures_position`: short -3.
+2. Show reverse plan; after confirm: first `create_futures_order(..., size="3", reduce_only=true, price="0", tif="ioc")` to close short, then `create_futures_order(..., size="3", price="0", tif="ioc")` to open 3 long.
+3. Verify new position: long +3.
 
 **Response Template**:
 ```
-反手开仓成功！
+Reverse done.
 
-| 项目 | 原仓位 | 新仓位 |
-|------|--------|--------|
-| 方向 | 空仓 | 多仓 |
-| 数量 | 3 张 | 3 张 |
+| Item | Before | After |
+|------|--------|-------|
+| Side | Short  | Long  |
+| Size | 3      | 3     |
 
-✅ 已从空仓反手至多仓
+Reversed from short to long.
 ```
 
 ---
 
-## Scenario 6: 反手开仓（指定数量不同）
+## Scenario 6: Reverse with different size
 
-**Context**: 用户想反手但新仓位数量与原仓位不同。
+**Context**: User wants to reverse but new size differs from current.
 
 **Prompt Examples**:
-- "反手做空 3 张"（当前多仓 5 张）
-- "平掉多仓，开 2 张空"
+- "Reverse to short 3" (current long 5)
+- "Close long, open 2 short"
 
 **Expected Behavior**:
-1. Query current position via `get_futures_position`: long +5
-2. 展示反手方案（平 5 张多 → 开 3 张空），请用户确认后：先 `create_futures_order(..., size="-5", reduce_only=true, ...)` 市价全平多仓，再 `create_futures_order(..., size="-3", ...)` 市价开 3 张空
-3. Verify new position via `get_futures_position`: short -3
+1. Query position: long +5.
+2. Show plan (close 5 long → open 3 short), confirm, then: close all long with reduce_only, then open 3 short.
+3. Verify position: short -3.
 
 **Response Template**:
 ```
-反手开仓成功！
+Reverse done.
 
-| 项目 | 原仓位 | 新仓位 |
-|------|--------|--------|
-| 方向 | 多仓 | 空仓 |
-| 数量 | 5 张 | 3 张 |
+| Item | Before | After |
+|------|--------|-------|
+| Side | Long   | Short |
+| Size | 5      | 3     |
 
-✅ 已反手至空仓 3 张（原多仓 5 张已全部平仓）
+Reversed to short 3 (all 5 long closed).
 ```
 
 ---
 
-## Scenario 7: 查询后选择平仓方式
+## Scenario 7: Query then choose close action
 
-**Context**: 用户想平仓但没有说明具体方式。
+**Context**: User wants to close but has not specified how.
 
 **Prompt Examples**:
-- "帮我平仓"
-- "我想平仓"
-- "平仓"
+- "Help me close"
+- "I want to close"
+- "Close position"
 
 **Expected Behavior**:
-1. Query current position
-2. Display position info and ask user to choose
-3. Execute based on user selection
+1. Query current position.
+2. Show position and ask user to choose action.
+3. Execute based on choice.
 
-**Response Template (查询阶段)**:
+**Response Template** (query phase):
 ```
-当前仓位：
+Current position:
 
-| 合约 | 方向 | 数量 | 开仓价 | 当前价 | 未实现盈亏 |
-|------|------|------|--------|--------|-----------|
-| BTC_USDT | 多仓 | 5 张 | $50,000 | $52,000 | +$200 |
+| Contract   | Side | Size | Entry   | Mark    | Unrealised PnL |
+|------------|------|------|---------|---------|----------------|
+| BTC_USDT   | Long | 5    | $50,000 | $52,000 | +$200          |
 
-请问您要：
-1. **全平** - 平掉所有 5 张
-2. **部分平仓** - 输入数量，如 "平 2 张"
-3. **反手** - 平掉多仓，开空仓
+Choose:
+1. **Close all** — close all 5
+2. **Partial** — specify size, e.g. "Close 2"
+3. **Reverse** — close long, open short
 
-请选择或输入具体操作：
+Reply with option or exact action.
 ```
 
 ---
 
-## Scenario 8: 没有仓位时平仓
+## Scenario 8: No position to close
 
-**Context**: 用户想平仓但当前没有仓位。
+**Context**: User asks to close but has no position.
 
 **Prompt Examples**:
-- "平掉 BTC 的仓位"
+- "Close BTC position"
 
 **Expected Behavior**:
-1. Query position: size = 0
-2. Inform user no position to close
+1. Query position: size = 0.
+2. Inform user there is no position to close.
 
 **Response Template**:
 ```
-当前没有 BTC_USDT 的持仓，无需平仓。
+No BTC_USDT position to close.
 
-如需开仓，可以说：
-- "BTC_USDT 开多 1 张，市价"
-- "BTC_USDT 开空 1 张，限价 50000"
+To open, you can say:
+- "BTC_USDT long 1 contract, market"
+- "BTC_USDT short 1 contract, limit 50000"
 ```
 
 ---
 
-## Scenario 9: 平仓数量超过持仓
+## Scenario 9: Close size exceeds position
 
-**Context**: 用户想平仓的数量超过实际持仓。
+**Context**: User wants to close more than current size.
 
 **Prompt Examples**:
-- "平掉 10 张"（实际只有 5 张）
+- "Close 10" (only 5 contracts)
 
 **Expected Behavior**:
-1. Query position: size = 5
-2. Detect 10 > 5, suggest alternatives
-3. Wait for user decision
+1. Query position: size = 5.
+2. Detect 10 > 5, suggest alternatives.
+3. Wait for user decision.
 
 **Response Template**:
 ```
-您当前只有 5 张多仓，无法平掉 10 张。
+You have only 5 long contracts; cannot close 10.
 
-请选择：
-1. 全平 - 平掉所有 5 张
-2. 修改数量 - 输入 1-5 张之间的数量
+Choose:
+1. Close all — close all 5
+2. Different size — enter 1–5
 
-请输入您的选择：
+Reply with your choice.
 ```
 
 ---
 
-## Scenario 10: 平掉指定合约的所有仓位
+## Scenario 10: Close all for one contract
 
-**Context**: 用户想平掉某个合约的所有仓位。
+**Context**: User wants to close all positions for a specific contract.
 
 **Prompt Examples**:
-- "平掉 BTC 的仓位"
-- "平掉 ETH 的所有仓位"
+- "Close BTC position"
+- "Close all ETH"
 - "close BTC position"
 
 **Expected Behavior**:
-1. Query position for specific contract
-2. Close all positions for that contract
-3. Verify and report result
+1. Query position for that contract.
+2. Close all for that contract.
+3. Verify and report.
 
 **Response Template**:
 ```
-已平掉 BTC_USDT 的所有仓位！
+BTC_USDT position closed.
 
-| 项目 | 值 |
-|------|-----|
-| 合约 | BTC_USDT |
-| 原仓位 | 多仓 5 张 |
-| 成交价 | $52,000 |
-| 实现盈亏 | +$200 |
+| Item         | Value          |
+|--------------|----------------|
+| Contract     | BTC_USDT       |
+| Previous     | Long 5         |
+| Fill price   | $52,000        |
+| Realised PnL | +$200          |
 
-✅ BTC_USDT 仓位已清空
+BTC_USDT position cleared.
 ```
 
 ---
 
-## Scenario 11: 多个合约同时全平
+## Scenario 11: Close all across multiple contracts
 
-**Context**: 用户持有多个合约的仓位，想全部平掉。
+**Context**: User has positions in several contracts and wants to close all.
 
 **Prompt Examples**:
-- "全部平仓"
-- "平掉所有合约"
+- "Close all positions"
+- "Close all contracts"
 
 **Expected Behavior**:
-1. Query all positions
-2. Display all positions and confirm
-3. Close all contracts
+1. Query all positions.
+2. Show all and confirm.
+3. Close each contract.
 
 **Response Template**:
 ```
-确定要平掉所有仓位吗？当前持有：
+Confirm close all positions? Current:
 
-| 合约 | 方向 | 数量 | 未实现盈亏 |
-|------|------|------|-----------|
-| BTC_USDT | 多仓 | 5 张 | +$200 |
-| ETH_USDT | 空仓 | 10 张 | -$50 |
+| Contract   | Side | Size | Unrealised PnL |
+|------------|------|------|----------------|
+| BTC_USDT   | Long | 5    | +$200          |
+| ETH_USDT   | Short| 10   | -$50           |
 
-（用户确认后）
+(After user confirms)
 
-全部平仓完成！
+All positions closed.
 
-✅ 已平掉 2 个合约的仓位
-总实现盈亏: +$150
+Closed 2 contracts.
+Total realised PnL: +$150
 ```
