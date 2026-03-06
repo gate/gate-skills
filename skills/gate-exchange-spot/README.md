@@ -1,8 +1,8 @@
-# Gate.io Spot Trading Assistant Skill
+# Gate Spot Exchange Skill
 
 ## Overview
 
-An integrated execution skill for Gate.io spot trading, covering buy/sell actions, conditional monitoring orders, order management, fill verification, and account asset queries.
+An integrated execution skill for Gate spot trading, covering buy/sell actions, conditional monitoring orders, order management, fill verification, and account asset queries.
 
 ## Core Capabilities
 
@@ -15,7 +15,7 @@ An integrated execution skill for Gate.io spot trading, covering buy/sell action
 ## Skill Structure
 
 ```
-gate-spot-trading-assistant/
+gate-exchange-spot/
 ├── SKILL.md
 ├── README.md
 ├── CHANGELOG.md
