@@ -1,4 +1,4 @@
-# gate-exchange-MarketAnalysis — Scenarios & MCP Call Specs
+# gate-exchange-marketanalysis — Scenarios & MCP Call Specs
 
 This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 

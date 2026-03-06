@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the gate-exchange-MarketAnalysis skill are documented here.
+All notable changes to the gate-exchange-marketanalysis skill are documented here.
 
 Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.
 
