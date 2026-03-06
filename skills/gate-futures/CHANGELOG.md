@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to the Gate Trading Intelligence skill are documented here.
+All notable changes to the Gate.io Futures Trading skill are documented here.
 
 Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential suffix: `YYYY.M.DD-1`, `YYYY.M.DD-2`, etc.
 
@@ -8,29 +8,20 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ## [2026.3.5-1] - 2026-03-05
 
+### Scope
+
+This skill supports **four operations only**: 开仓 (open position), 平仓 (close position), 撤单 (cancel order), 改单 (amend order). No market monitoring or arbitrage modules.
+
 ### Added
-- Initial release (merged from `basis-monitor`, `funding-rate-arbitrage`, and `liquidation-monitor`)
-- Routing-based SKILL.md with progressive document loading
-- **Basis Monitor module** (`references/basis-monitor.md`):
-  - Spot vs futures basis calculation and monitoring
-  - Single-coin deep basis analysis with premium index history
-  - Multi-coin basis scan with Top-N ranking
-  - Basis deviation analysis (Z-Score) and trend detection
-  - Signal generation (正基差走阔, 负基差走阔, 基差回归, 基差极端偏离, 基差翻转)
-- **Funding Rate Arbitrage module** (`references/funding-rate-arbitrage.md`):
-  - Full-market funding rate arbitrage opportunity scanning
-  - Multi-step filtering pipeline (volume → rate → basis → depth)
-  - Annualized return estimation with composite scoring
-  - Directional arbitrage guidance (正向套利 / 反向套利)
-- **Liquidation Monitor module** (`references/liquidation-monitor.md`):
-  - Real-time liquidation event monitoring
-  - Abnormal liquidation spike detection (3x daily average threshold)
-  - Directional squeeze analysis (long/short squeeze with 80% threshold)
-  - Pin-bar / wick event detection with price recovery analysis
-- Cross-module synergy and suggestion system
+
+- **开仓 (Open)** — `references/open-position.md`: limit/market open long/short, U/张 conversion, cross/isolated mode, pre-order confirmation with leverage display
+- **平仓 (Close)** — `references/close-position.md`: full close, partial close, reverse position
+- **撤单 (Cancel)** — `references/cancel-order.md`: cancel single or batch orders
+- **改单 (Amend)** — `references/amend-order.md`: amend order price or size
+- Routing-based SKILL.md with intent → reference mapping
 
 ### Audit
-- ✅ No external scripts or dependencies
-- ✅ Uses Gate MCP tools only
-- ✅ No credential handling
-- ✅ Read-only data analysis, no trading operations
+
+- Uses Gate MCP tools only
+- Open/close/cancel/amend require user confirmation before execution where applicable
+- No credential handling in this skill
