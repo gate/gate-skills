@@ -2,15 +2,15 @@
 
 ## Overview
 
-面向 Gate.io 现货交易的一体化执行 Skill，覆盖买币、卖币、盯盘条件单、订单管理、成交核实与资产查询。
+An integrated execution skill for Gate.io spot trading, covering buy/sell actions, conditional monitoring orders, order management, fill verification, and account asset queries.
 
 ## Core Capabilities
 
-- 买币与账户查询（余额检查、全仓买入、资产估值、最小下单检查）
-- 智能盯盘与买卖（按百分比/固定价差挂限价单）
-- 订单管理与改价（查挂单、改单、撤单）
-- 交易后核验（成交记录 + 当前持仓核对）
-- 组合动作（买后挂卖、先卖后买置换）
+- Buy and account queries (balance checks, full-balance buy, asset valuation, minimum order checks)
+- Smart monitoring and trading (place limit orders by percentage/fixed price spread)
+- Order management and amendments (list open orders, amend orders, cancel orders)
+- Post-trade verification (trade history + current holdings reconciliation)
+- Combined actions (buy then place sell order, sell then rebuy for asset swap)
 
 ## Skill Structure
 
@@ -26,19 +26,19 @@ gate-spot-trading-assistant/
 ## Usage Examples
 
 ```
-"我想买 100 块钱的 BTC，先看看余额够不够。"
-"帮我把所有 USDT 买成 ETH。"
-"如果 BTC 跌 5% 就帮我卖掉。"
-"我刚才买 BTC 成功了吗？现在一共有多少？"
-"帮我把 DOGE 全换成 BTC，够 10U 就执行。"
+"I want to buy 100 USDT of BTC. Check whether my balance is enough first."
+"Convert all my USDT into ETH."
+"If BTC drops by 5%, sell it for me."
+"Did my BTC buy just go through? How much do I hold now?"
+"Swap all my DOGE into BTC if it is worth at least 10 USDT."
 ```
 
 ## Trigger Phrases
 
-- 买币 / 卖币 / 换仓
-- 盯盘 / 到价买 / 到价卖 / 止损
-- 撤单 / 改单 / 未成交处理
-- 成交了吗 / 到账多少 / 账户总值
+- buy / sell / rebalance
+- monitor market / buy at target price / sell at target price / stop-loss request
+- cancel order / amend order / unfilled order handling
+- did it fill / how much received / total account value
 - spot trading / buy / sell / amend / cancel
 
 ## Scenario Test Script

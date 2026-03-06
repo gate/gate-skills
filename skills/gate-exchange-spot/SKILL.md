@@ -2,206 +2,206 @@
 name: gate-spot-trading-assistant
 version: "2026.3.5-1"
 updated: "2026-03-05"
-description: "Gate.io 现货买卖与账户运营 Skill。Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include '买币', '卖币', '盯盘', '撤单', '改单', '保本价', '换仓', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
+description: "Gate.io spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
 ---
 
 # Gate.io Spot Trading Assistant
 
-在 Gate.io 现货场景中执行一体化操作，覆盖：
-- 买币与账户查询（余额检查、资产估值、最小下单检查）
-- 智能盯盘与买卖（按价格条件自动挂单，不支持止盈止损）
-- 订单管理与改价（改价、撤单、成交核实、成本价判断、置换）
+Execute integrated operations for Gate.io spot workflows, including:
+- Buy and account queries (balance checks, asset valuation, minimum order checks)
+- Smart monitoring and trading (automatic price-condition limit orders, no take-profit/stop-loss support)
+- Order management and amendment (price updates, cancellations, fill verification, cost-basis checks, swaps)
 
 ## Domain Knowledge
 
-### 常用接口分组
+### Common API Groups
 
-| 分组 | 接口 |
+| Group | Endpoints |
 |------|------|
-| 账户与余额 | `GET /spot/accounts` |
-| 下单与撤单 | `POST /spot/orders`, `DELETE /spot/orders`, `PATCH /spot/orders` |
-| 订单与成交 | `GET /spot/open_orders`, `GET /spot/my_trades` |
-| 行情 | `GET /spot/tickers`, `GET /spot/order_book`, `GET /spot/candlesticks` |
-| 交易规则 | `GET /spot/currencies/{currency}`, `GET /spot/currency_pairs/{pair}` |
-| 费率 | `GET /wallet/fee` |
+| Account and balances | `GET /spot/accounts` |
+| Place/cancel/amend orders | `POST /spot/orders`, `DELETE /spot/orders`, `PATCH /spot/orders` |
+| Orders and fills | `GET /spot/open_orders`, `GET /spot/my_trades` |
+| Market data | `GET /spot/tickers`, `GET /spot/order_book`, `GET /spot/candlesticks` |
+| Trading rules | `GET /spot/currencies/{currency}`, `GET /spot/currency_pairs/{pair}` |
+| Fees | `GET /wallet/fee` |
 
-### 关键交易规则
+### Key Trading Rules
 
-- 交易对格式统一为 `BASE_QUOTE`，如 `BTC_USDT`。
-- 买入前优先检查计价货币余额（如 USDT）。
-- 金额类买入需要满足 `min_quote_amount`（常见门槛 10U）。
-- 数量类买卖需要满足最小数量与数量精度（`min_base_amount` / `amount_precision`）。
-- 条件型需求（“跌 2% 买”“涨 500 卖”）通过计算目标价格后创建限价单实现，不依赖后台持续盯盘进程。
-- 不支持止盈止损（TP/SL）功能：不创建价格触发单，不执行“到价自动止盈/止损”。
+- Use `BASE_QUOTE` format for trading pairs, for example `BTC_USDT`.
+- Check quote-currency balance first before buy orders (for example USDT).
+- Amount-based buys must satisfy `min_quote_amount` (commonly 10U).
+- Quantity-based buys/sells must satisfy minimum size and precision (`min_base_amount` / `amount_precision`).
+- Condition requests (such as "buy 2% lower" or "sell when +500") are implemented by calculating a target price and placing a limit order; no background watcher process is used.
+- Take-profit/stop-loss (TP/SL) is not supported: do not create trigger orders and do not execute automatic TP/SL at target price.
 
-### 市价单参数提取与填充规则（强制）
+### Market Order Parameter Extraction Rules (Mandatory)
 
-`POST /spot/orders` 的 `type=market` 时，`amount` 字段按方向填写：
+When calling `POST /spot/orders` with `type=market`, fill `amount` by side:
 
-| side | amount 含义 | 示例 |
+| side | `amount` meaning | Example |
 |------|-------------|------|
-| `buy` | 计价币金额（USDT） | “买 100U BTC” -> `amount="100"` |
-| `sell` | 基础币数量（BTC/ETH 等） | “卖 0.01 BTC” -> `amount="0.01"` |
+| `buy` | Quote-currency amount (USDT) | "Buy 100U BTC" -> `amount="100"` |
+| `sell` | Base-currency quantity (BTC/ETH, etc.) | "Sell 0.01 BTC" -> `amount="0.01"` |
 
-执行前校验：
-- `buy` 市价单：检查计价币余额是否覆盖 `amount`（USDT）。
-- `sell` 市价单：检查基础币可用数量是否覆盖 `amount`（币数量）。
+Pre-check before execution:
+- `buy` market order: verify quote-currency balance can cover `amount` (USDT).
+- `sell` market order: verify base-currency available balance can cover `amount` (coin quantity).
 
 ## Workflow
 
 When the user asks for any spot trading operation, follow this sequence.
 
-### Step 1: 识别任务类型
+### Step 1: Identify Task Type
 
-将用户请求归类到以下 6 类之一：
-1. 买入（市价/限价/全仓买入）
-2. 卖出（清仓卖出/条件卖出）
-3. 账户查询（总资产、余额回查、交易可用性）
-4. 订单管理（查挂单、改单、撤单）
-5. 交易后核验（是否成交、到账数量、当前持仓）
-6. 组合动作（先卖后买、买后挂卖、行情判断后下单）
+Classify the request into one of these six categories:
+1. Buy (market/limit/full-balance buy)
+2. Sell (full-position sell/conditional sell)
+3. Account query (total assets, balance checks, tradability checks)
+4. Order management (list open orders, amend, cancel)
+5. Post-trade verification (filled or not, credited amount, current holdings)
+6. Combined actions (sell then buy, buy then place sell order, trend-based buy)
 
-### Step 2: 解析参数并做预检查
+### Step 2: Extract Parameters and Run Pre-checks
 
-提取关键字段：
+Extract key fields:
 - `currency` / `currency_pair`
-- `side`（buy/sell）
-- `amount`（按币数量）或 `quote_amount`（按 USDT 金额）
-- `price` 或价格条件（如“现价下浮 2%”）
-- 触发条件（是否满足再执行）
+- `side` (`buy`/`sell`)
+- `amount` (coin quantity) or `quote_amount` (USDT amount)
+- `price` or price condition (for example "2% below current")
+- trigger condition (execute only when condition is met)
 
-当 `type=market` 时，参数归一化为：
-- `side=buy`：`amount = quote_amount`（USDT 金额）
-- `side=sell`：`amount = base_amount`（基础币数量）
+When `type=market`, normalize parameters as:
+- `side=buy`: `amount = quote_amount` (USDT amount)
+- `side=sell`: `amount = base_amount` (base-coin quantity)
 
-预检查优先顺序：
-1. 交易对与币种可交易状态
-2. 最小下单金额/数量与精度
-3. 可用余额是否足够
-4. 用户条件是否成立（如“低于 60000 才买”）
+Pre-check order:
+1. Trading pair/currency tradability status
+2. Minimum order amount/size and precision
+3. Available balance sufficiency
+4. User condition satisfaction (for example "buy only below 60000")
 
-### Step 3: 按场景调用接口
+### Step 3: Call APIs by Scenario
 
-仅调用满足当前任务所需的最小接口集：
-- 余额与资金可用：`GET /spot/accounts`
-- 规则校验：`GET /spot/currency_pairs/{pair}`
-- 即时报价与涨跌：`GET /spot/tickers`
-- 下单执行：`POST /spot/orders`
-- 撤单/改单：`DELETE /spot/orders` / `PATCH /spot/orders`
-- 成交核验：`GET /spot/my_trades`
+Use only the minimal API set required for the task:
+- Balance and available funds: `GET /spot/accounts`
+- Rule validation: `GET /spot/currency_pairs/{pair}`
+- Live price and moves: `GET /spot/tickers`
+- Order placement: `POST /spot/orders`
+- Cancel/amend: `DELETE /spot/orders` / `PATCH /spot/orders`
+- Fill verification: `GET /spot/my_trades`
 
-### Step 4: 返回可执行结果与后续状态
+### Step 4: Return Actionable Result and Status
 
-回复中必须包含：
-- 是否执行成功（或为什么暂不执行）
-- 核心数字（价格、数量、金额、余额变化）
-- 若触发条件不满足，明确说明“当前不下单”的原因
+The response must include:
+- Whether execution succeeded (or why it did not execute)
+- Core numbers (price, quantity, amount, balance change)
+- If condition not met, clearly explain why no order is placed now
 
 ## Case Routing Map (1-25)
 
-### A. 买币与账户查询（1-8）
+### A. Buy and Account Queries (1-8)
 
-| Case | 用户意图 | 核心判断 | 接口序列 |
+| Case | User Intent | Core Decision | API Sequence |
 |------|----------|----------|----------|
-| 1 | 市价买币 | USDT 足够则市价买 | `GET /spot/accounts` → `POST /spot/orders` |
-| 2 | 指定价买币 | 创建 `limit buy` | `GET /spot/accounts` → `POST /spot/orders` |
-| 3 | 全额买入 | 读取 USDT 全部可用余额下单 | `GET /spot/accounts` → `POST /spot/orders` |
-| 4 | 买入体检 | 币种状态 + 最小数量 + 当前单价 | `GET /spot/currencies/{currency}` → `GET /spot/currency_pairs/{pair}` → `GET /spot/tickers` |
-| 5 | 资产简报 | 全仓按现价折算 USDT | `GET /spot/accounts` → `GET /spot/tickers` |
-| 6 | 批量撤单后看余额 | 全撤后返回账户余额 | `DELETE /spot/orders` → `GET /spot/accounts` |
-| 7 | 零钱卖出 | 满足最小数量才卖出 | `GET /spot/accounts` → `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
-| 8 | 最小买入检查 | 不足 `min_quote_amount` 提醒补足 | `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
+| 1 | Market buy | Place market buy if USDT is sufficient | `GET /spot/accounts` → `POST /spot/orders` |
+| 2 | Buy at target price | Create a `limit buy` order | `GET /spot/accounts` → `POST /spot/orders` |
+| 3 | Buy with all balance | Use all available USDT balance to buy | `GET /spot/accounts` → `POST /spot/orders` |
+| 4 | Buy readiness check | Currency status + min size + current unit price | `GET /spot/currencies/{currency}` → `GET /spot/currency_pairs/{pair}` → `GET /spot/tickers` |
+| 5 | Asset summary | Convert all holdings to USDT value | `GET /spot/accounts` → `GET /spot/tickers` |
+| 6 | Cancel all then check balance | Cancel all open orders and return balances | `DELETE /spot/orders` → `GET /spot/accounts` |
+| 7 | Sell dust | Sell only if minimum size is met | `GET /spot/accounts` → `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
+| 8 | Minimum buy check | Warn if below `min_quote_amount` | `GET /spot/currency_pairs/{pair}` → `POST /spot/orders` |
 
-### B. 智能盯盘与买卖（9-16）
+### B. Smart Monitoring and Trading (9-16)
 
-| Case | 用户意图 | 核心判断 | 接口序列 |
+| Case | User Intent | Core Decision | API Sequence |
 |------|----------|----------|----------|
-| 9 | 便宜 2% 再买 | 现价下浮 2% 挂限价买单 | `GET /spot/tickers` → `POST /spot/orders` |
-| 10 | 涨 500 就卖 | 现价上浮 500 挂限价卖单 | `GET /spot/tickers` → `POST /spot/orders` |
-| 11 | 今日低点买 | 当前价接近 24h low 才买 | `GET /spot/tickers` → `POST /spot/orders` |
-| 12 | 跌 5% 止损 | 计算止损价挂卖单 | `GET /spot/tickers` → `POST /spot/orders` |
-| 13 | 涨幅榜买入 | 自动选涨幅第一币种买入 | `GET /spot/tickers` → `POST /spot/orders` |
-| 14 | 跌幅对比买入 | BTC/ETH 跌幅更大者买入 | `GET /spot/tickers` → `POST /spot/orders` |
-| 15 | 买完挂卖 | 市价买后按成交参考价 +2% 挂卖 | `POST /spot/orders` → `POST /spot/orders` |
-| 16 | 手续费试算 | 按费率和现价预估总花费 | `GET /wallet/fee` → `GET /spot/tickers` |
+| 9 | Buy 2% lower | Place limit buy at current price -2% | `GET /spot/tickers` → `POST /spot/orders` |
+| 10 | Sell at +500 | Place limit sell at current price +500 | `GET /spot/tickers` → `POST /spot/orders` |
+| 11 | Buy near today's low | Buy only if current price is near 24h low | `GET /spot/tickers` → `POST /spot/orders` |
+| 12 | Sell on 5% drop request | Calculate target drop price and place sell limit order | `GET /spot/tickers` → `POST /spot/orders` |
+| 13 | Buy top gainer | Auto-pick highest 24h gainer and buy | `GET /spot/tickers` → `POST /spot/orders` |
+| 14 | Buy larger loser | Compare BTC/ETH daily drop and buy the bigger loser | `GET /spot/tickers` → `POST /spot/orders` |
+| 15 | Buy then place sell | Market buy, then place sell at +2% reference price | `POST /spot/orders` → `POST /spot/orders` |
+| 16 | Fee estimate | Estimate total cost from fee rate and live price | `GET /wallet/fee` → `GET /spot/tickers` |
 
-### C. 订单管理与改价（17-25）
+### C. Order Management and Amendment (17-25)
 
-| Case | 用户意图 | 核心判断 | 接口序列 |
+| Case | User Intent | Core Decision | API Sequence |
 |------|----------|----------|----------|
-| 17 | 未成交改价 | 找 open 订单后改价 | `GET /spot/open_orders` → `PATCH /spot/orders` |
-| 18 | 成交核实 | 最近买入数量 + 当前总持仓 | `GET /spot/my_trades` → `GET /spot/accounts` |
-| 19 | 没买到就撤 | 若仍 open 则撤单并回查余额 | `GET /spot/open_orders` → `DELETE /spot/orders` → `GET /spot/accounts` |
-| 20 | 按上次价格再买 | 上次成交价 + 余额检查后限价买 | `GET /spot/my_trades` → `GET /spot/accounts` → `POST /spot/orders` |
-| 21 | 保本价卖出 | 当前价高于成本价才卖 | `GET /spot/my_trades` → `GET /spot/tickers` → `POST /spot/orders` |
-| 22 | 资产置换 | 先估值，够 10U 再卖后买 | `GET /spot/accounts` → `GET /spot/tickers` → `POST /spot/orders`(卖) → `POST /spot/orders`(买) |
-| 23 | 价格合适下单 | `现价 < 60000` 才买并回报余额 | `GET /spot/tickers` → `POST /spot/orders` → `GET /spot/accounts` |
-| 24 | 趋势判断下单 | 近 4 小时至少 3 根阳线才买 | `GET /spot/candlesticks` → `POST /spot/orders` |
-| 25 | 快速成交限价买 | 取对手盘最优价挂限价单 | `GET /spot/order_book` → `POST /spot/orders` |
+| 17 | Raise price for unfilled order | Find open order, then amend price | `GET /spot/open_orders` → `PATCH /spot/orders` |
+| 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `GET /spot/my_trades` → `GET /spot/accounts` |
+| 19 | Cancel if not filled | If still open, cancel and then recheck balance | `GET /spot/open_orders` → `DELETE /spot/orders` → `GET /spot/accounts` |
+| 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `GET /spot/my_trades` → `GET /spot/accounts` → `POST /spot/orders` |
+| 21 | Sell at break-even or better | Sell only if current price is above cost basis | `GET /spot/my_trades` → `GET /spot/tickers` → `POST /spot/orders` |
+| 22 | Asset swap | Estimate value, if >=10U then sell then buy | `GET /spot/accounts` → `GET /spot/tickers` → `POST /spot/orders`(sell) → `POST /spot/orders`(buy) |
+| 23 | Buy if price condition met | Buy only when `current < 60000`, then report balance | `GET /spot/tickers` → `POST /spot/orders` → `GET /spot/accounts` |
+| 24 | Buy on trend condition | Buy only if 3 of last 4 hourly candles are bullish | `GET /spot/candlesticks` → `POST /spot/orders` |
+| 25 | Fast-fill limit buy | Use best opposite-book price for fast execution | `GET /spot/order_book` → `POST /spot/orders` |
 
 ## Judgment Logic Summary
 
 | Condition | Action |
 |-----------|--------|
-| 用户要求“先检查余额再买” | 必须先 `GET /spot/accounts`，余额足够才下单 |
-| 用户要求“指定价格买/卖” | 使用 `type=limit`，按用户价格挂单 |
-| 用户要求“按当前价最快成交” | 优先 `market`；若指定“限价最快成交”，取盘口最优价 |
-| 市价买单（buy） | `amount` 填 USDT 金额，不填基础币数量 |
-| 市价卖单（sell） | `amount` 填基础币数量，不填 USDT 金额 |
-| 用户要求“止盈/止损” | 明确告知当前 skill 不支持 TP/SL，提供限价替代方案 |
-| 用户金额太小 | 检查 `min_quote_amount`，不满足则提示补足 |
-| 用户要“全仓买/全仓卖” | 读取可用余额，按最小交易规则裁剪 |
-| 触发条件未满足 | 不下单，返回当前价格与目标差值 |
+| User asks to check balance before buying | Must call `GET /spot/accounts` first; place order only if sufficient |
+| User specifies buy/sell at target price | Use `type=limit` at user-provided price |
+| User asks for fastest fill at current market | Prefer `market`; if "fast limit" is requested, use best book price |
+| Market buy (`buy`) | Fill `amount` with USDT quote amount, not base quantity |
+| Market sell (`sell`) | Fill `amount` with base-coin quantity, not USDT amount |
+| User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
+| User amount is too small | Check `min_quote_amount`; if not met, ask user to increase amount |
+| User requests all-in buy/sell | Use available balance, then trim by minimum trade rules |
+| Trigger condition not met | Do not place order; return current vs target price gap |
 
 ## Report Template
 
 ```markdown
-## 执行结果
+## Execution Result
 
-| 项目 | 值 |
+| Item | Value |
 |------|-----|
-| 场景 | {case_name} |
-| 交易对 | {currency_pair} |
-| 动作 | {action} |
-| 执行状态 | {status} |
-| 关键数据 | {key_metrics} |
+| Scenario | {case_name} |
+| Pair | {currency_pair} |
+| Action | {action} |
+| Status | {status} |
+| Key Metrics | {key_metrics} |
 
 {decision_text}
 ```
 
-示例 `decision_text`：
-- `✅ 条件满足，已为你完成下单。`
-- `⏸️ 暂未下单：当前价 60200，高于你的目标价 60000。`
-- `❌ 未执行：最小下单金额为 10U，你当前输入 5U。`
+Example `decision_text`:
+- `✅ Condition met. Your order has been placed.`
+- `⏸️ No order placed yet: current price is 60200, above your target 60000.`
+- `❌ Not executed: minimum order amount is 10U, your input is 5U.`
 
 ## Error Handling
 
-| 错误类型 | 典型原因 | 处理策略 |
+| Error Type | Typical Cause | Handling Strategy |
 |----------|----------|----------|
-| 余额不足 | 账户可用 USDT/币不足 | 返回缺口金额，建议降低下单量 |
-| 最小交易限制 | 小于最小金额或数量 | 返回门槛值，建议补足后再下单 |
-| 不支持的能力 | 用户要求止盈止损（TP/SL） | 明确告知不支持，改为手动限价单方案 |
-| 订单不存在/已成交 | 改单或撤单目标失效 | 提示刷新挂单列表后重试 |
-| 行情条件不成立 | 条件单触发逻辑未满足 | 返回现价、目标价、差值 |
-| 交易对不可用 | 币种暂停交易或状态异常 | 明确提示“当前不可交易” |
+| Insufficient balance | Not enough available USDT/coins | Return shortfall and suggest reducing order size |
+| Minimum trade constraint | Below minimum amount/size | Return threshold and suggest increasing order size |
+| Unsupported capability | User asks for TP/SL | Clearly state unsupported, propose manual limit-order workflow |
+| Order missing/already filled | Amendment/cancellation target is invalid | Ask user to refresh open orders and retry |
+| Market condition not met | Trigger condition is not satisfied | Return current price, target price, and difference |
+| Pair unavailable | Currency suspended or abnormal status | Clearly state pair is currently not tradable |
 
 ## Cross-Skill Workflows
 
-### Workflow A: 买入后改单
+### Workflow A: Buy Then Amend
 
-1. `gate-spot-trading-assistant` 下单（Case 2/9/23）
-2. 未成交时执行改价（Case 17）
+1. Place order with `gate-spot-trading-assistant` (Case 2/9/23)
+2. If still unfilled, amend price (Case 17)
 
-### Workflow B: 先撤后再买
+### Workflow B: Cancel Then Rebuy
 
-1. 批量撤单释放资金（Case 6）
-2. 按新策略重新买入（Case 1/2/9）
+1. Cancel all open orders to release funds (Case 6)
+2. Re-enter with updated strategy (Case 1/2/9)
 
 ## Safety Rules
 
-- 涉及“全仓/全部/一键”操作时，先复述关键金额与币种再执行。
-- 对条件单类请求，必须展示“触发阈值如何计算”。
-- 用户提出止盈止损需求时，不要伪装支持，必须明确告知当前不支持。
-- 对“快速成交”请求，提示可能存在滑点或吃单深度不足。
-- 对连续组合动作（先卖后买）明确两步执行结果，避免用户误判。
-- 任何条件不满足时不强行下单，优先解释并给出可执行替代方案。
+- For all-in/full-balance/one-click requests, restate key amount and symbol before execution.
+- For condition-based requests, explicitly show how the trigger threshold is calculated.
+- If user asks for TP/SL, do not pretend support; clearly state it is not supported.
+- For fast-fill requests, warn about possible slippage or order-book depth limits.
+- For chained actions (sell then buy), report step-by-step results clearly.
+- If any condition is not met, do not force execution; explain and provide alternatives.
