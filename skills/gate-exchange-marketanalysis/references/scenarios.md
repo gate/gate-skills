@@ -489,8 +489,8 @@ Current basis rate 0.31%, above historical mean 0.15%; **elevated positive basis
 - "ETH spot–futures spread"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `get_spot_tickers`(ETH_USDT) → `get_futures_tickers`(usdt, ETH_USDT).
-2. Compute basis and basis rate; if negative, output basis table + ⚠️ negative basis warning (bearish / short crowding).
+1. Call per **MCP Call Spec**: `get_spot_tickers`(ETH_USDT) → `get_futures_tickers`(usdt, ETH_USDT) → optional `get_futures_premium_index`(settle=usdt, contract=ETH_USDT).
+2. Compute basis and basis rate; if premium index available, use for context; if negative, output basis table + ⚠️ negative basis warning (bearish / short crowding).
 
 **Output**:
 ```markdown
@@ -619,12 +619,12 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 - "How is ETH perpetual depth vs volume?"
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `get_futures_tickers` → `get_futures_trades` (or equivalent, limit=500).
-2. Extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
+1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_contract`(settle=usdt, contract=BTC_USDT) → `get_futures_order_book`(settle=usdt, contract=BTC_USDT, limit=20) → `get_futures_tickers` → `get_futures_trades` (or equivalent, limit=500).
+2. Use `quanto_multiplier` from contract to convert order book size to notional; extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
 3. Apply same judgment: depth ratio < 0.5% → thin; consecutive same-side large → possible manipulation.
 4. Output depth analysis table + large order summary + manipulation risk conclusion (same structure as 6.1/6.2, data from futures).
 
-**Output**: Same structure as Scenario 6.1 or 6.2; data source is futures order book, tickers, and trades.
+**Output**: Same structure as Scenario 6.1 or 6.2; data source is futures contract, order book, tickers, and trades.
 
 ---
 
@@ -837,6 +837,11 @@ For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points)
 
 **Context**: User asks for slippage simulation but does **not** specify a **currency pair** and/or does **not** specify a **quote amount** (e.g. "How much slippage if I market buy $10K?" with no pair; or "ETH_USDT slippage" with no amount).
 
+**Prompt examples**:
+- "How much slippage if I market buy $10K?" (missing pair)
+- "ETH_USDT slippage" / "ADA_USDT perpetual slippage simulation" (missing amount)
+- "Slippage simulation" (missing both pair and amount)
+
 **Expected behavior**:
 1. Do **not** call MCP. Do **not** assume a default pair or a default amount (e.g. do not default to $10K).
 2. Reply with a short prompt asking for the missing input(s): pair and/or quote amount.
@@ -925,6 +930,10 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 
 **Context**: User asks the same for a **perpetual/contract** (e.g. SOL_USDT perpetual).
 
+**Prompt examples**:
+- "Based on recent K-line, does SOL perpetual show breakout? Analyze support and resistance."
+- "BTC contract: support and resistance from candlesticks?"
+
 **Expected behavior**:
 1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_candlesticks`(settle=usdt, contract=SOL_USDT, interval=1d, limit=30–90) → `get_futures_tickers`(settle=usdt, contract=SOL_USDT).
 2. Same logic: derive support/resistance from OHLC; use tickers for 24h price, volume, change; output same structure with futures data.
@@ -1006,6 +1015,10 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 ### Scenario 10.2: Futures liquidity + weekend vs weekday
 
 **Context**: User asks the same for **perpetual/contract** (e.g. ETH_USDT perpetual).
+
+**Prompt examples**:
+- "Evaluate ETH contract liquidity and compare weekend vs weekday."
+- "BTC perpetual: liquidity and weekend vs weekday comparison."
 
 **Expected behavior**:
 1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_contract`(settle=usdt, contract=ETH_USDT) → `get_futures_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `get_futures_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `get_futures_tickers`(settle=usdt, contract=ETH_USDT).
