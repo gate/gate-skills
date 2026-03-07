@@ -6,7 +6,39 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ---
 
+## [2026.3.6-1] - 2026-03-06
+
+### Scope
+
+Case 8 adds **slippage simulation**: market-order fill vs order book, slippage reported as deviation from best ask (points and %). Spot and futures supported via same MCP call order as other cases.
+
+### Added
+
+- **Case 8: Slippage simulation** — market-order slippage vs best ask
+  - Trigger: e.g. "slippage simulation", "market buy $10K, how much slippage?", "ADA_USDT slippage simulation"
+  - **Spot:** `list_order_book` → `list_tickers`; **Futures:** `list_futures_order_book` → `list_futures_tickers`
+  - Logic: walk ask ladder for quote amount Q; volume-weighted avg price; slippage = avg price − ask1 (points and %)
+  - Output: simulation inputs, fill summary, slippage vs best ask, conclusion
+- Scenario 8.1: spot slippage simulation (e.g. ADA_USDT / ETH market buy $10K)
+- Scenario 8.2: futures slippage simulation (perpetual/contract market long)
+
+### Changed
+
+- **Pure English** — all Chinese trigger phrases and report templates in SKILL.md and `references/scenarios.md` replaced with English (e.g. "Slippage Simulation", "Best ask", "points", "Conclusion")
+- **Versioning** — version and `updated` follow current date (`YYYY.M.DD` or `YYYY.M.DD-1`)
+
+### Audit
+
+- Case 8 uses Gate MCP only (list_order_book / list_futures_order_book, list_tickers / list_futures_tickers)
+- Analysis is read-only; no trading operations
+
+---
+
 ## [2026.3.5-1] - 2026-03-05
+
+### Scope
+
+This skill supports **market tape analysis only** (read-only): liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer. No trading operations.
 
 ### Added
 - Initial release (market tape analysis, seven scenarios)
@@ -15,3 +47,8 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 - Smart spot/futures market detection (perpetual/contract keywords)
 - MCP call order and Report Template defined in `references/scenarios.md`
 - Domain knowledge and safety rules
+
+### Audit
+
+- Uses Gate MCP tools only; all analysis is read-only
+- No trading operations or credential handling in this skill

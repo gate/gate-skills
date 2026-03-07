@@ -11,6 +11,7 @@ This document defines the **MCP call order, parameters, required fields, and out
 | 5 | Basis (spot vs futures) | list_tickers(spot) → list_futures_tickers → list_futures_premium_index |
 | 6 | Manipulation risk | Spot: list_order_book → list_tickers → list_trades. When user says perpetual/contract: list_futures_order_book → list_futures_tickers → list_futures_trades |
 | 7 | Order book explainer | list_order_book(limit=10) → list_tickers |
+| 8 | Slippage simulation | Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers |
 
 ---
 
@@ -726,3 +727,92 @@ The order book is the exchange’s "list of orders":
 
 Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support below is stronger.
 ```
+
+---
+
+## Case 8: Slippage Simulation
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "slippage simulation", "market buy $X slippage", "how much slippage if I market buy $10K?", e.g. "ADA_USDT slippage simulation: if I market buy $10K, how much slippage?"
+
+**API choice**: When user mentions **perpetual, contract, futures**, use **futures** tools; otherwise use **spot** tools.
+
+| Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
+|------|-----------------|--------------------------------------------------------|------------|----------------|
+| 1 | `list_order_book` | `list_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
+| 2 | `list_tickers` | `list_futures_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **Order book + latest price**: Use current order book and ticker last / best ask.
+- **Simulate market buy for quote amount Q (e.g. $10K USDT)**: Walk the **ask** ladder from best ask upward; at each level fill `amount_i` at `price_i` until cumulative quote volume `sum(price_i × amount_i)` ≥ Q (last level may be partially filled so total cost ≈ Q).
+- **Outputs**: Total base filled, volume spent, **volume-weighted average execution price** = total_cost / total_base.
+- **Slippage = deviation from best ask**:
+  - **Price deviation**: `avg_price − ask1` (points in price).
+  - **Relative deviation**: `(avg_price − ask1) / ask1 × 100%`; optionally in bps: `× 10000`.
+
+**Output**: Must include "Simulation inputs" (pair, quote amount, ask1), "Fill summary" (total base, avg price), "Slippage" (vs ask1: points and %), and short "Conclusion".
+
+---
+
+### Scenario 8.1: Spot slippage simulation (e.g. ADA_USDT market buy $10K)
+
+**Context**: User wants to know how much slippage to expect for a market buy of a given USDT amount on spot.
+
+**Prompt examples**:
+- "ADA_USDT slippage simulation: if I market buy $10K, how much slippage?"
+- "How much slippage for a $10K market buy in ETH?"
+
+**Expected behavior**:
+1. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT).
+2. Call per **MCP Call Spec**: `list_order_book`(pair, limit=50) → `list_tickers`(pair).
+3. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
+4. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
+5. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
+
+**Output**:
+```markdown
+## ADA_USDT Slippage Simulation (Spot Market Buy)
+
+### Simulation inputs
+
+| Item | Value |
+|------|--------|
+| Pair | ADA_USDT (spot) |
+| Quote amount | $10,000 USDT |
+| Best ask | 0.xxxx USDT |
+
+### Fill summary
+
+| Metric | Value |
+|--------|--------|
+| Total base filled | x,xxx ADA |
+| Total cost | ~$10,000 USDT |
+| Volume-weighted avg price | 0.xxxx USDT |
+
+### Slippage vs best ask
+
+| Metric | Value |
+|--------|--------|
+| Price deviation (points) | +0.xxxx USDT |
+| Relative deviation | +x.xx% |
+
+### Conclusion
+
+For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points). Slippage can be higher when depth is thin; consider splitting large orders or using limit orders.
+```
+
+---
+
+### Scenario 8.2: Futures slippage simulation (perpetual/contract)
+
+**Context**: User asks slippage for a **perpetual/contract** market buy (long) of a given USDT amount.
+
+**Prompt examples**:
+- "BTC perpetual market long $50K, how much slippage?"
+
+**Expected behavior**:
+1. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=50`) → `list_futures_tickers`(settle, contract).
+2. Same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
+3. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.

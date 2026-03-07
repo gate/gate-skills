@@ -1,13 +1,13 @@
 ---
 name: gate-exchange-marketanalysis
-version: "2026.3.5-1"
-updated: "2026-03-05"
-description: "The market analysis function of Gate Exchange — liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, or order book explanation. Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, or equivalent in other languages."
+version: "2026.3.7-1"
+updated: "2026-03-07"
+description: "The market analysis function of Gate Exchange — liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, order book explanation, or slippage simulation (e.g. market buy $X slippage). Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, slippage simulation."
 ---
 
 # gate-exchange-marketanalysis
 
-Market tape analysis covering seven scenarios: liquidity, momentum, liquidation monitoring, funding arbitrage, basis monitoring, manipulation risk, and order book explanation. This skill provides structured market insights by orchestrating Gate MCP tools; call order and judgment logic are defined in `references/scenarios.md`.
+Market tape analysis covering eight scenarios: liquidity, momentum, liquidation monitoring, funding arbitrage, basis monitoring, manipulation risk, order book explanation, and slippage simulation. This skill provides structured market insights by orchestrating Gate MCP tools; call order and judgment logic are defined in `references/scenarios.md`.
 
 ---
 
@@ -22,6 +22,7 @@ Market tape analysis covering seven scenarios: liquidity, momentum, liquidation 
 | **Basis** | Spot–futures price, premium index | `references/scenarios.md` (Case 5) |
 | **Manipulation risk** | Depth/volume ratio, large orders | `references/scenarios.md` (Case 6) |
 | **Order book explainer** | Bids/asks, spread, depth | `references/scenarios.md` (Case 7) |
+| **Slippage simulation** | Market-order slippage vs best ask | `references/scenarios.md` (Case 8) |
 
 ---
 
@@ -38,12 +39,13 @@ Determine which module (case) to run based on user intent:
 | Basis | basis, premium | Read Case 5 |
 | Manipulation risk | manipulation, depth vs volume | Read Case 6 (spot or futures per keywords) |
 | Order book explainer | order book, spread | Read Case 7 |
+| Slippage simulation | slippage simulation, market buy $X slippage, how much slippage | Read Case 8 (spot or futures per keywords) |
 
 ---
 
 ## Execution
 
-1. **Match user intent** to the routing table above and determine case (1–7) and market type (spot/futures).
+1. **Match user intent** to the routing table above and determine case (1–8) and market type (spot/futures).
 2. **Read** the corresponding case in `references/scenarios.md` for MCP call order and required fields.
 3. **Call Gate MCP** in the exact order defined for that case.
 4. **Apply judgment logic** from scenarios (thresholds, flags, ratings).
@@ -62,6 +64,7 @@ Determine which module (case) to run based on user intent:
 - **Basis (Case 5):** Current basis vs history; basis widening/narrowing for sentiment.
 - **Manipulation (Case 6):** Top-10 depth total / 24h volume &lt; 0.5% → thin depth; consecutive same-direction large orders → possible manipulation. Use spot by default; use futures when user says perpetual/contract.
 - **Order book (Case 7):** Show bids/asks example, explain spread with last price, depth and volatility.
+- **Slippage simulation (Case 8):** Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
 
 ---
 
