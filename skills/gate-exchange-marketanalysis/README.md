@@ -2,7 +2,7 @@
 
 ## Overview
 
-An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.com), covering liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, and order book explanation. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
+An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.com), covering ten scenarios: liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, order book explanation, slippage simulation, K-line breakout/support–resistance, and liquidity with weekend vs weekday. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
 
 ---
 
@@ -17,8 +17,11 @@ An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.
 | **Basis monitoring** | Spot–futures price, premium index | "What is the basis for BTC?" |
 | **Manipulation risk** | Depth/volume ratio, large orders | "Is this coin easy to manipulate?" |
 | **Order book explainer** | Bids/asks, spread, depth | "Explain the order book" |
+| **Slippage simulation** | Market-order slippage vs best ask (pair + quote amount required) | "ADA_USDT slippage for $10K market buy?" |
+| **K-line breakout / support–resistance** | Candlesticks + tickers; support/resistance; breakout momentum | "Does SOL/USDT show breakout signs? Analyze support and resistance." |
+| **Liquidity + weekend vs weekday** | Order book + 90d candlesticks + tickers; weekend vs weekday volume/return | "Evaluate ETH liquidity and compare weekend vs weekday." |
 
-> 📊 **Seven scenarios:** Ask about liquidity, momentum, liquidation, arbitrage, basis, manipulation risk, or order book; the skill routes to the right case and follows `references/scenarios.md`.
+> 📊 **Ten scenarios (Case 1–10):** Ask about liquidity, momentum, liquidation, arbitrage, basis, manipulation risk, order book, slippage simulation, K-line breakout/support–resistance, or liquidity vs weekend/weekday; the skill routes to the right case and follows `references/scenarios.md`.
 
 ---
 
@@ -27,15 +30,15 @@ An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.
 ```
 Natural Language Input
     ↓
-Intent Routing (Case 1–7, spot vs futures)
+Intent Routing (Case 1–10, spot vs futures)
     ↓
 Gate MCP Tools
-    ├── list_order_book / list_futures_order_book
-    ├── list_tickers / list_futures_tickers
-    ├── list_candlesticks / list_futures_candlesticks
-    ├── list_trades / list_futures_funding_rate
+    ├── get_spot_order_book / get_futures_order_book
+    ├── get_spot_tickers / get_futures_tickers
+    ├── get_spot_candlesticks / get_futures_candlesticks
+    ├── get_spot_trades / get_futures_funding_rate
     ├── list_futures_liq_orders (when available)
-    └── list_futures_premium_index
+    └── get_futures_premium_index
     ↓
 Analysis & Judgment Logic
     ↓
@@ -83,6 +86,21 @@ Depth ratio (top 10 / 24h volume); large and consecutive same-side trades.
 
 Live order book (e.g. limit=10) + ticker; explain bids/asks, spread, depth.
 
+### 8. Slippage simulation
+> "ADA_USDT slippage for a $10K market buy?"
+
+Requires pair and quote amount. Spot or futures: order book → tickers (futures: get_futures_contract first for quanto_multiplier). Walk ask ladder; report slippage vs best ask.
+
+### 9. K-line breakout / support–resistance
+> "Does SOL/USDT show signs of breaking out? Analyze support and resistance."
+
+Candlesticks → tickers; derive support/resistance from OHLC; use 24h price and volume for momentum and breakout assessment.
+
+### 10. Liquidity + weekend vs weekday
+> "Evaluate ETH liquidity and compare weekend vs weekday."
+
+Order book + 90d candlesticks + tickers (futures: get_futures_contract first). Split days into weekend vs weekday; compare volume and return.
+
 ---
 
 ## Quick Start
@@ -116,6 +134,15 @@ Live order book (e.g. limit=10) + ticker; explain bids/asks, spread, depth.
 
 # Order book
 "Explain the order book with an example"
+
+# Slippage simulation (pair + amount required)
+"ADA_USDT contract slippage: if I market buy $20K, how much slippage?"
+
+# K-line breakout / support–resistance
+"Based on recent K-line, does SOL/USDT show breakout? Analyze support and resistance."
+
+# Liquidity + weekend vs weekday
+"Evaluate ETH contract liquidity and compare weekend vs weekday."
 ```
 
 See `references/scenarios.md` for full MCP call order and report templates.
