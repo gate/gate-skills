@@ -18,7 +18,7 @@ Format: date-based versioning (`YYYY.M.DD`). Same-day releases may use a sequent
 
 - **Case 8: Slippage simulation** — market-order slippage vs best ask
   - Trigger: e.g. "slippage simulation", "market buy $10K, how much slippage?", "ADA_USDT slippage simulation"
-  - **Spot:** `get_spot_order_book` → `get_spot_tickers`; **Futures:** `get_futures_order_book` → `get_futures_tickers`
+  - **Spot:** `get_spot_order_book` → `get_spot_tickers`; **Futures:** `get_futures_contract` → `get_futures_order_book` → `get_futures_tickers`
   - Logic: walk ask ladder for quote amount Q; volume-weighted avg price; slippage = avg price − ask1 (points and %)
   - Output: simulation inputs, fill summary, slippage vs best ask, conclusion
 - Scenario 8.1: spot slippage simulation (e.g. ADA_USDT / ETH market buy $10K)
@@ -31,7 +31,7 @@ Format: date-based versioning (`YYYY.M.DD`). Same-day releases may use a sequent
   - Output: K-line context, support & resistance table, momentum (24h), breakout assessment
 - **Case 10: Liquidity + weekend vs weekday** — evaluate liquidity and compare weekend vs weekday
   - Trigger: e.g. "Evaluate ETH liquidity on the exchange and compare weekend vs weekday."
-  - **Spot:** `get_spot_order_book` → `get_spot_candlesticks`(90d) → `get_spot_tickers`; **Futures:** `get_futures_order_book` → `get_futures_candlesticks`(90d) → `get_futures_tickers`
+  - **Spot:** `get_spot_order_book` → `get_spot_candlesticks`(90d) → `get_spot_tickers`; **Futures:** `get_futures_contract` → `get_futures_order_book` → `get_futures_candlesticks`(90d) → `get_futures_tickers`
   - Logic: order book for current depth; 90d candlesticks split by weekend vs weekday for volume and return; compare and summarize
   - Output: current liquidity, 90-day weekend vs weekday table, comparison, conclusion
 
