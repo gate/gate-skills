@@ -33,9 +33,9 @@ Gate MCP Tools
     ├── get_spot_order_book / get_futures_order_book
     ├── get_spot_tickers / get_futures_tickers
     ├── get_spot_candlesticks / get_futures_candlesticks
-    ├── get_spot_trades / list_futures_funding_rate
+    ├── get_spot_trades / get_futures_funding_rate
     ├── list_futures_liq_orders (when available)
-    └── list_futures_premium_index
+    └── get_futures_premium_index
     ↓
 Analysis & Judgment Logic
     ↓

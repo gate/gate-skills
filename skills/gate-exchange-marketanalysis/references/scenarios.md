@@ -2,15 +2,15 @@
 
 This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
-**MCP tool names (Gate MCP):** Spot market data use `get_spot_order_book`, `get_spot_candlesticks`, `get_spot_tickers`, `get_spot_trades`. Futures market data use `get_futures_order_book`, `get_futures_candlesticks`, `get_futures_tickers`, `get_futures_trades`. Futures funding/liquidation/premium use `list_futures_funding_rate`, `list_futures_liq_orders`, `list_futures_premium_index`. Call these exact tool names when invoking Gate MCP.
+**MCP tool names (Gate MCP):** Spot market data use `get_spot_order_book`, `get_spot_candlesticks`, `get_spot_tickers`, `get_spot_trades`. Futures market data use `get_futures_order_book`, `get_futures_candlesticks`, `get_futures_tickers`, `get_futures_trades`. Futures funding/liquidation/premium use `get_futures_funding_rate`, `list_futures_liq_orders`, `get_futures_premium_index`. Call these exact tool names when invoking Gate MCP.
 
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
 | 1 | Liquidity analysis | get_spot_order_book → get_spot_candlesticks → get_spot_tickers (use futures APIs when user says perpetual/contract) |
-| 2 | Momentum (buy vs sell) | get_spot_trades → get_spot_tickers → get_spot_candlesticks → get_spot_order_book → list_futures_funding_rate (futures APIs when contract) |
+| 2 | Momentum (buy vs sell) | get_spot_trades → get_spot_tickers → get_spot_candlesticks → get_spot_order_book → get_futures_funding_rate (futures APIs when contract) |
 | 3 | Liquidation monitoring | list_futures_liq_orders → get_futures_candlesticks → get_futures_tickers |
-| 4 | Funding rate arbitrage | get_futures_tickers → list_futures_funding_rate → get_spot_tickers → get_spot_order_book |
-| 5 | Basis (spot vs futures) | get_spot_tickers(spot) → get_futures_tickers → list_futures_premium_index |
+| 4 | Funding rate arbitrage | get_futures_tickers → get_futures_funding_rate → get_spot_tickers → get_spot_order_book |
+| 5 | Basis (spot vs futures) | get_spot_tickers(spot) → get_futures_tickers → get_futures_premium_index |
 | 6 | Manipulation risk | Spot: get_spot_order_book → get_spot_tickers → get_spot_trades. When user says perpetual/contract: get_futures_order_book → get_futures_tickers → get_futures_trades |
 | 7 | Order book explainer | get_spot_order_book(limit=10) → get_spot_tickers |
 | 8 | Slippage simulation | Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_order_book → get_futures_tickers |
@@ -150,7 +150,7 @@ Liquidity rating: 5/5 ⭐
 | 2 | `get_spot_tickers` (spot) / `get_futures_tickers` (futures) | Same pair | 24h volume, 24h change |
 | 3 | `get_spot_candlesticks` (spot) / `get_futures_candlesticks` (futures) | `interval=1d`, `limit=30` | 30-day average volume |
 | 4 | `get_spot_order_book` (spot) / `get_futures_order_book` (futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
-| 5 | `list_futures_funding_rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
+| 5 | `get_futures_funding_rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -170,7 +170,7 @@ Liquidity rating: 5/5 ⭐
 - "Is BTC more long or short in 24h, and is it sustainable?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `get_spot_trades`/`get_futures_trades` → `get_spot_tickers`/`get_futures_tickers` → `get_spot_candlesticks`/`get_futures_candlesticks` → `get_spot_order_book`/`get_futures_order_book` → `list_futures_funding_rate` (futures when contract).
+1. Call per **MCP Call Spec**: `get_spot_trades`/`get_futures_trades` → `get_spot_tickers`/`get_futures_tickers` → `get_spot_candlesticks`/`get_futures_candlesticks` → `get_spot_order_book`/`get_futures_order_book` → `get_futures_funding_rate` (futures when contract).
 2. From trades: buy/sell volume, buy share; tickers: 24h volume and change; candlesticks: 30d avg; order book: top 10 long/short depth; funding rate for bias.
 3. Apply logic (buy > 70% → buy-side strong; 24h > 30d avg → active; funding + book → direction and sustainability).
 4. Output buy/sell table + direction + analysis per Report Template.
@@ -350,7 +350,7 @@ Long liq 84%; current move is squeezing long leverage.
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
 | 1 | `get_futures_tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
-| 2 | `list_futures_funding_rate` or equivalent | For candidates / full market | Rate details |
+| 2 | `get_futures_funding_rate` or equivalent | For candidates / full market | Rate details |
 | 3 | `get_spot_tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
 | 4 | `get_spot_order_book` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
 
@@ -372,7 +372,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Any arbitrage opportunities?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `get_futures_tickers` → `list_futures_funding_rate` → `get_spot_tickers`(candidates) → `get_spot_order_book`(top candidates).
+1. Call per **MCP Call Spec**: `get_futures_tickers` → `get_futures_funding_rate` → `get_spot_tickers`(candidates) → `get_spot_order_book`(top candidates).
 2. Logic: |rate|>0.05% and 24h vol>$10M → candidate; spot–futures spread>0.2% → bonus; thin depth → exclude.
 3. Output arbitrage table + strategy + risk note.
 
@@ -437,7 +437,7 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 |------|----------|------------|----------------|
 | 1 | `get_spot_tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
 | 2 | `get_futures_tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
-| 3 | `list_futures_premium_index` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
+| 3 | `get_futures_premium_index` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -456,7 +456,7 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 - "What is BTC basis?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `get_spot_tickers`(BTC_USDT) → `get_futures_tickers`(usdt, BTC_USDT) → optional `list_futures_premium_index`.
+1. Call per **MCP Call Spec**: `get_spot_tickers`(BTC_USDT) → `get_futures_tickers`(usdt, BTC_USDT) → optional `get_futures_premium_index`.
 2. Compute basis, basis rate; if premium history available, historical mean.
 3. Output basis table + analysis + recommendation per Report Template.
 

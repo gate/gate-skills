@@ -6,7 +6,7 @@ Format: date-based versioning (`YYYY.M.DD`). Same-day releases may use a sequent
 
 ---
 
-## [2026.3.7] - 2026-03-07
+## [2026.3.7-1] - 2026-03-07
 
 ### Scope
 
@@ -37,6 +37,7 @@ Format: date-based versioning (`YYYY.M.DD`). Same-day releases may use a sequent
 
 ### Changed
 
+- **MCP tool names** — Corrected to match Gate MCP: `list_futures_funding_rate` → `get_futures_funding_rate`; `list_futures_premium_index` → `get_futures_premium_index`. Updated in `references/scenarios.md` and README.md. (`list_futures_liq_orders` is correct per MCP.)
 - **Pure English** — all trigger phrases and report templates in SKILL.md and `references/scenarios.md` are in English.
 - **Versioning** — version and `updated` follow current date (`YYYY.M.DD`).
 - **Case 8 required inputs** — currency pair and quote amount both required; if either missing, prompt user (no default pair, no default amount e.g. $10K). SKILL.md Execution step 3 and Domain Knowledge (Case 8) updated accordingly.
