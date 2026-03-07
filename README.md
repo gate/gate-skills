@@ -1,5 +1,7 @@
 # Gate GitHub Skills
 
+[English](README.md) | [中文](README_zh.md)
+
 Gate GitHub Skills is an open skills marketplace that empowers AI agents with native access to Gate.io's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
 
 Built by Gate.io. Built for the crypto community.
@@ -12,7 +14,10 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, and order book explainer | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
+| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.5-1` | ✅ Active |
+| [gate-dex-market](#-gate-dex-market) | Gate Wallet DEX market data: K-line, transaction stats, liquidity, token info, rankings, security audit, new token discovery | `2026.3.6-1` | ✅ Active |
 | [gate-mcp-installer](#-gate-mcp-installer) | One-click Gate MCP setup & configuration | `2026.3.4-1` | ✅ Active |
 
 ---
@@ -21,26 +26,56 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 > **Path**: `skills/gate-exchange-marketanalysis/`
 
-Analyze Gate.io market tape and structure across seven dimensions:
-
-| Sub-Module | What It Does |
-|------------|-------------|
-| **Liquidity** | Order book depth, volume activity, and slippage risk assessment |
-| **Momentum** | Buy vs sell flow structure and funding bias analysis |
-| **Liquidation** | Liquidation anomaly detection and squeeze signal identification |
-| **Funding Arbitrage** | Funding-rate and volume-based arbitrage candidate screening |
-| **Basis** | Spot-futures premium/basis tracking and sentiment interpretation |
-| **Manipulation Risk** | Depth/volume mismatch and large-order behavior risk flags |
-| **Order Book Explainer** | Bids/asks, spread, and depth interpretation in plain language |
+Read-only market tape analysis across ten scenarios: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, K-line breakout/support–resistance, and weekend vs weekday volume comparison.
 
 **Example Prompts**:
 - `Check BTC liquidity and slippage`
 - `What is the momentum of ETH?`
-- `Monitor BTC liquidations for squeeze risk`
-- `Run a funding arbitrage scan`
-- `What is the basis for SOL?`
+- `Simulate a $10K market buy on ETH`
 - `Is there manipulation risk on DOGE?`
-- `Explain the BTC order book and spread`
+- `Compare BTC weekend vs weekday volume`
+
+---
+
+## 📊 gate-exchange-futures
+
+> **Path**: `skills/gate-exchange-futures/`
+
+USDT perpetual futures trading on Gate Exchange. Supports four operations: open position, close position, cancel order, and amend order — with pre-flight checks, margin/leverage handling, and confirmation before execution.
+
+**Example Prompts**:
+- `Long BTC 1 contract with 10x leverage`
+- `Close all ETH positions`
+- `Cancel my BTC buy order`
+- `Change order price to 60000`
+
+---
+
+## 💱 gate-exchange-spot
+
+> **Path**: `skills/gate-exchange-spot/`
+
+Gate spot trading covering buy/sell (market & limit), smart condition-based orders, order management (amend/cancel), account queries, fill verification, and coin-to-coin swaps. All order placements require explicit user confirmation.
+
+**Example Prompts**:
+- `Buy 100 USDT worth of BTC`
+- `Sell ETH when price hits 3500`
+- `Cancel my unfilled BTC order and check balance`
+- `Swap USDT to SOL`
+
+---
+
+## 🌐 gate-dex-market
+
+> **Path**: `skills/gate-dex-market/`
+
+Gate Wallet DEX market data — all read-only, no authentication required. Covers K-line, transaction stats, liquidity pools, token details, rankings, new token discovery, and contract security audit.
+
+**Example Prompts**:
+- `Show me the ETH K-line on the last 24h`
+- `What tokens are trending on BSC?`
+- `Check the security of contract 0x...`
+- `List newly launched tokens on ETH`
 
 ---
 
@@ -48,12 +83,7 @@ Analyze Gate.io market tape and structure across seven dimensions:
 
 > **Path**: `skills/gate-mcp-installer/`
 
-One-click installer and configurator for Gate MCP (mcporter). Automates the complete setup process:
-
-1. Installs `mcporter` CLI globally via npm
-2. Configures Gate MCP server with proper endpoint
-3. Verifies connectivity by listing available tools
-4. Provides usage examples for common queries
+One-click installer for Gate MCP (mcporter). Installs the CLI, configures the Gate MCP server endpoint, and verifies connectivity.
 
 **Quick Start**:
 ```bash
@@ -86,19 +116,215 @@ bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
 
 ---
 
+## Skills Installation Guide
+
+### General Skills Installation (Recommended)
+
+1. Check whether `npx` is already installed (if not, see the appendix):
+
+   ```bash
+   npx -v
+   ```
+
+   If a version number is returned (for example, `11.8.0`), `npx` is installed.
+
+![Check npx version](image/general-install-1.png)
+
+2. Install skills with interactive selection:
+
+   ```bash
+   npx skills add https://github.com/gate/gate-skills
+   ```
+   
+![Select and install skills](image/general-install-2.png)
+
+3. Install a specific skill (example: `gate-market`):
+
+   ```bash
+   npx skills add https://github.com/gate/gate-skills --skill gate-market
+   ```
+   
+![Install a specific skill](image/general-install-3.png)
+
+### Install Skills in Claude CLI
+
+#### Option 1: Natural Language Installation (Recommended)
+
+```text
+help me to install skills, github url is: https://github.com/gate/gate-skills
+```
+
+![Claude natural language installation](image/claude-install-1.png)
+
+Installation complete.
+
+![Claude installation complete](image/claude-install-2.png)
+
+#### Option 2: Manual Installation
+
+Step 1: Download the skills package (GitHub: <https://github.com/gate/gate-skills>)
+
+Step 2: Unzip the package and copy it to `~/.claude/skills/`.
+
+- Show hidden folders: open your user home folder, then press `Command + Shift + .` (press again to hide)
+- Copy folders to target path: copy the `skills` subfolders from `gate-skills-master` into `~/.claude/skills/`
+- Verify installation: run `/skills` in Claude CLI, or ask `how many skills have I installed?`
+
+### Install Skills in Codex CLI
+
+#### Option 1: Natural Language Installation (Recommended)
+
+```text
+help me to install skills, github url is: https://github.com/gate/gate-skills
+```
+
+![Codex natural language installation step](image/codex-nl-install-1.png)
+
+Changes take effect after restarting Codex.
+
+![Codex natural language installation complete](image/codex-nl-install-2.png)
+
+#### Option 2: Terminal Installation
+
+1. In terminal, type `/skills`, choose `1. List skills`, select `Skill Installer`, and enter `https://github.com/gate/gate-skills`
+
+   ![Codex terminal install - open skills menu](image/codex-terminal-install-1.png)
+   ![Codex terminal install - select Skill Installer](image/codex-terminal-install-2.png)
+   ![Codex terminal install - input repository URL](image/codex-terminal-install-3.png)
+   ![Codex terminal install - installation process](image/codex-terminal-install-4.png)
+
+2. Verify installation: restart the terminal and run `/skills` -> `List Skills`
+
+   ![Codex terminal install - verify installed skills](image/codex-terminal-install-5.png)
+
+#### Option 3: Manual Installation
+
+Step 1: Download the skills package (GitHub: <https://github.com/gate/gate-skills>)
+
+![Codex manual install - download repository](image/codex-manual-install-1.png)
+
+Step 2: Unzip the package and copy it to `~/.codex/skills/`.
+
+1. Show hidden folders: open your user home folder, then press `Command + Shift + .` (press again to hide)
+
+   ![Codex manual install - show hidden folders](image/codex-manual-install-2.png)
+
+2. Copy folders to target path: copy all `skills` subfolders from `gate-skills-master` into `~/.codex/skills/`
+
+   ![Codex manual install - copy skills subfolders](image/codex-manual-install-3.png)
+
+3. Verify installation: restart the terminal and run `/skills` -> `List Skills`
+
+   ![Codex manual install - verify installation](image/codex-manual-install-4.png)
+
+### Install Skills in OpenClaw
+
+#### Option 1: Install via Chat (Recommended)
+
+In the OpenClaw chat interface (such as Telegram or Feishu), send the GitHub URL directly to the assistant, for example:
+
+```text
+Help me install this skill: https://github.com/gate/gate-skills
+```
+
+The assistant will automatically pull the repository, configure the environment, and try to load the skill.
+
+#### Option 2: Auto-install with ClawHub (Recommended)
+
+- Official marketplace (requires `npx`; see appendix for installation):
+
+  ```bash
+  npx clawhub@latest install gate-skills
+  ```
+
+- GitHub repository:
+
+  ```bash
+  npx clawhub@latest add https://github.com/gate/gate-skills
+  ```
+
+#### Option 3: Manual Installation
+
+Step 1: Download the skills package (GitHub: <https://github.com/gate/gate-skills>)
+
+![OpenClaw manual install - download repository](image/openclaw-manual-install-1.png)
+
+Step 2: Unzip the package and copy it to `~/.openclaw/skills/`.
+
+1. Show hidden folders: open your user home folder, then press `Command + Shift + .` (press again to hide)
+2. Copy folders to target path: copy all `skills` subfolders from `gate-skills-master` into `~/.openclaw/skills/`
+
+Step 3: Restart OpenClaw Gateway.
+
+### Appendix: Install npx on macOS
+
+1. Check whether `npx` is already installed:
+
+   ```bash
+   npx -v
+   ```
+
+   If a version number is returned (for example, `11.8.0`), `npx` is installed.
+
+2. If `npx` is not installed, use one of the following methods:
+
+   - Option 1: Install via Homebrew
+
+     ```bash
+     # Install Homebrew (official)
+     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+     # Install Homebrew (China mirror)
+     /bin/zsh -c "$(curl -fsSL https://gitee.com/cunkai/HomebrewCN/raw/master/Homebrew.sh)"
+
+     # Verify Homebrew
+     brew --version
+
+     # Install Node.js (includes npx)
+     brew install node
+
+     # Verify npx
+     npx -v
+     ```
+
+   - Option 2: Install Node.js from the official website (download page):
+     <https://nodejs.org/en/download>
+
+---
+
 ## Repository Structure
 
 ```
 gate-github-skills/
 ├── README.md
+├── image/                              # Installation screenshots
 └── skills/
-    ├── gate-exchange-marketanalysis/ # Market tape analysis skill
+    ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
     │   └── references/
     │       └── scenarios.md
-    ├── gate-mcp-installer/      # MCP setup skill
+    ├── gate-exchange-futures/          # Futures trading skill
+    │   ├── SKILL.md
+    │   ├── CHANGELOG.md
+    │   ├── README.md
+    │   └── references/
+    │       ├── open-position.md
+    │       ├── close-position.md
+    │       ├── cancel-order.md
+    │       └── amend-order.md
+    ├── gate-exchange-spot/             # Spot trading skill
+    │   ├── SKILL.md
+    │   ├── CHANGELOG.md
+    │   ├── README.md
+    │   └── references/
+    │       └── scenarios.md
+    ├── gate-dex-market/                # DEX market data skill
+    │   ├── SKILL.md
+    │   ├── CHANGELOG.md
+    │   └── README.md
+    └── gate-mcp-installer/             # MCP setup skill
         ├── SKILL.md
         ├── CHANGELOG.md
         ├── README.md

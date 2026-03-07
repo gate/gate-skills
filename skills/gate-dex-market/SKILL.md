@@ -1,8 +1,8 @@
 ---
-name: gate-web3-dex-market
+name: gate-dex-market
 version: "2026.3.6-1"
 updated: "2026-03-06"
-description: "Gate Wallet market data and6token info queries. K-line,
+description: "Gate Wallet market data and token info queries. K-line,
   transaction stats, liquidity, token details, rankings, security audit,
   new token discovery. Use when users ask about market data, prices, or
   token info. All queries require no authentication. Not for executing trades."
@@ -43,7 +43,7 @@ Option 1: Via Cursor Settings (recommended)
   3. Fill in:
      - Name: gate-dex-mcp
      - Type: HTTP
-     - URL: https://your-mcp-server-domain/mcp
+     - URL: https://api.gatemcp.ai/mcp
   4. Save and retry
 
 Option 2: Manually edit config file
@@ -51,7 +51,7 @@ Option 2: Manually edit config file
   {
     "mcpServers": {
       "gate-dex-mcp": {
-        "url": "https://your-mcp-server-domain/mcp"
+        "url": "https://api.gatemcp.ai/mcp"
       }
     }
   }
