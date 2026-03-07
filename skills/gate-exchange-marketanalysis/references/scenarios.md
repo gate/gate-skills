@@ -615,6 +615,8 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 **Context**: User asks about manipulation for a **perpetual/contract** (e.g. "BTC contract easy to manipulate?").
 
 **Prompt examples**:
+- "Is BTC contract easy to manipulate?"
+- "How is ETH perpetual depth vs volume?"
 
 **Expected behavior**:
 1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `get_futures_tickers` → `get_futures_trades` (or equivalent, limit=500).
@@ -778,9 +780,9 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 1. **Require pair and amount**: If the user did not specify a **currency pair** (e.g. ADA_USDT, ETH_USDT), prompt them to provide one; do not run the simulation or assume a default pair. If the user did not specify a **quote amount** (e.g. $10,000 USDT), prompt them to provide one; do not assume a default (e.g. do not default to $10K).
 2. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT) from the user.
 3. Call per **MCP Call Spec**: `get_spot_order_book`(pair, limit=50) → `get_spot_tickers`(pair).
-3. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
-4. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
-5. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
+4. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
+5. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
+6. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
 
 **Output**:
 ```markdown
