@@ -1,6 +1,6 @@
 ---
 name: gate-exchange-marketanalysis
-version: "2026.3.7-1"
+version: "2026.3.7-2"
 updated: "2026-03-07"
 description: "The market analysis function of Gate Exchange — liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, order book explanation, or slippage simulation (e.g. market buy $X slippage). Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, slippage simulation."
 ---
@@ -65,7 +65,7 @@ Determine which module (case) to run based on user intent:
 - **Basis (Case 5):** Current basis vs history; basis widening/narrowing for sentiment.
 - **Manipulation (Case 6):** Top-10 depth total / 24h volume &lt; 0.5% → thin depth; consecutive same-direction large orders → possible manipulation. Use spot by default; use futures when user says perpetual/contract.
 - **Order book (Case 7):** Show bids/asks example, explain spread with last price, depth and volatility.
-- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
+- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_order_book → get_futures_tickers. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
 
 ---
 

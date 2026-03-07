@@ -2,16 +2,18 @@
 
 This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
+**MCP tool names (Gate MCP):** Spot market data use `get_spot_order_book`, `get_spot_candlesticks`, `get_spot_tickers`, `get_spot_trades`. Futures market data use `get_futures_order_book`, `get_futures_candlesticks`, `get_futures_tickers`, `get_futures_trades`. Futures funding/liquidation/premium use `list_futures_funding_rate`, `list_futures_liq_orders`, `list_futures_premium_index`. Call these exact tool names when invoking Gate MCP.
+
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
-| 1 | Liquidity analysis | list_order_book → list_candlesticks → list_tickers (use futures APIs when user says perpetual/contract) |
-| 2 | Momentum (buy vs sell) | list_trades → list_tickers → list_candlesticks → list_order_book → list_futures_funding_rate (futures APIs when contract) |
-| 3 | Liquidation monitoring | list_futures_liq_orders → list_futures_candlesticks → list_futures_tickers |
-| 4 | Funding rate arbitrage | list_futures_tickers → list_futures_funding_rate → list_tickers → list_order_book |
-| 5 | Basis (spot vs futures) | list_tickers(spot) → list_futures_tickers → list_futures_premium_index |
-| 6 | Manipulation risk | Spot: list_order_book → list_tickers → list_trades. When user says perpetual/contract: list_futures_order_book → list_futures_tickers → list_futures_trades |
-| 7 | Order book explainer | list_order_book(limit=10) → list_tickers |
-| 8 | Slippage simulation | Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers |
+| 1 | Liquidity analysis | get_spot_order_book → get_spot_candlesticks → get_spot_tickers (use futures APIs when user says perpetual/contract) |
+| 2 | Momentum (buy vs sell) | get_spot_trades → get_spot_tickers → get_spot_candlesticks → get_spot_order_book → list_futures_funding_rate (futures APIs when contract) |
+| 3 | Liquidation monitoring | list_futures_liq_orders → get_futures_candlesticks → get_futures_tickers |
+| 4 | Funding rate arbitrage | get_futures_tickers → list_futures_funding_rate → get_spot_tickers → get_spot_order_book |
+| 5 | Basis (spot vs futures) | get_spot_tickers(spot) → get_futures_tickers → list_futures_premium_index |
+| 6 | Manipulation risk | Spot: get_spot_order_book → get_spot_tickers → get_spot_trades. When user says perpetual/contract: get_futures_order_book → get_futures_tickers → get_futures_trades |
+| 7 | Order book explainer | get_spot_order_book(limit=10) → get_spot_tickers |
+| 8 | Slippage simulation | Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_order_book → get_futures_tickers |
 
 ---
 
@@ -23,14 +25,14 @@ For liquidity analysis, **call Gate MCP in this order** and extract the listed f
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `list_order_book` (spot) | `currency_pair={BASE}_USDT`, `limit=20` | Number of ask/bid levels; top 10 bid/ask depth totals; bid1/ask1 (for spread and slippage) |
-| 2 | `list_candlesticks` (spot) | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | Last 30 days volume (for 30d avg); latest candle for 24h volume reference |
-| 3 | `list_tickers` (spot) | `currency_pair={BASE}_USDT` | `last`; `quoteVolume` 24h (USDT); `changePercentage` 24h; `high24h`/`low24h` |
-| 4 (optional) | `list_trades` (spot) | `currency_pair={BASE}_USDT`, `limit=100` | Recent trade size distribution for "recent flow" and participation |
+| 1 | `get_spot_order_book` (spot) | `currency_pair={BASE}_USDT`, `limit=20` | Number of ask/bid levels; top 10 bid/ask depth totals; bid1/ask1 (for spread and slippage) |
+| 2 | `get_spot_candlesticks` (spot) | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | Last 30 days volume (for 30d avg); latest candle for 24h volume reference |
+| 3 | `get_spot_tickers` (spot) | `currency_pair={BASE}_USDT` | `last`; `quoteVolume` 24h (USDT); `changePercentage` 24h; `high24h`/`low24h` |
+| 4 (optional) | `get_spot_trades` (spot) | `currency_pair={BASE}_USDT`, `limit=100` | Recent trade size distribution for "recent flow" and participation |
 
 **Calculation & judgment** (aligned with SKILL):
 
-- **API choice**: Use futures APIs (e.g. list_futures_order_book) when user says "perpetual" or "contract"; otherwise spot.
+- **API choice**: Use futures APIs (e.g. get_futures_order_book) when user says "perpetual" or "contract"; otherwise spot.
 - **Slippage** = `2×(ask1−bid1)/(bid1+ask1)×100%`; if > 0.5% → flag "high slippage risk".
 - **Depth**: asks/bids depth < 10 levels → flag "low liquidity".
 - **24h volume** < 30-day volume average → flag "cold pair".
@@ -48,7 +50,7 @@ For liquidity analysis, **call Gate MCP in this order** and extract the listed f
 - "How is ETH liquidity?"
 
 **Expected behavior**:
-1. Call in order per **MCP Call Spec**: `list_order_book` → `list_candlesticks` → `list_tickers` (optional `list_trades`).
+1. Call in order per **MCP Call Spec**: `get_spot_order_book` → `get_spot_candlesticks` → `get_spot_tickers` (optional `get_spot_trades`).
 2. From order book: level count, top 10 depth, bid1/ask1.
 3. From candlesticks: 30d avg volume, 24h volume.
 4. From tickers: last, 24h quote volume, change.
@@ -86,7 +88,7 @@ ETH liquidity is excellent, suitable for large size.
 - "How is BTC perpetual depth?"
 
 **Expected behavior**:
-1. Detect "perpetual/contract" and use **futures** MCP: `list_futures_order_book` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `list_futures_tickers`, `list_futures_candlesticks`(1d, 30).
+1. Detect "perpetual/contract" and use **futures** MCP: `get_futures_order_book` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `get_futures_tickers`, `get_futures_candlesticks`(1d, 30).
 2. Extract level count, top 10 depth, bid1/ask1; compute slippage.
 3. Output core metrics table + liquidity rating per liquidity criteria.
 
@@ -112,7 +114,7 @@ Liquidity rating: 5/5 ⭐
 - "How is XYZ liquidity?"
 
 **Expected behavior**:
-1. Still follow **Case 1 MCP Call Spec**: order_book → candlesticks → tickers.
+1. Still follow **Case 1 MCP Call Spec**: `get_spot_order_book` → `get_spot_candlesticks` → `get_spot_tickers`.
 2. If depth < 10 levels, or 24h volume < 30d avg, or slippage > 0.5%, mark 🔴 in core metrics and output risk note + low liquidity rating.
 
 **Output**:
@@ -142,10 +144,10 @@ Liquidity rating: 5/5 ⭐
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `list_trades` (spot/futures) | `currency_pair` or `contract`+`settle`, `limit=1000` | Buy/sell volume; buy share = buy_volume / total_volume |
-| 2 | `list_tickers` (spot/futures) | Same pair | 24h volume, 24h change |
-| 3 | `list_candlesticks` (spot/futures) | `interval=1d`, `limit=30` | 30-day average volume |
-| 4 | `list_order_book` (spot/futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
+| 1 | `get_spot_trades` (spot) / `get_futures_trades` (futures) | `currency_pair` or `contract`+`settle`, `limit=1000` | Buy/sell volume; buy share = buy_volume / total_volume |
+| 2 | `get_spot_tickers` (spot) / `get_futures_tickers` (futures) | Same pair | 24h volume, 24h change |
+| 3 | `get_spot_candlesticks` (spot) / `get_futures_candlesticks` (futures) | `interval=1d`, `limit=30` | 30-day average volume |
+| 4 | `get_spot_order_book` (spot) / `get_futures_order_book` (futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
 | 5 | `list_futures_funding_rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
 
 **Calculation & judgment** (aligned with SKILL):
@@ -166,7 +168,7 @@ Liquidity rating: 5/5 ⭐
 - "Is BTC more long or short in 24h, and is it sustainable?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_trades` → `list_tickers` → `list_candlesticks` → `list_order_book` → `list_futures_funding_rate` (futures when contract).
+1. Call per **MCP Call Spec**: `get_spot_trades`/`get_futures_trades` → `get_spot_tickers`/`get_futures_tickers` → `get_spot_candlesticks`/`get_futures_candlesticks` → `get_spot_order_book`/`get_futures_order_book` → `list_futures_funding_rate` (futures when contract).
 2. From trades: buy/sell volume, buy share; tickers: 24h volume and change; candlesticks: 30d avg; order book: top 10 long/short depth; funding rate for bias.
 3. Apply logic (buy > 70% → buy-side strong; 24h > 30d avg → active; funding + book → direction and sustainability).
 4. Output buy/sell table + direction + analysis per Report Template.
@@ -202,7 +204,7 @@ Buy share 65% but below 70% "strong" threshold; currently long-leaning but not o
 - "Is ETH buy side strong?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_trades`(ETH_USDT) → `list_tickers` → `list_candlesticks`.
+1. Call per **MCP Call Spec**: `get_spot_trades`(ETH_USDT) → `get_spot_tickers` → `get_spot_candlesticks`.
 2. Compute buy/sell share; if buy > 70% mark as buy-side strong.
 3. Output buy/sell table + direction (buy-side strong).
 
@@ -234,7 +236,7 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 - "BTC contract momentum"
 
 **Expected behavior**:
-1. Detect "contract" and use **futures** MCP: `list_trades` (futures, `settle=usdt`, `contract=BTC_USDT`) → `list_futures_tickers` → `list_futures_candlesticks`.
+1. Detect "contract" and use **futures** MCP: `get_futures_trades` (`settle=usdt`, `contract=BTC_USDT`) → `get_futures_tickers` → `get_futures_candlesticks`.
 2. Extract buy/sell share, 24h volume, 30d avg per MCP Call Spec; same output structure, data from futures.
 
 ---
@@ -248,8 +250,8 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
 | 1 | `list_futures_liq_orders` | `settle=usdt`, time range (last 1h; optional 24h for daily baseline) | Liq volume by contract; long (size>0) / short (size<0); 1h total liq |
-| 2 | `list_futures_candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | Price during liq window, current price, recovery |
-| 3 | `list_futures_tickers` | `settle=usdt` (or specific contract) | Current price, 24h change |
+| 2 | `get_futures_candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | Price during liq window, current price, recovery |
+| 3 | `get_futures_tickers` | `settle=usdt` (or specific contract) | Current price, 24h change |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -269,7 +271,7 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 - "Recent liquidations?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_futures_liq_orders` → `list_futures_candlesticks` → `list_futures_tickers`.
+1. Call per **MCP Call Spec**: `list_futures_liq_orders` → `get_futures_candlesticks` → `get_futures_tickers`.
 2. Aggregate liq by contract; long/short share; if daily baseline available, compute 1h vs daily multiple.
 3. Apply logic: 1h liq > 3× daily → anomaly; one-sided > 80% → long/short squeeze; price recovered → wick.
 4. Output market overview table + anomaly contracts table.
@@ -308,7 +310,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Did BTC just wick?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_futures_liq_orders`(1h, optional filter contract=BTC_USDT) → `list_futures_candlesticks`(BTC_USDT, 5m, 12) → `list_futures_tickers`.
+1. Call per **MCP Call Spec**: `list_futures_liq_orders`(1h, optional filter contract=BTC_USDT) → `get_futures_candlesticks`(BTC_USDT, 5m, 12) → `get_futures_tickers`.
 2. From liq: long/short share; from candlesticks: low, current price; recovery = (current − low) / (pre-spike high − low) or similar.
 3. If long-dominated liq and recovery > 80%, output wick analysis (liq table + low/current/recovery + wick conclusion).
 
@@ -345,10 +347,10 @@ Long liq 84%; current move is squeezing long leverage.
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `list_futures_tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
+| 1 | `get_futures_tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
 | 2 | `list_futures_funding_rate` or equivalent | For candidates / full market | Rate details |
-| 3 | `list_tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
-| 4 | `list_order_book` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
+| 3 | `get_spot_tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
+| 4 | `get_spot_order_book` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -368,7 +370,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Any arbitrage opportunities?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_futures_tickers` → `list_futures_funding_rate` → `list_tickers`(candidates) → `list_order_book`(top candidates).
+1. Call per **MCP Call Spec**: `get_futures_tickers` → `list_futures_funding_rate` → `get_spot_tickers`(candidates) → `get_spot_order_book`(top candidates).
 2. Logic: |rate|>0.05% and 24h vol>$10M → candidate; spot–futures spread>0.2% → bonus; thin depth → exclude.
 3. Output arbitrage table + strategy + risk note.
 
@@ -404,7 +406,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Which coins have extreme funding?"
 
 **Expected behavior**:
-1. Call `list_futures_tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
+1. Call `get_futures_tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
 2. Sort by |rate|; label severity (e.g. extreme positive, high negative).
 3. Output "Extreme funding" table (contract, rate, status).
 
@@ -431,8 +433,8 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `list_tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
-| 2 | `list_futures_tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
+| 1 | `get_spot_tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
+| 2 | `get_futures_tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
 | 3 | `list_futures_premium_index` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
 
 **Calculation & judgment** (aligned with SKILL):
@@ -452,7 +454,7 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 - "What is BTC basis?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_tickers`(BTC_USDT) → `list_futures_tickers`(usdt, BTC_USDT) → optional `list_futures_premium_index`.
+1. Call per **MCP Call Spec**: `get_spot_tickers`(BTC_USDT) → `get_futures_tickers`(usdt, BTC_USDT) → optional `list_futures_premium_index`.
 2. Compute basis, basis rate; if premium history available, historical mean.
 3. Output basis table + analysis + recommendation per Report Template.
 
@@ -485,7 +487,7 @@ Current basis rate 0.31%, above historical mean 0.15%; **elevated positive basis
 - "ETH spot–futures spread"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_tickers`(ETH_USDT) → `list_futures_tickers`(usdt, ETH_USDT).
+1. Call per **MCP Call Spec**: `get_spot_tickers`(ETH_USDT) → `get_futures_tickers`(usdt, ETH_USDT).
 2. Compute basis and basis rate; if negative, output basis table + ⚠️ negative basis warning (bearish / short crowding).
 
 **Output**:
@@ -520,9 +522,9 @@ Currently **negative basis** (futures below spot), which often indicates:
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
-| 1 | `list_order_book` | `list_futures_order_book` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `limit=20` | Top 10 bid depth sum, top 10 ask depth sum |
-| 2 | `list_tickers` | `list_futures_tickers` | Same pair / contract + settle | 24h quote volume (quoteVolume) |
-| 3 | `list_trades` | `list_futures_trades` or equivalent | Same pair; `limit=500` (or 24h window) | Trade size distribution; consecutive same-direction large orders |
+| 1 | `get_spot_order_book` | `get_futures_order_book` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `limit=20` | Top 10 bid depth sum, top 10 ask depth sum |
+| 2 | `get_spot_tickers` | `get_futures_tickers` | Same pair / contract + settle | 24h quote volume (quoteVolume) |
+| 3 | `get_spot_trades` | `get_futures_trades` or equivalent | Same pair; `limit=500` (or 24h window) | Trade size distribution; consecutive same-direction large orders |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -541,7 +543,7 @@ Currently **negative basis** (futures below spot), which often indicates:
 - "Is PEPE easy to manipulate?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_order_book`(PEPE_USDT) → `list_tickers` → `list_trades`(limit=500).
+1. Call per **MCP Call Spec**: `get_spot_order_book`(PEPE_USDT) → `get_spot_tickers` → `get_spot_trades`(limit=500).
 2. Compute depth ratio; from trades identify large and consecutive same-side.
 3. Output depth table + large order summary + risk conclusion per Report Template.
 
@@ -581,7 +583,7 @@ In last 500 trades:
 - "How is BTC depth vs volume?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_order_book`(BTC_USDT) → `list_tickers` → optional `list_trades`.
+1. Call per **MCP Call Spec**: `get_spot_order_book`(BTC_USDT) → `get_spot_tickers` → optional `get_spot_trades`.
 2. Compute depth ratio; if > 2% assess as good depth, low manipulation risk.
 3. Output depth table + risk conclusion (low).
 
@@ -613,7 +615,7 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 **Prompt examples**:
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `list_futures_tickers` → `list_futures_trades` (or equivalent, limit=500).
+1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → `get_futures_tickers` → `get_futures_trades` (or equivalent, limit=500).
 2. Extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
 3. Apply same judgment: depth ratio < 0.5% → thin; consecutive same-side large → possible manipulation.
 4. Output depth analysis table + large order summary + manipulation risk conclusion (same structure as 6.1/6.2, data from futures).
@@ -630,8 +632,8 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `list_order_book` (spot/futures) | `currency_pair` or `contract`+`settle`, `limit=10` | bids/asks sample (price and size per level) |
-| 2 | `list_tickers` (same market) | Same pair | `last` for spread explanation |
+| 1 | `get_spot_order_book` (spot) / `get_futures_order_book` (futures) | `currency_pair` or `contract`+`settle`, `limit=10` | bids/asks sample (price and size per level) |
+| 2 | `get_spot_tickers` (spot) / `get_futures_tickers` (futures) | Same pair | `last` for spread explanation |
 
 **Interpretation** (aligned with SKILL):
 
@@ -651,7 +653,7 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 - "Explain the order book"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_order_book` (e.g. BTC_USDT, limit=10) → `list_tickers`.
+1. Call per **MCP Call Spec**: `get_spot_order_book` (e.g. BTC_USDT, limit=10) → `get_spot_tickers`.
 2. Fill order book table and key metrics with live data; add tutorial text (Bids/Asks/Spread, what spread means).
 3. Output tutorial + live example + takeaways.
 
@@ -702,7 +704,7 @@ The order book is the exchange’s "list of orders":
 - "Show ETH order book"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `list_order_book`(ETH_USDT, limit=10) → `list_tickers`(ETH_USDT).
+1. Call per **MCP Call Spec**: `get_spot_order_book`(ETH_USDT, limit=10) → `get_spot_tickers`(ETH_USDT).
 2. Output ETH live table (asks/bids, price, size, cumulative) + last + spread and short comment (e.g. liquidity, support).
 
 **Output**:
@@ -745,8 +747,8 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
-| 1 | `list_order_book` | `list_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
-| 2 | `list_tickers` | `list_futures_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
+| 1 | `get_spot_order_book` | `get_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
+| 2 | `get_spot_tickers` | `get_futures_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -772,7 +774,7 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 **Expected behavior**:
 1. **Require pair and amount**: If the user did not specify a **currency pair** (e.g. ADA_USDT, ETH_USDT), prompt them to provide one; do not run the simulation or assume a default pair. If the user did not specify a **quote amount** (e.g. $10,000 USDT), prompt them to provide one; do not assume a default (e.g. do not default to $10K).
 2. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT) from the user.
-3. Call per **MCP Call Spec**: `list_order_book`(pair, limit=50) → `list_tickers`(pair).
+3. Call per **MCP Call Spec**: `get_spot_order_book`(pair, limit=50) → `get_spot_tickers`(pair).
 3. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
 4. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
 5. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
@@ -820,7 +822,7 @@ For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points)
 
 **Expected behavior**:
 1. **Require pair**: If no contract/pair is specified (e.g. BTC_USDT), prompt the user to provide one; do not assume a default.
-2. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract={pair}`, `limit=50`) → `list_futures_tickers`(settle, contract).
+2. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(`settle=usdt`, `contract={pair}`, `limit=50`) → `get_futures_tickers`(settle, contract).
 3. Same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
 4. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.
 
