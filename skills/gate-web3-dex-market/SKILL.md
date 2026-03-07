@@ -1,6 +1,8 @@
 ---
-name: gate-dex-market
-description: "Gate Wallet market data and token info queries. K-line,
+name: gate-web3-dex-market
+version: "2026.3.6-1"
+updated: "2026-03-06"
+description: "Gate Wallet market data and6token info queries. K-line,
   transaction stats, liquidity, token details, rankings, security audit,
   new token discovery. Use when users ask about market data, prices, or
   token info. All queries require no authentication. Not for executing trades."
