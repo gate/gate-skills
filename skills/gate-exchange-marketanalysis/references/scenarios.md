@@ -736,6 +736,11 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 
 **Trigger**: "slippage simulation", "market buy $X slippage", "how much slippage if I market buy $10K?", e.g. "ADA_USDT slippage simulation: if I market buy $10K, how much slippage?"
 
+**Required inputs** (both must be provided; do not use defaults):
+
+- **Currency pair** (e.g. `ETH_USDT`, `ADA_USDT`, `BTC_USDT`): identifies which order book and ticker to use. **If the user does not specify a pair**, prompt them to provide one (e.g. "Please specify a pair, e.g. ETH_USDT, ADA_USDT.").
+- **Quote amount** (e.g. $10,000 USDT): the notional to simulate for the market buy. **If the user does not specify an amount**, prompt them to provide one (e.g. "Please specify the quote amount, e.g. $10K USDT."). **Do not assume a default** (e.g. do not default to $10K).
+
 **API choice**: When user mentions **perpetual, contract, futures**, use **futures** tools; otherwise use **spot** tools.
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
@@ -765,8 +770,9 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 - "How much slippage for a $10K market buy in ETH?"
 
 **Expected behavior**:
-1. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT).
-2. Call per **MCP Call Spec**: `list_order_book`(pair, limit=50) → `list_tickers`(pair).
+1. **Require pair and amount**: If the user did not specify a **currency pair** (e.g. ADA_USDT, ETH_USDT), prompt them to provide one; do not run the simulation or assume a default pair. If the user did not specify a **quote amount** (e.g. $10,000 USDT), prompt them to provide one; do not assume a default (e.g. do not default to $10K).
+2. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT) from the user.
+3. Call per **MCP Call Spec**: `list_order_book`(pair, limit=50) → `list_tickers`(pair).
 3. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
 4. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
 5. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
@@ -813,6 +819,27 @@ For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points)
 - "BTC perpetual market long $50K, how much slippage?"
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract=BTC_USDT`, `limit=50`) → `list_futures_tickers`(settle, contract).
-2. Same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
-3. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.
+1. **Require pair**: If no contract/pair is specified (e.g. BTC_USDT), prompt the user to provide one; do not assume a default.
+2. Detect "perpetual" or "contract" and use **futures** MCP: `list_futures_order_book`(`settle=usdt`, `contract={pair}`, `limit=50`) → `list_futures_tickers`(settle, contract).
+3. Same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
+4. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.
+
+---
+
+### Scenario 8.3: Missing pair or amount — prompt user
+
+**Context**: User asks for slippage simulation but does **not** specify a **currency pair** and/or does **not** specify a **quote amount** (e.g. "How much slippage if I market buy $10K?" with no pair; or "ETH_USDT slippage" with no amount).
+
+**Expected behavior**:
+1. Do **not** call MCP. Do **not** assume a default pair or a default amount (e.g. do not default to $10K).
+2. Reply with a short prompt asking for the missing input(s): pair and/or quote amount.
+
+**Output** (when pair is missing, or amount is missing, or both):
+```markdown
+To run the slippage simulation, I need both:
+
+1. **Currency pair** (e.g. spot: ETH_USDT, ADA_USDT; or perpetual: BTC_USDT).
+2. **Quote amount** (e.g. $10,000 USDT). I will not assume a default — please specify the amount.
+
+Example: "ETH_USDT slippage for a $10K market buy" or "ADA_USDT perpetual, market long $5K, how much slippage?"
+```
