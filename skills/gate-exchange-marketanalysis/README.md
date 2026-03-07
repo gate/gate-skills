@@ -27,7 +27,7 @@ An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.
 ```
 Natural Language Input
     ↓
-Intent Routing (Case 1–7, spot vs futures)
+Intent Routing (Case 1–10, spot vs futures)
     ↓
 Gate MCP Tools
     ├── get_spot_order_book / get_futures_order_book

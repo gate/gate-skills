@@ -14,6 +14,8 @@ This document defines the **MCP call order, parameters, required fields, and out
 | 6 | Manipulation risk | Spot: get_spot_order_book → get_spot_tickers → get_spot_trades. When user says perpetual/contract: get_futures_order_book → get_futures_tickers → get_futures_trades |
 | 7 | Order book explainer | get_spot_order_book(limit=10) → get_spot_tickers |
 | 8 | Slippage simulation | Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_order_book → get_futures_tickers |
+| 9 | K-line breakout / support–resistance | get_spot_candlesticks → get_spot_tickers (spot); get_futures_candlesticks → get_futures_tickers (futures) |
+| 10 | Liquidity + weekend vs weekday | get_spot_order_book → get_spot_candlesticks → get_spot_tickers (spot); get_futures_order_book → get_futures_candlesticks → get_futures_tickers (futures) |
 
 ---
 
@@ -845,3 +847,162 @@ To run the slippage simulation, I need both:
 
 Example: "ETH_USDT slippage for a $10K market buy" or "ADA_USDT perpetual, market long $5K, how much slippage?"
 ```
+
+---
+
+## Case 9: K-Line Breakout / Support–Resistance
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "Based on recent K-line chart, does SOL/USDT show signs of breaking out upward? Analyze support and resistance."
+
+**API choice**: Use **spot** tools when user asks about spot pair (or unspecified); use **futures** tools when user says perpetual/contract.
+
+| Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
+|------|-----------------|--------------------|------------|-----------------|
+| 1 | `get_spot_candlesticks` | `get_futures_candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `interval=1d` (or 4h), `limit=30–90` | OHLC; volume; identify local highs/lows for support/resistance; trend structure |
+| 2 | `get_spot_tickers` | `get_futures_tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; `high24h`/`low24h` for momentum context |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **K-line**: Query historical candlesticks; from OHLC identify **support** (recent lows, consolidation floors) and **resistance** (recent highs, consolidation ceilings).
+- **Momentum**: Use 24h price, volume, and change from tickers to assess whether current level has breakout momentum (e.g. volume expansion near resistance, price above key levels).
+
+**Output**: Must include "K-line context" (period, key levels), "Support & resistance" table or list, "Momentum" (24h price, volume, change), and short "Breakout assessment" (e.g. signs of upward breakout or not).
+
+---
+
+### Scenario 9.1: Spot K-line support–resistance (e.g. SOL/USDT)
+
+**Context**: User asks whether a spot pair shows breakout signs and wants support/resistance from recent K-line.
+
+**Prompt examples**:
+- "Based on recent K-line chart, does SOL/USDT show signs of breaking out upward? Analyze support and resistance."
+
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `get_spot_candlesticks`(SOL_USDT, interval=1d or 4h, limit=30–90) → `get_spot_tickers`(SOL_USDT).
+2. From candlesticks: derive support (e.g. recent lows, swing lows) and resistance (e.g. recent highs, swing highs); note trend structure (higher highs/lows vs lower).
+3. From tickers: last, 24h volume, 24h change, high24h/low24h; use to assess momentum (e.g. volume confirmation, price relative to key levels).
+4. Output: K-line context + support/resistance levels + momentum summary + breakout assessment (e.g. clear / no clear signs of upward breakout; data-based, not investment advice).
+
+**Output**:
+```markdown
+## SOL/USDT — K-Line Support & Resistance
+
+### K-line context
+
+- Period: last 30 days (1d)
+- Key levels derived from OHLC
+
+### Support & resistance
+
+| Type   | Level (approx) | Note        |
+|--------|-----------------|-------------|
+| Resistance | $XXX           | Recent high |
+| Resistance | $XXX           | Prior swing |
+| Support    | $XXX           | Recent low  |
+| Support    | $XXX           | Consolidation floor |
+
+### Momentum (24h)
+
+| Metric   | Value   |
+|----------|---------|
+| Last     | $XXX    |
+| 24h vol  | $XXX    |
+| 24h change | +X.XX% |
+
+### Breakout assessment
+
+Based on recent K-line and 24h data: [e.g. price near/above resistance with volume expansion suggests upward breakout potential; or: no clear breakout yet, watch resistance and volume]. Analysis is data-based, not investment advice.
+```
+
+---
+
+### Scenario 9.2: Futures K-line support–resistance
+
+**Context**: User asks the same for a **perpetual/contract** (e.g. SOL_USDT perpetual).
+
+**Expected behavior**:
+1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_candlesticks`(settle=usdt, contract=SOL_USDT, interval=1d, limit=30–90) → `get_futures_tickers`(settle=usdt, contract=SOL_USDT).
+2. Same logic: derive support/resistance from OHLC; use tickers for 24h price, volume, change; output same structure with futures data.
+
+---
+
+## Case 10: Liquidity + Weekend vs Weekday
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "Evaluate ETH liquidity on the exchange and compare weekend vs weekday."
+
+**API choice**: Use **spot** tools when user asks about spot (or unspecified); use **futures** tools when user says perpetual/contract.
+
+| Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
+|------|-----------------|--------------------|------------|-----------------|
+| 1 | `get_spot_order_book` | `get_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=20`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=20` | Depth levels; top 10 bid/ask totals; bid1/ask1 for spread |
+| 2 | `get_spot_candlesticks` | `get_futures_candlesticks` | Same pair/contract; `interval=1d`, `limit=90` (or from/to for ~90 days) | Daily OHLC, volume, quote volume; tag each day as weekend (Sat/Sun) vs weekday (Mon–Fri) |
+| 3 | `get_spot_tickers` | `get_futures_tickers` | Same pair/contract | `last`; 24h volume; current context |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **Order book**: Query depth; summarize current depth (levels, top 10 totals, spread) for **liquidity**.
+- **90-day K-line**: From candlesticks, split days into **weekend** (Sat/Sun) vs **weekday** (Mon–Fri). Compute for each group: avg daily return (or sum of returns), avg/sum of volume and quote volume. Compare weekend vs weekday: volatility (e.g. absolute return), volume/quote volume (liquidity difference).
+
+**Output**: Must include "Current liquidity" (order book depth, spread), "90-day weekend vs weekday" table (e.g. avg daily volume, avg daily return, or similar), "Comparison" summary, and short "Conclusion".
+
+---
+
+### Scenario 10.1: Spot liquidity + weekend vs weekday (e.g. ETH)
+
+**Context**: User wants ETH liquidity assessment and weekend vs weekday comparison.
+
+**Prompt examples**:
+- "Evaluate ETH liquidity on the exchange and compare weekend vs weekday."
+
+**Expected behavior**:
+1. Call per **MCP Call Spec**: `get_spot_order_book`(ETH_USDT, limit=20) → `get_spot_candlesticks`(ETH_USDT, interval=1d, limit=90 or from/to ~90 days) → `get_spot_tickers`(ETH_USDT).
+2. From order book: depth levels, top 10 bid/ask totals, spread → current liquidity summary.
+3. From candlesticks: for each day (timestamp), classify weekend vs weekday; aggregate by group: e.g. avg daily volume, avg daily quote volume, avg absolute daily return or avg daily return; optionally count days.
+4. Compare: e.g. "Weekend avg volume vs weekday avg volume"; "Weekend vs weekday volatility/return."
+5. Output: Current liquidity table + "90-day weekend vs weekday" table + comparison + conclusion. Include disclaimer: data-based, not investment advice.
+
+**Output**:
+```markdown
+## ETH — Liquidity & Weekend vs Weekday
+
+### Current liquidity
+
+| Metric           | Value   |
+|------------------|---------|
+| Order book depth | XX levels |
+| Top 10 bid total | $XXX    |
+| Top 10 ask total | $XXX    |
+| Spread           | X.XX%   |
+
+### 90-day: Weekend vs weekday
+
+| Metric        | Weekend | Weekday | Note   |
+|---------------|---------|---------|--------|
+| Avg daily vol | $XXX    | $XXX    | Base   |
+| Avg daily quote vol | $XXX | $XXX    | USDT   |
+| Avg daily return | +X.XX% | +X.XX%  | Or abs return |
+| Days count    | XX      | XX      |        |
+
+### Comparison
+
+- Liquidity: [e.g. current order book depth is good / moderate]
+- Weekend vs weekday: [e.g. weekend volume/volatility is lower / higher / similar to weekday]. [One-line summary of volume and volatility difference.]
+
+### Conclusion
+
+[Short summary: ETH liquidity on exchange + weekend vs weekday difference.] Analysis is data-based, not investment advice.
+```
+
+---
+
+### Scenario 10.2: Futures liquidity + weekend vs weekday
+
+**Context**: User asks the same for **perpetual/contract** (e.g. ETH_USDT perpetual).
+
+**Expected behavior**:
+1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `get_futures_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `get_futures_tickers`(settle=usdt, contract=ETH_USDT).
+2. Same logic: order book for current depth; 90d candlesticks split weekend vs weekday for volume and return; output same structure with futures data.
