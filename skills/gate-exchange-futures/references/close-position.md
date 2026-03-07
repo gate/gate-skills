@@ -2,6 +2,10 @@
 
 Gate futures close-position scenarios and expected behavior.
 
+## Position query (dual vs single mode)
+
+**In dual mode**, `get_futures_position(settle, contract)` fails (API returns an array). Use **`list_futures_positions(settle, holding=true)`** or **`get_futures_dual_mode_position(settle, contract)`** when account is in dual mode (`get_futures_accounts` → `position_mode === "dual"` or `in_dual_mode === true`). In single mode use **`get_futures_position(settle, contract)`**.
+
 ## Scenario 1: Close all (one-click)
 
 **Context**: User wants to close all positions regardless of size.
@@ -110,10 +114,10 @@ Close done; 50% position remaining.
 - "Close long open short"
 
 **Expected Behavior**:
-1. Query position via `get_futures_position`: long +5.
+1. Query position via **position query** (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`): long +5.
 2. Show reverse plan and ask user to confirm (include estimated liq/margin).
 3. After confirm: first `create_futures_order(settle, contract, size="-5", reduce_only=true, price="0", tif="ioc")` to close long, then `create_futures_order(..., size="-5", price="0", tif="ioc")` to open 5 short (no reduce_only).
-4. Verify new position via `get_futures_position`: short -5.
+4. Verify new position via **position query** (same as above): short -5.
 
 **Response Template**:
 ```
@@ -140,7 +144,7 @@ Reversed from long to short.
 - "Close short open long"
 
 **Expected Behavior**:
-1. Query position via `get_futures_position`: short -3.
+1. Query position via **position query** (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`): short -3.
 2. Show reverse plan; after confirm: first `create_futures_order(..., size="3", reduce_only=true, price="0", tif="ioc")` to close short, then `create_futures_order(..., size="3", price="0", tif="ioc")` to open 3 long.
 3. Verify new position: long +3.
 

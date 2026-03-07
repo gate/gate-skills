@@ -7,7 +7,6 @@ Gate futures amend-order scenarios and expected behavior.
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
 | **amend_futures_order** | Amend one order | `settle`, `order_id` | `price`, `size`, `amend_text`, `text` |
-| **amend_futures_batch_orders** | Amend multiple orders | `settle`, `orders` (JSON array with order_id and price/size per item) | — |
 
 - Only **open** orders can be amended; finished or cancelled orders will error.
 - Before amending, you can call `get_futures_contract(settle, contract)` to check precision (`order_price_round`, `order_size_min`, etc.).
@@ -221,19 +220,3 @@ Example: "Change price to 50000" or "Change size to 10"
 1. Call `list_futures_orders(settle="usdt", status="open")` and show list.
 2. Ask user to pick order (by number or contract+side) or to provide order ID.
 3. Once order and new price/size are given, follow Scenario 1–3 (including confirm before amend).
-
----
-
-## Scenario 9: Batch amend
-
-**Context**: User wants to amend multiple orders at once.
-
-**Prompt Examples**:
-- "Order 1 price 50000, order 2 price 50100"
-- "Batch amend: order A price 50000, order B price 50200"
-
-**Expected Behavior**:
-1. Parse multiple order_ids and new price/size.
-2. Show before/after for each, ask confirm.
-3. After confirm call `amend_futures_batch_orders(settle="usdt", orders="[...]")` (format per MCP).
-4. Output result per order.
