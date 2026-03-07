@@ -15,11 +15,20 @@ When the user does not specify size in **contracts**, convert to **contracts** b
 - **Data source**: Call `get_futures_contract(settle, contract)` for `mark_price`, `quanto_multiplier`.
 - **Precision**: Resulting contracts must satisfy contract `order_size_min` and size precision; if below minimum, prompt the user.
 
+## Position and leverage query (dual vs single mode)
+
+**Tool `get_position` does not exist.** Use the following by account mode (from **`get_futures_accounts(settle)`** → **`position_mode`** or **`in_dual_mode`**):
+
+- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): use **`list_futures_positions(settle, holding=true)`** or **`get_futures_dual_mode_position(settle, contract)`** for position/leverage. Do **not** use `get_futures_position` in dual mode (API returns an array and causes parse error).
+- **Single mode**: use **`get_futures_position(settle, contract)`** for position/leverage.
+
+Same rule for **margin mode** (`pos_margin_mode`): get it from the position returned by the above query.
+
 ## Pre-Order Confirmation
 
 **Before opening**, show the **final order summary** and only call `create_futures_order` after user confirmation.
 
-- **Leverage**: Query current leverage for **contract + side** via `get_position(settle, contract)`; if that side has a position use its leverage; otherwise use the contract’s default for that side.
+- **Leverage**: Query current leverage for **contract + side** via the **position query** above (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`).
 - **Summary**: Contract, side (long/short), size (contracts), price (limit or “market”), margin mode (cross/isolated), **leverage**, estimated margin and liquidation price; for market orders also mention slippage risk. **Do not** add text about mark price, limit protection, or suggesting to adjust price.
 - **Confirmation**: *“Please confirm the above and reply ‘confirm’ to place the order.”* Only after the user confirms (e.g. “confirm”, “yes”, “place”) execute the order.
 
@@ -37,7 +46,7 @@ Example: cross `update_futures_dual_comp_position_cross_mode(settle="usdt", cont
 
 ## Leverage Before Order
 
-If the **user specifies leverage** and it **differs from current** for that contract/side, **first** call MCP **`update_futures_position_leverage`** (params: `settle`, `contract`, `leverage`), **then** call `create_futures_order`. Set leverage before placing the order.
+If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `create_futures_order`. Use **`update_futures_dual_mode_position_leverage(settle, contract, leverage)`** in dual mode; **`update_futures_position_leverage(settle, contract, leverage)`** in single mode. Do not use `update_futures_position_leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `update_futures_dual_mode_position_leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
 
 ## Margin Mode vs Position Mode
 
@@ -46,7 +55,7 @@ If the **user specifies leverage** and it **differs from current** for that cont
 When **target margin mode** is explicitly requested and **differs from** the **current margin mode** of the existing position for that contract, check **position mode** first:
 
 - **Position mode**: Call MCP **`get_futures_accounts(settle)`**. From **`position_mode`**: `single` = single position mode, `dual` = dual (hedge) position mode.
-- **Margin mode**: From **position** — call `get_futures_position(settle, contract)` and use `pos_margin_mode` (cross/isolated).
+- **Margin mode**: From **position** — use the **position query** per dual/single mode above and read `pos_margin_mode` (cross/isolated).
 
 **Branch logic** (target margin mode ≠ current position margin mode and contract already has a position):
 
@@ -67,10 +76,10 @@ When **target margin mode** is explicitly requested and **differs from** the **c
 **Expected Behavior**:
 1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")`
 2. Switch to cross via `update_futures_dual_comp_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="CROSS")`
-3. Query leverage via `get_position(settle="usdt", contract="BTC_USDT")` (for contract + long side)
+3. Query leverage via **position query** (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`) for contract + long side
 4. **Show final order summary** (contract, side, size, price, mode, **leverage**, estimated liq/margin), ask user to confirm
 5. After confirm, place order via `create_futures_order(settle="usdt", contract="BTC_USDT", size="1", price="65000", tif="gtc")`
-6. Query position via `get_futures_position(settle="usdt", contract="BTC_USDT")`
+6. Verify position via **position query** (dual: `list_futures_positions(holding=true)` or `get_futures_dual_mode_position`; single: `get_futures_position`)
 7. Output open result
 
 **Response Template**:
@@ -101,10 +110,11 @@ Leverage: 10x (from position query)
 **Expected Behavior**:
 1. Fetch contract via `get_futures_contract(settle="usdt", contract="ETH_USDT")`
 2. Switch to isolated via `update_futures_dual_comp_position_cross_mode(settle="usdt", contract="ETH_USDT", mode="ISOLATED")`
-3. Set leverage via `update_futures_position_leverage(settle="usdt", contract="ETH_USDT", leverage="10")`
-4. Place market order via `create_futures_order(settle="usdt", contract="ETH_USDT", size="-2", price="0", tif="ioc")`
-5. Query position via `get_futures_position(settle="usdt", contract="ETH_USDT")`
-6. Output fill and position info
+3. Set leverage via **`update_futures_dual_mode_position_leverage`** (dual) or **`update_futures_position_leverage`** (single): `(settle="usdt", contract="ETH_USDT", leverage="10")`
+4. **Show final order summary** (contract, side, size, market, mode, leverage, estimated liq/margin), ask user to confirm
+5. After confirm, place market order via `create_futures_order(settle="usdt", contract="ETH_USDT", size="-2", price="0", tif="ioc")`
+6. Verify position via **position query** (dual: `list_futures_positions(holding=true)` or `get_futures_dual_mode_position`; single: `get_futures_position`)
+7. Output fill and position info
 
 **Response Template**:
 ```
@@ -162,20 +172,18 @@ Suggestions:
 - "BTC_USDT long at 100000" (market ~65000)
 
 **Expected Behavior**:
-1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")`
-2. Compute limit: `mark_price * (1 ± order_price_deviate)`
-3. Detect 100000 outside range
-4. Return PRICE_TOO_DEVIATED with valid range
+1. Do **not** pre-compute valid range from contract `order_price_deviate` (actual limit depends on risk_limit_tier and may differ).
+2. Place order; if API returns **PRICE_TOO_DEVIATED**, extract the **valid price range from the error message** and show it to the user.
+3. Suggest user adjust price within that range.
 
-**Response Template**:
+**Response Template** (after receiving PRICE_TOO_DEVIATED):
 ```
 Order failed: price outside limit protection.
 
-Mark price: 65000 USDT
-Valid range: 45500 - 84500 USDT
 Your price: 100000 USDT
+Valid range (from exchange): [min] - [max] USDT
 
-Suggestion: Adjust price within 84500 USDT or below.
+Suggestion: Adjust price within the range above.
 ```
 
 ---
@@ -217,8 +225,8 @@ Suggestions:
 
 **Expected Behavior**:
 1. Call `update_futures_dual_comp_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="CROSS")`
-2. Receive POSITION_NOT_EMPTY (or similar)
-3. Query position via `get_futures_position(settle="usdt", contract="BTC_USDT")`
+2. Receive POSITION_HOLDING (or similar; API returns this for mode switch with position)
+3. Query position via **position query** (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`)
 4. Output failure and current position
 
 **Response Template**:
