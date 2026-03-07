@@ -6,7 +6,7 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ---
 
-## [2026.3.6-1] - 2026-03-06
+## [2026.3.7-1] - 2026-03-07
 
 ### Scope
 
