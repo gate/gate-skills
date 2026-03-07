@@ -27,15 +27,15 @@ An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.
 ```
 Natural Language Input
     ↓
-Intent Routing (Case 1–7, spot vs futures)
+Intent Routing (Case 1–10, spot vs futures)
     ↓
 Gate MCP Tools
-    ├── list_order_book / list_futures_order_book
-    ├── list_tickers / list_futures_tickers
-    ├── list_candlesticks / list_futures_candlesticks
-    ├── list_trades / list_futures_funding_rate
+    ├── get_spot_order_book / get_futures_order_book
+    ├── get_spot_tickers / get_futures_tickers
+    ├── get_spot_candlesticks / get_futures_candlesticks
+    ├── get_spot_trades / get_futures_funding_rate
     ├── list_futures_liq_orders (when available)
-    └── list_futures_premium_index
+    └── get_futures_premium_index
     ↓
 Analysis & Judgment Logic
     ↓
