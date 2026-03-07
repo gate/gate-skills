@@ -2,7 +2,7 @@
 
 This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
-**MCP tool names (Gate MCP):** Spot market data use `get_spot_order_book`, `get_spot_candlesticks`, `get_spot_tickers`, `get_spot_trades`. Futures market data use `get_futures_order_book`, `get_futures_candlesticks`, `get_futures_tickers`, `get_futures_trades`. Futures funding/liquidation/premium use `get_futures_funding_rate`, `list_futures_liq_orders`, `get_futures_premium_index`. Call these exact tool names when invoking Gate MCP.
+**MCP tool names (Gate MCP):** Spot market data use `get_spot_order_book`, `get_spot_candlesticks`, `get_spot_tickers`, `get_spot_trades`. Futures market data use `get_futures_contract`, `get_futures_order_book`, `get_futures_candlesticks`, `get_futures_tickers`, `get_futures_trades`. Futures funding/liquidation/premium use `get_futures_funding_rate`, `list_futures_liq_orders`, `get_futures_premium_index`. Call these exact tool names when invoking Gate MCP.
 
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
@@ -13,9 +13,9 @@ This document defines the **MCP call order, parameters, required fields, and out
 | 5 | Basis (spot vs futures) | get_spot_tickers(spot) → get_futures_tickers → get_futures_premium_index |
 | 6 | Manipulation risk | Spot: get_spot_order_book → get_spot_tickers → get_spot_trades. When user says perpetual/contract: get_futures_order_book → get_futures_tickers → get_futures_trades |
 | 7 | Order book explainer | get_spot_order_book(limit=10) → get_spot_tickers |
-| 8 | Slippage simulation | Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_order_book → get_futures_tickers |
+| 8 | Slippage simulation | Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_contract → get_futures_order_book → get_futures_tickers |
 | 9 | K-line breakout / support–resistance | get_spot_candlesticks → get_spot_tickers (spot); get_futures_candlesticks → get_futures_tickers (futures) |
-| 10 | Liquidity + weekend vs weekday | get_spot_order_book → get_spot_candlesticks → get_spot_tickers (spot); get_futures_order_book → get_futures_candlesticks → get_futures_tickers (futures) |
+| 10 | Liquidity + weekend vs weekday | get_spot_order_book → get_spot_candlesticks → get_spot_tickers (spot); get_futures_contract → get_futures_order_book → get_futures_candlesticks → get_futures_tickers (futures) |
 
 ---
 
@@ -749,8 +749,9 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
-| 1 | `get_spot_order_book` | `get_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
-| 2 | `get_spot_tickers` | `get_futures_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
+| 1 | `get_spot_order_book` | `get_futures_contract` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: asks (price, size), bid1/ask1. Futures: `quanto_multiplier` (contract size) for ladder notional |
+| 2 | — | `get_futures_order_book` | Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
+| 3 | `get_spot_tickers` | `get_futures_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -824,8 +825,8 @@ For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points)
 
 **Expected behavior**:
 1. **Require pair**: If no contract/pair is specified (e.g. BTC_USDT), prompt the user to provide one; do not assume a default.
-2. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(`settle=usdt`, `contract={pair}`, `limit=50`) → `get_futures_tickers`(settle, contract).
-3. Same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
+2. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_contract`(settle=usdt, contract={pair}) → `get_futures_order_book`(settle=usdt, contract={pair}, limit=50) → `get_futures_tickers`(settle, contract).
+3. Use `quanto_multiplier` from contract to convert order book size (contracts) to base notional; same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
 4. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.
 
 ---
@@ -938,9 +939,10 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 
 | Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
 |------|-----------------|--------------------|------------|-----------------|
-| 1 | `get_spot_order_book` | `get_futures_order_book` | Spot: `currency_pair={BASE}_USDT`, `limit=20`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=20` | Depth levels; top 10 bid/ask totals; bid1/ask1 for spread |
-| 2 | `get_spot_candlesticks` | `get_futures_candlesticks` | Same pair/contract; `interval=1d`, `limit=90` (or from/to for ~90 days) | Daily OHLC, volume, quote volume; tag each day as weekend (Sat/Sun) vs weekday (Mon–Fri) |
-| 3 | `get_spot_tickers` | `get_futures_tickers` | Same pair/contract | `last`; 24h volume; current context |
+| 1 | `get_spot_order_book` | `get_futures_contract` | Spot: `currency_pair={BASE}_USDT`, `limit=20`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: depth, bid1/ask1. Futures: `quanto_multiplier` for depth notional |
+| 2 | `get_spot_candlesticks` | `get_futures_order_book` | Spot: same pair, `interval=1d`, `limit=90`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=20` | Spot: daily OHLC, volume. Futures: depth levels; top 10 bid/ask totals; bid1/ask1 |
+| 3 | `get_spot_tickers` | `get_futures_candlesticks` | Same pair/contract; `interval=1d`, `limit=90` (or from/to for ~90 days) | Daily OHLC, volume, quote volume; tag weekend vs weekday |
+| 4 | — | `get_futures_tickers` | Same pair/contract | `last`; 24h volume; current context |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -1004,5 +1006,5 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 **Context**: User asks the same for **perpetual/contract** (e.g. ETH_USDT perpetual).
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `get_futures_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `get_futures_tickers`(settle=usdt, contract=ETH_USDT).
-2. Same logic: order book for current depth; 90d candlesticks split weekend vs weekday for volume and return; output same structure with futures data.
+1. Detect "perpetual" or "contract" and use **futures** MCP: `get_futures_contract`(settle=usdt, contract=ETH_USDT) → `get_futures_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `get_futures_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `get_futures_tickers`(settle=usdt, contract=ETH_USDT).
+2. Use `quanto_multiplier` from contract to interpret order book depth in notional; same logic: order book for current depth; 90d candlesticks split weekend vs weekday for volume and return; output same structure with futures data.
