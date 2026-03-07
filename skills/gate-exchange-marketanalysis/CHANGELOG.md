@@ -10,7 +10,7 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ### Scope
 
-Case 8 adds **slippage simulation**: market-order fill vs order book, slippage reported as deviation from best ask (points and %). Spot and futures supported via same MCP call order as other cases.
+Case 8 adds **slippage simulation**: market-order fill vs order book, slippage reported as deviation from best ask (points and %). Spot and futures supported via same MCP call order as other cases. **Requires both currency pair and quote amount** from the user; no defaults — when either is missing, prompt the user instead of running the simulation.
 
 ### Added
 
@@ -21,15 +21,18 @@ Case 8 adds **slippage simulation**: market-order fill vs order book, slippage r
   - Output: simulation inputs, fill summary, slippage vs best ask, conclusion
 - Scenario 8.1: spot slippage simulation (e.g. ADA_USDT / ETH market buy $10K)
 - Scenario 8.2: futures slippage simulation (perpetual/contract market long)
+- Scenario 8.3: missing pair or amount — prompt user (do not call MCP; ask for pair and/or quote amount; do not default to $10K)
 
 ### Changed
 
 - **Pure English** — all Chinese trigger phrases and report templates in SKILL.md and `references/scenarios.md` replaced with English (e.g. "Slippage Simulation", "Best ask", "points", "Conclusion")
 - **Versioning** — version and `updated` follow current date (`YYYY.M.DD` or `YYYY.M.DD-1`)
+- **Case 8 required inputs** — currency pair and quote amount both required; if either missing, prompt user (no default pair, no default amount e.g. $10K). SKILL.md Execution step 3 and Domain Knowledge (Case 8) updated accordingly.
 
 ### Audit
 
 - Case 8 uses Gate MCP only (list_order_book / list_futures_order_book, list_tickers / list_futures_tickers)
+- No MCP calls when pair or amount is missing; user is prompted first
 - Analysis is read-only; no trading operations
 
 ---
@@ -52,3 +55,4 @@ This skill supports **market tape analysis only** (read-only): liquidity, moment
 
 - Uses Gate MCP tools only; all analysis is read-only
 - No trading operations or credential handling in this skill
+
