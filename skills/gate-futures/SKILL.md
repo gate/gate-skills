@@ -1,5 +1,5 @@
 ---
-name: gate-exchange-futurestrade
+name: gate-exchange-futures
 version: "2026.3.5-1"
 updated: "2026-03-05"
 description: "The USDT perpetual futures trading function of Gate Exchange: open position, close position, cancel order, amend order. Trigger phrases: open position, close position, cancel order, amend order, reverse, close all."
@@ -70,7 +70,7 @@ This skill is the single entry for Gate USDT perpetual futures. It supports **fo
 #### Module C: Cancel order
 
 1. **Locate**: by order_id, or `list_futures_orders` and let user choose.
-2. **Cancel**: single `cancel_futures_order`; batch `cancel_futures_batch_orders` or `cancel_all_futures_orders` (by contract if needed).
+2. **Cancel**: single `cancel_futures_order` only (no batch cancel).
 3. **Verify**: `finish_as` == `cancelled`.
 
 #### Module D: Amend order
