@@ -47,10 +47,11 @@ Determine which module (case) to run based on user intent:
 
 1. **Match user intent** to the routing table above and determine case (1–8) and market type (spot/futures).
 2. **Read** the corresponding case in `references/scenarios.md` for MCP call order and required fields.
-3. **Call Gate MCP** in the exact order defined for that case.
-4. **Apply judgment logic** from scenarios (thresholds, flags, ratings).
-5. **Output the report** using that case’s Report Template.
-6. **Suggest related actions** (e.g. “For basis, ask ‘What is the basis for XXX?’”).
+3. **Case 8 only:** If the user did **not** specify a **currency pair** or did **not** specify a **quote amount** (e.g. $10K), do not assume defaults — **prompt the user** to provide the missing input(s); see Scenario 8.3 in `references/scenarios.md`.
+4. **Call Gate MCP** in the exact order defined for that case.
+5. **Apply judgment logic** from scenarios (thresholds, flags, ratings).
+6. **Output the report** using that case’s Report Template.
+7. **Suggest related actions** (e.g. “For basis, ask ‘What is the basis for XXX?’”).
 
 ---
 
@@ -64,7 +65,7 @@ Determine which module (case) to run based on user intent:
 - **Basis (Case 5):** Current basis vs history; basis widening/narrowing for sentiment.
 - **Manipulation (Case 6):** Top-10 depth total / 24h volume &lt; 0.5% → thin depth; consecutive same-direction large orders → possible manipulation. Use spot by default; use futures when user says perpetual/contract.
 - **Order book (Case 7):** Show bids/asks example, explain spread with last price, depth and volatility.
-- **Slippage simulation (Case 8):** Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
+- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: list_order_book → list_tickers. Futures: list_futures_order_book → list_futures_tickers. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
 
 ---
 
