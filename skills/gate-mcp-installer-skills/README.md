@@ -81,7 +81,7 @@ Gate MCP Ready → Other skills can use Gate MCP tools
 
 ```bash
 # Automated (recommended)
-bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
+bash ~/.openclaw/skills/gate-mcp-installer-skills/scripts/install-gate-mcp.sh
 
 # Or just ask the agent
 "help me install Gate MCP"
@@ -115,7 +115,7 @@ mcporter list gate --schema
 ## File Structure
 
 ```
-gate-mcp-installer/
+gate-mcp-installer-skills/
 ├── README.md           # This file
 ├── SKILL.md            # Skill instructions and workflow
 ├── CHANGELOG.md        # Version history

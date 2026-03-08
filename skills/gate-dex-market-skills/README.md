@@ -51,7 +51,7 @@ See [mcp-skills/README.md](../README.md) for detailed configuration instructions
 ## File Structure
 
 ```
-gate-dex-market/
+gate-dex-market-skills/
 ├── README.md          # This file — Skill description
 ├── SKILL.md           # Agent instruction file (tool specs, workflows, security rules)
 └── CHANGELOG.md       # Changelog

@@ -24,7 +24,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 ## 📈 gate-exchange-marketanalysis
 
-> **Path**: `skills/gate-exchange-marketanalysis/`
+> **Path**: `skills/gate-exchange-marketanalysis-skills/`
 
 Read-only market tape analysis across ten scenarios: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, K-line breakout/support–resistance, and weekend vs weekday volume comparison.
 
@@ -39,7 +39,7 @@ Read-only market tape analysis across ten scenarios: liquidity, momentum, liquid
 
 ## 📊 gate-exchange-futures
 
-> **Path**: `skills/gate-exchange-futures/`
+> **Path**: `skills/gate-exchange-futures-skills/`
 
 USDT perpetual futures trading on Gate Exchange. Supports four operations: open position, close position, cancel order, and amend order — with pre-flight checks, margin/leverage handling, and confirmation before execution.
 
@@ -53,7 +53,7 @@ USDT perpetual futures trading on Gate Exchange. Supports four operations: open 
 
 ## 💱 gate-exchange-spot
 
-> **Path**: `skills/gate-exchange-spot/`
+> **Path**: `skills/gate-exchange-spot-skills/`
 
 Gate spot trading covering buy/sell (market & limit), smart condition-based orders, order management (amend/cancel), account queries, fill verification, and coin-to-coin swaps. All order placements require explicit user confirmation.
 
@@ -67,7 +67,7 @@ Gate spot trading covering buy/sell (market & limit), smart condition-based orde
 
 ## 🌐 gate-dex-market
 
-> **Path**: `skills/gate-dex-market/`
+> **Path**: `skills/gate-dex-market-skills/`
 
 Gate Wallet DEX market data — all read-only, no authentication required. Covers K-line, transaction stats, liquidity pools, token details, rankings, new token discovery, and contract security audit.
 
@@ -81,13 +81,13 @@ Gate Wallet DEX market data — all read-only, no authentication required. Cover
 
 ## 🔧 gate-mcp-installer
 
-> **Path**: `skills/gate-mcp-installer/`
+> **Path**: `skills/gate-mcp-installer-skills/`
 
 One-click installer for Gate MCP (mcporter). Installs the CLI, configures the Gate MCP server endpoint, and verifies connectivity.
 
 **Quick Start**:
 ```bash
-bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
+bash ~/.openclaw/skills/gate-mcp-installer-skills/scripts/install-gate-mcp.sh
 ```
 
 ---
@@ -299,13 +299,13 @@ gate-github-skills/
 ├── README.md
 ├── image/                              # Installation screenshots
 └── skills/
-    ├── gate-exchange-marketanalysis/   # Market tape analysis skill
+    ├── gate-exchange-marketanalysis-skills/   # Market tape analysis skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
     │   └── references/
     │       └── scenarios.md
-    ├── gate-exchange-futures/          # Futures trading skill
+    ├── gate-exchange-futures-skills/          # Futures trading skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
@@ -314,17 +314,17 @@ gate-github-skills/
     │       ├── close-position.md
     │       ├── cancel-order.md
     │       └── amend-order.md
-    ├── gate-exchange-spot/             # Spot trading skill
+    ├── gate-exchange-spot-skills/             # Spot trading skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   ├── README.md
     │   └── references/
     │       └── scenarios.md
-    ├── gate-dex-market/                # DEX market data skill
+    ├── gate-dex-market-skills/                # DEX market data skill
     │   ├── SKILL.md
     │   ├── CHANGELOG.md
     │   └── README.md
-    └── gate-mcp-installer/             # MCP setup skill
+    └── gate-mcp-installer-skills/             # MCP setup skill
         ├── SKILL.md
         ├── CHANGELOG.md
         ├── README.md

@@ -152,7 +152,7 @@ See `references/scenarios.md` for full MCP call order and report templates.
 ## File Structure
 
 ```
-gate-exchange-marketanalysis/
+gate-exchange-marketanalysis-skills/
 ├── README.md                          # This file
 ├── SKILL.md                           # Skill routing and instructions
 ├── CHANGELOG.md                       # Version history

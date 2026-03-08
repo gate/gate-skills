@@ -14,7 +14,7 @@ One-click setup for Gate MCP (mcporter) in OpenClaw.
 To set up Gate MCP, run the install script:
 
 ```bash
-bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
+bash ~/.openclaw/skills/gate-mcp-installer-skills/scripts/install-gate-mcp.sh
 ```
 
 Or execute the skill directly and I will guide you through the installation.
