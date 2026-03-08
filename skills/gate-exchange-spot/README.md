@@ -1,4 +1,4 @@
-# Gate Spot Exchange Skill
+# Gate Exchange Spot
 
 ## Overview
 

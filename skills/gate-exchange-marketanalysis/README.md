@@ -1,4 +1,4 @@
-# gate-exchange-marketanalysis
+# Gate Exchange MarketAnalysis
 
 ## Overview
 

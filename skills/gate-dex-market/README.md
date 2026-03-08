@@ -1,4 +1,4 @@
-# Gate DEX Market Skill
+# Gate DEX Market
 
 A market data and token information query Skill providing read-only access to on-chain public data.
 

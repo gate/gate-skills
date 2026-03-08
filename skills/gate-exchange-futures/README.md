@@ -1,4 +1,4 @@
-# Gate Futures Trading
+# Gate Exchange Futures
 
 ## Overview
 
