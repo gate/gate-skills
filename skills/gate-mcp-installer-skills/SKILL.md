@@ -1,5 +1,5 @@
 ---
-name: gate-mcp-installer
+name: gate-mcp-installer-skills
 version: "2026.3.4-1"
 updated: "2026-03-04"
 description: One-click installer and configurator for Gate MCP (mcporter) in OpenClaw. Use when the user wants to (1) Install mcporter CLI tool, (2) Configure Gate MCP server connection, (3) Verify Gate MCP setup, or (4) Troubleshoot Gate MCP connectivity issues.
