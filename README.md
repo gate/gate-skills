@@ -1,8 +1,8 @@
-# Gate GitHub Skills
+# Gate Skills
 
 [English](README.md) | [中文](README_zh.md)
 
-Gate GitHub Skills is an open skills marketplace that empowers AI agents with native access to Gate.io's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
+Gate Skills is an open skills marketplace that empowers AI agents with native access to Gate.io's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
 
 Built by Gate.io. Built for the crypto community.
 
@@ -379,4 +379,4 @@ We welcome contributions! To add a new skill:
 
 ## Disclaimer
 
-Gate GitHub Skills is an informational tool only. All outputs are provided on an "as is" and "as available" basis, without representation or warranty of any kind. It does not constitute investment, financial, trading, or any other form of advice, nor does it represent a recommendation to buy, sell, or hold any assets. All analysis is data-based and read-only — no trading operations are performed by these skills. Digital asset prices are subject to high market risk and price volatility. You are solely responsible for your investment decisions. Past performance is not a reliable predictor of future performance. Please consult an independent financial adviser prior to making any investment.
+Gate Skills is an informational tool only. All outputs are provided on an "as is" and "as available" basis, without representation or warranty of any kind. It does not constitute investment, financial, trading, or any other form of advice, nor does it represent a recommendation to buy, sell, or hold any assets. All analysis is data-based and read-only — no trading operations are performed by these skills. Digital asset prices are subject to high market risk and price volatility. You are solely responsible for your investment decisions. Past performance is not a reliable predictor of future performance. Please consult an independent financial adviser prior to making any investment.
