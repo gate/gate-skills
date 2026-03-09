@@ -21,7 +21,7 @@ Execute integrated operations for Gate spot workflows, including:
 |------|------|
 | Account and balances | `get_spot_accounts`, `list_spot_account_book` |
 | Place/cancel/amend orders | `create_spot_order`, `create_spot_batch_orders`, `cancel_all_spot_orders`, `cancel_spot_order`, `cancel_spot_batch_orders`, `amend_spot_order` |
-| Open orders and fills | `list_spot_orders`, `list_spot_trades` |
+| Open orders and fills | `list_spot_orders`, `list_spot_my_trades` |
 | Market data | `get_spot_tickers`, `get_spot_order_book`, `get_spot_candlesticks` |
 | Trading rules | `get_currency`, `get_currency_pair` |
 | Fees | `get_wallet_fee`, `get_spot_batch_fee` |
@@ -125,7 +125,7 @@ Use only the minimal tool set required for the task:
 - Order placement: `create_spot_order` / `create_spot_batch_orders`
 - Cancel/amend: `cancel_all_spot_orders` / `cancel_spot_order` / `cancel_spot_batch_orders` / `amend_spot_order`
 - Open order query: `list_spot_orders` (use `status=open`)
-- Fill verification: `list_spot_trades`
+- Fill verification: `list_spot_my_trades`
 - Account change history: `list_spot_account_book`
 - Batch fee query: `get_spot_batch_fee`
 
@@ -169,10 +169,10 @@ The response must include:
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
 | 17 | Raise price for unfilled order | Confirm how much to raise (or target price), locate unfilled buy orders, confirm which order to amend if multiple, then amend limit price | `list_spot_orders`(status=open) → `amend_spot_order` |
-| 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `list_spot_trades` → `get_spot_accounts` |
+| 18 | Verify fill and holdings | Last buy fill quantity + current total holdings | `list_spot_my_trades` → `get_spot_accounts` |
 | 19 | Cancel if not filled | If still open, cancel and then recheck balance | `list_spot_orders`(status=open) → `cancel_spot_order` → `get_spot_accounts` |
-| 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `list_spot_trades` → `get_spot_accounts` → `create_spot_order` |
-| 21 | Sell at break-even or better | Sell only if current price is above cost basis | `list_spot_trades` → `get_spot_tickers` → `create_spot_order` |
+| 20 | Rebuy at last price | Use last fill price, check balance, then place limit buy | `list_spot_my_trades` → `get_spot_accounts` → `create_spot_order` |
+| 21 | Sell at break-even or better | Sell only if current price is above cost basis | `list_spot_my_trades` → `get_spot_tickers` → `create_spot_order` |
 | 22 | Asset swap | Estimate value, if >=10U then sell then buy | `get_spot_accounts` → `get_spot_tickers` → `create_spot_order`(sell) → `create_spot_order`(buy) |
 | 23 | Buy if price condition met | Buy only when `current < 60000`, then report balance | `get_spot_tickers` → `create_spot_order` → `get_spot_accounts` |
 | 24 | Buy on trend condition | Buy only if 3 of last 4 hourly candles are bullish | `get_spot_candlesticks` → `create_spot_order` |
