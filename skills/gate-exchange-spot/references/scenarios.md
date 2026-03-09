@@ -1,10 +1,10 @@
 # Scenarios
 
-This document defines behavior-oriented scenario templates for all 25 spot cases.
+This document defines behavior-oriented scenario templates for all 30 spot cases.
 
 ## Global Execution Gate (Mandatory)
 
-For every scenario that includes `create_spot_order`:
+For every scenario that includes `create_spot_order` or `create_spot_batch_orders`:
 - Build and present an Order Draft first
 - Require explicit confirmation from the immediately previous user turn
 - Treat confirmation as single-use
@@ -253,7 +253,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Did my BTC buy fill, and how much BTC do I have now?"
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
+1. Fetch data via `list_spot_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
 2. Calculate latest fill amount (X) and current holdings (Y).
 3. Output `Fill-and-Holdings Verification Report`.
 **Unexpected Behavior**:
@@ -279,7 +279,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If balance allows, buy 100U BTC at my last buy price."
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `list_spot_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
 2. Calculate rebuy limit price from last fill and affordability for 100U.
 3. Output `Rebuy Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -292,7 +292,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If I can exit ETH without loss, sell all."
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
+1. Fetch data via `list_spot_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
 2. Calculate cost basis vs current price and pass/fail for break-even exit.
 3. Output `Break-even Decision Report`; if passed, output `Sell Draft` then `Execution Result`.
 **Unexpected Behavior**:
@@ -351,3 +351,76 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 1. Uses bid price instead of ask-side top for fast buy placement.
 2. Ignores depth/size mismatch and proposes unrealistic instant fill.
 3. Omits risk note about slippage or partial fill at chosen limit price.
+
+## IV. Advanced Spot Utilities (26-30)
+
+### Scenario 26: Order Filtering and Precise Batch Cancellation
+**Context**: User wants to cancel only specific open orders (by id) for a selected symbol.
+**Prompt Examples**:
+- "Show my recent BTC open orders and cancel only 1001 and 1002."
+- "Find my BTC pending orders and batch-cancel ids 1001,1002."
+**Expected Behavior**:
+1. Fetch data via `list_spot_orders` `currency_pair=BTC_USDT,status=open`.
+2. Calculate matched vs unmatched target ids and open-status validation results.
+3. Output `Order Verification Report` first; after user verification, output `Batch Cancel Result Report` via `cancel_spot_orders`.
+**Unexpected Behavior**:
+1. Cancels all BTC open orders instead of only requested ids.
+2. Executes batch cancel before user verifies matched order list.
+3. Silently ignores missing ids without reporting matched/unmatched breakdown.
+
+### Scenario 27: Market Slippage Estimation
+**Context**: User wants slippage simulation for a large market buy notional.
+**Prompt Examples**:
+- "Simulate slippage for buying 10K ADA_USDT at market."
+- "For ADA_USDT market buy 10000 USDT, what's expected slippage?"
+**Expected Behavior**:
+1. Fetch data via `get_spot_order_book` `currency_pair=ADA_USDT` and `get_spot_tickers` `currency_pair=ADA_USDT`.
+2. Calculate weighted average execution price from ask-depth consumption for 10,000 USDT and compare with ticker last price to get slippage%.
+3. Output `Slippage Simulation Report` (no trade execution).
+**Unexpected Behavior**:
+1. Uses only best ask level and ignores deeper levels, understating slippage.
+2. Compares simulated average price against wrong benchmark (for example bid instead of last).
+3. Places a real order during simulation-only request.
+
+### Scenario 28: One-Click Batch Buy Placement
+**Context**: User wants to place multiple buy orders in one shot after balance and per-leg minimum-amount checks.
+**Prompt Examples**:
+- "Buy 10U BTC and 10U ETH together if balance is enough."
+- "One-click batch buy: BTC 10U + ETH 10U."
+**Expected Behavior**:
+1. Fetch data via `get_spot_accounts` `currency=USDT` and `get_currency_pair` for each target pair.
+2. Calculate total required quote amount across all legs, verify affordability, and verify each leg meets `min_quote_amount`.
+3. Output `Batch Eligibility + Order Draft` and then `Batch Execution Report` via `create_spot_batch_orders` after confirmation.
+**Unexpected Behavior**:
+1. Submits partial basket without explicitly telling user which leg failed affordability.
+2. Executes batch placement without final confirmation on full basket details.
+3. Misinterprets per-leg 10U as base quantity and builds wrong order payloads.
+4. Verifies only total basket amount but skips per-leg `min_quote_amount`, causing avoidable API rejections.
+
+### Scenario 29: Multi-Pair Fee Comparison
+**Context**: User wants to compare trading fees/costs across multiple pairs.
+**Prompt Examples**:
+- "Compare trading fees for BTC and ETH; which is cheaper?"
+- "For BTC_USDT and ETH_USDT, which one has lower trading cost?"
+**Expected Behavior**:
+1. Fetch data via `get_spot_batch_fee` `currency_pairs=BTC_USDT,ETH_USDT` and `get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
+2. Calculate estimated effective fee cost under the same notional for each pair.
+3. Output `Fee Comparison Report` with ranking and cost difference.
+**Unexpected Behavior**:
+1. Uses a single default fee for all pairs without per-pair verification.
+2. Returns lower fee pair but provides no numeric delta or cost context.
+3. Executes any trade in a compare-only request.
+
+### Scenario 30: Account Book and Balance Reconciliation
+**Context**: User wants recent ledger flow for one coin and current remaining balance.
+**Prompt Examples**:
+- "Check recent BTC account book and tell me how much BTC I have now."
+- "Show BTC ledger changes and current balance."
+**Expected Behavior**:
+1. Fetch data via `list_spot_account_book` `currency=BTC` and `get_spot_accounts` `currency=BTC`.
+2. Calculate recent change summary (buy/sell/fee/transfer effects) and reconcile to current balance snapshot.
+3. Output `Account Flow + Current Balance Report`.
+**Unexpected Behavior**:
+1. Shows balance only and skips ledger-flow details user requested.
+2. Mixes BTC and USDT units when explaining account changes.
+3. Uses outdated account-book window and misses latest movements.
