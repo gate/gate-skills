@@ -4,16 +4,52 @@ Gate futures open-position scenarios and expected behavior.
 
 ## Unit Conversion
 
-When the user does not specify size in **contracts**, convert to **contracts** before placing the order:
+When the user does not specify size in **contracts**, convert to **contracts** before placing the order.
 
-| User unit | Conversion | Notes |
-|-----------|------------|-------|
-| **U (USDT notional)** | contracts = u ÷ mark_price ÷ quanto_multiplier | No leverage or cross: `size_contracts = u / mark_price / quanto_multiplier` |
-| **U (USDT notional) + leverage** | contracts = u × leverage ÷ mark_price ÷ quanto_multiplier | With leverage: `size_contracts = u * leverage / mark_price / quanto_multiplier` |
-| **Base (e.g. BTC, ETH)** | contracts = base_amount ÷ quanto_multiplier | `size_contracts = base_amount / quanto_multiplier` |
+There are **two distinct intents** when user specifies USDT:
 
-- **Data source**: Call `get_futures_contract(settle, contract)` for `mark_price`, `quanto_multiplier`.
-- **Precision**: Resulting contracts must satisfy contract `order_size_min` and size precision; if below minimum, prompt the user.
+| User phrase | Intent | Type |
+|-------------|--------|------|
+| "spend 100U long" / "invest 100 USDT long" | **USDT cost** — 100 USDT is the margin cost | Cost-based |
+| "long 100U worth" / "open 100 USDT value position" | **USDT value** — 100 USDT is the notional value | Value-based |
+| "long 0.1 BTC" | **Base amount** — direct base conversion | Base |
+
+### Data sources
+
+- `get_futures_contract(settle, contract)` → `quanto_multiplier`, `order_size_min`
+- `list_futures_order_book(settle, contract, limit=1)` → `asks[0].p` (best ask), `bids[0].p` (best bid)
+- Position query → current leverage for the contract+side (**use this leverage in USDT cost formulas; do not change or override it unless the user explicitly specified a different leverage**)
+
+### USDT Cost → contracts (margin-based)
+
+The user specifies how much margin (USDT) to invest. The formula accounts for fees and leverage.
+
+| Direction | Formula | `order_price` |
+|-----------|---------|---------------|
+| **Open long** | `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price` | Limit: specified price; Market: best ask |
+| **Open short** | `contracts = cost / (0.0015 + 1.00075/leverage) / quanto_multiplier / max(order_price, best_bid)` | Limit: specified price; Market: best bid |
+| **Close long** | `contracts = cost / (0.0015 + 1.00075/leverage) / quanto_multiplier / max(order_price, best_bid)` | Limit: specified price; Market: best bid. Use the **long position's leverage**. |
+| **Close short** | `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price` | Limit: specified price; Market: best ask. Use the **short position's leverage**. |
+
+### USDT Value → contracts (notional-based)
+
+The user specifies the notional value of the position in USDT.
+
+| Direction | Formula | `price` |
+|-----------|---------|---------|
+| **Buy / Open long / Close short** | `contracts = usdt_value / price / quanto_multiplier` | Limit: specified price; Market: best ask |
+| **Sell / Open short / Close long** | `contracts = usdt_value / max(best_bid, order_price) / quanto_multiplier` | Limit: max(specified price, best bid); Market: best bid |
+
+### Base amount → contracts
+
+| User unit | Formula |
+|-----------|---------|
+| **Base (e.g. BTC, ETH)** | `contracts = base_amount / quanto_multiplier` |
+
+### Precision
+
+- Resulting contracts must satisfy `order_size_min` and size precision from the contract; if below minimum, prompt the user.
+- Always **floor** (truncate) the result to an integer (contracts are whole numbers).
 
 ## Position and leverage query (dual vs single mode)
 
@@ -34,7 +70,7 @@ Same rule for **margin mode** (`pos_margin_mode`): get it from the position retu
 
 ## Margin Mode Switch API (update_futures_dual_comp_position_cross_mode)
 
-**Switch margin mode only when the user explicitly requests it**: switch to isolated only when user asks for isolated (e.g. "isolated", "逐仓"); switch to cross only when user asks for cross (e.g. "cross", "全仓"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode.**
+**Switch margin mode only when the user explicitly requests it**: switch to isolated only when user asks for isolated (e.g. "isolated"); switch to cross only when user asks for cross (e.g. "cross"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode.**
 
 When switching cross/isolated margin, call MCP **`update_futures_dual_comp_position_cross_mode`** with **`settle`**, **`contract`**, **`mode`**:
 
@@ -47,6 +83,8 @@ Example: cross `update_futures_dual_comp_position_cross_mode(settle="usdt", cont
 ## Leverage Before Order
 
 If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `create_futures_order`. Use **`update_futures_dual_mode_position_leverage(settle, contract, leverage)`** in dual mode; **`update_futures_position_leverage(settle, contract, leverage)`** in single mode. Do not use `update_futures_position_leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `update_futures_dual_mode_position_leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
+
+**If the user does not specify leverage, do not change it.** Use the current leverage from the position query for all calculations (including the USDT cost formula). Do not default to any standard leverage value (e.g. 10x). This is especially important when the user already has a position — changing leverage without explicit request would alter the existing position's risk parameters.
 
 ## Margin Mode vs Position Mode
 
@@ -309,18 +347,131 @@ Note: This order will only fill as Maker (maker fee).
 
 ---
 
-## Scenario 8: Open by U (USDT notional)
+## Scenario 8: Top gainer/loser order (ticker-based)
 
-**Context**: User specifies size in USDT (U); convert to contracts then open.
+**Context**: User wants to open a position on the contract with the highest 24h gain or loss. The system discovers the contract automatically via `list_futures_tickers`.
 
-**Prompt Examples**:
-- "BTC_USDT long 1000U"
-- "Market short 500 U ETH_USDT"
-- "Long 2000 USDT notional BTC"
+**Trigger phrases**:
+- "top gainer long 10U"
+- "top loser short 5U"
+- "long 10U on today's biggest gainer"
+- "short 5U on the 24h biggest loser"
 
 **Expected Behavior**:
-1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")` for `mark_price`, `quanto_multiplier`.
-2. Compute contracts: no leverage → contracts = u ÷ mark_price ÷ quanto_multiplier; **with leverage** → contracts = u × leverage ÷ mark_price ÷ quanto_multiplier (respect precision and `order_size_min`).
-3. If contracts < order_size_min, prompt "Notional converts to below minimum size."
-4. Proceed with open flow (mode switch, leverage, `create_futures_order`) using the computed size.
-5. Report can show both "~xxx U" and "yy contracts".
+1. Call `list_futures_tickers(settle="usdt")` to get all USDT-settled futures tickers.
+2. Sort by `changePercentage`:
+   - **Top gainer**: sort descending, pick the contract with the highest positive `changePercentage`.
+   - **Top loser**: sort ascending, pick the contract with the most negative `changePercentage`.
+3. With the identified contract (e.g. `PEPE_USDT`), call `get_futures_contract(settle="usdt", contract="PEPE_USDT")` for `mark_price`, `quanto_multiplier`, `order_size_min`.
+4. Convert USDT notional to contracts: `contracts = u ÷ mark_price ÷ quanto_multiplier` (or `u × leverage ÷ mark_price ÷ quanto_multiplier` if leverage specified). Round to meet `order_size_min`.
+5. **Show discovery result and order summary**, ask user to confirm:
+   - Which contract was identified, 24h change percentage
+   - Order details: contract, side, size (contracts + USDT equivalent), market/limit, mode, leverage
+   - Risk warning for volatile coins
+6. After user confirms, place order via `create_futures_order(settle="usdt", contract=..., size=..., price="0", tif="ioc")` for market order.
+7. Verify position and output result.
+
+**Response Template** (discovery + confirmation):
+```
+Today's top gainer: PEPE_USDT (+45.2% in 24h)
+
+Order summary:
+- Contract: PEPE_USDT
+- Side: long (buy)
+- Size: ~10 USDT (≈ 1234 contracts)
+- Type: market
+- Mode: cross
+- Leverage: 20x
+
+⚠️ Hot coin alert: PEPE_USDT has high volatility. Please manage risk and consider setting a stop-loss.
+
+Reply 'confirm' to place the order.
+```
+
+**Response Template** (after fill):
+```
+Order filled.
+
+Contract: PEPE_USDT (24h top gainer, +45.2%)
+Order ID: 123456792
+Side: long (buy)
+Size: 1234 contracts (~10 USDT)
+Avg fill: 0.00001234 USDT
+Status: finished
+Mode: cross 20x
+
+⚠️ Hot coins are highly volatile — consider setting a stop-loss.
+```
+
+**Edge cases**:
+- If `changePercentage` is `"0"` for all contracts (e.g. data unavailable), inform user: "24h price change data is currently unavailable. Please specify a contract directly."
+- If the top contract has very low liquidity or is not in `trading` status, skip to the next one.
+- If user says "top gainer" / "biggest gainer" → top gainer (long by default); "top loser" / "biggest loser" → top loser (user specifies long or short; do not assume).
+
+---
+
+## Scenario 9: Open by USDT cost (margin-based)
+
+**Context**: User specifies how much USDT to **invest as margin**. Contracts are calculated using the cost formula that accounts for fees and leverage.
+
+**Prompt Examples**:
+- "spend 100U long BTC_USDT"
+- "invest 100 USDT to open long BTC_USDT"
+- "spend 500U isolated 10x short ETH_USDT"
+
+**Expected Behavior**:
+1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")` for `quanto_multiplier`.
+2. Fetch orderbook via `list_futures_order_book(settle="usdt", contract="BTC_USDT", limit=1)` for best ask (`asks[0].p`) and best bid (`bids[0].p`).
+3. Get current leverage from position query. **Use this leverage in the formula. Do not change leverage unless the user explicitly requests a different value.**
+4. Compute contracts:
+   - **Open long**: `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price` (`order_price`: limit → specified; market → best ask)
+   - **Open short**: `contracts = cost / (0.0015 + 1.00075/leverage) / quanto_multiplier / max(order_price, best_bid)` (`order_price`: limit → specified; market → best bid)
+5. Floor to integer. If < `order_size_min`, prompt user.
+6. Proceed with open flow; report shows both "~xxx U cost" and "yy contracts".
+
+**Response Template**:
+```
+Order summary:
+- Contract: BTC_USDT
+- Side: long (buy)
+- Cost: 100 USDT (margin)
+- Size: 156 contracts (≈ 1.0 BTC)
+- Type: market (best ask: 64,200)
+- Mode: cross 10x
+- Estimated liq price: ...
+
+Reply 'confirm' to place the order.
+```
+
+---
+
+## Scenario 10: Open by USDT value (notional-based)
+
+**Context**: User specifies the **notional value** of the position in USDT.
+
+**Prompt Examples**:
+- "long 100U worth of BTC_USDT"
+- "open 100 USDT value long BTC_USDT"
+- "market short 500 USDT value ETH_USDT"
+
+**Expected Behavior**:
+1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")` for `quanto_multiplier`.
+2. Fetch orderbook via `list_futures_order_book(settle="usdt", contract="BTC_USDT", limit=1)` for best ask and best bid.
+3. Compute contracts:
+   - **Buy / open long**: `contracts = usdt_value / price / quanto_multiplier` (`price`: limit → specified; market → best ask)
+   - **Sell / open short**: `contracts = usdt_value / max(best_bid, order_price) / quanto_multiplier` (`order_price`: limit → specified; market → best bid)
+4. Floor to integer. If < `order_size_min`, prompt user.
+5. Proceed with open flow; report shows both "~xxx U value" and "yy contracts".
+
+**Response Template**:
+```
+Order summary:
+- Contract: BTC_USDT
+- Side: long (buy)
+- Notional: ~100 USDT
+- Size: 15 contracts (≈ 0.0015 BTC)
+- Type: market (best ask: 64,200)
+- Mode: cross 10x
+
+Reply 'confirm' to place the order.
+```
