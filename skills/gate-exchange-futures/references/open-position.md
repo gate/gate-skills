@@ -18,7 +18,7 @@ There are **two distinct intents** when user specifies USDT:
 
 - `get_futures_contract(settle, contract)` → `quanto_multiplier`, `order_size_min`
 - `list_futures_order_book(settle, contract, limit=1)` → `asks[0].p` (best ask), `bids[0].p` (best bid)
-- Position query → current leverage for the contract+side
+- Position query → current leverage for the contract+side (**use this leverage in USDT cost formulas; do not change or override it unless the user explicitly specified a different leverage**)
 
 ### USDT Cost → contracts (margin-based)
 
@@ -83,6 +83,8 @@ Example: cross `update_futures_dual_comp_position_cross_mode(settle="usdt", cont
 ## Leverage Before Order
 
 If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `create_futures_order`. Use **`update_futures_dual_mode_position_leverage(settle, contract, leverage)`** in dual mode; **`update_futures_position_leverage(settle, contract, leverage)`** in single mode. Do not use `update_futures_position_leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `update_futures_dual_mode_position_leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
+
+**If the user does not specify leverage, do not change it.** Use the current leverage from the position query for all calculations (including the USDT cost formula). Do not default to any standard leverage value (e.g. 10x). This is especially important when the user already has a position — changing leverage without explicit request would alter the existing position's risk parameters.
 
 ## Margin Mode vs Position Mode
 
@@ -420,7 +422,7 @@ Mode: cross 20x
 **Expected Behavior**:
 1. Fetch contract via `get_futures_contract(settle="usdt", contract="BTC_USDT")` for `quanto_multiplier`.
 2. Fetch orderbook via `list_futures_order_book(settle="usdt", contract="BTC_USDT", limit=1)` for best ask (`asks[0].p`) and best bid (`bids[0].p`).
-3. Get current leverage from position query.
+3. Get current leverage from position query. **Use this leverage in the formula. Do not change leverage unless the user explicitly requests a different value.**
 4. Compute contracts:
    - **Open long**: `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price` (`order_price`: limit → specified; market → best ask)
    - **Open short**: `contracts = cost / (0.0015 + 1.00075/leverage) / quanto_multiplier / max(order_price, best_bid)` (`order_price`: limit → specified; market → best bid)
