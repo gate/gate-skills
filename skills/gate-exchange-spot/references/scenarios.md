@@ -15,7 +15,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 
 ## I. Buy and Account Queries (1-8)
 
-### Scenario 1: Market Buy by Quote Amount
+## Scenario 1: Market Buy by Quote Amount
 **Context**: User wants to buy a fixed USDT value of a coin at market price.
 **Prompt Examples**:
 - "Buy 100U of BTC."
@@ -29,7 +29,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Sends `amount=0.001 BTC` for market buy request "buy 100U", causing wrong notional.
 3. Reports filled quantity but omits average fill price and fee impact.
 
-### Scenario 2: Limit Buy at Target Price
+## Scenario 2: Limit Buy at Target Price
 **Context**: User wants to buy at a specified limit price.
 **Prompt Examples**:
 - "Buy 100U BTC at 60000."
@@ -43,7 +43,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Returns "open order created" without checking whether quote balance can support order value.
 3. Uses wrong price precision and returns exchange error without a user-readable fix suggestion.
 
-### Scenario 3: Buy with All USDT
+## Scenario 3: Buy with All USDT
 **Context**: User wants to convert full USDT balance into a target coin.
 **Prompt Examples**:
 - "Use all my USDT to buy ETH."
@@ -57,7 +57,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Places full-size order without draft/confirmation despite all-in risk.
 3. Returns no residual balance summary, so user cannot verify remaining funds.
 
-### Scenario 4: Tradability and Unit-Cost Check
+## Scenario 4: Tradability and Unit-Cost Check
 **Context**: User wants a buy readiness check before placing any order.
 **Prompt Examples**:
 - "Can BTC be traded now? How much for one BTC?"
@@ -71,7 +71,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Ignores disabled/suspended trading status and answers "tradable" incorrectly.
 3. Returns only ticker price, missing min amount/precision constraints.
 
-### Scenario 5: Total Account Valuation
+## Scenario 5: Total Account Valuation
 **Context**: User wants total account value in USDT terms.
 **Prompt Examples**:
 - "How much is my account worth now?"
@@ -85,7 +85,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Uses stale or mismatched pair prices, producing unrealistic valuation output.
 3. Triggers trade-related tools in a portfolio-report-only task.
 
-### Scenario 6: Cancel All Open Orders Then Recheck Balance
+## Scenario 6: Cancel All Open Orders Then Recheck Balance
 **Context**: User wants all open orders canceled and updated balances.
 **Prompt Examples**:
 - "Cancel all unfilled orders and show my balance."
@@ -99,7 +99,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Fails to show which order ids were canceled vs already filled.
 3. Skips post-cancel balance refresh, so refund state is unknown.
 
-### Scenario 7: Sell Full Dust Position
+## Scenario 7: Sell Full Dust Position
 **Context**: User wants to sell all holdings of a coin into USDT.
 **Prompt Examples**:
 - "Sell all my DOGE to USDT."
@@ -113,7 +113,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Rounds amount with wrong precision and creates unexpected partial leftover balance.
 3. Executes sell without showing user that dust remains unsellable.
 
-### Scenario 8: Balance and Minimum-Amount Buy Check
+## Scenario 8: Balance and Minimum-Amount Buy Check
 **Context**: User asks to buy only if both balance and minimum amount conditions are satisfied.
 **Prompt Examples**:
 - "I want to buy 5U ETH; if possible, place it."
@@ -129,7 +129,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 
 ## II. Smart Monitoring and Trading (9-16)
 
-### Scenario 9: Buy 2% Lower
+## Scenario 9: Buy 2% Lower
 **Context**: User wants a discounted-entry limit buy based on current price.
 **Prompt Examples**:
 - "Buy 50U BTC when it is 2% lower than now."
@@ -142,7 +142,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Submits market order instead of computed limit order.
 3. Places order without showing target price formula in draft.
 
-### Scenario 10: Sell at Current + 500
+## Scenario 10: Sell at Current + 500
 **Context**: User wants a profit-taking limit sell at fixed offset.
 **Prompt Examples**:
 - "If BTC rises by 500, sell my holdings."
@@ -155,7 +155,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Calculates offset from wrong reference price (for example 24h open, not current).
 3. Omits size source (available holdings) and causes insufficient-balance failure.
 
-### Scenario 11: Buy Near 24h Low
+## Scenario 11: Buy Near 24h Low
 **Context**: User wants to buy only when price is near daily low.
 **Prompt Examples**:
 - "If ETH is near today's low, buy."
@@ -168,7 +168,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Returns binary yes/no without reporting current price, 24h low, and distance.
 3. Treats "near" as exact equality only, causing unrealistic non-execution.
 
-### Scenario 12: Sell on 5% Drop Request
+## Scenario 12: Sell on 5% Drop Request
 **Context**: User wants downside-exit style execution using a computed target.
 **Prompt Examples**:
 - "Sell if BTC drops 5%."
@@ -181,7 +181,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Executes sell without confirmation under "risk-control urgency" wording.
 3. Computes 5% drop from wrong anchor (entry price vs current price) without disclosure.
 
-### Scenario 13: Buy Top 24h Gainer
+## Scenario 13: Buy Top 24h Gainer
 **Context**: User wants to rotate into the strongest coin by recent performance.
 **Prompt Examples**:
 - "Buy 20U of the top gainer now."
@@ -194,7 +194,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Selects an illiquid/suspended pair and fails at order placement.
 3. Omits ranking evidence (top candidates and 24h change values).
 
-### Scenario 14: Buy the Bigger Loser (BTC vs ETH)
+## Scenario 14: Buy the Bigger Loser (BTC vs ETH)
 **Context**: User wants comparative dip-buy between two assets.
 **Prompt Examples**:
 - "Between BTC and ETH, buy whichever dropped more."
@@ -207,7 +207,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Uses absolute price drop rather than percentage decline despite scenario intent.
 3. Executes before final confirmation after showing comparison.
 
-### Scenario 15: Buy Then Place +2% Sell
+## Scenario 15: Buy Then Place +2% Sell
 **Context**: User wants a two-leg flow: entry first, then exit order.
 **Prompt Examples**:
 - "Buy 100U BTC, then place sell at +2%."
@@ -220,7 +220,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Uses requested +2% on intended price instead of actual fill reference.
 3. Creates second leg with wrong quantity (requested amount vs filled amount).
 
-### Scenario 16: Fee-Inclusive Cost Estimate
+## Scenario 16: Fee-Inclusive Cost Estimate
 **Context**: User wants pre-trade cost estimation only.
 **Prompt Examples**:
 - "If I buy 1000U, what's total including fees?"
@@ -235,7 +235,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 
 ## III. Order Management and Amendment (17-25)
 
-### Scenario 17: Raise Price for Unfilled Buy Order
+## Scenario 17: Raise Price for Unfilled Buy Order
 **Context**: User wants to amend an unfilled buy order to improve fill chance.
 **Prompt Examples**:
 - "My buy order is unfilled, raise the price a bit."
@@ -248,12 +248,12 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Amends the wrong order when multiple open buy orders exist.
 3. Returns success without showing old price -> new price delta.
 
-### Scenario 18: Verify Latest Buy Fill and Current Holdings
+## Scenario 18: Verify Latest Buy Fill and Current Holdings
 **Context**: User wants confirmation of executed buy and current total holdings.
 **Prompt Examples**:
 - "Did my BTC buy fill, and how much BTC do I have now?"
 **Expected Behavior**:
-1. Fetch data via `list_spot_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
+1. Fetch data via `list_spot_my_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
 2. Calculate latest fill amount (X) and current holdings (Y).
 3. Output `Fill-and-Holdings Verification Report`.
 **Unexpected Behavior**:
@@ -261,7 +261,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Returns fill quantity but not current holding total (or vice versa).
 3. Mixes pair/currency units (for example reports USDT where BTC is expected).
 
-### Scenario 19: Cancel If Still Unfilled and Verify Refund
+## Scenario 19: Cancel If Still Unfilled and Verify Refund
 **Context**: User wants conditional cancellation and post-cancel balance verification.
 **Prompt Examples**:
 - "If my ETH buy is still open, cancel it and check refund."
@@ -274,12 +274,12 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Reports "refund completed" without checking updated quote balance.
 3. Fails to identify target order among multiple open ETH buys.
 
-### Scenario 20: Rebuy at Last Fill Price
+## Scenario 20: Rebuy at Last Fill Price
 **Context**: User wants another buy using previous execution price.
 **Prompt Examples**:
 - "If balance allows, buy 100U BTC at my last buy price."
 **Expected Behavior**:
-1. Fetch data via `list_spot_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `list_spot_my_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
 2. Calculate rebuy limit price from last fill and affordability for 100U.
 3. Output `Rebuy Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -287,12 +287,12 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Skips balance check and hits insufficient funds after confirmation.
 3. Places market order when scenario requires price reuse via limit order.
 
-### Scenario 21: Break-even Exit
+## Scenario 21: Break-even Exit
 **Context**: User wants to sell only if current price is above cost basis.
 **Prompt Examples**:
 - "If I can exit ETH without loss, sell all."
 **Expected Behavior**:
-1. Fetch data via `list_spot_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
+1. Fetch data via `list_spot_my_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
 2. Calculate cost basis vs current price and pass/fail for break-even exit.
 3. Output `Break-even Decision Report`; if passed, output `Sell Draft` then `Execution Result`.
 **Unexpected Behavior**:
@@ -300,7 +300,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Computes cost basis from one trade only, ignoring partial fills/history.
 3. Omits fee-adjusted break-even explanation, misleading "no-loss" decision.
 
-### Scenario 22: Full Asset Swap (DOGE -> BTC)
+## Scenario 22: Full Asset Swap (DOGE -> BTC)
 **Context**: User wants a two-leg conversion only above minimum value threshold.
 **Prompt Examples**:
 - "Swap all DOGE to BTC if worth at least 10U."
@@ -313,7 +313,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Runs both legs without independent confirmation checkpoints.
 3. Proceeds with buy leg before confirming sell leg completion amount.
 
-### Scenario 23: Buy Only If Below Price Threshold
+## Scenario 23: Buy Only If Below Price Threshold
 **Context**: User wants conditional buy and post-trade balance report.
 **Prompt Examples**:
 - "If BTC < 60000, buy 50U and show balance."
@@ -326,7 +326,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Uses delayed ticker snapshot and mis-evaluates condition.
 3. Skips post-trade account refresh and returns stale balance.
 
-### Scenario 24: Buy on Short-Term Uptrend
+## Scenario 24: Buy on Short-Term Uptrend
 **Context**: User wants trend-filtered execution using recent candlesticks.
 **Prompt Examples**:
 - "If BTC has been rising for recent hours, buy 100U."
@@ -339,7 +339,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Miscounts bullish candles (for example includes incomplete current candle incorrectly).
 3. Executes on sideways/downtrend while labeling it "uptrend confirmed."
 
-### Scenario 25: Fast Execution Limit Buy from Order Book
+## Scenario 25: Fast Execution Limit Buy from Order Book
 **Context**: User wants fastest practical limit execution using book top.
 **Prompt Examples**:
 - "Check ETH book and place fastest 50U buy."
@@ -354,7 +354,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 
 ## IV. Advanced Spot Utilities (26-30)
 
-### Scenario 26: Order Filtering and Precise Batch Cancellation
+## Scenario 26: Order Filtering and Precise Batch Cancellation
 **Context**: User wants to cancel only specific open orders (by id) for a selected symbol.
 **Prompt Examples**:
 - "Show my recent BTC open orders and cancel only 1001 and 1002."
@@ -362,13 +362,13 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Expected Behavior**:
 1. Fetch data via `list_spot_orders` `currency_pair=BTC_USDT,status=open`.
 2. Calculate matched vs unmatched target ids and open-status validation results.
-3. Output `Order Verification Report` first; after user verification, output `Batch Cancel Result Report` via `cancel_spot_orders`.
+3. Output `Order Verification Report` first; after user verification, output `Batch Cancel Result Report` via `cancel_spot_batch_orders`.
 **Unexpected Behavior**:
 1. Cancels all BTC open orders instead of only requested ids.
 2. Executes batch cancel before user verifies matched order list.
 3. Silently ignores missing ids without reporting matched/unmatched breakdown.
 
-### Scenario 27: Market Slippage Estimation
+## Scenario 27: Market Slippage Estimation
 **Context**: User wants slippage simulation for a large market buy notional.
 **Prompt Examples**:
 - "Simulate slippage for buying 10K ADA_USDT at market."
@@ -382,7 +382,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Compares simulated average price against wrong benchmark (for example bid instead of last).
 3. Places a real order during simulation-only request.
 
-### Scenario 28: One-Click Batch Buy Placement
+## Scenario 28: One-Click Batch Buy Placement
 **Context**: User wants to place multiple buy orders in one shot after balance and per-leg minimum-amount checks.
 **Prompt Examples**:
 - "Buy 10U BTC and 10U ETH together if balance is enough."
@@ -397,7 +397,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 3. Misinterprets per-leg 10U as base quantity and builds wrong order payloads.
 4. Verifies only total basket amount but skips per-leg `min_quote_amount`, causing avoidable API rejections.
 
-### Scenario 29: Multi-Pair Fee Comparison
+## Scenario 29: Multi-Pair Fee Comparison
 **Context**: User wants to compare trading fees/costs across multiple pairs.
 **Prompt Examples**:
 - "Compare trading fees for BTC and ETH; which is cheaper?"
@@ -411,7 +411,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Returns lower fee pair but provides no numeric delta or cost context.
 3. Executes any trade in a compare-only request.
 
-### Scenario 30: Account Book and Balance Reconciliation
+## Scenario 30: Account Book and Balance Reconciliation
 **Context**: User wants recent ledger flow for one coin and current remaining balance.
 **Prompt Examples**:
 - "Check recent BTC account book and tell me how much BTC I have now."

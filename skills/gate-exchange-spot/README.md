@@ -4,7 +4,7 @@
 
 An integrated execution skill for Gate spot trading, covering buy/sell actions, conditional monitoring orders, order management, fill verification, and account asset queries.
 
-## Core Capabilities
+### Core Capabilities
 
 - Buy and account queries (balance checks, full-balance buy, asset valuation, minimum order checks)
 - Smart monitoring and trading (place limit orders by percentage/fixed price spread)
@@ -28,7 +28,7 @@ Hard gate rules:
 - Any parameter/topic change invalidates old confirmation and requires a new draft + reconfirmation.
 - For multi-leg actions, require per-leg confirmation before each order placement.
 
-## Skill Structure
+## Architecture
 
 ```
 gate-exchange-spot/
