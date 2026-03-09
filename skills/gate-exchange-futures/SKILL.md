@@ -13,7 +13,7 @@ This skill is the single entry for Gate USDT perpetual futures. It supports **fo
 
 | Module | Description | Trigger keywords |
 |--------|-------------|------------------|
-| **Open** | Limit/market open long or short, cross/isolated mode | `long`, `short`, `buy`, `sell`, `open` |
+| **Open** | Limit/market open long or short, cross/isolated mode, top gainer/loser order | `long`, `short`, `buy`, `sell`, `open`, `top gainer`, `top loser` |
 | **Close** | Full close, partial close, reverse position | `close`, `close all`, `reverse` |
 | **Cancel** | Cancel one or many orders | `cancel`, `revoke` |
 | **Amend** | Change order price or size | `amend`, `modify` |
@@ -22,7 +22,7 @@ This skill is the single entry for Gate USDT perpetual futures. It supports **fo
 
 | Intent | Example phrases | Route to |
 |--------|-----------------|----------|
-| **Open position** | "BTC long 1 contract", "market short ETH", "10x leverage long" | Read `references/open-position.md` |
+| **Open position** | "BTC long 1 contract", "market short ETH", "10x leverage long", "top gainer long 10U" | Read `references/open-position.md` |
 | **Close position** | "close all BTC", "close half", "reverse to short", "close everything" | Read `references/close-position.md` |
 | **Cancel orders** | "cancel that buy order", "cancel all orders", "list my orders" | Read `references/cancel-order.md` |
 | **Amend order** | "change price to 60000", "change order size" | Read `references/amend-order.md` |
@@ -34,6 +34,7 @@ This skill is the single entry for Gate USDT perpetual futures. It supports **fo
 
 - Determine module (Open/Close/Cancel/Amend).
 - Extract: `contract`, `side`, `size`, `price`, `leverage`.
+- **Top gainer/loser**: if user requests "top gainer" / "top loser" (or equivalent) instead of a specific contract, call `list_futures_tickers(settle="usdt")`, sort by `changePercentage` (descending for gainer, ascending for loser), pick the top contract. Then continue the open flow with that contract.
 - **Missing**: if required params missing (e.g. size), ask user (clarify mode).
 
 ### 2. Pre-flight checks
@@ -55,14 +56,15 @@ This skill is the single entry for Gate USDT perpetual futures. It supports **fo
 
 #### Module A: Open position
 
-1. **Unit conversion**: if user does not specify size in **contracts**, get `mark_price`, `quanto_multiplier` from `get_futures_contract`, then convert:
-   - **U (USDT notional)**: contracts = u ÷ mark_price ÷ quanto_multiplier (no leverage); **with leverage**: contracts = u × leverage ÷ mark_price ÷ quanto_multiplier
+1. **Unit conversion**: if user does not specify size in **contracts**, distinguish between **USDT cost** ("spend 100U") and **USDT value** ("100U worth"), get `quanto_multiplier` from `get_futures_contract` and best bid/ask from `list_futures_order_book(settle, contract, limit=1)`:
+   - **USDT cost (margin-based)**: open long: `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price`; open short: `contracts = cost / (0.0015 + 1.00075/leverage) / quanto_multiplier / max(order_price, best_bid)`. `order_price`: limit → specified price; market → best ask (long) or best bid (short). **`leverage` must come from the current position query (step 5); do not assume a default.**
+   - **USDT value (notional-based)**: buy/open long: `contracts = usdt_value / price / quanto_multiplier`; sell/open short: `contracts = usdt_value / max(best_bid, order_price) / quanto_multiplier`. `price`: limit → specified price; market → best ask (buy) or best bid (sell).
    - **Base (e.g. BTC, ETH)**: contracts = base_amount ÷ quanto_multiplier
-   - Round/truncate to `order_size_min` and size precision.
-2. **Mode**: **Switch margin mode only when the user explicitly requests it**: switch to isolated only when user explicitly asks for isolated (e.g. "isolated", "逐仓"); switch to cross only when user explicitly asks for cross (e.g. "cross", "全仓"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode** (from position `pos_margin_mode`). If user explicitly wants isolated, check leverage.
+   - Floor to integer; must satisfy `order_size_min`.
+2. **Mode**: **Switch margin mode only when the user explicitly requests it**: switch to isolated only when user explicitly asks for isolated (e.g. "isolated"); switch to cross only when user explicitly asks for cross (e.g. "cross"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode** (from position `pos_margin_mode`). If user explicitly wants isolated, check leverage.
 3. **Mode switch**: only when user **explicitly** requested a margin mode and it **differs from current** (current from position: `pos_margin_mode`), then **before** calling `update_futures_dual_comp_position_cross_mode`: get **position mode** via `get_futures_accounts(settle)` → **`position_mode`** (single/dual); if `position_mode === "single"`, show prompt *"You already have a {currency} position; switching margin mode will apply to this position too. Continue?"* and continue only after user confirms; if `position_mode === "dual"`, **do not** switch—interrupt and tell user *"Please close the position first, then open a new one."*
 4. **Mode switch (no conflict)**: only when user **explicitly** requested cross or isolated and that target differs from current: if no position, or single position and user confirmed, call `update_futures_dual_comp_position_cross_mode(settle, contract, mode)` with **`mode`** `"CROSS"` or `"ISOLATED"`. **Do not switch if the user did not explicitly request a margin mode.**
-5. **Leverage**: if user specified leverage and it **differs from current** (from position query per dual/single above), call **`update_futures_dual_mode_position_leverage`** in dual mode or **`update_futures_position_leverage`** in single mode **first**, then proceed.
+5. **Leverage**: if user specified leverage and it **differs from current** (from position query per dual/single above), call **`update_futures_dual_mode_position_leverage`** in dual mode or **`update_futures_position_leverage`** in single mode **first**, then proceed. **If user did not specify leverage, do not change it — use the current leverage from the position query for all calculations (e.g. USDT cost formula). Do not default to any value (e.g. 10x or 20x).**
 6. **Pre-order confirmation**: get current leverage from **position query** (dual: `list_futures_positions` or `get_futures_dual_mode_position`; single: `get_futures_position`) for contract + side. Show **final order summary** (contract, side, size, price or market, mode, **leverage**, estimated margin/liq price). Ask user to confirm (e.g. "Reply 'confirm' to place the order."). **Only after user confirms**, place order.
 7. **Place order**: call `create_futures_order` (market: `tif=ioc`, `price=0`).
 8. **Verify**: confirm position via **position query** (dual: `list_futures_positions(holding=true)` or `get_futures_dual_mode_position`; single: `get_futures_position`).
