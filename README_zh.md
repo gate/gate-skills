@@ -6,7 +6,18 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 由 gate.com 构建，为加密社区而生。
 
-这些 skills 设计为可兼容任意 AI Agent 框架。无论你使用 OpenClaw、LangChain、CrewAI，还是自研 Agent 栈，都可以通过最少配置接入 gate.com 的加密智能能力。
+### 一键安装
+
+使用我们的安装器 skill，秒级完成配置：
+
+- **Cursor 用户**：使用 `gate-mcp-cursorinstaller` — 一条命令安装全部 Gate MCP 服务器 + Skills
+- **OpenClaw 用户**：使用 `gate-mcp-openclawinstaller` — 完整的 Gate MCP 安装器，支持交互式选择
+
+只需对 AI 助手说 **"帮我安装 Gate MCP"**，或直接运行安装脚本即可。
+
+### 框架兼容性
+
+这些 skills 设计为可兼容任意 AI Agent 框架。无论你使用 Cursor、OpenClaw，还是自研 Agent 栈，都可以通过最少配置接入 gate.com 的加密智能能力。
 
 ---
 

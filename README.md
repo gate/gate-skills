@@ -6,7 +6,18 @@ Gate Skills is an open skills marketplace that empowers AI agents with native ac
 
 Built by gate.com. Built for the crypto community.
 
-These skills are designed to work with any AI agent framework. Whether you're using OpenClaw, LangChain, CrewAI, or your own stack, your agents can plug into gate.com's crypto intelligence with minimal configuration.
+### One-Click Installation
+
+Get started in seconds with our installer skills:
+
+- **Cursor Users**: Use `gate-mcp-cursorinstaller` — installs all Gate MCP servers + skills with a single command
+- **OpenClaw Users**: Use `gate-mcp-openclawinstaller` — complete Gate MCP setup with interactive selection
+
+Just say **"Help me install Gate MCP"** to your AI assistant, or run the install script directly.
+
+### Framework Compatibility
+
+These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into gate.com's crypto intelligence with minimal configuration.
 
 ---
 
