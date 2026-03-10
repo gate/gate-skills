@@ -185,23 +185,42 @@ Complete Gate.com MCP server installer for OpenClaw. Supports spot/futures tradi
 
 ### Prerequisites
 
-- An AI agent environment that supports skill loading (e.g., OpenClaw)
-- Node.js & npm (for Gate MCP installation)
+- An AI agent environment that supports skill loading (e.g., Cursor, OpenClaw)
+- Node.js & npm
 
 ### Setup
 
-1. **Install Gate MCP** — Run the install script manually:
-   ```bash
-   npm i -g mcporter
-   mcporter config add gate https://api.gatemcp.ai/mcp --scope home
-   ```
+Choose the installer skill based on your environment:
 
-2. **Verify connectivity**:
-   ```bash
-   mcporter list gate --schema
-   ```
+#### For Cursor Users
 
-3. **Start using skills** — Ask your AI agent any market or trading question in natural language.
+Use the `gate-mcp-cursorinstaller` skill to install Gate MCP and Skills with one click:
+
+```bash
+# Run the install script
+bash skills/gate-mcp-cursorinstaller/scripts/install.sh
+```
+
+Or simply ask the AI assistant:
+```
+Help me install Gate MCP
+```
+
+#### For OpenClaw Users
+
+Use the `gate-mcp-openclawinstaller` skill:
+
+```bash
+# Install all Gate MCP servers (default)
+./skills/gate-mcp-openclawinstaller/scripts/install.sh
+
+# Selective installation
+./skills/gate-mcp-openclawinstaller/scripts/install.sh --select
+```
+
+### Start Using Skills
+
+After installation, ask your AI agent any market or trading question in natural language.
 
 ---
 

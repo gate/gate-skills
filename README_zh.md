@@ -185,23 +185,42 @@ bash scripts/install.sh
 
 ### 前置要求
 
-- 支持 skill 加载的 AI Agent 环境（例如 OpenClaw）
-- Node.js 与 npm（用于安装 Gate MCP）
+- 支持 skill 加载的 AI Agent 环境（例如 Cursor、OpenClaw）
+- Node.js 与 npm
 
 ### 配置步骤
 
-1. **安装 Gate MCP** — 手动执行安装命令：
-   ```bash
-   npm i -g mcporter
-   mcporter config add gate https://api.gatemcp.ai/mcp --scope home
-   ```
+根据你的环境选择对应的安装器：
 
-2. **验证连通性**：
-   ```bash
-   mcporter list gate --schema
-   ```
+#### Cursor 用户
 
-3. **开始使用 skills** — 向 AI Agent 提出任意市场或交易问题即可。
+使用 `gate-mcp-cursorinstaller` 一键安装 Gate MCP 和 Skills：
+
+```bash
+# 执行安装脚本
+bash skills/gate-mcp-cursorinstaller/scripts/install.sh
+```
+
+或直接向 AI 助手说：
+```
+帮我安装 Gate MCP
+```
+
+#### OpenClaw 用户
+
+使用 `gate-mcp-openclawinstaller`：
+
+```bash
+# 安装全部 Gate MCP 服务器（默认）
+./skills/gate-mcp-openclawinstaller/scripts/install.sh
+
+# 选择性安装
+./skills/gate-mcp-openclawinstaller/scripts/install.sh --select
+```
+
+### 开始使用 Skills
+
+安装完成后，向 AI Agent 提出任意市场或交易问题即可。
 
 ---
 
