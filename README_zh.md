@@ -12,6 +12,8 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 - **Cursor 用户**：使用 `gate-mcp-cursorinstaller` — 一条命令安装全部 Gate MCP 服务器 + Skills
 - **OpenClaw 用户**：使用 `gate-mcp-openclawinstaller` — 完整的 Gate MCP 安装器，支持交互式选择
+- **Claude Code (Claude CLI) 用户**：使用 `gate-mcp-claudeinstaller` — 一键安装全部 Gate MCP + 全部 Gate Skills
+- **Codex 用户**：使用 `gate-mcp-codexinstaller` — 一键安装全部 Gate MCP + 全部 Gate Skills
 
 只需对 AI 助手说 **"帮我安装 Gate MCP"**，或直接运行安装脚本即可。
 
@@ -27,6 +29,8 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 |-------|------|------|------|
 | [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | 为 Cursor 提供的一键安装 Gate MCP 与 Skills 脚本 | `2026.3.10-1` | ✅ Active |
 | [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | 为 OpenClaw 提供的 Gate MCP 完整安装器 | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-claudeinstaller](#-gate-mcp-claudeinstaller) | 为 Claude Code (Claude CLI) 提供的一键安装 Gate MCP 与 Skills | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-codexinstaller](#-gate-mcp-codexinstaller) | 为 Codex 提供的一键安装 Gate MCP 与 Skills | `2026.3.11-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | 市场盘口分析：流动性、动量、爆仓、资金费套利、基差、操纵风险、订单簿解读、滑点模拟、K线突破、周末与工作日对比 | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate 现货交易：买卖下单、订单管理、账户查询、资产兑换 | `2026.3.9-1` | ✅ Active |
@@ -192,6 +196,38 @@ bash scripts/install.sh
 
 ---
 
+## 🛠️ gate-mcp-claudeinstaller
+
+> **路径**: `skills/gate-mcp-claudeinstaller/`
+
+专为 **Claude Code（Claude CLI）** 提供的一键安装 Gate MCP 与全部 Gate Skills。
+
+**快速开始**：
+```bash
+# 在仓库根目录执行
+bash skills/gate-mcp-claudeinstaller/scripts/install.sh
+```
+
+可选：`--no-skills` 仅安装 MCP；`--mcp main --mcp dex` 等只安装指定 MCP。
+
+---
+
+## 🛠️ gate-mcp-codexinstaller
+
+> **路径**: `skills/gate-mcp-codexinstaller/`
+
+专为 **Codex** 提供的一键安装 Gate MCP 与全部 Gate Skills。
+
+**快速开始**：
+```bash
+# 在仓库根目录执行
+bash skills/gate-mcp-codexinstaller/scripts/install.sh
+```
+
+可选：`--no-skills` 仅安装 MCP；`--mcp main --mcp dex` 等只安装指定 MCP。
+
+---
+
 ## 快速开始
 
 ### 前置要求
@@ -228,6 +264,28 @@ bash skills/gate-mcp-cursorinstaller/scripts/install.sh
 # 选择性安装
 ./skills/gate-mcp-openclawinstaller/scripts/install.sh --select
 ```
+
+#### Claude Code (Claude CLI) 用户
+
+使用 `gate-mcp-claudeinstaller` 一键安装全部 Gate MCP 与 Gate Skills：
+
+```bash
+# 在仓库根目录执行
+bash skills/gate-mcp-claudeinstaller/scripts/install.sh
+```
+
+仅安装 MCP：`bash skills/gate-mcp-claudeinstaller/scripts/install.sh --no-skills`
+
+#### Codex 用户
+
+使用 `gate-mcp-codexinstaller` 一键安装全部 Gate MCP 与 Gate Skills：
+
+```bash
+# 在仓库根目录执行
+bash skills/gate-mcp-codexinstaller/scripts/install.sh
+```
+
+仅安装 MCP：`bash skills/gate-mcp-codexinstaller/scripts/install.sh --no-skills`
 
 ### 开始使用 Skills
 
@@ -429,7 +487,9 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # 市场盘口分析 skill
     ├── gate-exchange-spot/             # 现货交易 skill
     ├── gate-mcp-cursorinstaller/       # Cursor MCP 安装 skill
-    └── gate-mcp-openclawinstaller/     # OpenClaw MCP 安装 skill
+    ├── gate-mcp-openclawinstaller/     # OpenClaw MCP 安装 skill
+    ├── gate-mcp-claudeinstaller/      # Claude Code (Claude CLI) MCP + Skills 安装 skill
+    └── gate-mcp-codexinstaller/       # Codex MCP + Skills 安装 skill
 ```
 
 ---

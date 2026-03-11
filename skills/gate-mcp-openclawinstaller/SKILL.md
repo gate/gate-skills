@@ -1,6 +1,6 @@
 ---
 name: gate-mcp-openclawinstaller
-description: One-click installer for all Gate.com MCP servers including spot/futures trading, wallet, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
+description: One-click installer for all Gate.com MCP servers including spot/futures trading, DEX, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
 ---
 
 # Gate MCP
@@ -22,7 +22,7 @@ Complete Gate.com MCP server installer for OpenClaw.
 | Server | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `gate` | `npx -y gate-mcp` | API Key + Secret | Spot/Futures/Options trading |
-| `gate-wallet` | `https://api.gatemcp.ai/mcp/wallet` | x-api-key | Wallet operations |
+| `gate-dex` | `https://api.gatemcp.ai/mcp/dex` | x-api-key 固定为 MCP_AK_8W2N7Q | DEX operations |
 | `gate-info` | `https://api.gatemcp.ai/mcp/info` | None | Market data |
 | `gate-news` | `https://api.gatemcp.ai/mcp/news` | None | News feed |
 
@@ -54,7 +54,7 @@ mcporter call gate.list_spot_accounts
 mcporter call gate.list_tickers currency_pair=ETH_USDT
 
 # Wallet (requires auth)
-mcporter call gate-wallet.list_balances
+mcporter call gate-dex.list_balances
 ```
 
 ## API Configuration

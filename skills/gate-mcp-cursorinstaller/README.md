@@ -24,8 +24,8 @@ bash scripts/install.sh --no-skills
 ### 只安装部分 MCP
 
 ```bash
-# 只安装 Gate (main) 和 Gate-Wallet
-bash scripts/install.sh --mcp main --mcp wallet
+# 只安装 Gate (main) 和 Gate-Dex
+bash scripts/install.sh --mcp main --mcp dex
 
 # 只安装 Gate、Info、News
 bash scripts/install.sh --mcp main --mcp info --mcp news
@@ -36,7 +36,7 @@ bash scripts/install.sh --mcp main --mcp info --mcp news
 | 项目 | 说明 |
 |------|------|
 | **Gate** | 主 MCP，`npx -y gate-mcp`，[gate-mcp](https://github.com/gate/gate-mcp) |
-| **Gate-Wallet** | https://api.gatemcp.ai/mcp/wallet（x-api-key 已内置） |
+| **Gate-Dex** | https://api.gatemcp.ai/mcp/dex（x-api-key 已内置） |
 | **Gate-Info** | https://api.gatemcp.ai/mcp/info |
 | **Gate-News** | https://api.gatemcp.ai/mcp/news |
 | **gate-skills** | 从 [gate-skills](https://github.com/gate/gate-skills) 克隆并安装 `skills/` 下全部 skill |
