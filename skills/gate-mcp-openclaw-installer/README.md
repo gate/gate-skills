@@ -23,12 +23,8 @@
 ### 安装
 
 ```bash
-# 克隆仓库
-git clone https://github.com/yourusername/gate-mcp.git
-cd gate-mcp
-
-# 一键安装所有服务器
-./scripts/install.sh
+# 在 gate-skills 仓库根目录执行（需先克隆 https://github.com/gate/gate-skills）
+./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
 ### 使用
@@ -51,14 +47,14 @@ mcporter config list | grep gate
 
 ### 默认：安装全部
 ```bash
-./scripts/install.sh
+./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
 ### 选择性安装
 ```bash
-./scripts/install.sh --select
+./skills/gate-mcp-openclaw-installer/scripts/install.sh --select
 # 或
-./scripts/install.sh -s
+./skills/gate-mcp-openclaw-installer/scripts/install.sh -s
 ```
 
 ## 📖 详细文档

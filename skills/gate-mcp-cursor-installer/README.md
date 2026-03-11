@@ -4,31 +4,27 @@
 
 ## 安装方式
 
-### 从 GitHub 下载后一键安装
+### 从本仓库一键安装
 
 ```bash
-# 克隆本仓库（或下载 ZIP 解压后进入该目录）
-git clone <本仓库地址>
-cd gate-cex-installer
-
-# 一键安装全部 MCP + 全部 gate-skills
-bash scripts/install.sh
+# 在 gate-skills 仓库根目录执行
+bash skills/gate-mcp-cursor-installer/scripts/install.sh
 ```
 
 ### 仅安装 MCP（不安装 gate-skills）
 
 ```bash
-bash scripts/install.sh --no-skills
+bash skills/gate-mcp-cursor-installer/scripts/install.sh --no-skills
 ```
 
 ### 只安装部分 MCP
 
 ```bash
 # 只安装 Gate (main) 和 Gate-Dex
-bash scripts/install.sh --mcp main --mcp dex
+bash skills/gate-mcp-cursor-installer/scripts/install.sh --mcp main --mcp dex
 
 # 只安装 Gate、Info、News
-bash scripts/install.sh --mcp main --mcp info --mcp news
+bash skills/gate-mcp-cursor-installer/scripts/install.sh --mcp main --mcp info --mcp news
 ```
 
 ## 将安装的内容
