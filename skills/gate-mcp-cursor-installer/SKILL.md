@@ -1,5 +1,5 @@
 ---
-name: gate-mcp-cursorinstaller
+name: gate-mcp-cursor-installer
 description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安装 Gate MCP（main/dex/info/news 可选）、以及 gate-skills 仓库中的全部 skills；默认不选时安装所有 MCP + 全部 skills，skills 始终全部安装不可选。
 ---
 

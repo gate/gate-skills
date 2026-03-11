@@ -1,5 +1,5 @@
 ---
-name: gate-mcp-openclawinstaller
+name: gate-mcp-openclaw-installer
 description: One-click installer for all Gate.com MCP servers including spot/futures trading, DEX, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
 ---
 
