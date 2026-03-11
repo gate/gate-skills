@@ -25,6 +25,8 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
+| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.9-1` | ✅ Active |
@@ -34,8 +36,6 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-dex-mcptransfer](#-gate-dex-mcptransfer) | Gate Wallet transfer execution: native and token transfers across EVM and Solana | `2026.3.5-1` | ✅ Active |
 | [gate-dex-mcpdapp](#-gate-dex-mcpdapp) | Gate Wallet DApp interaction: connect wallet, sign messages, execute DApp transactions, ERC20 Approve | `2026.3.5-1` | ✅ Active |
 | [gate-dex-mcpauth](#-gate-dex-mcpauth) | Gate Wallet authentication: Google OAuth login, session management | `2026.3.5-1` | ✅ Active |
-| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
 
 ---
 
