@@ -2,11 +2,22 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-Gate Skills is an open skills marketplace that empowers AI agents with native access to Gate.io's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
+Gate Skills is an open skills marketplace that empowers AI agents with native access to gate.com's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
 
-Built by Gate.io. Built for the crypto community.
+Built by gate.com. Built for the crypto community.
 
-These skills are designed to work with any AI agent framework. Whether you're using OpenClaw, LangChain, CrewAI, or your own stack, your agents can plug into Gate.io's crypto intelligence with minimal configuration.
+### One-Click Installation
+
+Get started in seconds with our installer skills:
+
+- **Cursor Users**: Use `gate-mcp-cursorinstaller` — installs all Gate MCP servers + skills with a single command
+- **OpenClaw Users**: Use `gate-mcp-openclawinstaller` — complete Gate MCP setup with interactive selection
+
+Just say **"Help me install Gate MCP"** to your AI assistant, or run the install script directly.
+
+### Framework Compatibility
+
+These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into gate.com's crypto intelligence with minimal configuration.
 
 ---
 
@@ -16,9 +27,15 @@ These skills are designed to work with any AI agent framework. Whether you're us
 |-------|-------------|---------|--------|
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.5-1` | ✅ Active |
-| [gate-dex-market](#-gate-dex-market) | Gate Wallet DEX market data: K-line, transaction stats, liquidity, token info, rankings, security audit, new token discovery | `2026.3.6-1` | ✅ Active |
-| [gate-mcp-installer](#-gate-mcp-installer) | One-click Gate MCP setup & configuration | `2026.3.4-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.9-1` | ✅ Active |
+| [gate-dex-mcpmarket](#-gate-dex-mcpmarket) | Gate Wallet DEX market data: K-line, transaction stats, liquidity, token info, rankings, security audit, new token discovery | `2026.3.5-1` | ✅ Active |
+| [gate-dex-mcpwallet](#-gate-dex-mcpwallet) | Gate Wallet portfolio assets and transaction history: balance, total assets, token holdings, transfer/swap history | `2026.3.6-1` | ✅ Active |
+| [gate-dex-mcpswap](#-gate-dex-mcpswap) | Gate Wallet Swap/DEX trading: get quotes, execute Swap across EVM and Solana | `2026.3.6-1` | ✅ Active |
+| [gate-dex-mcptransfer](#-gate-dex-mcptransfer) | Gate Wallet transfer execution: native and token transfers across EVM and Solana | `2026.3.5-1` | ✅ Active |
+| [gate-dex-mcpdapp](#-gate-dex-mcpdapp) | Gate Wallet DApp interaction: connect wallet, sign messages, execute DApp transactions, ERC20 Approve | `2026.3.5-1` | ✅ Active |
+| [gate-dex-mcpauth](#-gate-dex-mcpauth) | Gate Wallet authentication: Google OAuth login, session management | `2026.3.5-1` | ✅ Active |
+| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
 
 ---
 
@@ -65,9 +82,9 @@ Gate spot trading covering buy/sell (market & limit), smart condition-based orde
 
 ---
 
-## 🌐 gate-dex-market
+## 🌐 gate-dex-mcpmarket
 
-> **Path**: `skills/gate-dex-market/`
+> **Path**: `skills/gate-dex-mcpmarket/`
 
 Gate Wallet DEX market data — all read-only, no authentication required. Covers K-line, transaction stats, liquidity pools, token details, rankings, new token discovery, and contract security audit.
 
@@ -79,15 +96,98 @@ Gate Wallet DEX market data — all read-only, no authentication required. Cover
 
 ---
 
-## 🔧 gate-mcp-installer
+## 💼 gate-dex-mcpwallet
 
-> **Path**: `skills/gate-mcp-installer/`
+> **Path**: `skills/gate-dex-mcpwallet/`
 
-One-click installer for Gate MCP (mcporter). Installs the CLI, configures the Gate MCP server endpoint, and verifies connectivity.
+Gate Wallet portfolio assets and transaction history. Query balance, total assets, token holdings, wallet address, transfer history, transaction details, and Swap history. Supports EVM multi-chain and Solana.
+
+**Example Prompts**:
+- `How much ETH do I have?`
+- `Check my wallet balance and total assets`
+- `Show my transfer records`
+- `What is my Solana wallet address?`
+
+---
+
+## 🔄 gate-dex-mcpswap
+
+> **Path**: `skills/gate-dex-mcpswap/`
+
+Gate Wallet Swap/DEX trading. Get quotes, execute Swap across EVM and Solana, and track Swap status. Includes mandatory three-step confirmation gate.
+
+**Example Prompts**:
+- `Swap 100 USDT for ETH`
+- `Exchange 1 SOL for USDC`
+- `Buy some PEPE with BNB`
+- `Cross-chain swap ETH to Solana SOL`
+
+---
+
+## 💸 gate-dex-mcptransfer
+
+> **Path**: `skills/gate-dex-mcptransfer/`
+
+Gate Wallet transfer execution. Build transactions, sign, and broadcast. Supports EVM multi-chain and Solana native/token transfers with mandatory balance verification and confirmation gate.
+
+**Example Prompts**:
+- `Send 0.1 ETH to 0x...`
+- `Transfer 100 USDT on Polygon to 0x...`
+- `Send 5 SOL to my other wallet`
+- `Batch transfer USDC to these addresses`
+
+---
+
+## 🔌 gate-dex-mcpdapp
+
+> **Path**: `skills/gate-dex-mcpdapp/`
+
+Gate Wallet interaction with external DApps. Connect wallet, sign messages (EIP-712/personal_sign), execute DApp transactions, and authorize ERC20 Approve. Includes security review.
+
+**Example Prompts**:
+- `Connect my wallet to Uniswap`
+- `Sign this EIP-712 message`
+- `Approve 1000 USDC for Aave`
+- `Add ETH-USDC liquidity on Uniswap`
+
+---
+
+## 🔐 gate-dex-mcpauth
+
+> **Path**: `skills/gate-dex-mcpauth/`
+
+Gate Wallet authentication. Manage Google OAuth login, token refresh, and logout. Verifies MCP Server connection before operations.
+
+**Example Prompts**:
+- `Log in to my wallet`
+- `Sign in`
+- `Log out of my account`
+- `Refresh my session`
+
+---
+
+## 🛠️ gate-mcp-cursorinstaller
+
+> **Path**: `skills/gate-mcp-cursorinstaller/`
+
+One-click installer for Gate MCP servers and Skills specifically tailored for Cursor.
 
 **Quick Start**:
 ```bash
-bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
+bash scripts/install.sh
+```
+
+---
+
+## 🛠️ gate-mcp-openclawinstaller
+
+> **Path**: `skills/gate-mcp-openclawinstaller/`
+
+Complete Gate.com MCP server installer for OpenClaw. Supports spot/futures trading, wallet, market info, and news servers.
+
+**Quick Start**:
+```bash
+./scripts/install.sh
 ```
 
 ---
@@ -96,23 +196,42 @@ bash ~/.openclaw/skills/gate-mcp-installer/scripts/install-gate-mcp.sh
 
 ### Prerequisites
 
-- An AI agent environment that supports skill loading (e.g., OpenClaw)
-- Node.js & npm (for Gate MCP installation)
+- An AI agent environment that supports skill loading (e.g., Cursor, OpenClaw)
+- Node.js & npm
 
 ### Setup
 
-1. **Install Gate MCP** — Use the `gate-mcp-installer` skill or run the install script manually:
-   ```bash
-   npm i -g mcporter
-   mcporter config add gate https://api.gatemcp.ai/mcp --scope home
-   ```
+Choose the installer skill based on your environment:
 
-2. **Verify connectivity**:
-   ```bash
-   mcporter list gate --schema
-   ```
+#### For Cursor Users
 
-3. **Start using skills** — Ask your AI agent any market or trading question in natural language.
+Use the `gate-mcp-cursorinstaller` skill to install Gate MCP and Skills with one click:
+
+```bash
+# Run the install script
+bash skills/gate-mcp-cursorinstaller/scripts/install.sh
+```
+
+Or simply ask the AI assistant:
+```
+Help me install Gate MCP
+```
+
+#### For OpenClaw Users
+
+Use the `gate-mcp-openclawinstaller` skill:
+
+```bash
+# Install all Gate MCP servers (default)
+./skills/gate-mcp-openclawinstaller/scripts/install.sh
+
+# Selective installation
+./skills/gate-mcp-openclawinstaller/scripts/install.sh --select
+```
+
+### Start Using Skills
+
+After installation, ask your AI agent any market or trading question in natural language.
 
 ---
 
@@ -297,41 +416,20 @@ Step 3: Restart OpenClaw Gateway.
 ```
 gate-github-skills/
 ├── README.md
+├── README_zh.md
 ├── image/                              # Installation screenshots
 └── skills/
-    ├── gate-exchange-marketanalysis/   # Market tape analysis skill
-    │   ├── SKILL.md
-    │   ├── CHANGELOG.md
-    │   ├── README.md
-    │   └── references/
-    │       └── scenarios.md
+    ├── gate-dex-mcpauth/               # Wallet Auth skill
+    ├── gate-dex-mcpdapp/               # Wallet DApp interaction skill
+    ├── gate-dex-mcpmarket/             # Wallet DEX market data skill
+    ├── gate-dex-mcpswap/               # Wallet Swap/DEX trading skill
+    ├── gate-dex-mcptransfer/           # Wallet Transfer execution skill
+    ├── gate-dex-mcpwallet/             # Wallet Portfolio and History skill
     ├── gate-exchange-futures/          # Futures trading skill
-    │   ├── SKILL.md
-    │   ├── CHANGELOG.md
-    │   ├── README.md
-    │   └── references/
-    │       ├── open-position.md
-    │       ├── close-position.md
-    │       ├── cancel-order.md
-    │       └── amend-order.md
+    ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
-    │   ├── SKILL.md
-    │   ├── CHANGELOG.md
-    │   ├── README.md
-    │   └── references/
-    │       └── scenarios.md
-    ├── gate-dex-market/                # DEX market data skill
-    │   ├── SKILL.md
-    │   ├── CHANGELOG.md
-    │   └── README.md
-    └── gate-mcp-installer/             # MCP setup skill
-        ├── SKILL.md
-        ├── CHANGELOG.md
-        ├── README.md
-        ├── references/
-        │   └── scenarios.md
-        └── scripts/
-            └── install-gate-mcp.sh
+    ├── gate-mcp-cursorinstaller/       # Cursor MCP installer skill
+    └── gate-mcp-openclawinstaller/     # OpenClaw MCP installer skill
 ```
 
 ---
