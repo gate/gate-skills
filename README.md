@@ -15,7 +15,7 @@ Get started in seconds with our installer skills:
 - **Claude Code (Claude CLI) Users**: Use `gate-mcp-claude-installer` — one-click install all Gate MCP + Gate Skills
 - **Codex Users**: Use `gate-mcp-codex-installer` — one-click install all Gate MCP + Gate Skills
 
-Just say **"Help me install Gate MCP"** to your AI assistant, or run the install script directly.
+Just say **"Help me install Gate MCP, https://github.com/gate/gate-skills"** to your AI assistant, or run the install script directly.
 
 ### Framework Compatibility
 

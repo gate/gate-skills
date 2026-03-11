@@ -15,7 +15,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 - **Claude Code (Claude CLI) 用户**：使用 `gate-mcp-claude-installer` — 一键安装全部 Gate MCP + 全部 Gate Skills
 - **Codex 用户**：使用 `gate-mcp-codex-installer` — 一键安装全部 Gate MCP + 全部 Gate Skills
 
-只需对 AI 助手说 **"帮我安装 Gate MCP"**，或直接运行安装脚本即可。
+只需对 AI 助手说 **"帮我安装 Gate MCP Skills and MCP，https://github.com/gate/gate-skills"**，或直接运行安装脚本即可。
 
 ### 框架兼容性
 
