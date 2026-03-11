@@ -69,7 +69,7 @@ mcporter config list | grep gate
    - **交易** - Spot/Margin/Futures
    - **提币** - 钱包操作
 
-**Gate-Dex 授权**：首次使用 gate-dex 进行钱包或交易时，需在浏览器中完成 OAuth 授权。
+**Gate-Dex 授权**：当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时，请先打开 [https://web3.gate.com/](https://web3.gate.com/) 创建或绑定钱包；助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。
 
 ## 📄 开源协议
 

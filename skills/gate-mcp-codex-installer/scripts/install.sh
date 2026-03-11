@@ -75,6 +75,26 @@ if [[ $MCP_MAIN -eq 1 ]]; then
   fi
 fi
 
+# Gate (main) 现货/合约需要用户的 API Key
+USER_GATE_API_KEY=""
+USER_GATE_API_SECRET=""
+if [[ $MCP_MAIN -eq 1 ]]; then
+  echo ""
+  echo "Gate (main) 现货/合约交易需要 API Key 才能操作账户。"
+  echo "请访问以下链接创建 API Key（需开启现货/合约交易权限）："
+  echo "  https://www.gate.com/myaccount/profile/api-key/manage"
+  echo ""
+  read -p "  GATE_API_KEY (留空则跳过): " USER_GATE_API_KEY
+  if [[ -n "$USER_GATE_API_KEY" ]]; then
+    read -s -p "  GATE_API_SECRET: " USER_GATE_API_SECRET
+    echo ""
+    if [[ -z "$USER_GATE_API_SECRET" ]]; then
+      echo "警告: GATE_API_SECRET 为空，现货/合约交易将无法使用。" >&2
+      USER_GATE_API_KEY=""
+    fi
+  fi
+fi
+
 # DEX MCP 固定 x-api-key
 GATE_API_KEY="MCP_AK_8W2N7Q"
 
@@ -101,20 +121,40 @@ append_mcp_gate() {
   # 优先使用全局 gate-mcp（避免 npx 下 @modelcontextprotocol/sdk 的 ESM 路径解析失败）
   if command -v gate-mcp &>/dev/null; then
     GATE_MAIN_USE_NPX=0
-    cat >> "$CONFIG_TOML" << 'TOML'
+    if [[ -n "$USER_GATE_API_KEY" ]]; then
+      cat >> "$CONFIG_TOML" << TOML
+
+[mcp_servers.Gate]
+command = "gate-mcp"
+args = []
+env = { GATE_API_KEY = "$USER_GATE_API_KEY", GATE_API_SECRET = "$USER_GATE_API_SECRET" }
+TOML
+    else
+      cat >> "$CONFIG_TOML" << 'TOML'
 
 [mcp_servers.Gate]
 command = "gate-mcp"
 args = []
 TOML
+    fi
   else
     GATE_MAIN_USE_NPX=1
-    cat >> "$CONFIG_TOML" << 'TOML'
+    if [[ -n "$USER_GATE_API_KEY" ]]; then
+      cat >> "$CONFIG_TOML" << TOML
+
+[mcp_servers.Gate]
+command = "npx"
+args = ["-y", "gate-mcp"]
+env = { GATE_API_KEY = "$USER_GATE_API_KEY", GATE_API_SECRET = "$USER_GATE_API_SECRET" }
+TOML
+    else
+      cat >> "$CONFIG_TOML" << 'TOML'
 
 [mcp_servers.Gate]
 command = "npx"
 args = ["-y", "gate-mcp"]
 TOML
+    fi
   fi
   echo "  已添加 MCP: Gate (main)"
 }
@@ -206,6 +246,23 @@ else
   done
 
   echo "Skills 已安装到: $SKILLS_DIR"
+fi
+
+if [[ $MCP_MAIN -eq 1 && -z "$USER_GATE_API_KEY" ]]; then
+  echo ""
+  echo "Gate (main) API Key 配置提示:"
+  echo "  现货/合约交易功能需要 API Key。请访问以下链接创建："
+  echo "    https://www.gate.com/myaccount/profile/api-key/manage"
+  echo "  创建后，请将 GATE_API_KEY 和 GATE_API_SECRET 添加到 $CONFIG_TOML 中 [mcp_servers.Gate] 的 env 字段："
+  echo "    env = { GATE_API_KEY = \"你的Key\", GATE_API_SECRET = \"你的Secret\" }"
+fi
+
+if [[ $MCP_DEX -eq 1 ]]; then
+  echo ""
+  echo "Gate-Dex 授权提示: 当 gate-dex 查询返回需要授权时，请先打开下方链接创建或绑定钱包，"
+  echo "  然后助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。"
+  echo "  https://web3.gate.com/"
+  echo ""
 fi
 
 echo "完成。请重启 Codex 以加载 MCP 与 Skills。"

@@ -284,9 +284,13 @@ for server in "${SERVERS[@]}"; do
 done
 
 echo ""
-# Gate-Dex: remind user to authorize in browser on first use
+# Gate-Dex: 当查询接口返回需要授权时的指引
 if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
-    echo -e "${CYAN}Gate-Dex:${NC} When using wallet or trading for the first time, complete authorization in browser (OAuth)."
+    echo -e "${CYAN}Gate-Dex 授权提示:${NC}"
+    echo "  当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时："
+    echo "  1) 请先打开下方钱包页创建或绑定钱包（若尚未有钱包）："
+    echo "     https://web3.gate.com/"
+    echo "  2) 助手返回的 Google 授权页将以可点击链接形式给出，点击即可跳转完成授权。"
     echo ""
 fi
 echo "Quick commands:"
