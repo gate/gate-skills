@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gate MCP Installer
-# One-click setup for ALL Gate.io MCP servers
+# One-click setup for ALL Gate.com MCP servers
 # Usage: ./install.sh         # Install all (default)
 #        ./install.sh --select # Interactive selection
 
@@ -39,11 +39,14 @@ if [ "$1" = "--select" ] || [ "$1" = "-s" ]; then
     SELECT_MODE=true
 fi
 
+# DEX MCP 固定 x-api-key（与 Cursor/Claude/Codex installer 一致）
+GATE_DEX_API_KEY="MCP_AK_8W2N7Q"
+
 # MCP Server definitions
 # Format: name|type|endpoint|auth_type|description
 declare -a SERVERS=(
     "gate|stdio|npx -y gate-mcp|api_key_secret|Spot/Futures/Options Trading"
-    "gate-wallet|http|https://api.gatemcp.ai/mcp/wallet|x_api_key|Wallet Operations"
+    "gate-dex|http|https://api.gatemcp.ai/mcp/dex|x_api_key|DEX Operations"
     "gate-info|http|https://api.gatemcp.ai/mcp/info|none|Market Data"
     "gate-news|http|https://api.gatemcp.ai/mcp/news|none|News Feed"
 )
@@ -89,7 +92,7 @@ install_server() {
     local config="$1"
     local gate_key="$2"
     local gate_secret="$3"
-    local wallet_key="$4"
+    local dex_key="$4"
     
     IFS='|' read -r name type endpoint auth_type desc <<< "$config"
     
@@ -110,7 +113,7 @@ install_server() {
             }
             ;;
         x_api_key)
-            install_http "$name" "$endpoint" "$wallet_key" || {
+            install_http "$name" "$endpoint" "$dex_key" || {
                 echo -e "${RED}failed${NC}"
                 return 1
             }
@@ -175,12 +178,14 @@ selective_install() {
     echo -e "Installing: ${CYAN}$name${NC} - $desc"
     echo ""
     
-    # Get required credentials
-    local gate_key="" gate_secret="" wallet_key=""
+    # Get required credentials（gate-dex 使用固定 x-api-key，不询问）
+    local gate_key="" gate_secret="" dex_key="$GATE_DEX_API_KEY"
     
     case "$auth_type" in
         api_key_secret)
-            echo "This server requires Gate API credentials:"
+            echo "This server requires Gate API credentials."
+            echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
+            echo ""
             read -p "  API Key: " gate_key
             read -s -p "  API Secret: " gate_secret
             echo ""
@@ -190,17 +195,12 @@ selective_install() {
             fi
             ;;
         x_api_key)
-            echo "This server requires Wallet API key:"
-            read -p "  x-api-key: " wallet_key
-            if [ -z "$wallet_key" ]; then
-                echo -e "${RED}Error: API key is required${NC}"
-                exit 1
-            fi
+            # 使用固定 GATE_DEX_API_KEY，与 Cursor/Claude/Codex installer 一致
             ;;
     esac
     
     echo ""
-    install_server "$selected" "$gate_key" "$gate_secret" "$wallet_key"
+    install_server "$selected" "$gate_key" "$gate_secret" "$dex_key"
     
     echo ""
     echo "Testing connection..."
@@ -212,35 +212,26 @@ install_all() {
     echo -e "${BLUE}Installing ALL Gate MCP servers${NC}"
     echo ""
     
-    # Check what auth is needed
+    # Check if gate (main) needs credentials
     local need_gate=false
-    local need_wallet=false
-    
     for server in "${SERVERS[@]}"; do
         IFS='|' read -r name type endpoint auth_type desc <<< "$server"
         if ! check_existing "$name"; then
             case "$auth_type" in
                 api_key_secret) need_gate=true ;;
-                x_api_key) need_wallet=true ;;
             esac
         fi
     done
     
-    # Collect credentials
-    local gate_key="" gate_secret="" wallet_key=""
+    # Collect credentials（gate-dex 使用固定 x-api-key，不询问）
+    local gate_key="" gate_secret="" dex_key="$GATE_DEX_API_KEY"
     
     if [ "$need_gate" = true ]; then
         echo "${CYAN}Gate Trading API${NC} (for gate server)"
-        echo "Get from: https://www.gate.io/mypage/api_keys"
+        echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
         read -p "  API Key: " gate_key
         read -s -p "  API Secret: " gate_secret
         echo ""
-        echo ""
-    fi
-    
-    if [ "$need_wallet" = true ]; then
-        echo "${CYAN}Gate Wallet API${NC} (for gate-wallet server)"
-        read -p "  x-api-key: " wallet_key
         echo ""
     fi
     
@@ -250,28 +241,18 @@ install_all() {
         echo ""
     fi
     
-    if [ -z "$wallet_key" ] && [ "$need_wallet" = true ]; then
-        echo -e "${YELLOW}Warning: No Wallet API key provided${NC}"
-        echo "The gate-wallet server will be skipped."
-        echo ""
-    fi
-    
-    # Install all
+    # Install all（gate-dex 始终使用 GATE_DEX_API_KEY）
     echo "Installing servers..."
     for server in "${SERVERS[@]}"; do
         IFS='|' read -r name type endpoint auth_type desc <<< "$server"
         
-        # Skip if missing required auth
         case "$auth_type" in
             api_key_secret)
                 [ -z "$gate_key" ] && continue
                 ;;
-            x_api_key)
-                [ -z "$wallet_key" ] && continue
-                ;;
         esac
         
-        install_server "$server" "$gate_key" "$gate_secret" "$wallet_key"
+        install_server "$server" "$gate_key" "$gate_secret" "$dex_key"
     done
     
     # Test all
@@ -303,9 +284,18 @@ for server in "${SERVERS[@]}"; do
 done
 
 echo ""
+# Gate-Dex: 当查询接口返回需要授权时的指引
+if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
+    echo -e "${CYAN}Gate-Dex 授权提示:${NC}"
+    echo "  当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时："
+    echo "  1) 请先打开下方钱包页创建或绑定钱包（若尚未有钱包）："
+    echo "     https://web3.gate.com/"
+    echo "  2) 助手返回的 Google 授权页将以可点击链接形式给出，点击即可跳转完成授权。"
+    echo ""
+fi
 echo "Quick commands:"
 echo "  mcporter call gate-info.list_tickers currency_pair=BTC_USDT"
 echo "  mcporter call gate-news.list_news"
 echo "  mcporter call gate.list_spot_accounts"
-echo "  mcporter call gate-wallet.list_balances"
+echo "  mcporter call gate-dex.list_balances"
 echo ""

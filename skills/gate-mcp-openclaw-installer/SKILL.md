@@ -1,6 +1,6 @@
 ---
-name: gate-mcp-openclawinstaller
-description: One-click installer for all Gate.com MCP servers including spot/futures trading, wallet, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
+name: gate-mcp-openclaw-installer
+description: One-click installer for all Gate.com MCP servers including spot/futures trading, DEX, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
 ---
 
 # Gate MCP
@@ -22,7 +22,7 @@ Complete Gate.com MCP server installer for OpenClaw.
 | Server | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `gate` | `npx -y gate-mcp` | API Key + Secret | Spot/Futures/Options trading |
-| `gate-wallet` | `https://api.gatemcp.ai/mcp/wallet` | x-api-key | Wallet operations |
+| `gate-dex` | `https://api.gatemcp.ai/mcp/dex` | x-api-key 固定为 MCP_AK_8W2N7Q | DEX operations |
 | `gate-info` | `https://api.gatemcp.ai/mcp/info` | None | Market data |
 | `gate-news` | `https://api.gatemcp.ai/mcp/news` | None | News feed |
 
@@ -54,7 +54,7 @@ mcporter call gate.list_spot_accounts
 mcporter call gate.list_tickers currency_pair=ETH_USDT
 
 # Wallet (requires auth)
-mcporter call gate-wallet.list_balances
+mcporter call gate-dex.list_balances
 ```
 
 ## API Configuration
@@ -65,6 +65,9 @@ mcporter call gate-wallet.list_balances
    - **Read** - Market data, account info
    - **Trade** - Spot/Margin/Futures trading
    - **Withdraw** - Wallet operations
+
+### Gate-Dex authorization
+When a **gate-dex** query (e.g. list_balances, transfer, swap) returns "need authorization": (1) Open [https://web3.gate.com/](https://web3.gate.com/) to create or bind a wallet if needed; (2) The assistant will return a **clickable** Google authorization link—click it to complete OAuth. The installer uses a fixed x-api-key.
 
 ### Storing Credentials
 The installer securely stores credentials in mcporter config.

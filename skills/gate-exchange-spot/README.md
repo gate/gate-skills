@@ -11,11 +11,11 @@ An integrated execution skill for Gate spot trading, covering buy/sell actions, 
 - Order management and amendments (list open orders, amend orders, cancel orders)
 - Post-trade verification (trade history + current holdings reconciliation)
 - Combined actions (buy then place sell order, sell then rebuy for asset swap)
-- Advanced utilities (batch cancel by ids, slippage simulation, batch orders, fee comparison, account-book reconciliation)
+- Advanced utilities (batch cancel by ids, batch amend by ids, slippage simulation, batch orders, fee comparison, account-book reconciliation)
 
 ## Execution Guardrail (Mandatory)
 
-Before any real trading action (`create_spot_order` or `create_spot_batch_orders`), the assistant must:
+Before any real trading action (`cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders`), the assistant must:
 
 1. Send an **Order Draft** first (pair, side, type, amount/value, estimated fill/cost, risk note)
 2. Wait for explicit user confirmation (for example: `Confirm order`, `Confirm`, `Proceed`)
@@ -24,7 +24,7 @@ Before any real trading action (`create_spot_order` or `create_spot_batch_orders
 If confirmation is missing or ambiguous, the assistant must stay in query/estimation mode and must not execute trading.
 
 Hard gate rules:
-- NEVER call `create_spot_order` or `create_spot_batch_orders` without explicit confirmation in the immediately previous user turn.
+- NEVER call `cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders` without explicit confirmation in the immediately previous user turn.
 - Any parameter/topic change invalidates old confirmation and requires a new draft + reconfirmation.
 - For multi-leg actions, require per-leg confirmation before each order placement.
 

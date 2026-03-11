@@ -14,7 +14,7 @@
 | 服务器 | 类型 | 功能 | 认证 |
 |--------|------|------|------|
 | `gate` | stdio | Spot/Futures/Options 交易 | ✅ API Key + Secret |
-| `gate-wallet` | HTTP | 钱包操作 | ✅ x-api-key |
+| `gate-dex` | HTTP | DEX 操作 | ✅ x-api-key 已内置（MCP_AK_8W2N7Q） |
 | `gate-info` | HTTP | 行情数据 | ❌ 无需认证 |
 | `gate-news` | HTTP | 新闻资讯 | ❌ 无需认证 |
 
@@ -23,12 +23,8 @@
 ### 安装
 
 ```bash
-# 克隆仓库
-git clone https://github.com/yourusername/gate-mcp.git
-cd gate-mcp
-
-# 一键安装所有服务器
-./scripts/install.sh
+# 在 gate-skills 仓库根目录执行（需先克隆 https://github.com/gate/gate-skills）
+./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
 ### 使用
@@ -51,14 +47,14 @@ mcporter config list | grep gate
 
 ### 默认：安装全部
 ```bash
-./scripts/install.sh
+./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
 ### 选择性安装
 ```bash
-./scripts/install.sh --select
+./skills/gate-mcp-openclaw-installer/scripts/install.sh --select
 # 或
-./scripts/install.sh -s
+./skills/gate-mcp-openclaw-installer/scripts/install.sh -s
 ```
 
 ## 📖 详细文档
@@ -67,12 +63,13 @@ mcporter config list | grep gate
 
 ## 🔑 获取 API Keys
 
-1. 登录 [Gate](https://www.gate.com/)
-2. 进入 **钱包** → **API 管理**
-3. 创建 API Key，选择所需权限：
+1. 访问 **https://www.gate.com/myaccount/profile/api-key/manage**（登录后：头像 → API 管理）
+2. 创建 API Key，选择所需权限：
    - **读取** - 行情查询、账户信息
    - **交易** - Spot/Margin/Futures
    - **提币** - 钱包操作
+
+**Gate-Dex 授权**：当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时，请先打开 [https://web3.gate.com/](https://web3.gate.com/) 创建或绑定钱包；助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。
 
 ## 📄 开源协议
 
