@@ -47,6 +47,11 @@ bash skills/gate-mcp-codex-installer/scripts/install.sh --mcp main --mcp info --
 - **Bash**：用于执行 `install.sh`（macOS/Linux 自带，Windows 可用 Git Bash 或 WSL）。
 - **git**：用于克隆 gate-skills（使用 `--no-skills` 时不需要）。
 
+## 获取 API Key 与授权
+
+- **Gate (main)** 现货/合约需 API Key + Secret：访问 **https://www.gate.com/myaccount/profile/api-key/manage** 创建并配置环境变量 `GATE_API_KEY`、`GATE_API_SECRET`。
+- **Gate-Dex**：首次使用钱包或交易时，请在浏览器中完成 OAuth 授权。
+
 ## 安装完成后
 
-重启 Codex 以加载 MCP 与 Skills。若使用 Gate (main) 的 OAuth，首次连接时按提示在浏览器中完成授权。
+重启 Codex 以加载 MCP 与 Skills。

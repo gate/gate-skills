@@ -65,6 +65,25 @@ if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]
   MCP_NEWS=1
 fi
 
+# Gate (main) 依赖 node + npx，安装前检查并在缺 npx 时尝试安装
+if [[ $MCP_MAIN -eq 1 ]]; then
+  if ! command -v node &>/dev/null; then
+    echo "错误: 未检测到 Node.js。Gate (main) MCP 需要 Node.js（含 npx）。" >&2
+    echo "请先安装: https://nodejs.org 或使用 nvm/fnm 安装 Node.js 后重试。" >&2
+    exit 1
+  fi
+  if ! command -v npx &>/dev/null; then
+    echo "未检测到 npx，正在尝试安装: npm install -g npx ..."
+    if npm install -g npx 2>/dev/null; then
+      echo "npx 已安装。"
+    else
+      echo "错误: 未检测到 npx，且自动安装失败。" >&2
+      echo "请手动运行: npm install -g npx" >&2
+      exit 1
+    fi
+  fi
+fi
+
 # DEX MCP 固定 x-api-key
 GATE_API_KEY="MCP_AK_8W2N7Q"
 
@@ -72,13 +91,20 @@ GATE_API_KEY="MCP_AK_8W2N7Q"
 mkdir -p "$(dirname "$SKILLS_DIR")"
 
 # 构建要添加的 mcpServers 片段（Claude Code 格式：stdio 用 command/args，http 用 type/url/headers）
-# main: stdio npx -y gate-mcp
+# main: 优先使用全局 gate-mcp（避免 npx 下 @modelcontextprotocol/sdk 的 ESM 路径解析失败）
 # dex/info/news: type http + url [+ headers]
+if [[ $MCP_MAIN -eq 1 ]] && command -v gate-mcp &>/dev/null; then
+  GATE_MAIN_CMD="gate-mcp"
+  GATE_MAIN_ARGS="[]"
+elif [[ $MCP_MAIN -eq 1 ]]; then
+  GATE_MAIN_CMD="npx"
+  GATE_MAIN_ARGS="[\"-y\",\"gate-mcp\"]"
+fi
 ADD_JSON="{"
 first=1
 if [[ $MCP_MAIN -eq 1 ]]; then
   [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"npx\",\"args\":[\"-y\",\"gate-mcp\"]}"
+  ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS}}"
   first=0
 fi
 if [[ $MCP_DEX -eq 1 ]]; then
@@ -124,6 +150,12 @@ if command -v node &>/dev/null; then
   " "$TMP_JSON" "$ADD_JSON" "$CLAUDE_JSON"
   rm -f "$TMP_JSON"
   echo "已写入 MCP 配置: $CLAUDE_JSON"
+  if [[ $MCP_MAIN -eq 1 && "$GATE_MAIN_CMD" == "npx" ]]; then
+    echo ""
+    echo "提示: Gate (main) 当前使用 npx 启动。若启动时报错 ERR_MODULE_NOT_FOUND（找不到 @modelcontextprotocol/sdk），请执行："
+    echo "  npm install -g gate-mcp"
+    echo "然后重新运行本脚本，或手动将 .claude.json 中 Gate 的 command 改为 gate-mcp、args 改为 []。"
+  fi
 else
   echo "未检测到 node，请手动将以下内容合并到 $CLAUDE_JSON 的 mcpServers 中："
   echo "  $ADD_JSON"

@@ -66,6 +66,9 @@ mcporter call gate-dex.list_balances
    - **Trade** - Spot/Margin/Futures trading
    - **Withdraw** - Wallet operations
 
+### Gate-Dex authorization
+When using **gate-dex** for wallet or trading, you must authorize in the browser (OAuth) on first use. The installer uses a fixed x-api-key; complete the login/authorization flow when prompted.
+
 ### Storing Credentials
 The installer securely stores credentials in mcporter config.
 

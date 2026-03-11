@@ -63,12 +63,13 @@ mcporter config list | grep gate
 
 ## 🔑 获取 API Keys
 
-1. 登录 [Gate](https://www.gate.com/)
-2. 进入 **钱包** → **API 管理**
-3. 创建 API Key，选择所需权限：
+1. 访问 **https://www.gate.com/myaccount/profile/api-key/manage**（登录后：头像 → API 管理）
+2. 创建 API Key，选择所需权限：
    - **读取** - 行情查询、账户信息
    - **交易** - Spot/Margin/Futures
    - **提币** - 钱包操作
+
+**Gate-Dex 授权**：首次使用 gate-dex 进行钱包或交易时，需在浏览器中完成 OAuth 授权。
 
 ## 📄 开源协议
 

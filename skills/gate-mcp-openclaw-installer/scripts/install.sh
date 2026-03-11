@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gate MCP Installer
-# One-click setup for ALL Gate.io MCP servers
+# One-click setup for ALL Gate.com MCP servers
 # Usage: ./install.sh         # Install all (default)
 #        ./install.sh --select # Interactive selection
 
@@ -183,7 +183,9 @@ selective_install() {
     
     case "$auth_type" in
         api_key_secret)
-            echo "This server requires Gate API credentials:"
+            echo "This server requires Gate API credentials."
+            echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
+            echo ""
             read -p "  API Key: " gate_key
             read -s -p "  API Secret: " gate_secret
             echo ""
@@ -226,7 +228,7 @@ install_all() {
     
     if [ "$need_gate" = true ]; then
         echo "${CYAN}Gate Trading API${NC} (for gate server)"
-        echo "Get from: https://www.gate.io/mypage/api_keys"
+        echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
         read -p "  API Key: " gate_key
         read -s -p "  API Secret: " gate_secret
         echo ""
@@ -282,6 +284,11 @@ for server in "${SERVERS[@]}"; do
 done
 
 echo ""
+# Gate-Dex: remind user to authorize in browser on first use
+if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
+    echo -e "${CYAN}Gate-Dex:${NC} When using wallet or trading for the first time, complete authorization in browser (OAuth)."
+    echo ""
+fi
 echo "Quick commands:"
 echo "  mcporter call gate-info.list_tickers currency_pair=BTC_USDT"
 echo "  mcporter call gate-news.list_news"
