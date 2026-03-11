@@ -25,6 +25,8 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 | Skill | 描述 | 版本 | 状态 |
 |-------|------|------|------|
+| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | 为 Cursor 提供的一键安装 Gate MCP 与 Skills 脚本 | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | 为 OpenClaw 提供的 Gate MCP 完整安装器 | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | 市场盘口分析：流动性、动量、爆仓、资金费套利、基差、操纵风险、订单簿解读、滑点模拟、K线突破、周末与工作日对比 | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate 现货交易：买卖下单、订单管理、账户查询、资产兑换 | `2026.3.9-1` | ✅ Active |
@@ -34,8 +36,6 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 | [gate-dex-mcptransfer](#-gate-dex-mcptransfer) | Gate Wallet 转账操作：执行 EVM 多链与 Solana 的原生/代币转账 | `2026.3.5-1` | ✅ Active |
 | [gate-dex-mcpdapp](#-gate-dex-mcpdapp) | Gate Wallet DApp 交互：连接钱包，签名消息，执行 DApp 交易与授权 | `2026.3.5-1` | ✅ Active |
 | [gate-dex-mcpauth](#-gate-dex-mcpauth) | Gate Wallet 身份验证：Google OAuth 登录、会话管理 | `2026.3.5-1` | ✅ Active |
-| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | 为 Cursor 提供的一键安装 Gate MCP 与 Skills 脚本 | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | 为 OpenClaw 提供的 Gate MCP 完整安装器 | `2026.3.10-1` | ✅ Active |
 
 ---
 
