@@ -14,7 +14,7 @@
 | 服务器 | 类型 | 功能 | 认证 |
 |--------|------|------|------|
 | `gate` | stdio | Spot/Futures/Options 交易 | ✅ API Key + Secret |
-| `gate-wallet` | HTTP | 钱包操作 | ✅ x-api-key |
+| `gate-dex` | HTTP | DEX 操作 | ✅ x-api-key 已内置（MCP_AK_8W2N7Q） |
 | `gate-info` | HTTP | 行情数据 | ❌ 无需认证 |
 | `gate-news` | HTTP | 新闻资讯 | ❌ 无需认证 |
 

@@ -1,11 +1,11 @@
 ---
-name: gate-mcp-cursorinstaller
-description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安装 Gate MCP（main/dex/info/news 可选）、以及 gate-skills 仓库中的全部 skills；默认不选时安装所有 MCP + 全部 skills，skills 始终全部安装不可选。
+name: gate-mcp-codexinstaller
+description: 当用户要一键安装 Codex 的 Gate MCP 和全部 Gate Skills 时使用。可安装 Gate MCP（main/dex/info/news 可选）以及 gate-skills 仓库中的全部 skills；默认不选时安装所有 MCP + 全部 skills，skills 始终全部安装不可选。
 ---
 
-# Gate  一键安装（MCP + Skills）
+# Gate 一键安装（Codex：MCP + Skills）
 
-用户说「一键安装 Gate」「安装 Gate MCP 和 skills」「安装 gate-mcp」等时，使用本技能。
+用户说「一键安装 Gate」「安装 Gate MCP 和 skills」「Codex 安装 gate-mcp」等且在使用 **Codex** 时，使用本技能。
 
 ## 资源地址
 
@@ -30,24 +30,24 @@ description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安
 - 若用户未说明选哪些 MCP → 安装全部：main、dex、info、news。
 - 若用户说明「只装 xxx」→ 仅安装指定的 MCP。
 
-### 2. 写入 Cursor MCP 配置
+### 2. 写入 Codex MCP 配置
 
-- 配置文件：`~/.cursor/mcp.json`（Windows：`%APPDATA%\Cursor\mcp.json`）。
-- 若已存在则**合并**到现有 `mcpServers`，不覆盖其他 MCP。
+- 用户级配置：`~/.codex/config.toml`（或 `$CODEX_HOME/config.toml`）。若不存在会创建并写入 `[mcp_servers]` 及对应表。
+- 若已存在则**合并**：仅当某 Gate MCP 段不存在时追加，不覆盖已有配置。
 - 配置说明：
-  - **Gate (main)**：`command: npx`, `args: ["-y", "gate-mcp"]`
-  - **Gate-Dex**：`url` + `transport: streamable-http` + `headers["x-api-key"]` 固定为 MCP_AK_8W2N7Q
-  - **Gate-Info / Gate-News**：`url` + `transport: streamable-http`
+  - **Gate (main)**：stdio，`command = "npx"`, `args = ["-y", "gate-mcp"]`
+  - **gate-dex**：streamable HTTP，`url` + `http_headers["x-api-key"]` 固定为 MCP_AK_8W2N7Q
+  - **gate-info / gate-news**：streamable HTTP，`url`
 
 ### 3. 安装 gate-skills（全部）
 
-- 从 https://github.com/gate/gate-skills 拉取 **skills/** 下所有子目录，复制到 `~/.cursor/skills/`（或当前环境对应目录）。
+- 从 https://github.com/gate/gate-skills 拉取 **skills/** 下所有子目录，复制到 `$CODEX_HOME/skills/`（默认 `~/.codex/skills/`）。
 - 使用脚本时加 `--no-skills` 可仅安装 MCP、不安装 skills。
 
 ### 4. 完成后提示
 
 - 告知用户已安装的 MCP 列表和「已安装 gate-skills 全部 skills」（若未使用 --no-skills）。
-- 提示重启 Cursor。
+- 提示重启 Codex 以加载 MCP 与 Skills。
 
 ## 脚本
 
@@ -56,9 +56,9 @@ description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安
 - 用法：  
   `./scripts/install.sh [--mcp main|dex|info|news] ... [--no-skills]`  
   不传 `--mcp` 时安装全部 MCP；传多个 `--mcp` 则只安装指定项；`--no-skills` 仅安装 MCP。
-- DEX 的 x-api-key 已固定为 `MCP_AK_8W2N7Q`，写入 mcp.json。
+- DEX 的 x-api-key 已固定为 `MCP_AK_8W2N7Q`，写入 config.toml。
 
 从 GitHub 下载本 skill 后，在仓库根目录执行：  
-`bash scripts/install.sh`  
+`bash skills/gate-mcp-codexinstaller/scripts/install.sh`  
 或（仅安装 MCP）：  
-`bash scripts/install.sh --no-skills`
+`bash skills/gate-mcp-codexinstaller/scripts/install.sh --no-skills`
