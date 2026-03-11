@@ -1,10 +1,10 @@
 # Scenarios
 
-This document defines behavior-oriented scenario templates for all 30 spot cases.
+This document defines behavior-oriented scenario templates for all 31 spot cases.
 
 ## Global Execution Gate (Mandatory)
 
-For every scenario that includes `create_spot_order` or `create_spot_batch_orders`:
+For every scenario that includes `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_amend_spot_batch_orders`:
 - Build and present an Order Draft first
 - Require explicit confirmation from the immediately previous user turn
 - Treat confirmation as single-use
@@ -21,7 +21,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Buy 100U of BTC."
 - "I want to buy 100 USDT of BTC now."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=USDT`.
 2. Calculate available quote balance and validate market-buy `amount` semantics (`amount=quote_amount`).
 3. Output `Order Draft` and then `Execution Result Report` after confirmation.
 **Unexpected Behavior**:
@@ -35,7 +35,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Buy 100U BTC at 60000."
 - "Place a limit buy for BTC at 60000."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=USDT`.
 2. Calculate affordability and validate target `limit_price` precision/constraints.
 3. Output `Limit Order Draft` and then `Open Order/Execution Report` after confirmation.
 **Unexpected Behavior**:
@@ -49,7 +49,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Use all my USDT to buy ETH."
 - "All-in USDT into ETH."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=USDT`.
 2. Calculate full available quote amount and executable order size.
 3. Output `All-in Order Draft` and then `Post-Trade Balance Report` after confirmation.
 **Unexpected Behavior**:
@@ -63,7 +63,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Can BTC be traded now? How much for one BTC?"
 - "Check ETH tradability and current unit price."
 **Expected Behavior**:
-1. Fetch data via `get_currency` `currency=BASE`, `get_currency_pair` `currency_pair=BASE_USDT`, and `get_spot_tickers` `currency_pair=BASE_USDT`.
+1. Fetch data via `cex_spot_get_currency` `currency=BASE`, `cex_spot_get_currency_pair` `currency_pair=BASE_USDT`, and `cex_spot_get_spot_tickers` `currency_pair=BASE_USDT`.
 2. Calculate tradability result, min-trade constraints, and current unit cost.
 3. Output `Readiness Check Report` (no order execution).
 **Unexpected Behavior**:
@@ -77,7 +77,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "How much is my account worth now?"
 - "Give me my total USDT-equivalent value."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=all` and `get_spot_tickers` `currency_pair=*USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=all` and `cex_spot_get_spot_tickers` `currency_pair=*USDT`.
 2. Calculate per-asset USDT valuation and aggregate portfolio total.
 3. Output `Portfolio Valuation Report`.
 **Unexpected Behavior**:
@@ -91,7 +91,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Cancel all unfilled orders and show my balance."
 - "Clear open orders first."
 **Expected Behavior**:
-1. Fetch data via `cancel_all_spot_orders` `currency_pair=optional` and `get_spot_accounts` `currency=all`.
+1. Fetch data via `cex_spot_cancel_all_spot_orders` `currency_pair=optional` and `cex_spot_get_spot_accounts` `currency=all`.
 2. Calculate canceled-order summary and refreshed available balances.
 3. Output `Cancel Summary + Balance Report`.
 **Unexpected Behavior**:
@@ -105,7 +105,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Sell all my DOGE to USDT."
 - "Convert my DOGE position to USDT."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=DOGE` and `get_currency_pair` `currency_pair=DOGE_USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=DOGE` and `cex_spot_get_currency_pair` `currency_pair=DOGE_USDT`.
 2. Calculate sellable amount against min-size/precision constraints.
 3. Output `Sell Draft` or `Constraint Warning Report`, then `Execution Result` after confirmation.
 **Unexpected Behavior**:
@@ -119,7 +119,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "I want to buy 5U ETH; if possible, place it."
 - "Check if I can buy 5 USDT of ETH, then buy."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=USDT` and `get_currency_pair` `currency_pair=ETH_USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=USDT` and `cex_spot_get_currency_pair` `currency_pair=ETH_USDT`.
 2. Calculate both checks: available balance and `min_quote_amount` threshold gap.
 3. Output `Eligibility Report` and, if eligible, `Order Draft` then `Execution Result` after confirmation.
 **Unexpected Behavior**:
@@ -134,7 +134,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 50U BTC when it is 2% lower than now."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT`.
 2. Calculate target price (`current * 0.98`) for limit buy.
 3. Output `Target-Price Order Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -147,7 +147,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC rises by 500, sell my holdings."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT`.
 2. Calculate target sell price (`current + 500`) and executable position size.
 3. Output `Limit Sell Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -160,7 +160,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If ETH is near today's low, buy."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=ETH_USDT`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=ETH_USDT`.
 2. Calculate current-vs-24h-low distance and condition pass/fail.
 3. Output `Condition Decision Report`; if passed, output `Order Draft` then `Execution Result`.
 **Unexpected Behavior**:
@@ -173,7 +173,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Sell if BTC drops 5%."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT`.
 2. Calculate downside trigger price (`current * 0.95`) and sell order params.
 3. Output `Downside-Exit Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -186,7 +186,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 20U of the top gainer now."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=all tradable`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=all tradable`.
 2. Calculate top gainer ranking by 24h change and selected target pair.
 3. Output `Ranking + Selected Order Draft` and then `Execution Result` after confirmation.
 **Unexpected Behavior**:
@@ -199,7 +199,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Between BTC and ETH, buy whichever dropped more."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
 2. Calculate comparative 24h decline and select the larger loser.
 3. Output `Comparison Report + Order Draft` and then `Execution Result` after confirmation.
 **Unexpected Behavior**:
@@ -212,7 +212,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Buy 100U BTC, then place sell at +2%."
 **Expected Behavior**:
-1. Fetch data via `create_spot_order` `leg1=buy` and then fill reference for leg2.
+1. Fetch data via `cex_spot_create_spot_order` `leg1=buy` and then fill reference for leg2.
 2. Calculate second-leg target price (`fill_reference * 1.02`) and sell size.
 3. Output `Leg-1 Report` and `Leg-2 Draft/Execution Report` with per-leg confirmations.
 **Unexpected Behavior**:
@@ -225,7 +225,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If I buy 1000U, what's total including fees?"
 **Expected Behavior**:
-1. Fetch data via `get_wallet_fee` `account=tier` and `get_spot_tickers` `currency_pair=target`.
+1. Fetch data via `cex_wallet_get_wallet_fee` `account=tier` and `cex_spot_get_spot_tickers` `currency_pair=target`.
 2. Calculate principal + fee estimate and total payable amount.
 3. Output `Fee-Inclusive Cost Estimate Report` (no order execution).
 **Unexpected Behavior**:
@@ -240,9 +240,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "My buy order is unfilled, raise the price a bit."
 **Expected Behavior**:
-1. Fetch data via `list_spot_orders` `status=open,side=buy`.
+1. Fetch data via `cex_spot_list_spot_orders` `status=open,side=buy`.
 2. Calculate amendment target (raise amount/new price) and identify exact order id.
-3. Output `Amendment Draft`; after confirmation, output `Amendment Result Report` via `amend_spot_order`.
+3. Output `Amendment Draft`; after confirmation, output `Amendment Result Report` via `cex_spot_amend_spot_order`.
 **Unexpected Behavior**:
 1. Amends order without confirming raise amount/new target price.
 2. Amends the wrong order when multiple open buy orders exist.
@@ -253,7 +253,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Did my BTC buy fill, and how much BTC do I have now?"
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=target,side=buy` and `get_spot_accounts` `currency=BASE`.
+1. Fetch data via `cex_spot_list_spot_my_trades` `currency_pair=target,side=buy` and `cex_spot_get_spot_accounts` `currency=BASE`.
 2. Calculate latest fill amount (X) and current holdings (Y).
 3. Output `Fill-and-Holdings Verification Report`.
 **Unexpected Behavior**:
@@ -266,7 +266,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If my ETH buy is still open, cancel it and check refund."
 **Expected Behavior**:
-1. Fetch data via `list_spot_orders` `status=open,currency_pair=ETH_USDT`, then `cancel_spot_order`, then `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `cex_spot_list_spot_orders` `status=open,currency_pair=ETH_USDT`, then `cex_spot_cancel_spot_order`, then `cex_spot_get_spot_accounts` `currency=USDT`.
 2. Calculate cancellation status and quote-fund refund delta.
 3. Output `Cancel-and-Refund Verification Report`.
 **Unexpected Behavior**:
@@ -279,7 +279,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If balance allows, buy 100U BTC at my last buy price."
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=BTC_USDT` and `get_spot_accounts` `currency=USDT`.
+1. Fetch data via `cex_spot_list_spot_my_trades` `currency_pair=BTC_USDT` and `cex_spot_get_spot_accounts` `currency=USDT`.
 2. Calculate rebuy limit price from last fill and affordability for 100U.
 3. Output `Rebuy Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -292,7 +292,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If I can exit ETH without loss, sell all."
 **Expected Behavior**:
-1. Fetch data via `list_spot_my_trades` `currency_pair=ETH_USDT` and `get_spot_tickers` `currency_pair=ETH_USDT`.
+1. Fetch data via `cex_spot_list_spot_my_trades` `currency_pair=ETH_USDT` and `cex_spot_get_spot_tickers` `currency_pair=ETH_USDT`.
 2. Calculate cost basis vs current price and pass/fail for break-even exit.
 3. Output `Break-even Decision Report`; if passed, output `Sell Draft` then `Execution Result`.
 **Unexpected Behavior**:
@@ -305,7 +305,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Swap all DOGE to BTC if worth at least 10U."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=DOGE` and `get_spot_tickers` `currency_pair=DOGE_USDT,BTC_USDT`.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=DOGE` and `cex_spot_get_spot_tickers` `currency_pair=DOGE_USDT,BTC_USDT`.
 2. Calculate DOGE valuation vs 10U threshold and two-leg conversion sizing.
 3. Output `Swap Eligibility Report` and per-leg `Order Draft/Execution Report` with per-leg confirmations.
 **Unexpected Behavior**:
@@ -318,7 +318,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC < 60000, buy 50U and show balance."
 **Expected Behavior**:
-1. Fetch data via `get_spot_tickers` `currency_pair=BTC_USDT` and (if executed) `get_spot_accounts` `currency=all`.
+1. Fetch data via `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT` and (if executed) `cex_spot_get_spot_accounts` `currency=all`.
 2. Calculate price-threshold check (`current < 60000`) and order eligibility.
 3. Output `Condition Decision Report`; if passed, output `Order Draft` then `Execution + Balance Report`.
 **Unexpected Behavior**:
@@ -331,7 +331,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "If BTC has been rising for recent hours, buy 100U."
 **Expected Behavior**:
-1. Fetch data via `get_spot_candlesticks` `currency_pair=BTC_USDT,interval=1h,count=4`.
+1. Fetch data via `cex_spot_get_spot_candlesticks` `currency_pair=BTC_USDT,interval=1h,count=4`.
 2. Calculate bullish-candle count and trend pass/fail (`>=3/4`).
 3. Output `Trend Check Report`; if passed, output `Order Draft` then `Execution Result`.
 **Unexpected Behavior**:
@@ -344,7 +344,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 **Prompt Examples**:
 - "Check ETH book and place fastest 50U buy."
 **Expected Behavior**:
-1. Fetch data via `get_spot_order_book` `currency_pair=ETH_USDT`.
+1. Fetch data via `cex_spot_get_spot_order_book` `currency_pair=ETH_USDT`.
 2. Calculate execution-oriented limit price from `ask1` and size feasibility.
 3. Output `Fast-Execution Draft` and then `Execution/Open-Order Report` after confirmation.
 **Unexpected Behavior**:
@@ -352,7 +352,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 2. Ignores depth/size mismatch and proposes unrealistic instant fill.
 3. Omits risk note about slippage or partial fill at chosen limit price.
 
-## IV. Advanced Spot Utilities (26-30)
+## IV. Advanced Spot Utilities (26-31)
 
 ## Scenario 26: Order Filtering and Precise Batch Cancellation
 **Context**: User wants to cancel only specific open orders (by id) for a selected symbol.
@@ -360,9 +360,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Show my recent BTC open orders and cancel only 1001 and 1002."
 - "Find my BTC pending orders and batch-cancel ids 1001,1002."
 **Expected Behavior**:
-1. Fetch data via `list_spot_orders` `currency_pair=BTC_USDT,status=open`.
+1. Fetch data via `cex_spot_list_spot_orders` `currency_pair=BTC_USDT,status=open`.
 2. Calculate matched vs unmatched target ids and open-status validation results.
-3. Output `Order Verification Report` first; after user verification, output `Batch Cancel Result Report` via `cancel_spot_batch_orders`.
+3. Output `Order Verification Report` first; after user verification, output `Batch Cancel Result Report` via `cex_spot_cancel_spot_batch_orders`.
 **Unexpected Behavior**:
 1. Cancels all BTC open orders instead of only requested ids.
 2. Executes batch cancel before user verifies matched order list.
@@ -374,7 +374,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Simulate slippage for buying 10K ADA_USDT at market."
 - "For ADA_USDT market buy 10000 USDT, what's expected slippage?"
 **Expected Behavior**:
-1. Fetch data via `get_spot_order_book` `currency_pair=ADA_USDT` and `get_spot_tickers` `currency_pair=ADA_USDT`.
+1. Fetch data via `cex_spot_get_spot_order_book` `currency_pair=ADA_USDT` and `cex_spot_get_spot_tickers` `currency_pair=ADA_USDT`.
 2. Calculate weighted average execution price from ask-depth consumption for 10,000 USDT and compare with ticker last price to get slippage%.
 3. Output `Slippage Simulation Report` (no trade execution).
 **Unexpected Behavior**:
@@ -388,9 +388,9 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Buy 10U BTC and 10U ETH together if balance is enough."
 - "One-click batch buy: BTC 10U + ETH 10U."
 **Expected Behavior**:
-1. Fetch data via `get_spot_accounts` `currency=USDT` and `get_currency_pair` for each target pair.
+1. Fetch data via `cex_spot_get_spot_accounts` `currency=USDT` and `cex_spot_get_currency_pair` for each target pair.
 2. Calculate total required quote amount across all legs, verify affordability, and verify each leg meets `min_quote_amount`.
-3. Output `Batch Eligibility + Order Draft` and then `Batch Execution Report` via `create_spot_batch_orders` after confirmation.
+3. Output `Batch Eligibility + Order Draft` and then `Batch Execution Report` via `cex_spot_create_spot_batch_orders` after confirmation.
 **Unexpected Behavior**:
 1. Submits partial basket without explicitly telling user which leg failed affordability.
 2. Executes batch placement without final confirmation on full basket details.
@@ -403,7 +403,7 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Compare trading fees for BTC and ETH; which is cheaper?"
 - "For BTC_USDT and ETH_USDT, which one has lower trading cost?"
 **Expected Behavior**:
-1. Fetch data via `get_spot_batch_fee` `currency_pairs=BTC_USDT,ETH_USDT` and `get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
+1. Fetch data via `cex_spot_get_spot_batch_fee` `currency_pairs=BTC_USDT,ETH_USDT` and `cex_spot_get_spot_tickers` `currency_pair=BTC_USDT,ETH_USDT`.
 2. Calculate estimated effective fee cost under the same notional for each pair.
 3. Output `Fee Comparison Report` with ranking and cost difference.
 **Unexpected Behavior**:
@@ -417,10 +417,24 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "Check recent BTC account book and tell me how much BTC I have now."
 - "Show BTC ledger changes and current balance."
 **Expected Behavior**:
-1. Fetch data via `list_spot_account_book` `currency=BTC` and `get_spot_accounts` `currency=BTC`.
+1. Fetch data via `cex_spot_list_spot_account_book` `currency=BTC` and `cex_spot_get_spot_accounts` `currency=BTC`.
 2. Calculate recent change summary (buy/sell/fee/transfer effects) and reconcile to current balance snapshot.
 3. Output `Account Flow + Current Balance Report`.
 **Unexpected Behavior**:
 1. Shows balance only and skips ledger-flow details user requested.
 2. Mixes BTC and USDT units when explaining account changes.
 3. Uses outdated account-book window and misses latest movements.
+
+## Scenario 31: Batch Amend Open Buy Orders by +1%
+**Context**: User wants to speed up fills by increasing prices of multiple unfilled buy orders for a specific pair.
+**Prompt Examples**:
+- "Market changed, check my open BTC buy orders and raise them all by 1%."
+- "For my unfilled BTC buy orders, increase prices by 1% in batch."
+**Expected Behavior**:
+1. Fetch data via `cex_spot_list_spot_orders` `currency_pair=BTC_USDT,status=open,side=buy`.
+2. Calculate target candidate set (max 5 orders), compute each new price (`old_price * 1.01`), and prepare amendment payload.
+3. Output `Batch Amend Verification Draft` first; after user verification, output `Batch Amend Result Report` via `cex_spot_amend_spot_batch_orders`.
+**Unexpected Behavior**:
+1. Batch-amends without showing candidate order list and new prices for user verification.
+2. Includes filled/canceled/non-BTC orders in the amendment set.
+3. Amends more than 5 orders in one batch despite scenario limit.

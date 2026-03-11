@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-marketanalysis
-version: "2026.3.7-1"
-updated: "2026-03-07"
+version: "2026.3.11-1"
+updated: "2026-03-11"
 description: "The market analysis function of Gate Exchange — liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, order book explanation, or slippage simulation (e.g. market buy $X slippage). Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, slippage simulation."
 ---
 
@@ -69,9 +69,9 @@ Determine which module (case) to run based on user intent:
 - **Basis (Case 5):** Current basis vs history; basis widening/narrowing for sentiment.
 - **Manipulation (Case 6):** Top-10 depth total / 24h volume &lt; 0.5% → thin depth; consecutive same-direction large orders → possible manipulation. Use spot by default; use futures when user says perpetual/contract.
 - **Order book (Case 7):** Show bids/asks example, explain spread with last price, depth and volatility.
-- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: get_spot_order_book → get_spot_tickers. Futures: get_futures_contract → get_futures_order_book → get_futures_tickers (use quanto_multiplier from contract for ladder notional). Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
-- **K-line breakout / support–resistance (Case 9):** Trigger: e.g. “breakout, support, resistance”, “K-line”, “does X show signs of breaking out?”. Spot: get_spot_candlesticks → get_spot_tickers. Futures: get_futures_candlesticks → get_futures_tickers. Use candlesticks for support/resistance levels; use tickers for 24h price, volume, change (momentum).
-- **Liquidity + weekend vs weekday (Case 10):** Trigger: e.g. “liquidity”, “weekend vs weekday”, “compare weekend and weekday”. Spot: get_spot_order_book → get_spot_candlesticks(90d) → get_spot_tickers. Futures: get_futures_contract → get_futures_order_book → get_futures_candlesticks(90d) → get_futures_tickers (use quanto_multiplier for depth notional). Order book for current depth; 90d candlesticks to split weekend vs weekday volume and return; compare and summarize.
+- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_tickers (use quanto_multiplier from contract for ladder notional). Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
+- **K-line breakout / support–resistance (Case 9):** Trigger: e.g. “breakout, support, resistance”, “K-line”, “does X show signs of breaking out?”. Spot: cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers. Use candlesticks for support/resistance levels; use tickers for 24h price, volume, change (momentum).
+- **Liquidity + weekend vs weekday (Case 10):** Trigger: e.g. “liquidity”, “weekend vs weekday”, “compare weekend and weekday”. Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_candlesticks(90d) → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_candlesticks(90d) → cex_fx_get_fx_tickers (use quanto_multiplier for depth notional). Order book for current depth; 90d candlesticks to split weekend vs weekday volume and return; compare and summarize.
 
 ---
 

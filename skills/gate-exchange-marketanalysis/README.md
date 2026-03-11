@@ -33,12 +33,12 @@ Natural Language Input
 Intent Routing (Case 1–10, spot vs futures)
     ↓
 Gate MCP Tools
-    ├── get_spot_order_book / get_futures_order_book
-    ├── get_spot_tickers / get_futures_tickers
-    ├── get_spot_candlesticks / get_futures_candlesticks
-    ├── get_spot_trades / get_futures_funding_rate
-    ├── list_futures_liq_orders (when available)
-    └── get_futures_premium_index
+    ├── cex_spot_get_spot_order_book / cex_fx_get_fx_order_book
+    ├── cex_spot_get_spot_tickers / cex_fx_get_fx_tickers
+    ├── cex_spot_get_spot_candlesticks / cex_fx_get_fx_candlesticks
+    ├── cex_spot_get_spot_trades / cex_fx_get_fx_funding_rate
+    ├── cex_fx_list_fx_liq_orders (when available)
+    └── cex_fx_get_fx_premium_index
     ↓
 Analysis & Judgment Logic
     ↓
@@ -89,7 +89,7 @@ Live order book (e.g. limit=10) + ticker; explain bids/asks, spread, depth.
 ### 8. Slippage simulation
 > "ADA_USDT slippage for a $10K market buy?"
 
-Requires pair and quote amount. Spot or futures: order book → tickers (futures: get_futures_contract first for quanto_multiplier). Walk ask ladder; report slippage vs best ask.
+Requires pair and quote amount. Spot or futures: order book → tickers (futures: cex_fx_get_fx_contract first for quanto_multiplier). Walk ask ladder; report slippage vs best ask.
 
 ### 9. K-line breakout / support–resistance
 > "Does SOL/USDT show signs of breaking out? Analyze support and resistance."
@@ -99,7 +99,7 @@ Candlesticks → tickers; derive support/resistance from OHLC; use 24h price and
 ### 10. Liquidity + weekend vs weekday
 > "Evaluate ETH liquidity and compare weekend vs weekday."
 
-Order book + 90d candlesticks + tickers (futures: get_futures_contract first). Split days into weekend vs weekday; compare volume and return.
+Order book + 90d candlesticks + tickers (futures: cex_fx_get_fx_contract first). Split days into weekend vs weekday; compare volume and return.
 
 ---
 
