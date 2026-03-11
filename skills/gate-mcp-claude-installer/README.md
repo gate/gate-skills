@@ -48,6 +48,11 @@ bash skills/gate-mcp-claude-installer/scripts/install.sh --mcp main --mcp info -
 - **Node.js**：用于合并 `~/.claude.json`；若无 Node，脚本会输出需手动合并的 JSON 片段。
 - **git**：用于克隆 gate-skills（使用 `--no-skills` 时不需要）。
 
+## 获取 API Key 与授权
+
+- **Gate (main)** 现货/合约需 API Key + Secret：访问 **https://www.gate.com/myaccount/profile/api-key/manage** 创建并配置环境变量 `GATE_API_KEY`、`GATE_API_SECRET`。
+- **Gate-Dex**：当查询返回需要授权时，请先打开 https://web3.gate.com/ 创建或绑定钱包，然后点击助手返回的 Google 授权链接完成授权。
+
 ## 安装完成后
 
-重新打开 Claude Code 或新开一个会话以加载 MCP 与 Skills。若使用 Gate (main) 的 OAuth，首次连接时按提示在浏览器中完成授权。
+重新打开 Claude Code 或新开一个会话以加载 MCP 与 Skills。

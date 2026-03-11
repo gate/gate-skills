@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Gate MCP Installer
-# One-click setup for ALL Gate.io MCP servers
+# One-click setup for ALL Gate.com MCP servers
 # Usage: ./install.sh         # Install all (default)
 #        ./install.sh --select # Interactive selection
 
@@ -183,7 +183,9 @@ selective_install() {
     
     case "$auth_type" in
         api_key_secret)
-            echo "This server requires Gate API credentials:"
+            echo "This server requires Gate API credentials."
+            echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
+            echo ""
             read -p "  API Key: " gate_key
             read -s -p "  API Secret: " gate_secret
             echo ""
@@ -226,7 +228,7 @@ install_all() {
     
     if [ "$need_gate" = true ]; then
         echo "${CYAN}Gate Trading API${NC} (for gate server)"
-        echo "Get from: https://www.gate.io/mypage/api_keys"
+        echo "Get API Key from: https://www.gate.com/myaccount/profile/api-key/manage"
         read -p "  API Key: " gate_key
         read -s -p "  API Secret: " gate_secret
         echo ""
@@ -282,6 +284,15 @@ for server in "${SERVERS[@]}"; do
 done
 
 echo ""
+# Gate-Dex: 当查询接口返回需要授权时的指引
+if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
+    echo -e "${CYAN}Gate-Dex 授权提示:${NC}"
+    echo "  当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时："
+    echo "  1) 请先打开下方钱包页创建或绑定钱包（若尚未有钱包）："
+    echo "     https://web3.gate.com/"
+    echo "  2) 助手返回的 Google 授权页将以可点击链接形式给出，点击即可跳转完成授权。"
+    echo ""
+fi
 echo "Quick commands:"
 echo "  mcporter call gate-info.list_tickers currency_pair=BTC_USDT"
 echo "  mcporter call gate-news.list_news"

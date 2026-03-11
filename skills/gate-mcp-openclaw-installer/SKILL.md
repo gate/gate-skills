@@ -66,6 +66,9 @@ mcporter call gate-dex.list_balances
    - **Trade** - Spot/Margin/Futures trading
    - **Withdraw** - Wallet operations
 
+### Gate-Dex authorization
+When a **gate-dex** query (e.g. list_balances, transfer, swap) returns "need authorization": (1) Open [https://web3.gate.com/](https://web3.gate.com/) to create or bind a wallet if needed; (2) The assistant will return a **clickable** Google authorization link—click it to complete OAuth. The installer uses a fixed x-api-key.
+
 ### Storing Credentials
 The installer securely stores credentials in mcporter config.
 

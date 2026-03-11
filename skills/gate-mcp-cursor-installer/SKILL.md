@@ -48,6 +48,8 @@ description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安
 
 - 告知用户已安装的 MCP 列表和「已安装 gate-skills 全部 skills」（若未使用 --no-skills）。
 - 提示重启 Cursor。
+- **获取 API Key**：若用户使用 Gate (main) 现货/合约，提示其访问 https://www.gate.com/myaccount/profile/api-key/manage 创建 API Key 并配置 `GATE_API_KEY`、`GATE_API_SECRET`。
+- **Gate-Dex 授权**：若安装了 Gate-Dex，当查询返回需要授权时，提示用户先打开 https://web3.gate.com/ 创建或绑定钱包，然后助手会返回可点击的 Google 授权链接供用户点击跳转完成授权。
 
 ## 脚本
 

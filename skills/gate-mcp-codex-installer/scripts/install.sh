@@ -56,6 +56,45 @@ if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]
   MCP_NEWS=1
 fi
 
+# Gate (main) 依赖 node + npx，安装前检查并在缺 npx 时尝试安装
+if [[ $MCP_MAIN -eq 1 ]]; then
+  if ! command -v node &>/dev/null; then
+    echo "错误: 未检测到 Node.js。Gate (main) MCP 需要 Node.js（含 npx）。" >&2
+    echo "请先安装: https://nodejs.org 或使用 nvm/fnm 安装 Node.js 后重试。" >&2
+    exit 1
+  fi
+  if ! command -v npx &>/dev/null; then
+    echo "未检测到 npx，正在尝试安装: npm install -g npx ..."
+    if npm install -g npx 2>/dev/null; then
+      echo "npx 已安装。"
+    else
+      echo "错误: 未检测到 npx，且自动安装失败。" >&2
+      echo "请手动运行: npm install -g npx" >&2
+      exit 1
+    fi
+  fi
+fi
+
+# Gate (main) 现货/合约需要用户的 API Key
+USER_GATE_API_KEY=""
+USER_GATE_API_SECRET=""
+if [[ $MCP_MAIN -eq 1 ]]; then
+  echo ""
+  echo "Gate (main) 现货/合约交易需要 API Key 才能操作账户。"
+  echo "请访问以下链接创建 API Key（需开启现货/合约交易权限）："
+  echo "  https://www.gate.com/myaccount/profile/api-key/manage"
+  echo ""
+  read -p "  GATE_API_KEY (留空则跳过): " USER_GATE_API_KEY
+  if [[ -n "$USER_GATE_API_KEY" ]]; then
+    read -s -p "  GATE_API_SECRET: " USER_GATE_API_SECRET
+    echo ""
+    if [[ -z "$USER_GATE_API_SECRET" ]]; then
+      echo "警告: GATE_API_SECRET 为空，现货/合约交易将无法使用。" >&2
+      USER_GATE_API_KEY=""
+    fi
+  fi
+fi
+
 # DEX MCP 固定 x-api-key
 GATE_API_KEY="MCP_AK_8W2N7Q"
 
@@ -79,12 +118,44 @@ append_mcp_gate() {
     echo "  [mcp_servers.Gate] 已存在，跳过"
     return
   fi
-  cat >> "$CONFIG_TOML" << 'TOML'
+  # 优先使用全局 gate-mcp（避免 npx 下 @modelcontextprotocol/sdk 的 ESM 路径解析失败）
+  if command -v gate-mcp &>/dev/null; then
+    GATE_MAIN_USE_NPX=0
+    if [[ -n "$USER_GATE_API_KEY" ]]; then
+      cat >> "$CONFIG_TOML" << TOML
+
+[mcp_servers.Gate]
+command = "gate-mcp"
+args = []
+env = { GATE_API_KEY = "$USER_GATE_API_KEY", GATE_API_SECRET = "$USER_GATE_API_SECRET" }
+TOML
+    else
+      cat >> "$CONFIG_TOML" << 'TOML'
+
+[mcp_servers.Gate]
+command = "gate-mcp"
+args = []
+TOML
+    fi
+  else
+    GATE_MAIN_USE_NPX=1
+    if [[ -n "$USER_GATE_API_KEY" ]]; then
+      cat >> "$CONFIG_TOML" << TOML
+
+[mcp_servers.Gate]
+command = "npx"
+args = ["-y", "gate-mcp"]
+env = { GATE_API_KEY = "$USER_GATE_API_KEY", GATE_API_SECRET = "$USER_GATE_API_SECRET" }
+TOML
+    else
+      cat >> "$CONFIG_TOML" << 'TOML'
 
 [mcp_servers.Gate]
 command = "npx"
 args = ["-y", "gate-mcp"]
 TOML
+    fi
+  fi
   echo "  已添加 MCP: Gate (main)"
 }
 
@@ -129,10 +200,17 @@ TOML
 }
 
 echo "正在写入 MCP 配置: $CONFIG_TOML"
+GATE_MAIN_USE_NPX=0
 [[ $MCP_MAIN -eq 1 ]] && append_mcp_gate
 [[ $MCP_DEX -eq 1 ]]  && append_mcp_gate_dex
 [[ $MCP_INFO -eq 1 ]] && append_mcp_gate_info
 [[ $MCP_NEWS -eq 1 ]] && append_mcp_gate_news
+if [[ $MCP_MAIN -eq 1 && "$GATE_MAIN_USE_NPX" -eq 1 ]]; then
+  echo ""
+  echo "提示: Gate (main) 当前使用 npx 启动。若启动时报错 ERR_MODULE_NOT_FOUND（找不到 @modelcontextprotocol/sdk），请执行："
+  echo "  npm install -g gate-mcp"
+  echo "然后重新运行本脚本，或手动将 config.toml 中 [mcp_servers.Gate] 的 command 改为 gate-mcp、args 改为 []。"
+fi
 
 # ---------- 2. 安装 gate-skills 全部（可选） ----------
 if [[ $INSTALL_SKILLS -eq 0 ]]; then
@@ -168,6 +246,23 @@ else
   done
 
   echo "Skills 已安装到: $SKILLS_DIR"
+fi
+
+if [[ $MCP_MAIN -eq 1 && -z "$USER_GATE_API_KEY" ]]; then
+  echo ""
+  echo "Gate (main) API Key 配置提示:"
+  echo "  现货/合约交易功能需要 API Key。请访问以下链接创建："
+  echo "    https://www.gate.com/myaccount/profile/api-key/manage"
+  echo "  创建后，请将 GATE_API_KEY 和 GATE_API_SECRET 添加到 $CONFIG_TOML 中 [mcp_servers.Gate] 的 env 字段："
+  echo "    env = { GATE_API_KEY = \"你的Key\", GATE_API_SECRET = \"你的Secret\" }"
+fi
+
+if [[ $MCP_DEX -eq 1 ]]; then
+  echo ""
+  echo "Gate-Dex 授权提示: 当 gate-dex 查询返回需要授权时，请先打开下方链接创建或绑定钱包，"
+  echo "  然后助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。"
+  echo "  https://web3.gate.com/"
+  echo ""
 fi
 
 echo "完成。请重启 Codex 以加载 MCP 与 Skills。"
