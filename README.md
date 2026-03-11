@@ -10,10 +10,10 @@ Built by gate.com. Built for the crypto community.
 
 Get started in seconds with our installer skills:
 
-- **Cursor Users**: Use `gate-mcp-cursorinstaller` — installs all Gate MCP servers + skills with a single command
-- **OpenClaw Users**: Use `gate-mcp-openclawinstaller` — complete Gate MCP setup with interactive selection
-- **Claude Code (Claude CLI) Users**: Use `gate-mcp-claudeinstaller` — one-click install all Gate MCP + Gate Skills
-- **Codex Users**: Use `gate-mcp-codexinstaller` — one-click install all Gate MCP + Gate Skills
+- **Cursor Users**: Use `gate-mcp-cursor-installer` — installs all Gate MCP servers + skills with a single command
+- **OpenClaw Users**: Use `gate-mcp-openclaw-installer` — complete Gate MCP setup with interactive selection
+- **Claude Code (Claude CLI) Users**: Use `gate-mcp-claude-installer` — one-click install all Gate MCP + Gate Skills
+- **Codex Users**: Use `gate-mcp-codex-installer` — one-click install all Gate MCP + Gate Skills
 
 Just say **"Help me install Gate MCP"** to your AI assistant, or run the install script directly.
 
@@ -27,10 +27,10 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-mcp-claudeinstaller](#-gate-mcp-claudeinstaller) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-codexinstaller](#-gate-mcp-codexinstaller) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-cursorinstaller](#-gate-mcp-cursorinstaller) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclawinstaller](#-gate-mcp-openclawinstaller) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.9-1` | ✅ Active |
@@ -170,9 +170,9 @@ Gate Wallet authentication. Manage Google OAuth login, token refresh, and logout
 
 ---
 
-## 🛠️ gate-mcp-cursorinstaller
+## 🛠️ gate-mcp-cursor-installer
 
-> **Path**: `skills/gate-mcp-cursorinstaller/`
+> **Path**: `skills/gate-mcp-cursor-installer/`
 
 One-click installer for Gate MCP servers and Skills specifically tailored for Cursor.
 
@@ -183,9 +183,9 @@ bash scripts/install.sh
 
 ---
 
-## 🛠️ gate-mcp-openclawinstaller
+## 🛠️ gate-mcp-openclaw-installer
 
-> **Path**: `skills/gate-mcp-openclawinstaller/`
+> **Path**: `skills/gate-mcp-openclaw-installer/`
 
 Complete Gate.com MCP server installer for OpenClaw. Supports spot/futures trading, wallet, market info, and news servers.
 
@@ -196,32 +196,32 @@ Complete Gate.com MCP server installer for OpenClaw. Supports spot/futures tradi
 
 ---
 
-## 🛠️ gate-mcp-claudeinstaller
+## 🛠️ gate-mcp-claude-installer
 
-> **Path**: `skills/gate-mcp-claudeinstaller/`
+> **Path**: `skills/gate-mcp-claude-installer/`
 
 One-click installer for **Claude Code (Claude CLI)**: all Gate MCP servers + all Gate Skills.
 
 **Quick Start**:
 ```bash
 # From repo root
-bash skills/gate-mcp-claudeinstaller/scripts/install.sh
+bash skills/gate-mcp-claude-installer/scripts/install.sh
 ```
 
 Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to install selected MCPs.
 
 ---
 
-## 🛠️ gate-mcp-codexinstaller
+## 🛠️ gate-mcp-codex-installer
 
-> **Path**: `skills/gate-mcp-codexinstaller/`
+> **Path**: `skills/gate-mcp-codex-installer/`
 
 One-click installer for **Codex**: all Gate MCP servers + all Gate Skills.
 
 **Quick Start**:
 ```bash
 # From repo root
-bash skills/gate-mcp-codexinstaller/scripts/install.sh
+bash skills/gate-mcp-codex-installer/scripts/install.sh
 ```
 
 Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to install selected MCPs.
@@ -241,11 +241,11 @@ Choose the installer skill based on your environment:
 
 #### For Cursor Users
 
-Use the `gate-mcp-cursorinstaller` skill to install Gate MCP and Skills with one click:
+Use the `gate-mcp-cursor-installer` skill to install Gate MCP and Skills with one click:
 
 ```bash
 # Run the install script
-bash skills/gate-mcp-cursorinstaller/scripts/install.sh
+bash skills/gate-mcp-cursor-installer/scripts/install.sh
 ```
 
 Or simply ask the AI assistant:
@@ -255,37 +255,37 @@ Help me install Gate MCP
 
 #### For OpenClaw Users
 
-Use the `gate-mcp-openclawinstaller` skill:
+Use the `gate-mcp-openclaw-installer` skill:
 
 ```bash
 # Install all Gate MCP servers (default)
-./skills/gate-mcp-openclawinstaller/scripts/install.sh
+./skills/gate-mcp-openclaw-installer/scripts/install.sh
 
 # Selective installation
-./skills/gate-mcp-openclawinstaller/scripts/install.sh --select
+./skills/gate-mcp-openclaw-installer/scripts/install.sh --select
 ```
 
 #### For Claude Code (Claude CLI) Users
 
-Use `gate-mcp-claudeinstaller` to install all Gate MCP and Gate Skills:
+Use `gate-mcp-claude-installer` to install all Gate MCP and Gate Skills:
 
 ```bash
 # From repo root
-bash skills/gate-mcp-claudeinstaller/scripts/install.sh
+bash skills/gate-mcp-claude-installer/scripts/install.sh
 ```
 
-MCP only: `bash skills/gate-mcp-claudeinstaller/scripts/install.sh --no-skills`
+MCP only: `bash skills/gate-mcp-claude-installer/scripts/install.sh --no-skills`
 
 #### For Codex Users
 
-Use `gate-mcp-codexinstaller` to install all Gate MCP and Gate Skills:
+Use `gate-mcp-codex-installer` to install all Gate MCP and Gate Skills:
 
 ```bash
 # From repo root
-bash skills/gate-mcp-codexinstaller/scripts/install.sh
+bash skills/gate-mcp-codex-installer/scripts/install.sh
 ```
 
-MCP only: `bash skills/gate-mcp-codexinstaller/scripts/install.sh --no-skills`
+MCP only: `bash skills/gate-mcp-codex-installer/scripts/install.sh --no-skills`
 
 ### Start Using Skills
 
@@ -486,10 +486,10 @@ gate-github-skills/
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
-    ├── gate-mcp-cursorinstaller/       # Cursor MCP installer skill
-    ├── gate-mcp-openclawinstaller/     # OpenClaw MCP installer skill
-    ├── gate-mcp-claudeinstaller/       # Claude Code (Claude CLI) MCP + Skills installer
-    └── gate-mcp-codexinstaller/        # Codex MCP + Skills installer
+    ├── gate-mcp-cursor-installer/       # Cursor MCP installer skill
+    ├── gate-mcp-openclaw-installer/     # OpenClaw MCP installer skill
+    ├── gate-mcp-claude-installer/       # Claude Code (Claude CLI) MCP + Skills installer
+    └── gate-mcp-codex-installer/        # Codex MCP + Skills installer
 ```
 
 ---

@@ -69,7 +69,7 @@ touch "$CONFIG_TOML"
 if ! grep -q '^\[mcp_servers\]' "$CONFIG_TOML" 2>/dev/null; then
   echo "" >> "$CONFIG_TOML"
   echo "################################################################################" >> "$CONFIG_TOML"
-  echo "# Gate MCP servers (added by gate-mcp-codexinstaller)" >> "$CONFIG_TOML"
+  echo "# Gate MCP servers (added by gate-mcp-codex-installer)" >> "$CONFIG_TOML"
   echo "################################################################################" >> "$CONFIG_TOML"
   echo "[mcp_servers]" >> "$CONFIG_TOML"
 fi
