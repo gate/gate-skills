@@ -34,6 +34,9 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.9-1` | ✅ Active |
+| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
+| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
+| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-dex-mcpmarket](#-gate-dex-mcpmarket) | Gate Wallet DEX market data: K-line, transaction stats, liquidity, token info, rankings, security audit, new token discovery | `2026.3.5-1` | ✅ Active |
 | [gate-dex-mcpwallet](#-gate-dex-mcpwallet) | Gate Wallet portfolio assets and transaction history: balance, total assets, token holdings, transfer/swap history | `2026.3.6-1` | ✅ Active |
 | [gate-dex-mcpswap](#-gate-dex-mcpswap) | Gate Wallet Swap/DEX trading: get quotes, execute Swap across EVM and Solana | `2026.3.6-1` | ✅ Active |
@@ -83,6 +86,49 @@ Gate spot trading covering buy/sell (market & limit), smart condition-based orde
 - `Sell ETH when price hits 3500`
 - `Cancel my unfilled BTC order and check balance`
 - `Swap USDT to SOL`
+
+---
+
+## 📊 gate-dex-market
+
+> **Path**: `skills/gate-dex-market/`
+
+Gate DEX market data skill using OpenAPI mode with AK/SK authentication. Provides read-only queries for token info, K-line data, rankings, and security audits.
+
+**Example Prompts**:
+- `Get BTC token info`
+- `Show me ETH K-line data`
+- `What are the top trending tokens?`
+- `Check security audit for this token`
+
+---
+
+## 🔄 gate-dex-trade
+
+> **Path**: `skills/gate-dex-trade/`
+
+Gate DEX trading comprehensive skill with MCP + OpenAPI dual mode support. Smart routing automatically selects the optimal trading method based on environment. Supports Swap execution across EVM and Solana.
+
+**Example Prompts**:
+- `Swap 100 USDT for ETH`
+- `Exchange BNB for PEPE`
+- `Get a quote for swapping SOL to USDC`
+- `Buy some tokens using OpenAPI mode`
+
+---
+
+## 💼 gate-dex-wallet
+
+> **Path**: `skills/gate-dex-wallet/`
+
+Gate DEX comprehensive wallet skill. Unified entry point for authentication, asset queries, transfer execution, and DApp interactions. Routes to specific sub-modules based on user intent.
+
+**Example Prompts**:
+- `Log in to my wallet`
+- `Check my wallet balance`
+- `Transfer 0.1 ETH to 0x...`
+- `Connect my wallet to Uniswap`
+- `Sign this message`
 
 ---
 
@@ -477,6 +523,9 @@ gate-github-skills/
 ├── README_zh.md
 ├── image/                              # Installation screenshots
 └── skills/
+    ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
+    ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
+    ├── gate-dex-wallet/                # DEX comprehensive wallet skill
     ├── gate-dex-mcpauth/               # Wallet Auth skill
     ├── gate-dex-mcpdapp/               # Wallet DApp interaction skill
     ├── gate-dex-mcpmarket/             # Wallet DEX market data skill
@@ -486,10 +535,10 @@ gate-github-skills/
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
-    ├── gate-mcp-cursor-installer/       # Cursor MCP installer skill
-    ├── gate-mcp-openclaw-installer/     # OpenClaw MCP installer skill
-    ├── gate-mcp-claude-installer/       # Claude Code (Claude CLI) MCP + Skills installer
-    └── gate-mcp-codex-installer/        # Codex MCP + Skills installer
+    ├── gate-mcp-cursor-installer/      # Cursor MCP installer skill
+    ├── gate-mcp-openclaw-installer/    # OpenClaw MCP installer skill
+    ├── gate-mcp-claude-installer/      # Claude Code (Claude CLI) MCP + Skills installer
+    └── gate-mcp-codex-installer/       # Codex MCP + Skills installer
 ```
 
 ---
