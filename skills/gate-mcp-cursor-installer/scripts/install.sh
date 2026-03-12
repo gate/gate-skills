@@ -127,7 +127,7 @@ if [[ $MCP_MAIN -eq 1 ]]; then
   if [[ -n "$USER_GATE_API_KEY" ]]; then
     ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS},\"env\":{\"GATE_API_KEY\":\"${USER_GATE_API_KEY}\",\"GATE_API_SECRET\":\"${USER_GATE_API_SECRET}\"}}"
   else
-    ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS}}"
+    ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS},\"env\":{\"GATE_API_KEY\":\"your-api-key\",\"GATE_API_SECRET\":\"your-api-secret\"}}"
   fi
   first=0
 fi
