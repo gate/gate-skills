@@ -1,15 +1,15 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.10-1"
-updated: "2026-03-10"
-description: "Gate DEX comprehensive wallet skill. Unified entry point supporting: authentication login, asset queries, transfer execution, DApp interactions for four major modules. Use when users mention login, check balance, transfer, DApp interaction, signing and other wallet-related operations. Route to specific operation reference files through sub-function routing."
+version: "2026.3.12-1"
+updated: "2026-03-12"
+description: "Gate DEX comprehensive wallet skill. Unified entry point supporting: authentication login, asset queries, transfer execution, DApp interactions, CLI command-line for five major modules. Use when users mention login, check balance, transfer, DApp interaction, signing, gate-wallet, CLI, command-line, openapi-swap and other wallet-related operations. Route to specific operation reference files through sub-function routing."
 ---
 
 # Gate DEX Wallet
 
-> **Comprehensive Wallet Skill** — Unified entry point for authentication, assets, transfers, and DApp interactions. 4 major modules through sub-function routing distribution.
+> **Comprehensive Wallet Skill** — Unified entry point for authentication, assets, transfers, DApp interactions, and CLI command-line. 5 major modules through sub-function routing distribution.
 
-**Trigger Scenarios**: Use this Skill when users mention "login", "check balance", "transfer", "DApp", "sign", "wallet", "assets" and other wallet-related operations.
+**Trigger Scenarios**: Use this Skill when users mention "login", "check balance", "transfer", "DApp", "sign", "wallet", "assets", "gate-wallet", "CLI", "command-line", "openapi-swap" and other wallet-related operations.
 
 ---
 
@@ -21,6 +21,7 @@ description: "Gate DEX comprehensive wallet skill. Unified entry point supportin
 | 💰 **Assets** | Balance queries, address retrieval, transaction history | "check balance", "total assets", "transaction history" |
 | 💸 **Transfer** | Gas estimation, transaction building, signature broadcast | "transfer", "send tokens", "batch transfer" |
 | 🎯 **DApp** | Wallet connection, message signing, contract interaction | "connect DApp", "sign message", "Approve" |
+| 🖥️ **CLI** | gate-wallet CLI dual-channel (MCP custodial signing + OpenAPI hybrid mode) | "gate-wallet", "CLI", "command-line", "openapi-swap", "hybrid swap" |
 
 ---
 
@@ -30,10 +31,11 @@ Route to corresponding sub-function reference files based on user intent:
 
 | User Intent | Example Keywords | Reference File |
 |---------|-----------|---------|
-| **Authentication login** | "login", "login", "auth", "token expired", "session" | references/auth.md |
-| **Asset queries** | "check balance", "total assets", "wallet address", "transaction history", "Swap history" | Current SKILL.md main flow |
-| **Transfer operations** | "transfer", "send", "transfer", "batch transfer", "Gas fee" | references/transfer.md |
-| **DApp interactions** | "DApp", "sign message", "Approve", "connect wallet", "contract call" | references/dapp.md |
+| **Authentication login** | "login", "login", "auth", "token expired", "session" | [references/auth.md](./references/auth.md) |
+| **Asset queries** | "check balance", "total assets", "wallet address", "transaction history", "Swap history" | Keep current SKILL.md main flow |
+| **Transfer operations** | "transfer", "send", "transfer", "batch transfer", "Gas fee" | [references/transfer.md](./references/transfer.md) |
+| **DApp interactions** | "DApp", "sign message", "Approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
+| **CLI operations** | "gate-wallet", "CLI", "command-line", "openapi-swap", "hybrid swap", "hybrid mode swap" | [references/cli.md](./references/cli.md) |
 
 ---
 
@@ -198,6 +200,7 @@ Post-asset viewing follow-up operation guidance:
 | Swap/Exchange tokens | `gate-dex-trade` |
 | Interact with DApps | This Skill `references/dapp.md` |
 | Login/Auth expired | This Skill `references/auth.md` |
+| Use CLI / command-line operations / hybrid mode Swap | This Skill `references/cli.md` |
 
 ---
 
@@ -210,6 +213,7 @@ This Skill serves as **wallet data center**, called by other Skills:
 | `gate-dex-trade` | Pre-swap balance validation, token address resolution | `wallet.get_token_list` |
 | `gate-dex-trade` | Get chain-specific wallet address | `wallet.get_addresses` |
 | `gate-dex-market` | Guide to view holdings after market data query | `wallet.get_token_list` |
+| CLI sub-module | CLI dual-channel operations (MCP custodial signing / OpenAPI hybrid Swap) | `references/cli.md` |
 
 ---
 
