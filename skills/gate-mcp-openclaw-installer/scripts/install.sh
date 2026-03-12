@@ -69,7 +69,9 @@ install_stdio() {
             --env "GATE_API_KEY=$api_key" \
             --env "GATE_API_SECRET=$api_secret" 2>/dev/null || return 1
     else
-        mcporter config add "$name" --stdio --command "$cmd" 2>/dev/null || return 1
+        mcporter config add "$name" --stdio --command "$cmd" \
+            --env "GATE_API_KEY=your-api-key" \
+            --env "GATE_API_SECRET=your-api-secret" 2>/dev/null || return 1
     fi
 }
 

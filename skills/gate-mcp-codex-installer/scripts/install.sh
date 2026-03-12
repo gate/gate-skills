@@ -135,6 +135,7 @@ TOML
 [mcp_servers.Gate]
 command = "gate-mcp"
 args = []
+env = { GATE_API_KEY = "your-api-key", GATE_API_SECRET = "your-api-secret" }
 TOML
     fi
   else
@@ -153,6 +154,7 @@ TOML
 [mcp_servers.Gate]
 command = "npx"
 args = ["-y", "gate-mcp"]
+env = { GATE_API_KEY = "your-api-key", GATE_API_SECRET = "your-api-secret" }
 TOML
     fi
   fi
