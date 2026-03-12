@@ -1,76 +1,76 @@
 # Gate MCP
 
-一键安装所有 Gate MCP 服务器，支持 spot 交易、合约、钱包、行情和新闻查询。
+One-click installer for all Gate MCP servers, supporting spot trading, futures, wallet, market data, and news queries.
 
-## ✨ 特性
+## Features
 
-- 🚀 **一键安装** - 默认安装所有 MCP 服务器
-- 🔧 **灵活选择** - 支持单独安装某个服务器
-- 🔐 **安全配置** - 自动管理 API 密钥
-- 📦 **开箱即用** - 下载即可运行
+- **One-Click Install** - Installs all MCP servers by default
+- **Flexible Selection** - Supports installing individual servers
+- **Secure Configuration** - Automatically manages API keys
+- **Ready to Use** - Works out of the box after download
 
-## 📋 包含的 MCP 服务器
+## Included MCP Servers
 
-| 服务器 | 类型 | 功能 | 认证 |
-|--------|------|------|------|
-| `gate` | stdio | Spot/Futures/Options 交易 | ✅ API Key + Secret |
-| `gate-dex` | HTTP | DEX 操作 | ✅ x-api-key 已内置（MCP_AK_8W2N7Q） |
-| `gate-info` | HTTP | 行情数据 | ❌ 无需认证 |
-| `gate-news` | HTTP | 新闻资讯 | ❌ 无需认证 |
+| Server | Type | Function | Auth |
+|--------|------|----------|------|
+| `gate` | stdio | Spot/Futures/Options trading | API Key + Secret |
+| `gate-dex` | HTTP | DEX operations | x-api-key built-in (MCP_AK_8W2N7Q) |
+| `gate-info` | HTTP | Market data | No auth required |
+| `gate-news` | HTTP | News feed | No auth required |
 
-## 🚀 快速开始
+## Quick Start
 
-### 安装
+### Installation
 
 ```bash
-# 在 gate-skills 仓库根目录执行（需先克隆 https://github.com/gate/gate-skills）
+# Run from the gate-skills repository root (clone https://github.com/gate/gate-skills first)
 ./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
-### 使用
+### Usage
 
 ```bash
-# 查看 BTC 价格（无需认证）
+# Check BTC price (no auth required)
 mcporter call gate-info.list_tickers currency_pair=BTC_USDT
 
-# 查看账户余额（需要认证）
+# Check account balance (requires auth)
 mcporter call gate.list_spot_accounts
 
-# 查看新闻（无需认证）
+# Check news (no auth required)
 mcporter call gate-news.list_news
 
-# 查看已安装的服务器
+# List installed servers
 mcporter config list | grep gate
 ```
 
-## 🔧 安装选项
+## Installation Options
 
-### 默认：安装全部
+### Default: Install All
 ```bash
 ./skills/gate-mcp-openclaw-installer/scripts/install.sh
 ```
 
-### 选择性安装
+### Selective Installation
 ```bash
 ./skills/gate-mcp-openclaw-installer/scripts/install.sh --select
-# 或
+# or
 ./skills/gate-mcp-openclaw-installer/scripts/install.sh -s
 ```
 
-## 📖 详细文档
+## Detailed Documentation
 
-查看 [SKILL.md](SKILL.md) 获取完整使用说明。
+See [SKILL.md](SKILL.md) for full usage instructions.
 
-## 🔑 获取 API Keys
+## Getting API Keys
 
-1. 访问 **https://www.gate.com/myaccount/profile/api-key/manage**（登录后：头像 → API 管理）
-2. 创建 API Key，选择所需权限：
-   - **读取** - 行情查询、账户信息
-   - **交易** - Spot/Margin/Futures
-   - **提币** - 钱包操作
+1. Visit **https://www.gate.com/myaccount/profile/api-key/manage** (after login: Avatar -> API Management)
+2. Create an API Key and select the required permissions:
+   - **Read** - Market queries, account info
+   - **Trade** - Spot/Margin/Futures
+   - **Withdraw** - Wallet operations
 
-**Gate-Dex 授权**：当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时，请先打开 [https://web3.gate.com/](https://web3.gate.com/) 创建或绑定钱包；助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。
+**Gate-Dex Authorization**: When a gate-dex query (balance/transfer/swap, etc.) returns an authorization required message, first open [https://web3.gate.com/](https://web3.gate.com/) to create or bind a wallet; the assistant will return a clickable Google authorization link for you to complete OAuth.
 
-## 📄 开源协议
+## License
 
 MIT License

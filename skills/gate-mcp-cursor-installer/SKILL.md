@@ -1,66 +1,66 @@
 ---
 name: gate-mcp-cursor-installer
-description: 当用户要一键安装 Gate 的 MCP 和 Skills 时使用。可安装 Gate MCP（main/dex/info/news 可选）、以及 gate-skills 仓库中的全部 skills；默认不选时安装所有 MCP + 全部 skills，skills 始终全部安装不可选。
+description: One-click installer for Gate MCP and Skills in Cursor. Installs Gate MCP servers (main/dex/info/news, selectable) and all skills from the gate-skills repository. Installs all MCPs + all skills by default; skills are always fully installed.
 ---
 
-# Gate  一键安装（MCP + Skills）
+# Gate One-Click Installer (MCP + Skills)
 
-用户说「一键安装 Gate」「安装 Gate MCP 和 skills」「安装 gate-mcp」等时，使用本技能。
+Use this skill when the user says "one-click install Gate", "install Gate MCP and skills", "install gate-mcp", etc.
 
-## 资源地址
+## Resources
 
-| 类型 | 名称 | 地址/配置 |
-|------|------|-----------|
-| MCP | Gate (main) | `npx -y gate-mcp`，见 [gate-mcp](https://github.com/gate/gate-mcp) |
-| MCP | Gate Dex | https://api.gatemcp.ai/mcp/dex，x-api-key 固定 |
+| Type | Name | Endpoint / Config |
+|------|------|-------------------|
+| MCP | Gate (main) | `npx -y gate-mcp`, see [gate-mcp](https://github.com/gate/gate-mcp) |
+| MCP | Gate Dex | https://api.gatemcp.ai/mcp/dex, fixed x-api-key |
 | MCP | Gate Info | https://api.gatemcp.ai/mcp/info |
 | MCP | Gate News | https://api.gatemcp.ai/mcp/news |
-| Skills | gate-skills | https://github.com/gate/gate-skills（安装 skills/ 下全部） |
+| Skills | gate-skills | https://github.com/gate/gate-skills (installs all under skills/) |
 
-## 行为规则
+## Behavior Rules
 
-1. **默认**：用户未指定选哪几个 MCP 时，安装**全部 MCP**（main、dex、info、news）+ **全部 gate-skills**。
-2. **可选 MCP**：用户可指定只安装部分 MCP（如只装 main、只装 dex 等），按用户选择执行。
-3. **Skills**：未加 `--no-skills` 时，始终安装 gate-skills 仓库 **skills/** 下全部 skill。
+1. **Default**: When the user does not specify which MCPs to install, install **all MCPs** (main, dex, info, news) + **all gate-skills**.
+2. **Selectable MCPs**: Users can choose to install only specific MCPs (e.g. main only, dex only, etc.); follow the user's selection.
+3. **Skills**: Unless `--no-skills` is passed, always install **all** skills from the gate-skills repository's **skills/** directory.
 
-## 安装步骤
+## Installation Steps
 
-### 1. 确认用户选择（MCP）
+### 1. Confirm User Selection (MCPs)
 
-- 若用户未说明选哪些 MCP → 安装全部：main、dex、info、news。
-- 若用户说明「只装 xxx」→ 仅安装指定的 MCP。
+- If the user does not specify which MCPs -> install all: main, dex, info, news.
+- If the user specifies "only install xxx" -> install only the specified MCPs.
 
-### 2. 写入 Cursor MCP 配置
+### 2. Write Cursor MCP Config
 
-- 配置文件：`~/.cursor/mcp.json`（Windows：`%APPDATA%\Cursor\mcp.json`）。
-- 若已存在则**合并**到现有 `mcpServers`，不覆盖其他 MCP。
-- 配置说明：
-  - **Gate (main)**：`command: npx`, `args: ["-y", "gate-mcp"]`
-  - **Gate-Dex**：`url` + `transport: streamable-http` + `headers["x-api-key"]` 固定为 MCP_AK_8W2N7Q
-  - **Gate-Info / Gate-News**：`url` + `transport: streamable-http`
+- Config file: `~/.cursor/mcp.json` (Windows: `%APPDATA%\Cursor\mcp.json`).
+- If it already exists, **merge** into the existing `mcpServers`; do not overwrite other MCPs.
+- Config details:
+  - **Gate (main)**: `command: npx`, `args: ["-y", "gate-mcp"]`
+  - **Gate-Dex**: `url` + `transport: streamable-http` + `headers["x-api-key"]` fixed as MCP_AK_8W2N7Q
+  - **Gate-Info / Gate-News**: `url` + `transport: streamable-http`
 
-### 3. 安装 gate-skills（全部）
+### 3. Install gate-skills (all)
 
-- 从 https://github.com/gate/gate-skills 拉取 **skills/** 下所有子目录，复制到 `~/.cursor/skills/`（或当前环境对应目录）。
-- 使用脚本时加 `--no-skills` 可仅安装 MCP、不安装 skills。
+- Pull all subdirectories under **skills/** from https://github.com/gate/gate-skills and copy them to `~/.cursor/skills/` (or the corresponding directory for the current environment).
+- Add `--no-skills` when using the script to install MCP only without skills.
 
-### 4. 完成后提示
+### 4. Post-Installation Prompt
 
-- 告知用户已安装的 MCP 列表和「已安装 gate-skills 全部 skills」（若未使用 --no-skills）。
-- 提示重启 Cursor。
-- **获取 API Key**：若用户使用 Gate (main) 现货/合约，提示其访问 https://www.gate.com/myaccount/profile/api-key/manage 创建 API Key 并配置 `GATE_API_KEY`、`GATE_API_SECRET`。
-- **Gate-Dex 授权**：若安装了 Gate-Dex，当查询返回需要授权时，提示用户先打开 https://web3.gate.com/ 创建或绑定钱包，然后助手会返回可点击的 Google 授权链接供用户点击跳转完成授权。
+- Inform the user of the installed MCP list and "all gate-skills have been installed" (unless --no-skills was used).
+- Prompt to restart Cursor.
+- **Getting API Key**: If the user uses Gate (main) for spot/futures trading, prompt them to visit https://www.gate.com/myaccount/profile/api-key/manage to create an API Key and set `GATE_API_KEY` and `GATE_API_SECRET`.
+- **Gate-Dex Authorization**: If Gate-Dex was installed and a query returns an authorization required message, prompt the user to first open https://web3.gate.com/ to create or bind a wallet, then the assistant will return a clickable Google authorization link for the user to complete OAuth.
 
-## 脚本
+## Script
 
-使用本 skill 目录下的 **scripts/install.sh** 完成一键安装。
+Use the **scripts/install.sh** in this skill directory for one-click installation.
 
-- 用法：  
+- Usage:  
   `./scripts/install.sh [--mcp main|dex|info|news] ... [--no-skills]`  
-  不传 `--mcp` 时安装全部 MCP；传多个 `--mcp` 则只安装指定项；`--no-skills` 仅安装 MCP。
-- DEX 的 x-api-key 已固定为 `MCP_AK_8W2N7Q`，写入 mcp.json。
+  Installs all MCPs when no `--mcp` is passed; pass multiple `--mcp` to install only specified ones; `--no-skills` installs MCP only.
+- The DEX x-api-key is fixed as `MCP_AK_8W2N7Q` and written to mcp.json.
 
-从 GitHub 下载本 skill 后，在仓库根目录执行：  
+After downloading this skill from GitHub, run from the repository root:  
 `bash scripts/install.sh`  
-或（仅安装 MCP）：  
+Or (MCP only):  
 `bash scripts/install.sh --no-skills`

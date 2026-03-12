@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 NC='\033[0m'
 
-echo "🚀 Gate MCP OpenClaw Installer"
+echo "Gate MCP OpenClaw Installer"
 echo "====================="
 echo ""
 
@@ -39,7 +39,7 @@ if [ "$1" = "--select" ] || [ "$1" = "-s" ]; then
     SELECT_MODE=true
 fi
 
-# DEX MCP 固定 x-api-key（与 Cursor/Claude/Codex installer 一致）
+# DEX MCP fixed x-api-key (consistent with Cursor/Claude/Codex installers)
 GATE_DEX_API_KEY="MCP_AK_8W2N7Q"
 
 # MCP Server definitions
@@ -178,7 +178,7 @@ selective_install() {
     echo -e "Installing: ${CYAN}$name${NC} - $desc"
     echo ""
     
-    # Get required credentials（gate-dex 使用固定 x-api-key，不询问）
+    # Get required credentials (gate-dex uses fixed x-api-key, no prompt needed)
     local gate_key="" gate_secret="" dex_key="$GATE_DEX_API_KEY"
     
     case "$auth_type" in
@@ -195,7 +195,7 @@ selective_install() {
             fi
             ;;
         x_api_key)
-            # 使用固定 GATE_DEX_API_KEY，与 Cursor/Claude/Codex installer 一致
+            # Uses fixed GATE_DEX_API_KEY, consistent with Cursor/Claude/Codex installers
             ;;
     esac
     
@@ -223,7 +223,7 @@ install_all() {
         fi
     done
     
-    # Collect credentials（gate-dex 使用固定 x-api-key，不询问）
+    # Collect credentials (gate-dex uses fixed x-api-key, no prompt needed)
     local gate_key="" gate_secret="" dex_key="$GATE_DEX_API_KEY"
     
     if [ "$need_gate" = true ]; then
@@ -241,7 +241,7 @@ install_all() {
         echo ""
     fi
     
-    # Install all（gate-dex 始终使用 GATE_DEX_API_KEY）
+    # Install all (gate-dex always uses GATE_DEX_API_KEY)
     echo "Installing servers..."
     for server in "${SERVERS[@]}"; do
         IFS='|' read -r name type endpoint auth_type desc <<< "$server"
@@ -273,7 +273,7 @@ fi
 
 echo ""
 echo "====================="
-echo "🎉 Installation Complete!"
+echo "Installation Complete!"
 echo ""
 echo -e "${BLUE}Installed servers:${NC}"
 for server in "${SERVERS[@]}"; do
@@ -284,13 +284,13 @@ for server in "${SERVERS[@]}"; do
 done
 
 echo ""
-# Gate-Dex: 当查询接口返回需要授权时的指引
+# Gate-Dex: authorization guidance when queries return auth-required
 if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
-    echo -e "${CYAN}Gate-Dex 授权提示:${NC}"
-    echo "  当 gate-dex 查询（余额/转账/Swap 等）返回需要授权时："
-    echo "  1) 请先打开下方钱包页创建或绑定钱包（若尚未有钱包）："
+    echo -e "${CYAN}Gate-Dex authorization note:${NC}"
+    echo "  When a gate-dex query (balance/transfer/swap, etc.) returns an authorization required message:"
+    echo "  1) First open the wallet page below to create or bind a wallet (if you don't have one yet):"
     echo "     https://web3.gate.com/"
-    echo "  2) 助手返回的 Google 授权页将以可点击链接形式给出，点击即可跳转完成授权。"
+    echo "  2) The assistant will return a clickable Google authorization link for you to complete OAuth."
     echo ""
 fi
 echo "Quick commands:"
