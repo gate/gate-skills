@@ -107,7 +107,7 @@ Route to specific implementation based on mode detection result and user intent:
 
 | Routing Condition | Target | Description |
 |-------------------|---------|-------------|
-| OpenAPI environment + related intent | [references/openapi.md](./references/openapi.md) | Complete OpenAPI call specification |
+| OpenAPI environment + related intent | references/openapi.md | Complete OpenAPI call specification |
 | MCP environment + trading intent | Current SKILL.md main process | MCP tool calls and three-step confirmation process |
 
 ---
