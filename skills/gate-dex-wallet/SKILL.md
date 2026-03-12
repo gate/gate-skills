@@ -30,10 +30,10 @@ Route to corresponding sub-function reference files based on user intent:
 
 | User Intent | Example Keywords | Reference File |
 |---------|-----------|---------|
-| **Authentication login** | "login", "login", "auth", "token expired", "session" | [references/auth.md](./references/auth.md) |
-| **Asset queries** | "check balance", "total assets", "wallet address", "transaction history", "Swap history" | Keep current SKILL.md main flow |
-| **Transfer operations** | "transfer", "send", "transfer", "batch transfer", "Gas fee" | [references/transfer.md](./references/transfer.md) |
-| **DApp interactions** | "DApp", "sign message", "Approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
+| **Authentication login** | "login", "login", "auth", "token expired", "session" | references/auth.md |
+| **Asset queries** | "check balance", "total assets", "wallet address", "transaction history", "Swap history" | Current SKILL.md main flow |
+| **Transfer operations** | "transfer", "send", "transfer", "batch transfer", "Gas fee" | references/transfer.md |
+| **DApp interactions** | "DApp", "sign message", "Approve", "connect wallet", "contract call" | references/dapp.md |
 
 ---
 
