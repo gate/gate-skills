@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# Gate Claude Code 一键安装：MCP（main/dex/info/news 可选）+ gate-skills 全部
-# 用法: install.sh [--mcp main] [--mcp dex] ... [--no-skills]  不传 --mcp 则安装全部 MCP
-# DEX MCP 使用固定 x-api-key: MCP_AK_8W2N7Q
+# Gate Claude Code One-Click Installer: MCP (main/dex/info/news selectable) + all gate-skills
+# Usage: install.sh [--mcp main] [--mcp dex] ... [--no-skills]  Installs all MCPs when no --mcp is passed
+# DEX MCP uses fixed x-api-key: MCP_AK_8W2N7Q
 
 set -e
 
 GATE_SKILLS_REPO="https://github.com/gate/gate-skills.git"
 GATE_SKILLS_BRANCH="${GATE_SKILLS_BRANCH:-master}"
 
-# Claude Code 用户级配置与 skills 目录（macOS/Linux）
+# Claude Code user-level config and skills directory (macOS/Linux)
 if [[ -n "$CLAUDE_USER_HOME" ]]; then
   CLAUDE_HOME="$CLAUDE_USER_HOME"
 else
@@ -22,7 +22,7 @@ else
   SKILLS_DIR="${CLAUDE_HOME}/.claude/skills"
 fi
 
-# 默认安装全部 MCP，默认安装 skills
+# Default: install all MCPs, install skills
 MCP_MAIN=0
 MCP_DEX=0
 MCP_INFO=0
@@ -30,11 +30,11 @@ MCP_NEWS=0
 INSTALL_SKILLS=1
 
 usage() {
-  echo "用法: $0 [--mcp main|dex|info|news] ... [--no-skills]"
-  echo "  不传 --mcp 时安装全部 MCP；传多个 --mcp 则只安装指定项。"
-  echo "  --no-skills  仅安装 MCP，不克隆安装 gate-skills。"
-  echo "示例: $0"
-  echo "示例: $0 --mcp main --mcp dex"
+  echo "Usage: $0 [--mcp main|dex|info|news] ... [--no-skills]"
+  echo "  Installs all MCPs when no --mcp is passed; pass multiple --mcp to install only specified ones."
+  echo "  --no-skills  Install MCP only, do not clone gate-skills."
+  echo "Examples: $0"
+  echo "          $0 --mcp main --mcp dex"
   exit 0
 }
 
@@ -47,17 +47,17 @@ while [[ $# -gt 0 ]]; do
         dex)    MCP_DEX=1 ;;
         info)   MCP_INFO=1 ;;
         news)   MCP_NEWS=1 ;;
-        *)      echo "未知 MCP: $1 (可选: main, dex, info, news)" >&2; exit 1 ;;
+        *)      echo "Unknown MCP: $1 (available: main, dex, info, news)" >&2; exit 1 ;;
       esac
       shift
       ;;
     --no-skills) INSTALL_SKILLS=0; shift ;;
     -h|--help) usage ;;
-    *) echo "未知参数: $1" >&2; usage ;;
+    *) echo "Unknown argument: $1" >&2; usage ;;
   esac
 done
 
-# 若未指定任何 --mcp，则全选
+# If no --mcp specified, select all
 if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
   MCP_MAIN=1
   MCP_DEX=1
@@ -65,53 +65,53 @@ if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]
   MCP_NEWS=1
 fi
 
-# Gate (main) 依赖 node + npx，安装前检查并在缺 npx 时尝试安装
+# Gate (main) requires node + npx; check before installation and attempt to install npx if missing
 if [[ $MCP_MAIN -eq 1 ]]; then
   if ! command -v node &>/dev/null; then
-    echo "错误: 未检测到 Node.js。Gate (main) MCP 需要 Node.js（含 npx）。" >&2
-    echo "请先安装: https://nodejs.org 或使用 nvm/fnm 安装 Node.js 后重试。" >&2
+    echo "Error: Node.js not found. Gate (main) MCP requires Node.js (with npx)." >&2
+    echo "Please install first: https://nodejs.org or use nvm/fnm to install Node.js, then retry." >&2
     exit 1
   fi
   if ! command -v npx &>/dev/null; then
-    echo "未检测到 npx，正在尝试安装: npm install -g npx ..."
+    echo "npx not found, attempting to install: npm install -g npx ..."
     if npm install -g npx 2>/dev/null; then
-      echo "npx 已安装。"
+      echo "npx installed successfully."
     else
-      echo "错误: 未检测到 npx，且自动安装失败。" >&2
-      echo "请手动运行: npm install -g npx" >&2
+      echo "Error: npx not found, and automatic installation failed." >&2
+      echo "Please run manually: npm install -g npx" >&2
       exit 1
     fi
   fi
 fi
 
-# Gate (main) 现货/合约需要用户的 API Key
+# Gate (main) spot/futures requires user's API Key
 USER_GATE_API_KEY=""
 USER_GATE_API_SECRET=""
 if [[ $MCP_MAIN -eq 1 ]]; then
   echo ""
-  echo "Gate (main) 现货/合约交易需要 API Key 才能操作账户。"
-  echo "请访问以下链接创建 API Key（需开启现货/合约交易权限）："
+  echo "Gate (main) spot/futures trading requires an API Key to operate your account."
+  echo "Visit the link below to create an API Key (enable spot/futures trading permissions):"
   echo "  https://www.gate.com/myaccount/profile/api-key/manage"
   echo ""
-  read -p "  GATE_API_KEY (留空则跳过): " USER_GATE_API_KEY
+  read -p "  GATE_API_KEY (leave empty to skip): " USER_GATE_API_KEY
   if [[ -n "$USER_GATE_API_KEY" ]]; then
     read -s -p "  GATE_API_SECRET: " USER_GATE_API_SECRET
     echo ""
     if [[ -z "$USER_GATE_API_SECRET" ]]; then
-      echo "警告: GATE_API_SECRET 为空，现货/合约交易将无法使用。" >&2
+      echo "Warning: GATE_API_SECRET is empty; spot/futures trading will not work." >&2
       USER_GATE_API_KEY=""
     fi
   fi
 fi
 
-# DEX MCP 固定 x-api-key
+# DEX MCP fixed x-api-key
 GATE_API_KEY="MCP_AK_8W2N7Q"
 
-# ---------- 1. 合并写入 ~/.claude.json 的 mcpServers ----------
+# ---------- 1. Merge and write mcpServers to ~/.claude.json ----------
 mkdir -p "$(dirname "$SKILLS_DIR")"
 
-# 构建要添加的 mcpServers 片段（Claude Code 格式：stdio 用 command/args，http 用 type/url/headers）
-# main: 优先使用全局 gate-mcp（避免 npx 下 @modelcontextprotocol/sdk 的 ESM 路径解析失败）
+# Build mcpServers fragment (Claude Code format: stdio uses command/args, http uses type/url/headers)
+# main: prefer global gate-mcp (avoids npx ESM path resolution failures with @modelcontextprotocol/sdk)
 # dex/info/news: type http + url [+ headers]
 if [[ $MCP_MAIN -eq 1 ]] && command -v gate-mcp &>/dev/null; then
   GATE_MAIN_CMD="gate-mcp"
@@ -173,37 +173,37 @@ if command -v node &>/dev/null; then
     fs.writeFileSync(outPath, JSON.stringify(existing, null, 2));
   " "$TMP_JSON" "$ADD_JSON" "$CLAUDE_JSON"
   rm -f "$TMP_JSON"
-  echo "已写入 MCP 配置: $CLAUDE_JSON"
+  echo "MCP config written to: $CLAUDE_JSON"
   if [[ $MCP_MAIN -eq 1 && "$GATE_MAIN_CMD" == "npx" ]]; then
     echo ""
-    echo "提示: Gate (main) 当前使用 npx 启动。若启动时报错 ERR_MODULE_NOT_FOUND（找不到 @modelcontextprotocol/sdk），请执行："
+    echo "Note: Gate (main) is currently launched via npx. If you encounter ERR_MODULE_NOT_FOUND (@modelcontextprotocol/sdk) on startup, run:"
     echo "  npm install -g gate-mcp"
-    echo "然后重新运行本脚本，或手动将 .claude.json 中 Gate 的 command 改为 gate-mcp、args 改为 []。"
+    echo "Then re-run this script, or manually change the Gate command in .claude.json to gate-mcp with args []."
   fi
 else
-  echo "未检测到 node，请手动将以下内容合并到 $CLAUDE_JSON 的 mcpServers 中："
+  echo "Node.js not found. Please manually merge the following into the mcpServers section of $CLAUDE_JSON:"
   echo "  $ADD_JSON"
 fi
 
-# ---------- 2. 安装 gate-skills 全部（可选） ----------
+# ---------- 2. Install all gate-skills (optional) ----------
 if [[ $INSTALL_SKILLS -eq 0 ]]; then
-  echo "已跳过 gate-skills 安装（--no-skills）。"
+  echo "Skipped gate-skills installation (--no-skills)."
 else
-  echo "正在安装 gate-skills（全部）..."
+  echo "Installing gate-skills (all)..."
   TMP_CLONE=$(mktemp -d 2>/dev/null || mktemp -d -t gate-skills)
   trap "rm -rf '$TMP_CLONE'" EXIT
 
   if command -v git &>/dev/null; then
     git clone --depth 1 -b "$GATE_SKILLS_BRANCH" "$GATE_SKILLS_REPO" "$TMP_CLONE"
   else
-    echo "需要 git 才能克隆 gate-skills。请安装 git 或使用 --no-skills 仅安装 MCP。" >&2
+    echo "git is required to clone gate-skills. Please install git or use --no-skills to install MCP only." >&2
     exit 1
   fi
 
   mkdir -p "$SKILLS_DIR"
   SKILLS_SRC="$TMP_CLONE/skills"
   if [[ ! -d "$SKILLS_SRC" ]]; then
-    echo "gate-skills 仓库中未找到 skills 目录" >&2
+    echo "skills directory not found in the gate-skills repository" >&2
     exit 1
   fi
 
@@ -215,27 +215,28 @@ else
       rm -rf "$dst"
     fi
     cp -R "$dir" "$dst"
-    echo "  已安装 skill: $name"
+    echo "  Installed skill: $name"
   done
 
-  echo "Skills 已安装到: $SKILLS_DIR"
+  echo "Skills installed to: $SKILLS_DIR"
 fi
 
 if [[ $MCP_MAIN -eq 1 && -z "$USER_GATE_API_KEY" ]]; then
   echo ""
-  echo "Gate (main) API Key 配置提示:"
-  echo "  现货/合约交易功能需要 API Key。请访问以下链接创建："
+  echo "Gate (main) API Key reminder:"
+  echo "  Spot/futures trading requires an API Key. Visit the link below to create one:"
   echo "    https://www.gate.com/myaccount/profile/api-key/manage"
-  echo "  创建后，请将 GATE_API_KEY 和 GATE_API_SECRET 添加到 $CLAUDE_JSON 中 Gate 的 env 字段："
-  echo "    \"Gate\": { ..., \"env\": { \"GATE_API_KEY\": \"你的Key\", \"GATE_API_SECRET\": \"你的Secret\" } }"
+  echo "  After creation, add GATE_API_KEY and GATE_API_SECRET to the Gate env field in $CLAUDE_JSON:"
+  echo "    \"Gate\": { ..., \"env\": { \"GATE_API_KEY\": \"your-key\", \"GATE_API_SECRET\": \"your-secret\" } }"
 fi
 
 if [[ $MCP_DEX -eq 1 ]]; then
   echo ""
-  echo "Gate-Dex 授权提示: 当 gate-dex 查询返回需要授权时，请先打开下方链接创建或绑定钱包，"
-  echo "  然后助手会返回可点击的 Google 授权链接，点击即可跳转完成授权。"
+  echo "Gate-Dex authorization note: When a gate-dex query returns an authorization required message,"
+  echo "  first open the link below to create or bind a wallet, then the assistant will return a"
+  echo "  clickable Google authorization link for you to complete OAuth."
   echo "  https://web3.gate.com/"
   echo ""
 fi
 
-echo "完成。请重新打开 Claude Code 或新开会话以加载 MCP 与 Skills。"
+echo "Done. Please reopen Claude Code or start a new session to load the MCP servers and skills."

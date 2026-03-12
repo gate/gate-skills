@@ -1,58 +1,58 @@
-# Gate Claude Code 一键安装（MCP + Skills）
+# Gate Claude Code One-Click Installer (MCP + Skills)
 
-一键为 **Claude Code（Claude CLI）** 安装 Gate 相关 MCP 与 [gate-skills](https://github.com/gate/gate-skills) 全部 skills。
+One-click installation of Gate MCP servers and all [gate-skills](https://github.com/gate/gate-skills) skills for **Claude Code (Claude CLI)**.
 
-## 安装方式
+## Installation
 
-### 从本仓库一键安装
+### One-click install from this repository
 
 ```bash
-# 在 gate-skills 仓库根目录执行
+# Run from the gate-skills repository root
 bash skills/gate-mcp-claude-installer/scripts/install.sh
 ```
 
-### 仅安装 MCP（不安装 gate-skills）
+### Install MCP only (without gate-skills)
 
 ```bash
 bash skills/gate-mcp-claude-installer/scripts/install.sh --no-skills
 ```
 
-### 只安装部分 MCP
+### Install specific MCPs only
 
 ```bash
-# 只安装 Gate (main) 和 Gate-Dex
+# Install only Gate (main) and Gate-Dex
 bash skills/gate-mcp-claude-installer/scripts/install.sh --mcp main --mcp dex
 
-# 只安装 Gate、Info、News
+# Install only Gate, Info, and News
 bash skills/gate-mcp-claude-installer/scripts/install.sh --mcp main --mcp info --mcp news
 ```
 
-## 将安装的内容
+## What Gets Installed
 
-| 项目 | 说明 |
-|------|------|
-| **Gate** | 主 MCP，`npx -y gate-mcp`，[gate-mcp](https://github.com/gate/gate-mcp) |
-| **Gate-Dex** | https://api.gatemcp.ai/mcp/dex（x-api-key 已内置） |
+| Component | Description |
+|-----------|-------------|
+| **Gate** | Main MCP, `npx -y gate-mcp`, [gate-mcp](https://github.com/gate/gate-mcp) |
+| **Gate-Dex** | https://api.gatemcp.ai/mcp/dex (x-api-key built-in) |
 | **Gate-Info** | https://api.gatemcp.ai/mcp/info |
 | **Gate-News** | https://api.gatemcp.ai/mcp/news |
-| **gate-skills** | 从 [gate-skills](https://github.com/gate/gate-skills) 克隆并安装 `skills/` 下全部 skill |
+| **gate-skills** | Cloned from [gate-skills](https://github.com/gate/gate-skills), installs all skills under `skills/` |
 
-## 配置写入位置
+## Config File Locations
 
-- **MCP 配置**：`~/.claude.json` 的 `mcpServers` 字段（Windows：`%USERPROFILE%\.claude.json`），会与已有配置合并。
-- **Skills**：`~/.claude/skills/`（Windows：`%USERPROFILE%\.claude\skills`）。
+- **MCP config**: `~/.claude.json` under `mcpServers` (Windows: `%USERPROFILE%\.claude.json`), merged with existing config.
+- **Skills**: `~/.claude/skills/` (Windows: `%USERPROFILE%\.claude\skills`).
 
-## 依赖
+## Dependencies
 
-- **Bash**：用于执行 `install.sh`（macOS/Linux 自带，Windows 可用 Git Bash 或 WSL）。
-- **Node.js**：用于合并 `~/.claude.json`；若无 Node，脚本会输出需手动合并的 JSON 片段。
-- **git**：用于克隆 gate-skills（使用 `--no-skills` 时不需要）。
+- **Bash**: Required to run `install.sh` (built-in on macOS/Linux; use Git Bash or WSL on Windows).
+- **Node.js**: Used to merge `~/.claude.json`; if Node is unavailable, the script outputs a JSON snippet for manual merging.
+- **git**: Used to clone gate-skills (not required when using `--no-skills`).
 
-## 获取 API Key 与授权
+## Getting API Keys & Authorization
 
-- **Gate (main)** 现货/合约需 API Key + Secret：访问 **https://www.gate.com/myaccount/profile/api-key/manage** 创建并配置环境变量 `GATE_API_KEY`、`GATE_API_SECRET`。
-- **Gate-Dex**：当查询返回需要授权时，请先打开 https://web3.gate.com/ 创建或绑定钱包，然后点击助手返回的 Google 授权链接完成授权。
+- **Gate (main)** spot/futures requires API Key + Secret: Visit **https://www.gate.com/myaccount/profile/api-key/manage** to create one, then set the environment variables `GATE_API_KEY` and `GATE_API_SECRET`.
+- **Gate-Dex**: When a query returns an authorization required message, first open https://web3.gate.com/ to create or bind a wallet, then click the Google authorization link returned by the assistant to complete the process.
 
-## 安装完成后
+## After Installation
 
-重新打开 Claude Code 或新开一个会话以加载 MCP 与 Skills。
+Reopen Claude Code or start a new session to load the MCP servers and skills.
