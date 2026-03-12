@@ -22,7 +22,7 @@ Complete Gate.com MCP server installer for OpenClaw.
 | Server | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
 | `gate` | `npx -y gate-mcp` | API Key + Secret | Spot/Futures/Options trading |
-| `gate-dex` | `https://api.gatemcp.ai/mcp/dex` | x-api-key fixed as MCP_AK_8W2N7Q | DEX operations |
+| `gate-dex` | `https://api.gatemcp.ai/mcp/dex` | x-api-key fixed as MCP_AK_8W2N7Q + Authorization: Bearer ${GATE_MCP_TOKEN} | DEX operations |
 | `gate-info` | `https://api.gatemcp.ai/mcp/info` | None | Market data |
 | `gate-news` | `https://api.gatemcp.ai/mcp/news` | None | News feed |
 

@@ -14,7 +14,7 @@ One-click installer for all Gate MCP servers, supporting spot trading, futures, 
 | Server | Type | Function | Auth |
 |--------|------|----------|------|
 | `gate` | stdio | Spot/Futures/Options trading | API Key + Secret |
-| `gate-dex` | HTTP | DEX operations | x-api-key built-in (MCP_AK_8W2N7Q) |
+| `gate-dex` | HTTP | DEX operations | x-api-key built-in (MCP_AK_8W2N7Q) + Authorization: Bearer ${GATE_MCP_TOKEN} |
 | `gate-info` | HTTP | Market data | No auth required |
 | `gate-news` | HTTP | News feed | No auth required |
 

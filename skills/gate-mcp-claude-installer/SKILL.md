@@ -36,7 +36,7 @@ Use this skill when the user says "one-click install Gate", "install Gate MCP an
 - If it already exists, **merge** into the existing `mcpServers`; do not overwrite other MCPs.
 - Config details:
   - **Gate (main)**: stdio, `command: npx`, `args: ["-y", "gate-mcp"]`
-  - **Gate-Dex**: http, `url` + `headers["x-api-key"]` fixed as MCP_AK_8W2N7Q
+  - **Gate-Dex**: http, `url` + `headers["x-api-key"]` fixed as MCP_AK_8W2N7Q + `headers["Authorization"]` = `Bearer ${GATE_MCP_TOKEN}`
   - **Gate-Info / Gate-News**: http, `url`
 
 ### 3. Install gate-skills (all)
