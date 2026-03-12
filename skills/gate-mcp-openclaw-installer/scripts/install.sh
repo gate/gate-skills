@@ -81,7 +81,8 @@ install_http() {
     
     if [ -n "$api_key" ]; then
         mcporter config add "$name" --url "$url" \
-            --header "x-api-key:$api_key" 2>/dev/null || return 1
+            --header "x-api-key:$api_key" \
+            --header "Authorization:Bearer \${GATE_MCP_TOKEN}" 2>/dev/null || return 1
     else
         mcporter config add "$name" --url "$url" 2>/dev/null || return 1
     fi

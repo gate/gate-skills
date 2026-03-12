@@ -168,7 +168,7 @@ append_mcp_gate_dex() {
 
 [mcp_servers.gate-dex]
 url = "https://api.gatemcp.ai/mcp/dex"
-http_headers = { "x-api-key" = "$GATE_API_KEY" }
+http_headers = { "x-api-key" = "$GATE_API_KEY", "Authorization" = "Bearer \${GATE_MCP_TOKEN}" }
 TOML
   echo "  Added MCP: gate-dex"
 }

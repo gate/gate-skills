@@ -112,7 +112,7 @@ mkdir -p "$(dirname "$SKILLS_DIR")"
 
 # Build mcpServers fragment (Claude Code format: stdio uses command/args, http uses type/url/headers)
 # main: prefer global gate-mcp (avoids npx ESM path resolution failures with @modelcontextprotocol/sdk)
-# dex/info/news: type http + url [+ headers]
+# dex/info/news: type http + url [+ headers]; dex includes Authorization Bearer token
 if [[ $MCP_MAIN -eq 1 ]] && command -v gate-mcp &>/dev/null; then
   GATE_MAIN_CMD="gate-mcp"
   GATE_MAIN_ARGS="[]"
@@ -133,7 +133,7 @@ if [[ $MCP_MAIN -eq 1 ]]; then
 fi
 if [[ $MCP_DEX -eq 1 ]]; then
   [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate-Dex\":{\"type\":\"http\",\"url\":\"https://api.gatemcp.ai/mcp/dex\",\"headers\":{\"x-api-key\":\"${GATE_API_KEY}\"}}"
+  ADD_JSON="${ADD_JSON}\"Gate-Dex\":{\"type\":\"http\",\"url\":\"https://api.gatemcp.ai/mcp/dex\",\"headers\":{\"x-api-key\":\"${GATE_API_KEY}\",\"Authorization\":\"Bearer \${GATE_MCP_TOKEN}\"}}"
   first=0
 fi
 if [[ $MCP_INFO -eq 1 ]]; then

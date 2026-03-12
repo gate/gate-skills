@@ -32,7 +32,7 @@ bash skills/gate-mcp-claude-installer/scripts/install.sh --mcp main --mcp info -
 | Component | Description |
 |-----------|-------------|
 | **Gate** | Main MCP, `npx -y gate-mcp`, [gate-mcp](https://github.com/gate/gate-mcp) |
-| **Gate-Dex** | https://api.gatemcp.ai/mcp/dex (x-api-key built-in) |
+| **Gate-Dex** | https://api.gatemcp.ai/mcp/dex (x-api-key built-in, Authorization: Bearer ${GATE_MCP_TOKEN}) |
 | **Gate-Info** | https://api.gatemcp.ai/mcp/info |
 | **Gate-News** | https://api.gatemcp.ai/mcp/news |
 | **gate-skills** | Cloned from [gate-skills](https://github.com/gate/gate-skills), installs all skills under `skills/` |

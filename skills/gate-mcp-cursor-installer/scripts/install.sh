@@ -111,7 +111,7 @@ mkdir -p "$(dirname "$MCP_JSON")"
 
 # Build mcpServers fragment to add (Bash 3 compatible)
 # main: prefer global gate-mcp (avoids npx ESM path resolution failures with @modelcontextprotocol/sdk)
-# dex: url + x-api-key header
+# dex: url + x-api-key header + Authorization Bearer token
 # info/news: url + streamable-http
 if [[ $MCP_MAIN -eq 1 ]] && command -v gate-mcp &>/dev/null; then
   GATE_MAIN_CMD="gate-mcp"
@@ -133,7 +133,7 @@ if [[ $MCP_MAIN -eq 1 ]]; then
 fi
 if [[ $MCP_DEX -eq 1 ]]; then
   [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate-Dex\":{\"url\":\"https://api.gatemcp.ai/mcp/dex\",\"transport\":\"streamable-http\",\"headers\":{\"x-api-key\":\"${GATE_API_KEY}\"}}"
+  ADD_JSON="${ADD_JSON}\"Gate-Dex\":{\"url\":\"https://api.gatemcp.ai/mcp/dex\",\"transport\":\"streamable-http\",\"headers\":{\"x-api-key\":\"${GATE_API_KEY}\",\"Authorization\":\"Bearer \${GATE_MCP_TOKEN}\"}}"
   first=0
 fi
 if [[ $MCP_INFO -eq 1 ]]; then
