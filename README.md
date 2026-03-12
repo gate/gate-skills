@@ -31,16 +31,25 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
-| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
+| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
+| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
+| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
+| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.12-1` | ✅ Active |
+| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.12-1` | ✅ Active |
+| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
+| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
+| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
+| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 
 ---
 
@@ -127,6 +136,132 @@ Gate DEX comprehensive wallet skill. Unified entry point for authentication, ass
 - `Transfer 0.1 ETH to 0x...`
 - `Connect my wallet to Uniswap`
 - `Sign this message`
+
+---
+
+## 🔍 gate-info-addresstracker
+
+> **Path**: `skills/gate-info-addresstracker/`
+
+On-chain address tracking and analysis. Fetches address profile, transaction history, and fund flow tracing. Supports basic queries and deep tracking modes across multiple chains.
+
+**Example Prompts**:
+- `Track this address 0x...`
+- `Who owns this address?`
+- `Show fund flow for bc1...`
+- `Check address activity`
+
+---
+
+## 📊 gate-info-coinanalysis
+
+> **Path**: `skills/gate-info-coinanalysis/`
+
+Single-coin comprehensive analysis. Fetches fundamentals, market data, technicals, news, and social sentiment in parallel, then generates a structured analysis report.
+
+**Example Prompts**:
+- `Analyze ETH`
+- `How is SOL doing?`
+- `Is BTC worth buying right now?`
+- `Give me a full analysis of DOGE`
+
+---
+
+## ⚖️ gate-info-coincompare
+
+> **Path**: `skills/gate-info-coincompare/`
+
+Multi-coin comparison (2–5 coins). Fetches market snapshots and fundamentals for each coin, then generates a multi-dimensional comparison table and summary.
+
+**Example Prompts**:
+- `Compare BTC vs ETH`
+- `Which is better: SOL or AVAX?`
+- `Compare BTC, ETH, SOL, and BNB`
+- `What's the difference between DOGE and SHIB?`
+
+---
+
+## 🌐 gate-info-marketoverview
+
+> **Path**: `skills/gate-info-marketoverview/`
+
+Crypto market overview. Fetches global market data, sector rankings, DeFi overview, upcoming events, and macro summary in parallel, then generates a market briefing report.
+
+**Example Prompts**:
+- `How is the market today?`
+- `Give me a market overview`
+- `What's happening in crypto?`
+- `Show me the overall market status`
+
+---
+
+## 🛡️ gate-info-riskcheck
+
+> **Path**: `skills/gate-info-riskcheck/`
+
+Token and contract risk assessment. Runs 30+ risk checks including honeypot detection, tax analysis, holder concentration, and naming risks. Generates a structured risk report.
+
+**Example Prompts**:
+- `Is this token safe? 0x...`
+- `Check contract risk for PEPE`
+- `Is this a honeypot?`
+- `Could this be a rug pull?`
+
+---
+
+## 📉 gate-info-trendanalysis
+
+> **Path**: `skills/gate-info-trendanalysis/`
+
+Trend and technical analysis. Fetches K-line data, indicator history, multi-timeframe signals, and market snapshots in parallel. Generates a multi-dimensional technical analysis report.
+
+**Example Prompts**:
+- `Technical analysis for BTC`
+- `Show me ETH RSI and MACD`
+- `What's the trend for SOL?`
+- `Check support and resistance levels for BNB`
+
+---
+
+## 📰 gate-news-briefing
+
+> **Path**: `skills/gate-news-briefing/`
+
+Crypto news briefing. Fetches major events, trending news, and social sentiment in parallel, then generates a layered news briefing report.
+
+**Example Prompts**:
+- `What happened in crypto recently?`
+- `Today's crypto highlights`
+- `Any new updates in the market?`
+- `Give me the latest crypto news`
+
+---
+
+## 💡 gate-news-eventexplain
+
+> **Path**: `skills/gate-news-eventexplain/`
+
+Event attribution and explanation. When users ask about price anomalies, traces event sources and combines market and on-chain data to generate an "Event → Impact Chain → Market Reaction" analysis report.
+
+**Example Prompts**:
+- `Why did BTC crash?`
+- `What just happened to ETH?`
+- `Why is SOL pumping?`
+- `What caused the DOGE dump?`
+
+---
+
+## 📋 gate-news-listing
+
+> **Path**: `skills/gate-news-listing/`
+
+Exchange listing/delisting tracker. Fetches exchange announcements for new listings, delistings, and maintenance, then supplements high-interest new coins with fundamentals and market data.
+
+**Example Prompts**:
+- `Any new coins listed recently?`
+- `What did Binance list this week?`
+- `Show me recent delistings`
+- `New token listings today`
 
 ---
 
@@ -443,6 +578,15 @@ gate-github-skills/
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
+    ├── gate-info-addresstracker/       # On-chain address tracking skill
+    ├── gate-info-coinanalysis/         # Single-coin analysis skill
+    ├── gate-info-coincompare/          # Multi-coin comparison skill
+    ├── gate-info-marketoverview/       # Market overview skill
+    ├── gate-info-riskcheck/            # Token risk assessment skill
+    ├── gate-info-trendanalysis/        # Trend & technical analysis skill
+    ├── gate-news-briefing/             # News briefing skill
+    ├── gate-news-eventexplain/         # Event explanation skill
+    ├── gate-news-listing/              # Listing/delisting tracker skill
     ├── gate-mcp-cursor-installer/      # Cursor MCP installer skill
     ├── gate-mcp-openclaw-installer/    # OpenClaw MCP installer skill
     ├── gate-mcp-claude-installer/      # Claude Code (Claude CLI) MCP + Skills installer
