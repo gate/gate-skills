@@ -15,7 +15,11 @@ Get started in seconds with our installer skills:
 - **Claude Code (Claude CLI) Users**: Use `gate-mcp-claude-installer` — one-click install all Gate MCP + Gate Skills
 - **Codex Users**: Use `gate-mcp-codex-installer` — one-click install all Gate MCP + Gate Skills
 
-Just say **"Help me auto install Gate Skills and MCPs：https://github.com/gate/gate-skills"** to your AI assistant, or run the install script directly.
+**Quick Start**: Just say to your AI assistant:
+
+> **"Help me auto install Gate Skills and MCPs: https://github.com/gate/gate-skills"**
+
+Or run the install script directly from the repository.
 
 ### Framework Compatibility
 
@@ -31,18 +35,12 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
 | [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.7-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.9-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
-| [gate-dex-mcpmarket](#-gate-dex-mcpmarket) | Gate Wallet DEX market data: K-line, transaction stats, liquidity, token info, rankings, security audit, new token discovery | `2026.3.5-1` | ✅ Active |
-| [gate-dex-mcpwallet](#-gate-dex-mcpwallet) | Gate Wallet portfolio assets and transaction history: balance, total assets, token holdings, transfer/swap history | `2026.3.6-1` | ✅ Active |
-| [gate-dex-mcpswap](#-gate-dex-mcpswap) | Gate Wallet Swap/DEX trading: get quotes, execute Swap across EVM and Solana | `2026.3.6-1` | ✅ Active |
-| [gate-dex-mcptransfer](#-gate-dex-mcptransfer) | Gate Wallet transfer execution: native and token transfers across EVM and Solana | `2026.3.5-1` | ✅ Active |
-| [gate-dex-mcpdapp](#-gate-dex-mcpdapp) | Gate Wallet DApp interaction: connect wallet, sign messages, execute DApp transactions, ERC20 Approve | `2026.3.5-1` | ✅ Active |
-| [gate-dex-mcpauth](#-gate-dex-mcpauth) | Gate Wallet authentication: Google OAuth login, session management | `2026.3.5-1` | ✅ Active |
 
 ---
 
@@ -129,90 +127,6 @@ Gate DEX comprehensive wallet skill. Unified entry point for authentication, ass
 - `Transfer 0.1 ETH to 0x...`
 - `Connect my wallet to Uniswap`
 - `Sign this message`
-
----
-
-## 🌐 gate-dex-mcpmarket
-
-> **Path**: `skills/gate-dex-mcpmarket/`
-
-Gate Wallet DEX market data — all read-only, no authentication required. Covers K-line, transaction stats, liquidity pools, token details, rankings, new token discovery, and contract security audit.
-
-**Example Prompts**:
-- `Show me the ETH K-line on the last 24h`
-- `What tokens are trending on BSC?`
-- `Check the security of contract 0x...`
-- `List newly launched tokens on ETH`
-
----
-
-## 💼 gate-dex-mcpwallet
-
-> **Path**: `skills/gate-dex-mcpwallet/`
-
-Gate Wallet portfolio assets and transaction history. Query balance, total assets, token holdings, wallet address, transfer history, transaction details, and Swap history. Supports EVM multi-chain and Solana.
-
-**Example Prompts**:
-- `How much ETH do I have?`
-- `Check my wallet balance and total assets`
-- `Show my transfer records`
-- `What is my Solana wallet address?`
-
----
-
-## 🔄 gate-dex-mcpswap
-
-> **Path**: `skills/gate-dex-mcpswap/`
-
-Gate Wallet Swap/DEX trading. Get quotes, execute Swap across EVM and Solana, and track Swap status. Includes mandatory three-step confirmation gate.
-
-**Example Prompts**:
-- `Swap 100 USDT for ETH`
-- `Exchange 1 SOL for USDC`
-- `Buy some PEPE with BNB`
-- `Cross-chain swap ETH to Solana SOL`
-
----
-
-## 💸 gate-dex-mcptransfer
-
-> **Path**: `skills/gate-dex-mcptransfer/`
-
-Gate Wallet transfer execution. Build transactions, sign, and broadcast. Supports EVM multi-chain and Solana native/token transfers with mandatory balance verification and confirmation gate.
-
-**Example Prompts**:
-- `Send 0.1 ETH to 0x...`
-- `Transfer 100 USDT on Polygon to 0x...`
-- `Send 5 SOL to my other wallet`
-- `Batch transfer USDC to these addresses`
-
----
-
-## 🔌 gate-dex-mcpdapp
-
-> **Path**: `skills/gate-dex-mcpdapp/`
-
-Gate Wallet interaction with external DApps. Connect wallet, sign messages (EIP-712/personal_sign), execute DApp transactions, and authorize ERC20 Approve. Includes security review.
-
-**Example Prompts**:
-- `Connect my wallet to Uniswap`
-- `Sign this EIP-712 message`
-- `Approve 1000 USDC for Aave`
-- `Add ETH-USDC liquidity on Uniswap`
-
----
-
-## 🔐 gate-dex-mcpauth
-
-> **Path**: `skills/gate-dex-mcpauth/`
-
-Gate Wallet authentication. Manage Google OAuth login, token refresh, and logout. Verifies MCP Server connection before operations.
-
-**Example Prompts**:
-- `Log in to my wallet`
-- `Sign in`
-- `Log out of my account`
-- `Refresh my session`
 
 ---
 
@@ -526,12 +440,6 @@ gate-github-skills/
     ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
     ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
     ├── gate-dex-wallet/                # DEX comprehensive wallet skill
-    ├── gate-dex-mcpauth/               # Wallet Auth skill
-    ├── gate-dex-mcpdapp/               # Wallet DApp interaction skill
-    ├── gate-dex-mcpmarket/             # Wallet DEX market data skill
-    ├── gate-dex-mcpswap/               # Wallet Swap/DEX trading skill
-    ├── gate-dex-mcptransfer/           # Wallet Transfer execution skill
-    ├── gate-dex-mcpwallet/             # Wallet Portfolio and History skill
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
@@ -586,4 +494,4 @@ We welcome contributions! To add a new skill:
 
 ## Disclaimer
 
-Gate Skills is an informational tool only. All outputs are provided on an "as is" and "as available" basis, without representation or warranty of any kind. It does not constitute investment, financial, trading, or any other form of advice, nor does it represent a recommendation to buy, sell, or hold any assets. All analysis is data-based and read-only — no trading operations are performed by these skills. Digital asset prices are subject to high market risk and price volatility. You are solely responsible for your investment decisions. Past performance is not a reliable predictor of future performance. Please consult an independent financial adviser prior to making any investment.
+Gate Skills is an informational tool only. All outputs are provided on an "as is" and "as available" basis, without representation or warranty of any kind. It does not constitute investment, financial, trading, or any other form of advice, nor does it represent a recommendation to buy, sell, or hold any assets. Digital asset prices are subject to high market risk and price volatility. You are solely responsible for your investment decisions. Past performance is not a reliable predictor of future performance. Please consult an independent financial adviser prior to making any investment.
