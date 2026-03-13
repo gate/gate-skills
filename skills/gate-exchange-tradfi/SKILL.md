@@ -3,6 +3,7 @@ name: gate-exchange-tradfi
 version: "2026.3.13-6"
 updated: "2026-03-13"
 description: "Gate TradFi (traditional finance) read-only query skill using MCP tools prefixed with cex_tradfi. Use this skill whenever the user asks to query TradFi order list, order history, current or historical positions, category list, symbol list, ticker, symbol kline, user assets, or MT5 account info on Gate. Trigger phrases include 'TradFi orders', 'order history', 'positions', 'position history', 'category list', 'symbol list', 'ticker', 'kline', 'my assets', 'MT5 account', or any request to view TradFi data. Do not use for placing orders or transferring funds."
+---
 
 # Gate TradFi Query Suite
 
