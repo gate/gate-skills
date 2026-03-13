@@ -31,6 +31,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 
 | Skill | 描述 | 版本 | 状态 |
 |-------|------|------|------|
+| [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi（传统金融）只读查询：订单、持仓、行情、资产与 MT5 账户信息 | `2026.3.13-6` | ✅ Active |
 | [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn（活期理财）：持仓、利息、Top APY 利率查询（不支持申购/赎回） | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate 交易所联盟/合伙人计划：佣金、交易量、净手续费、客户数、交易用户数查询与申请指引 | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate 统一账户：权益、借还、借贷与利息、模式切换、杠杆与抵押币 | `2026.3.13-4` | ✅ Active |
@@ -175,6 +176,21 @@ Gate Simple Earn（活期理财）只读查询：支持单币/全量持仓、单
 - `我累计赚了多少 USDT 利息？`
 - `哪个币种的 Simple Earn APY 最高？`
 - `申购 100 USDT 到 Simple Earn`（将回复暂不支持）
+
+---
+
+## 🏦 gate-exchange-tradfi
+
+> **路径**: `skills/gate-exchange-tradfi/`
+
+Gate TradFi（传统金融）只读查询技能：支持订单、持仓、行情、资产与 MT5 账户信息查询。本 skill 不执行下单、撤单或资金划转。
+
+**示例提示词**：
+- `我的 TradFi 挂单`
+- `显示我的持仓历史`
+- `TradFi 分类列表`
+- `查询 EURUSD 的 ticker`
+- `显示我的 MT5 账户信息`
 
 ---
 
@@ -694,6 +710,7 @@ gate-github-skills/
     ├── gate-exchange-simpleearn/       # Simple Earn（活期理财）查询：持仓、利息、利率（只读）
     ├── gate-exchange-staking/          # 理财/质押查询（只读）
     ├── gate-exchange-subaccount/      # 子账户管理：列表、创建、锁定/解锁
+    ├── gate-exchange-tradfi/           # TradFi 查询：订单、持仓、行情、资产、MT5（只读）
     ├── gate-exchange-unified/          # 统一账户：借还、杠杆、抵押币
     ├── gate-info-addresstracker/       # 链上地址追踪 skill
     ├── gate-info-coinanalysis/         # 单币种分析 skill
