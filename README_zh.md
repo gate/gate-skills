@@ -31,6 +31,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 | Skill | 描述 | 版本 | 状态 |
 |-------|------|------|------|
+| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate 交易所联盟/合伙人计划：佣金、交易量、净手续费、客户数、交易用户数查询与申请指引 | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate 统一账户：权益、借还、借贷与利息、模式切换、杠杆与抵押币 | `2026.3.13-4` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate 交易所资产查询：总资产、现货持仓、账户估值、账户流水（只读） | `2026.3.12-3` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | 单币种综合分析：基本面、技术面、新闻、社交情绪 | `2026.3.12-2` | ✅ Active |
@@ -55,6 +56,23 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate 现货交易：买卖下单、订单管理、账户查询、资产兑换 | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX 综合钱包：身份认证、资产查询、转账执行、DApp 交互 | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
+
+---
+
+## 🤝 gate-exchange-affiliate
+
+> **路径**: `skills/gate-exchange-affiliate/`
+
+Gate 交易所联盟/合伙人计划数据查询与管理：佣金追踪、团队表现分析、申请指引。支持单次最多 30 天、合计最多 180 天的历史查询（超 30 天时由 Agent 自动拆分请求）。需合伙人权限认证。
+
+**示例提示词**：
+- `我的联盟数据`
+- `本周佣金`
+- `合伙人收益`
+- `团队表现`
+- `客户交易量`
+- `返佣收入`
+- `申请联盟计划`
 
 ---
 
