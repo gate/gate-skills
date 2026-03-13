@@ -1,5 +1,7 @@
 ---
 name: gate-mcp-openclaw-installer
+version: "2026.3.10-1"
+updated: "2026-03-10"
 description: One-click installer for all Gate.com MCP servers including spot/futures trading, DEX, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
 ---
 

@@ -1,5 +1,7 @@
 ---
 name: gate-mcp-cursor-installer
+version: "2026.3.10-1"
+updated: "2026-03-10"
 description: One-click installer for Gate MCP and Skills in Cursor. Installs Gate MCP servers (main/dex/info/news, selectable) and all skills from the gate-skills repository. Installs all MCPs + all skills by default; skills are always fully installed.
 ---
 
