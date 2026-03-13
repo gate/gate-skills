@@ -31,6 +31,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
+| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
@@ -55,6 +56,23 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+
+---
+
+## 🤝 gate-exchange-affiliate
+
+> **Path**: `skills/gate-exchange-affiliate/`
+
+Gate Exchange affiliate/partner program data query and management: commission tracking, team performance analysis, and application guidance. Supports up to 30 days per request and up to 180 days total (agent splits requests when >30 days). Requires partner-privilege authentication.
+
+**Example Prompts**:
+- `Show my affiliate data`
+- `Commission this week`
+- `Partner earnings`
+- `Team performance`
+- `Customer trading volume`
+- `Rebate income`
+- `Apply for affiliate program`
 
 ---
 
