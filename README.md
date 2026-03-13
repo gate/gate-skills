@@ -31,6 +31,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
+| [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi (traditional finance) read-only queries: orders, positions, market data, assets and MT5 account info | `2026.3.13-6` | ✅ Active |
 | [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
@@ -175,6 +176,21 @@ Gate Simple Earn (Uni) flexible earn read operations: query single/all positions
 - `How much USDT interest have I earned?`
 - `Which Simple Earn currency has the top APY?`
 - `Subscribe 100 USDT to Simple Earn` (will reply not supported)
+
+---
+
+## 🏦 gate-exchange-tradfi
+
+> **Path**: `skills/gate-exchange-tradfi/`
+
+Gate TradFi (traditional finance) read-only query skill for orders, positions, market data, assets, and MT5 account information. This skill does not place/cancel orders or transfer funds.
+
+**Example Prompts**:
+- `My TradFi open orders`
+- `Show my position history`
+- `TradFi category list`
+- `Ticker for EURUSD`
+- `Show my MT5 account info`
 
 ---
 
@@ -694,6 +710,7 @@ gate-github-skills/
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
     ├── gate-exchange-subaccount/      # Sub-account management: list, create, lock/unlock
+    ├── gate-exchange-tradfi/           # TradFi query: orders, positions, market, assets, MT5 (read-only)
     ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
