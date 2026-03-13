@@ -2,9 +2,9 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gate.com 的加密生态。从市场分析、衍生品监控到一键 MCP 配置，全部可通过自然语言完成。
+Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gate 的加密生态。从市场分析、衍生品监控到一键 MCP 配置，全部可通过自然语言完成。
 
-由 gate.com 构建，为加密社区而生。
+由 Gate 构建，为加密社区而生。
 
 ### 一键安装
 
@@ -23,7 +23,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 ### 框架兼容性
 
-这些 skills 设计为可兼容任意 AI Agent 框架。无论你使用 Cursor、OpenClaw，还是自研 Agent 栈，都可以通过最少配置接入 gate.com 的加密智能能力。
+这些 skills 设计为可兼容任意 AI Agent 框架。无论你使用 Cursor、OpenClaw，还是自研 Agent 栈，都可以通过最少配置接入 Gate 的加密智能能力。
 
 ---
 

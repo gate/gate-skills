@@ -2,9 +2,9 @@
 
 [English](README.md) | [中文](README_zh.md)
 
-Gate Skills is an open skills marketplace that empowers AI agents with native access to gate.com's cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
+Gate Skills is an open skills marketplace that empowers AI agents with native access to Gate cryptocurrency ecosystem. From market analysis and derivatives monitoring to one-click MCP setup — all through natural language.
 
-Built by gate.com. Built for the crypto community.
+Built by Gate. Built for the crypto community.
 
 ### One-Click Installation
 
@@ -23,7 +23,7 @@ Or run the install script directly from the repository.
 
 ### Framework Compatibility
 
-These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into gate.com's crypto intelligence with minimal configuration.
+These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into Gate crypto intelligence with minimal configuration.
 
 ---
 
@@ -52,7 +52,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
@@ -377,7 +377,7 @@ bash scripts/install.sh
 
 > **Path**: `skills/gate-mcp-openclaw-installer/`
 
-Complete Gate.com MCP server installer for OpenClaw. Supports spot/futures trading, wallet, market info, and news servers.
+Complete Gate MCP server installer for OpenClaw. Supports spot/futures trading, wallet, market info, and news servers.
 
 **Quick Start**:
 ```bash
