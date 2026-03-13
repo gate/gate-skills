@@ -31,7 +31,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee query: spot/futures maker-taker rates (read-only) | `2026.3.11-2` | ✅ Active |
+| [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock sub-accounts | `2026.3.12-1` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
@@ -57,17 +57,17 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 ---
 
-## 🏷️ gate-exchange-vipfee
+## 👥 gate-exchange-subaccount
 
-> **Path**: `skills/gate-exchange-vipfee/`
+> **Path**: `skills/gate-exchange-subaccount/`
 
-Read-only query for Gate VIP tier and trading fee rates (spot and futures maker/taker). No account changes.
+Sub-account management on Gate Exchange: query status by UID, list all sub-accounts, create new sub-accounts, lock and unlock sub-accounts. Write operations require explicit user confirmation.
 
 **Example Prompts**:
-- `What is my VIP level?`
-- `Check my trading fees`
-- `Show me spot and futures fees`
-- `What is my VIP level and fee rate?`
+- `What is the status of sub-account UID 123456?`
+- `Show me all my sub-accounts`
+- `Create a new sub-account`
+- `Lock sub-account UID 123456` / `Unlock sub-account UID 123456`
 
 ---
 
@@ -642,7 +642,7 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
-    ├── gate-exchange-vipfee/           # VIP tier & fee rate query (read-only)
+    ├── gate-exchange-subaccount/       # Sub-account management
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill

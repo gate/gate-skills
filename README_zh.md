@@ -31,7 +31,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 | Skill | 描述 | 版本 | 状态 |
 |-------|------|------|------|
-| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP 等级与交易手续费查询：现货/合约 maker-taker 费率（只读） | `2026.3.11-2` | ✅ Active |
+| [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate 子账户管理：查询状态、列表、创建、锁定/解锁子账户 | `2026.3.12-1` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | 单币种综合分析：基本面、技术面、新闻、社交情绪 | `2026.3.12-2` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | 链上地址追踪：地址画像、交易历史、资金流向分析 | `2026.3.12-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | 多币种对比：多维度对比表与总结 | `2026.3.12-1` | ✅ Active |
@@ -57,17 +57,17 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 gat
 
 ---
 
-## 🏷️ gate-exchange-vipfee
+## 👥 gate-exchange-subaccount
 
-> **路径**: `skills/gate-exchange-vipfee/`
+> **路径**: `skills/gate-exchange-subaccount/`
 
-只读查询 Gate VIP 等级与交易手续费（现货、合约 maker/taker）。不修改账户。
+Gate 交易所子账户管理：按 UID 查询状态、列出全部子账户、创建子账户、锁定/解锁子账户。写操作需用户明确确认。
 
 **示例提示词**：
-- `我的 VIP 等级是多少？`
-- `查一下我的交易手续费`
-- `显示现货和合约手续费`
-- `我的 VIP 等级和费率是多少？`
+- `子账户 UID 123456 的状态是什么？`
+- `显示我所有的子账户`
+- `创建一个新的子账户`
+- `锁定子账户 UID 123456` / `解锁子账户 UID 123456`
 
 ---
 
@@ -642,7 +642,7 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # 市场盘口分析 skill
     ├── gate-exchange-spot/             # 现货交易 skill
     ├── gate-exchange-staking/          # 理财/质押查询（只读）
-    ├── gate-exchange-vipfee/           # VIP 等级与手续费查询（只读）
+    ├── gate-exchange-subaccount/       # 子账户管理
     ├── gate-info-addresstracker/       # 链上地址追踪 skill
     ├── gate-info-coinanalysis/         # 单币种分析 skill
     ├── gate-info-coincompare/          # 多币种对比 skill
