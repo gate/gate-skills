@@ -1,5 +1,7 @@
 ---
 name: gate-mcp-claude-installer
+version: "2026.3.11-1"
+updated: "2026-03-11"
 description: One-click installer for Gate MCP and all Gate Skills in Claude Code (Claude CLI). Installs Gate MCP servers (main/dex/info/news, selectable) and all skills from the gate-skills repository. Installs all MCPs + all skills by default; skills are always fully installed.
 ---
 

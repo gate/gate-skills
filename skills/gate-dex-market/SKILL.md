@@ -1,5 +1,7 @@
 ---
 name: gate-dex-market
+version: "2026.3.12-1"
+updated: "2026-03-12"
 description: "Gate DEX market data skill. Uses AK/SK authentication to call Gate DEX OpenAPI, providing token and market quote read-only queries. Use when users mention quotes, prices, token information, rankings, security audits."
 ---
 

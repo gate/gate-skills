@@ -1,5 +1,7 @@
 ---
 name: gate-dex-trade
+version: "2026.3.12-1"
+updated: "2026-03-12"
 description: "Gate DEX trading comprehensive skill. Supports MCP and OpenAPI dual modes: MCP mode calls through gate-wallet service (requires authentication), OpenAPI mode calls directly through AK/SK. Use when users mention swap, exchange, buy, sell, quote, trade. Automatically select the most suitable calling method based on environment."
 ---
 
