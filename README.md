@@ -31,8 +31,12 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock sub-accounts | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
+| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
+| [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
 | [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
@@ -51,23 +55,6 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
-| [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
-
----
-
-## 👥 gate-exchange-subaccount
-
-> **Path**: `skills/gate-exchange-subaccount/`
-
-Sub-account management on Gate Exchange: query status by UID, list all sub-accounts, create new sub-accounts, lock and unlock sub-accounts. Write operations require explicit user confirmation.
-
-**Example Prompts**:
-- `What is the status of sub-account UID 123456?`
-- `Show me all my sub-accounts`
-- `Create a new sub-account`
-- `Lock sub-account UID 123456` / `Unlock sub-account UID 123456`
 
 ---
 
@@ -154,6 +141,35 @@ Staking (earn) query on Gate: positions, rewards, product discovery, and order h
 - `What are my staking rewards?`
 - `Find BTC staking products`
 - `Show staking history`
+
+---
+
+## 🔗 gate-exchange-unified
+
+> **Path**: `skills/gate-exchange-unified/`
+
+Gate unified account: account overview & mode, borrow/repay, loan & interest records, transferable limits, leverage and collateral settings. Mutation actions require explicit user confirmation.
+
+**Example Prompts**:
+- `Query my unified account total equity and current mode`
+- `How much USDT can I borrow?`
+- `Borrow 200 USDT — check max borrowable first`
+- `Repay all my BTC loan`
+- `Set my ETH leverage to 5x`
+
+---
+
+## 👥 gate-exchange-subaccount
+
+> **Path**: `skills/gate-exchange-subaccount/`
+
+Sub-account management on Gate Exchange: query status by UID, list all sub-accounts, create sub-account, lock/unlock. Write operations require explicit user confirmation.
+
+**Example Prompts**:
+- `Show me all my sub-accounts`
+- `What is the status of sub-account UID 123456?`
+- `Create a new sub-account`
+- `Lock sub-account UID 123456`
 
 ---
 
@@ -642,7 +658,8 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
-    ├── gate-exchange-subaccount/       # Sub-account management
+    ├── gate-exchange-subaccount/      # Sub-account management: list, create, lock/unlock
+    ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill

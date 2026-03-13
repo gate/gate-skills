@@ -1,16 +1,21 @@
+## General Rules
+Read and follow the shared runtime rules before proceeding:
+→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+---
 ---
 name: gate-exchange-spot
-version: "2026.3.10-1"
-updated: "2026-03-10"
-description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
+version: "2026.3.12-1"
+updated: "2026-03-12"
+description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, place trigger or TP/SL-style spot price orders, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'trigger order', 'take profit', 'stop loss', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
 ---
 
 # Gate Spot Trading Assistant
 
 Execute integrated operations for Gate spot workflows, including:
 - Buy and account queries (balance checks, asset valuation, minimum order checks)
-- Smart monitoring and trading (automatic price-condition limit orders, no take-profit/stop-loss support)
+- Smart monitoring and trading (automatic price-condition orders and trigger-order workflows)
 - Order management and amendment (price updates, cancellations, fill verification, cost-basis checks, swaps)
+- Trigger-order and TP/SL-style automation (create/query/cancel trigger orders, progress checks, single/batch cancellations)
 - Advanced execution utilities (batch cancel, batch amend, batch order placement, slippage simulation, fee comparison, account-book checks)
 
 ## Domain Knowledge
@@ -21,6 +26,7 @@ Execute integrated operations for Gate spot workflows, including:
 |------|------|
 | Account and balances | `cex_spot_get_spot_accounts`, `cex_spot_list_spot_account_book` |
 | Place/cancel/amend orders | `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, `cex_spot_cancel_all_spot_orders`, `cex_spot_cancel_spot_order`, `cex_spot_cancel_spot_batch_orders`, `cex_spot_amend_spot_order`, `cex_spot_amend_spot_batch_orders` |
+| Trigger orders (price orders) | `cex_spot_create_spot_price_triggered_order`, `cex_spot_list_spot_price_triggered_orders`, `cex_spot_get_spot_price_triggered_order`, `cex_spot_cancel_spot_price_triggered_order`, `cex_spot_cancel_spot_price_triggered_order_list` |
 | Open orders and fills | `cex_spot_list_spot_orders`, `cex_spot_list_spot_my_trades` |
 | Market data | `cex_spot_get_spot_tickers`, `cex_spot_get_spot_order_book`, `cex_spot_get_spot_candlesticks` |
 | Trading rules | `cex_spot_get_currency`, `cex_spot_get_currency_pair` |
@@ -32,8 +38,8 @@ Execute integrated operations for Gate spot workflows, including:
 - Check quote-currency balance first before buy orders (for example USDT).
 - Amount-based buys must satisfy `min_quote_amount` (commonly 10U).
 - Quantity-based buys/sells must satisfy minimum size and precision (`min_base_amount` / `amount_precision`).
-- Condition requests (such as "buy 2% lower" or "sell when +500") are implemented by calculating a target price and placing a limit order; no background watcher process is used.
-- Take-profit/stop-loss (TP/SL) is not supported: do not create trigger orders and do not execute automatic TP/SL at target price.
+- Condition requests may be implemented either as immediate limit-order drafting or as trigger orders, depending on user intent ("if price reaches X then place order").
+- Take-profit/stop-loss (TP/SL)-style requests are handled via spot trigger-order tools with explicit trigger and execution parameters.
 
 ### Market Order Parameter Extraction Rules (Mandatory)
 
@@ -83,7 +89,7 @@ Pre-check order:
 
 ### Step 3: Final User Confirmation Before Any Order Placement (Mandatory)
 
-Before every `cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders`, always provide an **Order Draft** first, then wait for explicit confirmation.
+Before every `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_create_spot_price_triggered_order`, always provide an **Order Draft** first, then wait for explicit confirmation.
 
 Required execution flow:
 1. Send order draft (no trading call yet)
@@ -107,9 +113,9 @@ Allowed confirmation responses (examples):
 - `Confirm order`, `Confirm`, `Proceed`, `Yes, place it`
 
 Hard blocking rules (non-bypassable):
-- NEVER call `cex_spot_create_spot_order` unless the user explicitly confirms in the immediately previous turn.
+- NEVER call `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_create_spot_price_triggered_order` unless the user explicitly confirms in the immediately previous turn.
 - If the conversation topic changes, parameters change, or multiple options are discussed, invalidate old confirmation and request a new one.
-- For multi-leg execution (for example case 15/22), require confirmation for each leg separately before each `cex_spot_create_spot_order`.
+- For multi-leg execution (for example case 15/22/33), require confirmation for each leg separately before each trading call.
 
 If user confirmation is missing, ambiguous, or negative:
 - do not place the order
@@ -123,6 +129,7 @@ Use only the minimal tool set required for the task:
 - Rule validation: `cex_spot_get_currency_pair`
 - Live price and moves: `cex_spot_get_spot_tickers`
 - Order placement: `cex_spot_create_spot_order` / `cex_spot_create_spot_batch_orders`
+- Trigger-order placement/query/cancel: `cex_spot_create_spot_price_triggered_order` / `cex_spot_list_spot_price_triggered_orders` / `cex_spot_get_spot_price_triggered_order` / `cex_spot_cancel_spot_price_triggered_order` / `cex_spot_cancel_spot_price_triggered_order_list`
 - Cancel/amend: `cex_spot_cancel_all_spot_orders` / `cex_spot_cancel_spot_order` / `cex_spot_cancel_spot_batch_orders` / `cex_spot_amend_spot_order` / `cex_spot_amend_spot_batch_orders`
 - Open order query: `cex_spot_list_spot_orders` (use `status=open`)
 - Fill verification: `cex_spot_list_spot_my_trades`
@@ -136,7 +143,7 @@ The response must include:
 - Core numbers (price, quantity, amount, balance change)
 - If condition not met, clearly explain why no order is placed now
 
-## Case Routing Map (1-31)
+## Case Routing Map (1-36)
 
 ### A. Buy and Account Queries (1-8)
 
@@ -189,6 +196,16 @@ The response must include:
 | 30 | Account-book audit + current balance | Show recent ledger changes for a coin and current remaining balance | `cex_spot_list_spot_account_book` → `cex_spot_get_spot_accounts` |
 | 31 | Batch amend open buy orders by +1% | Filter open orders by pair, select up to 5 target buy orders, reprice and batch amend after user verification | `cex_spot_list_spot_orders`(status=open) → `cex_spot_amend_spot_batch_orders` |
 
+### E. Trigger Orders and TP/SL Automation (32-36)
+
+| Case | User Intent | Core Decision | Tool Sequence |
+|------|----------|----------|----------|
+| 32 | Conditional buy trigger order | Read current BTC price, compute 5% drop trigger, place buy trigger after confirmation | `cex_spot_get_spot_tickers` → `cex_spot_create_spot_price_triggered_order` |
+| 33 | Dual TP/SL trigger placement | Check ETH available balance, build TP and SL trigger legs, confirm then place both | `cex_spot_get_spot_accounts` → `cex_spot_create_spot_price_triggered_order` → `cex_spot_create_spot_price_triggered_order` |
+| 34 | Single trigger order progress query | Read trigger-order detail and compare against live market price to compute distance to trigger | `cex_spot_get_spot_price_triggered_order` → `cex_spot_get_spot_tickers` |
+| 35 | Batch cancel BTC buy trigger orders | List open trigger orders, filter BTC buy side, confirm scope, then batch cancel | `cex_spot_list_spot_price_triggered_orders`(status=open) → `cex_spot_cancel_spot_price_triggered_order_list` |
+| 36 | Single trigger/TP-SL order cancel | Verify one target trigger order is active, then cancel after confirmation | `cex_spot_get_spot_price_triggered_order` → `cex_spot_cancel_spot_price_triggered_order` |
+
 ## Judgment Logic Summary
 
 | Condition | Action |
@@ -198,7 +215,7 @@ The response must include:
 | User asks for fastest fill at current market | Prefer `market`; if "fast limit" is requested, use best book price |
 | Market buy (`buy`) | Fill `amount` with USDT quote amount, not base quantity |
 | Market sell (`sell`) | Fill `amount` with base-coin quantity, not USDT amount |
-| User requests take-profit/stop-loss | Clearly state TP/SL is not supported; provide manual limit alternative |
+| User requests take-profit/stop-loss | Use trigger-order workflow: validate position size, draft TP+SL legs, then place after explicit confirmation |
 | Any order placement request | Require explicit final user confirmation before `cex_spot_create_spot_order` |
 | User has not replied with clear confirmation | Keep order as draft; no trading execution |
 | Confirmation is stale or not from the immediately previous turn | Invalidate it and require a fresh confirmation |
@@ -207,6 +224,9 @@ The response must include:
 | Multiple open buy orders match amendment request | Ask user to choose which order to amend before executing |
 | User requests selected-order batch cancellation | Verify each order id exists/open, present list, and run `cex_spot_cancel_spot_batch_orders` only after user verification |
 | User requests batch amend for open orders | Filter target pair open buy orders (max 5), compute repriced levels, and run `cex_spot_amend_spot_batch_orders` only after user verification |
+| User requests trigger-order progress | Read one trigger order and compare current ticker price to trigger condition; return numeric distance |
+| User requests trigger-order batch cancellation | Filter trigger orders by pair+side, present cancellation scope, then call `cex_spot_cancel_spot_price_triggered_order_list` after confirmation |
+| User requests single trigger-order cancellation | Verify order is active/matching intent, then call `cex_spot_cancel_spot_price_triggered_order` after confirmation |
 | User requests market slippage simulation | Use order-book depth simulation and compare weighted fill vs ticker last price |
 | User requests multi-coin one-click buy | Validate summed quote requirement, then use `cex_spot_create_spot_batch_orders` |
 | User requests fee comparison for multiple pairs | Use `cex_spot_get_spot_batch_fee` and convert to cost impact with latest prices |
@@ -243,10 +263,10 @@ Example `decision_text`:
 |----------|----------|----------|
 | Insufficient balance | Not enough available USDT/coins | Return shortfall and suggest reducing order size |
 | Minimum trade constraint | Below minimum amount/size | Return threshold and suggest increasing order size |
-| Unsupported capability | User asks for TP/SL | Clearly state unsupported, propose manual limit-order workflow |
+| Trigger-order parameter mismatch | Trigger rule/price/side is inconsistent with user intent | Return normalized trigger draft and require user reconfirmation |
 | Missing final confirmation | User has not clearly approved final order summary | Keep order pending and request explicit confirmation |
 | Stale confirmation | Confirmation does not match the current draft or is not in the previous turn | Reject execution and ask for reconfirmation |
-| Draft-only mode | User has not confirmed yet | Only run query/estimation tools; do not call `cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders` |
+| Draft-only mode | User has not confirmed yet | Only run query/estimation tools; do not call `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_create_spot_price_triggered_order` |
 | Ambiguous amendment target | Multiple candidate open buy orders | Keep pending and ask user to confirm order ID/row |
 | Batch-cancel ambiguity | Some requested order ids are missing/not-open | Return matched vs unmatched ids and request reconfirmation |
 | Batch-amend ambiguity | Candidate order set is unclear or exceeds max selection | Ask user to confirm exact order ids (up to 5) before execution |

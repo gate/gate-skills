@@ -1,4 +1,4 @@
-# Gate Exchange Spot
+# Gate Spot Exchange Skill
 
 ## Overview
 
@@ -8,6 +8,7 @@ An integrated execution skill for Gate spot trading, covering buy/sell actions, 
 
 - Buy and account queries (balance checks, full-balance buy, asset valuation, minimum order checks)
 - Smart monitoring and trading (place limit orders by percentage/fixed price spread)
+- Trigger and TP/SL automation (price-triggered placement, dual-leg TP/SL setup, trigger progress checks, and single/batch trigger cancellations)
 - Order management and amendments (list open orders, amend orders, cancel orders)
 - Post-trade verification (trade history + current holdings reconciliation)
 - Combined actions (buy then place sell order, sell then rebuy for asset swap)
@@ -15,7 +16,7 @@ An integrated execution skill for Gate spot trading, covering buy/sell actions, 
 
 ## Execution Guardrail (Mandatory)
 
-Before any real trading action (`cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders`), the assistant must:
+Before any real trading action (`cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_create_spot_price_triggered_order`), the assistant must:
 
 1. Send an **Order Draft** first (pair, side, type, amount/value, estimated fill/cost, risk note)
 2. Wait for explicit user confirmation (for example: `Confirm order`, `Confirm`, `Proceed`)
@@ -24,7 +25,7 @@ Before any real trading action (`cex_spot_create_spot_order` or `cex_spot_create
 If confirmation is missing or ambiguous, the assistant must stay in query/estimation mode and must not execute trading.
 
 Hard gate rules:
-- NEVER call `cex_spot_create_spot_order` or `cex_spot_create_spot_batch_orders` without explicit confirmation in the immediately previous user turn.
+- NEVER call `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders`, or `cex_spot_create_spot_price_triggered_order` without explicit confirmation in the immediately previous user turn.
 - Any parameter/topic change invalidates old confirmation and requires a new draft + reconfirmation.
 - For multi-leg actions, require per-leg confirmation before each order placement.
 
