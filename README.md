@@ -31,6 +31,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
+| [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
@@ -159,6 +160,21 @@ Staking (earn) query on Gate: positions, rewards, product discovery, and order h
 - `What are my staking rewards?`
 - `Find BTC staking products`
 - `Show staking history`
+
+---
+
+## 💸 gate-exchange-simpleearn
+
+> **Path**: `skills/gate-exchange-simpleearn/`
+
+Gate Simple Earn (Uni) flexible earn read operations: query single/all positions, single-currency interest, and top APY rate data. Subscribe and redeem APIs are currently disabled in this skill.
+
+**Example Prompts**:
+- `My USDT Simple Earn position`
+- `Show all Simple Earn positions`
+- `How much USDT interest have I earned?`
+- `Which Simple Earn currency has the top APY?`
+- `Subscribe 100 USDT to Simple Earn` (will reply not supported)
 
 ---
 
@@ -675,6 +691,7 @@ gate-github-skills/
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
+    ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
     ├── gate-exchange-subaccount/      # Sub-account management: list, create, lock/unlock
     ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
