@@ -16,6 +16,9 @@ This document defines the **MCP call order, parameters, required fields, and out
 | 8 | Slippage simulation | Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_tickers |
 | 9 | K-line breakout / support–resistance | cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers (spot); cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers (futures) |
 | 10 | Liquidity + weekend vs weekday | cex_spot_get_spot_order_book → cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers (spot); cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers (futures) |
+| 11 | Technical analysis / what to do (short + long timeframe, support/resistance, momentum, funding) | Spot: cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_funding_rate (query both timeframes, give separate advice) |
+| 12 | Multi-asset buy analysis & allocation | Per asset: cex_spot_get_spot_candlesticks(7d) → cex_spot_get_spot_tickers → cex_spot_get_spot_order_book; futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_order_book → cex_fx_get_fx_funding_rate |
+| 13 | Portfolio allocation review & adjustment | Same as Case 12: spot ticker + order book + 7d daily; futures add funding rate |
 
 ---
 
@@ -1023,3 +1026,222 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 **Expected behavior**:
 1. Detect "perpetual" or "contract" and use **futures** MCP: `cex_fx_get_fx_contract`(settle=usdt, contract=ETH_USDT) → `cex_fx_get_fx_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `cex_fx_get_fx_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `cex_fx_get_fx_tickers`(settle=usdt, contract=ETH_USDT).
 2. Use `quanto_multiplier` from contract to interpret order book depth in notional; same logic: order book for current depth; 90d candlesticks split weekend vs weekday for volume and return; output same structure with futures data.
+
+---
+
+## Case 11: Technical Analysis — What to Do (Short + Long Timeframe, Support/Resistance, Momentum, Funding)
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "Technical analysis: what should I do with BTC now?", "Should I go long or short at current level?", "Give me a trading recommendation based on technicals."
+
+**API choice**: Use **spot** and **futures** (query both); spot for price and volume, futures add funding rate for long/short bias. Query short and long timeframes; give separate advice per timeframe.
+
+| Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
+|------|-----------------|--------------------|------------|-----------------|
+| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. Short & long: `interval=4h` and `1d`, `limit=30–90` | OHLC; volume; support/resistance (recent highs/lows); trend structure |
+| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; compare to history for momentum |
+| 3 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate; positive → long cost high / short bias; negative → short cost high / long bias |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **Support/resistance**: From historical candlesticks (short and long timeframe) identify recent highs, lows, consolidation bounds; assess current price level.
+- **Momentum**: Compare current price and 24h volume to past (e.g. 7d/30d average); volume–price confirmation, volume breakout / low-volume pullback.
+- **Long/short bias**: Funding rate sign and size; high positive → long crowding, cautious or contrarian; high negative → short crowding, bias long.
+- **Short vs long timeframe**: Query both (e.g. 4h and 1d); give short-term action from short timeframe and trend/key levels from long timeframe.
+
+**Output**: Must include "K-line & key levels" (both timeframes), "Momentum" (current price, 24h volume vs past), "Funding & long/short" (futures only), "Short-term advice" and "Long-term advice".
+
+---
+
+### Scenario 11.1: Technical analysis — what to do (e.g. BTC)
+
+**Context**: User wants a technical-based recommendation for a pair (e.g. BTC): long/short/wait, short and long timeframe.
+
+**Prompt examples**:
+- "Technical analysis: what should I do with BTC now?"
+
+**Expected behavior**:
+1. **Spot**: Call per **MCP Call Spec**: `cex_spot_get_spot_candlesticks`(BTC_USDT, interval=4h and 1d, limit=30–90 each) → `cex_spot_get_spot_tickers`(BTC_USDT).
+2. **Futures**: Call per **MCP Call Spec**: `cex_fx_get_fx_candlesticks`(settle=usdt, contract=BTC_USDT, same timeframes) → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_funding_rate`(contract=BTC_USDT).
+3. From candlesticks: derive support/resistance; from ticker: current price, 24h volume, change; compare to history for momentum; from funding_rate: long/short bias.
+4. Output: K-line context + key levels (both timeframes) + momentum conclusion + funding long/short conclusion + short-term recommendation + long-term recommendation per Report Template.
+
+**Output**:
+```markdown
+## BTC Technical Analysis — Current Recommendation
+
+### K-line & key levels (short & long timeframe)
+
+| Timeframe | Support (approx) | Resistance (approx) | Note |
+|-----------|------------------|----------------------|------|
+| 4h        | $XX,XXX          | $XX,XXX              | Short-term structure |
+| 1d        | $XX,XXX          | $XX,XXX              | Trend & key levels |
+
+### Momentum (current price vs 24h volume vs past)
+
+| Metric        | Value   | Vs past |
+|---------------|--------|---------|
+| Current price | $XX,XXX | - |
+| 24h volume    | $X.XB  | Above/below 7d avg |
+| 24h change    | ±X.XX% | - |
+
+Conclusion: Volume–price [aligned/divergent]; momentum [bullish/bearish/neutral].
+
+### Funding & long/short (futures)
+
+| Contract  | Funding rate | Long/short read |
+|-----------|--------------|-----------------|
+| BTC_USDT  | ±0.0X%       | Long/short cost elevated; short/long bias |
+
+### Short-term advice (e.g. 4h)
+
+[Based on short-term support/resistance and momentum: e.g. near support consider buying, near resistance reduce; or wait.]
+
+### Long-term advice (e.g. 1d)
+
+[Based on daily trend and key levels: e.g. uptrend → buy dips; or wait for breakout confirmation.]
+
+Analysis is data-based, not investment advice.
+```
+
+---
+
+## Case 12: Multi-Asset Buy Analysis & Allocation
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "I'm watching BTC, ETH and GT and want to buy some; analyze these three and give investment advice; I have $5000, how should I allocate across them?"
+
+**API choice**: Use **spot** for each asset (ticker + order book + last 7d daily); if user involves **futures** or needs futures view, also use **futures** (candlesticks + tickers + order_book + funding_rate) per asset.
+
+| Step | MCP Tool (spot) | MCP Tool (futures, when needed) | Parameters | Required Fields |
+|------|-----------------|----------------------------------|------------|-----------------|
+| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: `settle=usdt`, `contract={BASE}_USDT`, same interval/limit | Last 7d daily OHLC; volume |
+| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`; 24h volume; change; liquidity reference |
+| 3 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_order_book` | `limit=20` | Depth; bid-ask spread; large orders |
+| 4 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate; futures add long/short cost |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **Spot**: Gate spot ticker (price, volume, change) + order book (depth, spread) + last 7d daily (trend, volatility).
+- **Futures**: If analysis involves futures, add funding rate (positive → long cost high; negative → short cost high).
+- **Allocation**: Combine volatility, liquidity, trend and risk per asset; for user’s total amount (e.g. $5000) give suggested weights (e.g. BTC X%, ETH Y%, GT Z%) with brief rationale.
+
+**Output**: Must include per-asset "Spot overview" (ticker + order book + 7d conclusion), "Futures funding" (if applicable), and "Allocation suggestion" (weights and brief rationale).
+
+---
+
+### Scenario 12.1: Multi-asset analysis & allocation (e.g. BTC, ETH, GT, $5000)
+
+**Context**: User is watching several assets (e.g. BTC, ETH, GT), plans to buy, states total budget (e.g. $5000); needs analysis and allocation advice.
+
+**Prompt examples**:
+- "I'm watching BTC, ETH and GT and want to buy; analyze these three and give investment advice; I have $5000, how should I allocate across them?"
+
+**Expected behavior**:
+1. Call per **MCP Call Spec** for each of BTC_USDT, ETH_USDT, GT_USDT: `cex_spot_get_spot_candlesticks`(interval=1d, limit=7) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_order_book`(limit=20).
+2. If futures view needed: for same contracts call `cex_fx_get_fx_candlesticks` → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_order_book` → `cex_fx_get_fx_funding_rate`.
+3. From ticker: price and 24h performance; from order book: depth and spread; from 7d daily: short-term trend; from futures: funding rate.
+4. Output: per-asset spot overview table + futures funding (if applicable) + allocation suggestion (e.g. BTC 40%, ETH 40%, GT 20% with brief rationale) per Report Template.
+
+**Output**:
+```markdown
+## Multi-Asset Analysis & Allocation (BTC / ETH / GT, budget $5000)
+
+### Per-asset spot overview (ticker + order book + last 7d daily)
+
+| Asset | Price | 24h change | 24h volume | Order book depth/spread | 7d trend (brief) |
+|-------|-------|------------|------------|--------------------------|------------------|
+| BTC   | $XX   | ±X%        | $XX        | Depth/spread             | - |
+| ETH   | $XX   | ±X%        | $XX        | Depth/spread             | - |
+| GT    | $XX   | ±X%        | $XX        | Depth/spread             | - |
+
+### Futures funding rate (if applicable)
+
+| Contract  | Funding rate | Note        |
+|-----------|--------------|-------------|
+| BTC_USDT  | ±X.XX%       | Long/short cost |
+| ETH_USDT  | ±X.XX%       | Same        |
+| GT_USDT   | ±X.XX%       | Same        |
+
+### Allocation suggestion ($5000 example)
+
+| Asset | Suggested % | Amount  | Brief rationale                    |
+|-------|--------------|---------|------------------------------------|
+| BTC   | XX%          | XXX U   | Liquidity, moderate volatility     |
+| ETH   | XX%          | XXX U   | Correlation with BTC, volatility   |
+| GT    | XX%          | XXX U   | Smaller cap / volatile; size limit |
+
+Analysis is data-based, not investment advice.
+```
+
+---
+
+## Case 13: Portfolio Allocation Review & Adjustment
+
+### MCP Call Spec (document-aligned)
+
+**Trigger**: "I hold 30% BTC, 30% ETH, 20% DOGE, 15% LTC, 5% USDT; is this allocation reasonable, how should I adjust, and if I don’t need to change it what else can I buy?"
+
+**API choice**: Same as Case 12 — use **spot** for each held asset (ticker + order book + last 7d daily); add **futures** funding rate when relevant.
+
+| Step | MCP Tool (spot) | MCP Tool (futures, when needed) | Parameters | Required Fields |
+|------|-----------------|----------------------------------|------------|-----------------|
+| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: same contract + settle | Last 7d daily OHLC; volume |
+| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | Current price; 24h volume; change |
+| 3 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_order_book` | `limit=20` | Depth; spread |
+| 4 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate |
+
+**Calculation & judgment** (aligned with SKILL):
+
+- **Spot**: Gate spot ticker + order book + last 7d daily (same as Case 12).
+- **Futures**: If user holds or considers futures, add funding rate.
+- **Allocation review**: From volatility, correlation, liquidity and current trend per asset, judge whether user’s allocation is too concentrated/diversified or risk too high; state "reasonable" or "suggest adjustment" and direction (e.g. reduce X, add Y or USDT).
+- **If no adjustment**: If current allocation is fine, suggest "what else to buy" (e.g. other majors, stable yield) with brief rationale.
+
+**Output**: Must include per-asset "Spot overview" (same as Case 12), "Allocation assessment" (reasonable / suggest adjustment), "Adjustment suggestion" (if any), "Other names to consider" (if no adjustment).
+
+---
+
+### Scenario 13.1: Portfolio allocation review & adjustment (e.g. BTC, ETH, DOGE, LTC, USDT)
+
+**Context**: User states current allocation (e.g. 30% BTC, 30% ETH, 20% DOGE, 15% LTC, 5% USDT) and asks if it’s reasonable, how to adjust, and what else to buy if no change.
+
+**Prompt examples**:
+- "I hold 30% BTC, 30% ETH, 20% DOGE, 15% LTC, 5% USDT; is this allocation reasonable, how should I adjust my portfolio, and if I don’t need to change it what else can I buy?"
+
+**Expected behavior**:
+1. Call per **MCP Call Spec** for each of BTC, ETH, DOGE, LTC: `cex_spot_get_spot_candlesticks`(interval=1d, limit=7) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_order_book`(limit=20); if futures involved, also call candlesticks → tickers → order_book → funding_rate for the contracts.
+2. From 7d performance, liquidity, volatility and correlation per asset, assess user's allocation (e.g. majors 60%, alts 35%, cash 5% — risk acceptable or not).
+3. Output: per-asset spot overview → allocation assessment (reasonable / suggest adjustment) → concrete adjustment (what to reduce/add) → if no change, "other names to consider" per Report Template.
+
+**Output**:
+```markdown
+## Portfolio Allocation Review & Advice (BTC / ETH / DOGE / LTC / USDT)
+
+### Per-asset spot overview (ticker + order book + last 7d daily)
+
+| Asset | Price | 24h change | 24h volume | Order book depth/spread | 7d trend (brief) |
+|-------|-------|------------|------------|--------------------------|------------------|
+| BTC   | $XX   | ±X%        | $XX        | -                        | - |
+| ETH   | $XX   | ±X%        | $XX        | -                        | - |
+| DOGE  | $XX   | ±X%        | $XX        | -                        | - |
+| LTC   | $XX   | ±X%        | $XX        | -                        | - |
+
+### Allocation assessment
+
+Current allocation: BTC 30%, ETH 30%, DOGE 20%, LTC 15%, USDT 5%.
+
+Conclusion: [Reasonable / Suggest adjustment]. Rationale: [1–2 sentences on concentration, volatility, liquidity, correlation.]
+
+### Adjustment suggestion (if needed)
+
+[E.g. reduce DOGE weight, increase USDT for volatility buffer; or keep as is.]
+
+### If no adjustment, other names to consider
+
+[E.g. consider adding XXX, YYY for diversification or return; or keep current portfolio.]
+
+Analysis is data-based, not investment advice.
+```
