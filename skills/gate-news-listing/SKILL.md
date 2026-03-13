@@ -45,7 +45,7 @@ Extract from user input:
 
 | Step | MCP Tool | Parameters | Retrieved Data | Parallel |
 |------|----------|------------|----------------|----------|
-| 1 | `news_feed_get_exchange_announcements` | `exchange={exchange}, coin={coin}, announcement_type={type}, limit={limit}` | Announcement list: exchange, coin, type, time, details | — |
+| 1 | `news_feed_get_exchange_announcements` | `exchange={exchange}, coin={coin}, announcement_type={announcement_type}, limit={limit}` | Announcement list: exchange, coin, type, time, details | — |
 
 ### Step 3: Supplement Key Coins with Data (Parallel)
 
@@ -150,7 +150,7 @@ Pass announcement data and supplementary info to the LLM to generate the exchang
 | news_feed_get_exchange_announcements timeout | Return error message; suggest trying again later |
 | Coin supplementary info (coin_info / market_snapshot) fails | Skip detailed analysis for that coin; display announcement info only |
 | User asks when a coin will be listed (future) | Inform "Currently only published announcements can be queried — future listing plans cannot be predicted" |
-| Too many results | Default to showing the most recent 10; inform user they can specify an exchange or time range to narrow results |
+| Too many results | Default to showing the most recent 10; inform the user they can specify an exchange or time range to narrow results |
 
 ---
 
