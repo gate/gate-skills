@@ -2,7 +2,7 @@
 name: gate-exchange-marketanalysis
 version: "2026.3.11-1"
 updated: "2026-03-11"
-description: "The market analysis function of Gate Exchange — liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, order book explanation, or slippage simulation (e.g. market buy $X slippage). Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, slippage simulation."
+description: "The market analysis function of Gate Exchange, such as liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation. Use when the user asks about liquidity, depth, slippage, buy/sell pressure, liquidation, funding rate arbitrage, basis/premium, manipulation risk, order book explanation, or slippage simulation (e.g. market buy $X slippage). Trigger phrases: liquidity, depth, slippage, momentum, buy/sell pressure, liquidation, squeeze, funding rate, arbitrage, basis, premium, manipulation, order book, spread, slippage simulation."
 ---
 
 # gate-exchange-marketanalysis
