@@ -50,6 +50,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
 
 ---
 
@@ -93,6 +94,21 @@ Gate spot trading covering buy/sell (market & limit), smart condition-based orde
 - `Sell ETH when price hits 3500`
 - `Cancel my unfilled BTC order and check balance`
 - `Swap USDT to SOL`
+
+---
+
+## 📦 gate-exchange-assets
+
+> **Path**: `skills/gate-exchange-assets/`
+
+Read-only asset and balance queries for Gate Exchange: total account balance, spot holdings, account valuation in USDT, and account book. No trading or transfers.
+
+**Example Prompts**:
+- `How much is my account worth?`
+- `Check my USDT balance`
+- `Show my total assets`
+- `What's my BTC balance?`
+- `Show recent BTC account book and current balance`
 
 ---
 
@@ -575,6 +591,7 @@ gate-github-skills/
     ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
     ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
     ├── gate-dex-wallet/                # DEX comprehensive wallet skill
+    ├── gate-exchange-assets/           # Exchange asset/balance queries (read-only)
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
