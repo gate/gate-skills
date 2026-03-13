@@ -31,29 +31,43 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: supported pairs, swap limits, order history, order details (read-only) | `2026.3.11-5` | ✅ Active |
-| [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
-| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
-| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
-| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
-| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
-| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
-| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
-| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.12-1` | ✅ Active |
-| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.12-1` | ✅ Active |
-| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
-| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
-| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee query: spot/futures maker-taker rates (read-only) | `2026.3.11-2` | ✅ Active |
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
+| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
+| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
+| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
+| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.12-1` | ✅ Active |
+| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.12-1` | ✅ Active |
+| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
+| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
+| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
+| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
+| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
+| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
+| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
+| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate.com MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
+| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
+| [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
+
+---
+
+## 🏷️ gate-exchange-vipfee
+
+> **Path**: `skills/gate-exchange-vipfee/`
+
+Read-only query for Gate VIP tier and trading fee rates (spot and futures maker/taker). No account changes.
+
+**Example Prompts**:
+- `What is my VIP level?`
+- `Check my trading fees`
+- `Show me spot and futures fees`
+- `What is my VIP level and fee rate?`
 
 ---
 
@@ -140,20 +154,6 @@ Staking (earn) query on Gate: positions, rewards, product discovery, and order h
 - `What are my staking rewards?`
 - `Find BTC staking products`
 - `Show staking history`
-
----
-
-## ⚡ gate-exchange-flashswap
-
-> **Path**: `skills/gate-exchange-flashswap/`
-
-Flash Swap query on Gate: supported currency pairs, min/max swap limits, order history, and single order details. Read-only; no swap execution.
-
-**Example Prompts**:
-- `Show me flash swap supported pairs`
-- `Can I swap BTC for USDT? What are the limits?`
-- `Query my flash swap orders`
-- `Check flash swap order 120841 details`
 
 ---
 
@@ -638,11 +638,11 @@ gate-github-skills/
     ├── gate-dex-wallet/                # DEX comprehensive wallet skill
     ├── gate-exchange-assets/           # Exchange asset/balance queries (read-only)
     ├── gate-exchange-dual/             # Dual investment query (read-only)
-    ├── gate-exchange-flashswap/        # Flash Swap query (read-only)
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
+    ├── gate-exchange-vipfee/           # VIP tier & fee rate query (read-only)
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill
