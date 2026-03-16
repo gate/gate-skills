@@ -83,14 +83,14 @@ configure_openapi() {
     echo ""
     echo -e "${CYAN}🔑 Configuring OpenAPI credentials (optional)...${NC}"
     echo "  OpenAPI channel is used for hybrid mode Swap (openapi-swap)"
-    echo "  You can skip this and configure manually later"
+    echo "  Can be skipped for now and configured manually later"
     echo ""
 
     local config_dir="$HOME/.gate-dex-openapi"
     local config_file="$config_dir/config.json"
 
     if [ -f "$config_file" ]; then
-        echo -e "${GREEN}  ✓${NC} OpenAPI config already exists: $config_file"
+        echo -e "${GREEN}  ✓${NC} OpenAPI configuration exists: $config_file"
         read -p "  Reconfigure? [y/N] " reconfig
         if [[ ! "$reconfig" =~ ^[yY]$ ]]; then
             return 0
@@ -100,7 +100,7 @@ configure_openapi() {
     read -p "  Configure OpenAPI AK/SK? [y/N] " setup_openapi
     if [[ ! "$setup_openapi" =~ ^[yY]$ ]]; then
         echo -e "${YELLOW}  ⏭  Skipping OpenAPI configuration${NC}"
-        echo "  You can manually create: $config_file"
+        echo "  Can be configured manually later: $config_file"
         return 0
     fi
 
@@ -120,7 +120,7 @@ configure_openapi() {
 }
 EOF
     chmod 600 "$config_file"
-    echo -e "${GREEN}  ✓${NC} OpenAPI config saved: $config_file"
+    echo -e "${GREEN}  ✓${NC} OpenAPI configuration saved: $config_file"
 }
 
 # Update CLAUDE.md / AGENTS.md routing to include CLI
@@ -134,9 +134,9 @@ update_routing_files() {
         if [ -f "$routing_file" ]; then
             if ! grep -q "cli.md" "$routing_file"; then
                 echo "$cli_route" >> "$routing_file"
-                echo -e "${GREEN}  ✓${NC} $routing_file updated (added CLI route)"
+                echo -e "${GREEN}  ✓${NC} $routing_file updated (added CLI routing)"
             else
-                echo -e "${GREEN}  ✓${NC} $routing_file already contains CLI route"
+                echo -e "${GREEN}  ✓${NC} $routing_file already contains CLI routing"
             fi
         fi
     done
@@ -148,9 +148,9 @@ print_summary() {
     echo "=================================="
     echo -e "${GREEN}🎉 Gate Wallet CLI installation complete!${NC}"
     echo ""
-    echo -e "${BLUE}🚀 Quick Start:${NC}"
+    echo -e "${BLUE}🚀 Quick start:${NC}"
     echo ""
-    echo "  # 1. Login (first time)"
+    echo "  # 1. Login (first time use)"
     echo "  gate-wallet login"
     echo ""
     echo "  # 2. Check balance"
@@ -159,17 +159,17 @@ print_summary() {
     echo "  # 3. Transfer"
     echo "  gate-wallet send --chain ETH --to 0x... --amount 0.01"
     echo ""
-    echo "  # 4. Hybrid mode Swap (requires OpenAPI config)"
+    echo "  # 4. Hybrid mode Swap (requires OpenAPI configuration)"
     echo "  gate-wallet openapi-swap --chain ARB --from - --to 0x... --amount 0.001 -y"
     echo ""
     echo "  # 5. Interactive REPL mode"
     echo "  gate-wallet"
     echo ""
     echo -e "${CYAN}💡 Tips:${NC}"
-    echo "  • First use requires OAuth login: gate-wallet login"
-    echo "  • Credentials saved at: ~/.gate-wallet/auth.json"
-    echo "  • OpenAPI config: ~/.gate-dex-openapi/config.json"
-    echo "  • Documentation: ./gate-dex-wallet/references/cli.md"
+    echo "  • First-time use requires OAuth login: gate-wallet login"
+    echo "  • Credentials saved in: ~/.gate-wallet/auth.json"
+    echo "  • OpenAPI configuration: ~/.gate-dex-openapi/config.json"
+    echo "  • Detailed documentation: ./gate-dex-wallet/references/cli.md"
     echo ""
 }
 
