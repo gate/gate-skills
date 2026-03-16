@@ -31,6 +31,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 
 | Skill | 描述 | 版本 | 状态 |
 |-------|------|------|------|
+| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha 代币发现、行情查看与账户持仓：浏览代币、行情、持仓与组合估值 | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi（传统金融）只读查询：订单、持仓、行情、资产与 MT5 账户信息 | `2026.3.13-6` | ✅ Active |
 | [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn（活期理财）：持仓、利息、Top APY 利率查询（不支持申购/赎回） | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate 交易所联盟/合伙人计划：佣金、交易量、净手续费、客户数、交易用户数查询与申请指引 | `2026.3.13` | ✅ Active |
@@ -58,6 +59,21 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate 现货交易：买卖下单、订单管理、账户查询、资产兑换 | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX 综合钱包：身份认证、资产查询、转账执行、DApp 交互 | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
+
+---
+
+## 🔬 gate-exchange-alpha
+
+> **路径**: `skills/gate-exchange-alpha/`
+
+Gate Alpha 代币发现、行情查看与账户持仓：按链/平台/地址浏览可交易代币，查看行情与价格，查询 Alpha 账户余额与组合市值。
+
+**示例提示词**：
+- `Alpha 上能交易哪些币？`
+- `Alpha 上 [代币] 什么价？`
+- `Alpha 行情怎么样？`
+- `我在 Alpha 上持有哪些币？`
+- `我的 Alpha 组合价值多少？`
 
 ---
 
