@@ -24,17 +24,17 @@ Execute integrated operations for Gate unified-account workflows, including:
 
 | Group | Tool Calls (`jsonrpc: call.method`) |
 |------|------|
-| Account and mode | `get_unified_accounts`, `get_unified_mode`, `set_unified_mode` |
-| Borrowing and repayment | `get_unified_borrowable`, `create_unified_loan`, `list_unified_loan_records`, `list_unified_loan_interest_records` |
-| Borrow rates and currency universe | `get_unified_estimate_rate`, `list_unified_currencies` |
-| Transferability | `get_unified_transferable` |
-| Leverage and collateral settings | `get_user_leverage_currency_setting`, `set_user_leverage_currency_setting`, `set_unified_collateral` |
-| Risk tiers and collateral discount | `list_currency_discount_tiers` |
+| Account and mode | `cex_unified_get_unified_accounts`, `cex_unified_get_unified_mode`, `cex_unified_set_unified_mode` |
+| Borrowing and repayment | `cex_unified_get_unified_borrowable`, `cex_unified_create_unified_loan`, `cex_unified_list_unified_loan_records`, `cex_unified_list_unified_loan_interest_records` |
+| Borrow rates and currency universe | `cex_unified_get_unified_estimate_rate`, `cex_unified_list_unified_currencies` |
+| Transferability | `cex_unified_get_unified_transferable` |
+| Leverage and collateral settings | `cex_unified_get_user_leverage_currency_setting`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral` |
+| Risk tiers and collateral discount | `cex_unified_list_currency_discount_tiers` |
 
 ### Capability Notes and API Coverage
 
 - Batch borrowable and batch transferable endpoints may not be exposed as dedicated tools; for multi-currency requests, iterate single-currency queries and aggregate results.
-- Loan repayment uses `create_unified_loan` with `type=repay`; full repayment uses `repaid_all=true`.
+- Loan repayment uses `cex_unified_create_unified_loan` with `type=repay`; full repayment uses `repaid_all=true`.
 - Unified mode switching is high-impact and may fail if account risk constraints are not satisfied.
 - Per-currency leverage settings should be validated against current account mode and platform limits.
 - Collateral configuration changes can alter borrow power and liquidation risk.
@@ -58,10 +58,10 @@ Execute integrated operations for Gate unified-account workflows, including:
 ### Risk-Sensitive Action Rules
 
 Mutating unified actions are treated as high risk:
-- `create_unified_loan` (borrow/repay)
-- `set_unified_mode`
-- `set_user_leverage_currency_setting`
-- `set_unified_collateral`
+- `cex_unified_create_unified_loan` (borrow/repay)
+- `cex_unified_set_unified_mode`
+- `cex_unified_set_user_leverage_currency_setting`
+- `cex_unified_set_unified_collateral`
 
 For each of the actions above, always require explicit user confirmation immediately before execution.
 
@@ -122,16 +122,16 @@ Hard blocking rules (non-bypassable):
 ### Step 4: Call Tools by Scenario
 
 Use only the minimal tool set required for the task:
-- Account overview: `get_unified_accounts`
-- Mode query/switch: `get_unified_mode` / `set_unified_mode`
-- Borrowable checks: `get_unified_borrowable`
-- Transferable checks: `get_unified_transferable`
-- Borrow/repay: `create_unified_loan`
-- Loan and interest records: `list_unified_loan_records`, `list_unified_loan_interest_records`
-- Currency support and rates: `list_unified_currencies`, `get_unified_estimate_rate`
-- Leverage settings: `get_user_leverage_currency_setting`, `set_user_leverage_currency_setting`
-- Collateral settings: `set_unified_collateral`
-- Risk tiers: `list_currency_discount_tiers`
+- Account overview: `cex_unified_get_unified_accounts`
+- Mode query/switch: `cex_unified_get_unified_mode` / `cex_unified_set_unified_mode`
+- Borrowable checks: `cex_unified_get_unified_borrowable`
+- Transferable checks: `cex_unified_get_unified_transferable`
+- Borrow/repay: `cex_unified_create_unified_loan`
+- Loan and interest records: `cex_unified_list_unified_loan_records`, `cex_unified_list_unified_loan_interest_records`
+- Currency support and rates: `cex_unified_list_unified_currencies`, `cex_unified_get_unified_estimate_rate`
+- Leverage settings: `cex_unified_get_user_leverage_currency_setting`, `cex_unified_set_user_leverage_currency_setting`
+- Collateral settings: `cex_unified_set_unified_collateral`
+- Risk tiers: `cex_unified_list_currency_discount_tiers`
 
 ### Step 5: Return Actionable Result and Status
 
@@ -149,50 +149,50 @@ The response must include:
 
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 1 | Unified account overview | Return total equity and margin indicators (including IMR/MMR when available) | `get_unified_accounts` |
-| 2 | Query current unified mode | Return current mode with readable label | `get_unified_mode` |
-| 3 | Switch unified mode | Validate target mode, then switch after confirmation | `get_unified_mode` -> `set_unified_mode` |
+| 1 | Unified account overview | Return total equity and margin indicators (including IMR/MMR when available) | `cex_unified_get_unified_accounts` |
+| 2 | Query current unified mode | Return current mode with readable label | `cex_unified_get_unified_mode` |
+| 3 | Switch unified mode | Validate target mode, then switch after confirmation | `cex_unified_get_unified_mode` -> `cex_unified_set_unified_mode` |
 
 ### B. Borrow Limits and Borrowing (4-8)
 
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 4 | Single-currency borrowable | Return max borrowable for one currency | `get_unified_borrowable` |
-| 5 | Multi-currency borrowable | Iterate per currency and aggregate | `get_unified_borrowable`(loop) |
-| 6 | Borrow specific amount | Check max borrowable then submit borrow after confirmation | `get_unified_borrowable` -> `create_unified_loan` |
-| 7 | List borrowable currencies | Return supported currency list | `list_unified_currencies` |
-| 8 | Query estimated borrow rate | Return estimated rate with disclaimer | `get_unified_estimate_rate` |
+| 4 | Single-currency borrowable | Return max borrowable for one currency | `cex_unified_get_unified_borrowable` |
+| 5 | Multi-currency borrowable | Iterate per currency and aggregate | `cex_unified_get_unified_borrowable`(loop) |
+| 6 | Borrow specific amount | Check max borrowable then submit borrow after confirmation | `cex_unified_get_unified_borrowable` -> `cex_unified_create_unified_loan` |
+| 7 | List borrowable currencies | Return supported currency list | `cex_unified_list_unified_currencies` |
+| 8 | Query estimated borrow rate | Return estimated rate with disclaimer | `cex_unified_get_unified_estimate_rate` |
 
 ### C. Repayment and Records (9-12)
 
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 9 | Partial repay | Validate repay amount and submit after confirmation | `create_unified_loan` |
-| 10 | Full repay | Submit `repaid_all=true` after confirmation | `create_unified_loan` |
-| 11 | Query loan records | Return borrow/repay history by filter | `list_unified_loan_records` |
-| 12 | Query interest records | Return charged-interest history with time/rate | `list_unified_loan_interest_records` |
+| 9 | Partial repay | Validate repay amount and submit after confirmation | `cex_unified_create_unified_loan` |
+| 10 | Full repay | Submit `repaid_all=true` after confirmation | `cex_unified_create_unified_loan` |
+| 11 | Query loan records | Return borrow/repay history by filter | `cex_unified_list_unified_loan_records` |
+| 12 | Query interest records | Return charged-interest history with time/rate | `cex_unified_list_unified_loan_interest_records` |
 
 ### D. Transferability and Risk Config (13-18)
 
 | Case | User Intent | Core Decision | Tool Sequence |
 |------|----------|----------|----------|
-| 13 | Single-currency transferable | Return max transferable amount | `get_unified_transferable` |
-| 14 | Multi-currency transferable | Iterate per currency and aggregate | `get_unified_transferable`(loop) |
-| 15 | Query leverage setting | Return leverage by currency (single/all) | `get_user_leverage_currency_setting` |
-| 16 | Set leverage setting | Update leverage after confirmation | `set_user_leverage_currency_setting` |
-| 17 | Set collateral currencies | Enable/disable collateral list after confirmation | `set_unified_collateral` |
-| 18 | Query collateral discount tiers | Return risk-tier/discount reference | `list_currency_discount_tiers` |
+| 13 | Single-currency transferable | Return max transferable amount | `cex_unified_get_unified_transferable` |
+| 14 | Multi-currency transferable | Iterate per currency and aggregate | `cex_unified_get_unified_transferable`(loop) |
+| 15 | Query leverage setting | Return leverage by currency (single/all) | `cex_unified_get_user_leverage_currency_setting` |
+| 16 | Set leverage setting | Update leverage after confirmation | `cex_unified_set_user_leverage_currency_setting` |
+| 17 | Set collateral currencies | Enable/disable collateral list after confirmation | `cex_unified_set_unified_collateral` |
+| 18 | Query collateral discount tiers | Return risk-tier/discount reference | `cex_unified_list_currency_discount_tiers` |
 
 ## Judgment Logic Summary
 
 | Condition | Action |
 |-----------|--------|
-| User asks "how much can I borrow" for one coin | Use `get_unified_borrowable` with that currency |
-| User asks borrowable for several coins | Iterate `get_unified_borrowable` per coin and aggregate |
-| User requests borrow execution | Pre-check limit first, then require confirmation before `create_unified_loan` |
+| User asks "how much can I borrow" for one coin | Use `cex_unified_get_unified_borrowable` with that currency |
+| User asks borrowable for several coins | Iterate `cex_unified_get_unified_borrowable` per coin and aggregate |
+| User requests borrow execution | Pre-check limit first, then require confirmation before `cex_unified_create_unified_loan` |
 | User requests repay execution | Clarify partial vs full repay and confirm before mutation |
 | User asks "all repay" but currency unclear | Ask user to specify currency or propose per-currency execution |
-| User asks transferable for several coins | Iterate `get_unified_transferable` per coin and aggregate |
+| User asks transferable for several coins | Iterate `cex_unified_get_unified_transferable` per coin and aggregate |
 | User asks to switch mode | Query current mode first, show impact, then confirm and execute |
 | User asks to set leverage | Query/validate currency and target leverage, then confirm mutation |
 | User asks to set collateral | Confirm enable/disable list and risk note before mutation |
