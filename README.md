@@ -31,16 +31,26 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account operations: browse tokens, tickers, holdings, portfolio value | `2026.3.13-1` | ✅ Active |
+| [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | End-to-end trading copilot: market judgment, risk control, order draft, execution, post-trade management | `2026.3.14-3` | ✅ Active |
 | [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi (traditional finance) read-only queries: orders, positions, market data, assets and MT5 account info | `2026.3.13-6` | ✅ Active |
-| [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
-| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
+| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account operations: browse tokens, tickers, holdings, portfolio value | `2026.3.13-1` | ✅ Active |
+| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
-| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
+| [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
+| [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: order queries, position queries, and history queries across Gate, Binance, OKX and Bybit | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: supported pairs, swap limits, order history, order tracking | `2026.3.11-5` | ✅ Active |
+| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rates: spot fees, futures fees, VIP level query | `2026.3.11-2` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
+| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+| [gate-dex-market](#-gate-dex-market) | Gate DEX market data: MCP + OpenAPI dual mode, intelligent routing, token info, K-line, rankings, security audit | `2026.3.14-2` | ✅ Active |
+| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing, Swap execution, cross-chain support | `2026.3.14-2` | ✅ Active |
+| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions, CLI commands — 5 modules with multi-skill routing | `2026.3.14-2` | ✅ Active |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
 | [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
@@ -49,16 +59,10 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
 | [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
 | [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
-| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
-| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
 | [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
 | [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
-| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 
 ---
 
@@ -243,13 +247,14 @@ Sub-account management on Gate Exchange: query status by UID, list all sub-accou
 
 > **Path**: `skills/gate-dex-market/`
 
-Gate DEX market data skill using OpenAPI mode with AK/SK authentication. Provides read-only queries for token info, K-line data, rankings, and security audits.
+Gate DEX comprehensive market data skill with MCP + OpenAPI dual-mode intelligent routing. Serves as the unified management and distribution center for market data queries. Supports token info, K-line data, rankings, security audits, and participates in the multi-skill priority & routing system with Trade and Wallet skills.
 
 **Example Prompts**:
 - `Get BTC token info`
 - `Show me ETH K-line data`
 - `What are the top trending tokens?`
 - `Check security audit for this token`
+- `Show me market cap rankings`
 
 ---
 
@@ -257,12 +262,13 @@ Gate DEX market data skill using OpenAPI mode with AK/SK authentication. Provide
 
 > **Path**: `skills/gate-dex-trade/`
 
-Gate DEX trading comprehensive skill with MCP + OpenAPI dual mode support. Smart routing automatically selects the optimal trading method based on environment. Supports Swap execution across EVM and Solana.
+Gate DEX trading comprehensive skill with MCP + OpenAPI dual-mode smart routing. Pure routing layer that detects environment and dispatches to complete sub-specifications. Supports Swap execution across EVM and Solana, including cross-chain swaps. Participates in multi-skill priority & routing system with Market and Wallet skills.
 
 **Example Prompts**:
 - `Swap 100 USDT for ETH`
 - `Exchange BNB for PEPE`
 - `Get a quote for swapping SOL to USDC`
+- `Cross-chain swap ETH to BSC`
 - `Buy some tokens using OpenAPI mode`
 
 ---
@@ -271,7 +277,7 @@ Gate DEX trading comprehensive skill with MCP + OpenAPI dual mode support. Smart
 
 > **Path**: `skills/gate-dex-wallet/`
 
-Gate DEX comprehensive wallet skill. Unified entry point for authentication, asset queries, transfer execution, and DApp interactions. Routes to specific sub-modules based on user intent.
+Gate DEX comprehensive wallet skill. Unified entry point covering 5 major modules: authentication login, asset queries, transfer execution, DApp interactions, and CLI command-line operations. Features sub-function routing distribution and participates in the multi-skill priority & routing system with Market and Trade skills.
 
 **Example Prompts**:
 - `Log in to my wallet`
@@ -279,6 +285,7 @@ Gate DEX comprehensive wallet skill. Unified entry point for authentication, ass
 - `Transfer 0.1 ETH to 0x...`
 - `Connect my wallet to Uniswap`
 - `Sign this message`
+- `Show my transaction history`
 
 ---
 
@@ -715,9 +722,9 @@ gate-github-skills/
 ├── README_zh.md
 ├── image/                              # Installation screenshots
 └── skills/
-    ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
-    ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
-    ├── gate-dex-wallet/                # DEX comprehensive wallet skill
+    ├── gate-dex-market/                # DEX market data skill (MCP + OpenAPI dual mode)
+    ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode, cross-chain)
+    ├── gate-dex-wallet/                # DEX comprehensive wallet skill (5 modules + CLI)
     ├── gate-exchange-assets/           # Exchange asset/balance queries (read-only)
     ├── gate-exchange-dual/             # Dual investment query (read-only)
     ├── gate-exchange-futures/          # Futures trading skill
