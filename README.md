@@ -31,6 +31,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
+| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account operations: browse tokens, tickers, holdings, portfolio value | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi (traditional finance) read-only queries: orders, positions, market data, assets and MT5 account info | `2026.3.13-6` | ✅ Active |
 | [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
@@ -58,6 +59,21 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+
+---
+
+## 🔬 gate-exchange-alpha
+
+> **Path**: `skills/gate-exchange-alpha/`
+
+Gate Alpha token discovery, market viewing, and account operations: browse tradable tokens (by chain/platform/address), check tickers and prices, view Alpha account balances and portfolio market value.
+
+**Example Prompts**:
+- `What coins can I trade on Alpha?`
+- `What's the price of [token] on Alpha?`
+- `How's the Alpha market?`
+- `What coins do I hold on Alpha?`
+- `How much is my Alpha portfolio worth?`
 
 ---
 
