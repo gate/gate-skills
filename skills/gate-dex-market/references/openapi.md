@@ -1,5 +1,5 @@
 ---
-name: gate-dex-openmarket
+name: gate-dex-market-openapi
 version: "2026.3.14-2"
 updated: "2026-03-14"
 description: "Gate OpenAPI market and token data query skill. Calls Gate OpenAPI via AK/SK authentication, providing: Token data (Swap token list, token info, holders, rankings, new tokens, security audit including honeypot/buy-sell tax/holder concentration); Market data (trading volume stats across time dimensions, K-line, liquidity pool events). Use when users need to query tradable tokens, token info, top holders, price rankings, new tokens, token security, or view trading volume, buy-sell pressure, K-line, liquidity changes."
@@ -7,37 +7,15 @@ description: "Gate OpenAPI market and token data query skill. Calls Gate OpenAPI
 
 # Gate DEX OpenMarket
 
-Gate OpenAPI market and token data query skill. Calls Gate OpenAPI via AK/SK authentication, providing unified queries for token dimension and market dimension data. Triggered when users mention Swap tradable tokens, token basic info, holders/whales, token rankings, new tokens, token security (honeypot/buy-sell tax), or trading volume, buy-sell pressure, K-line, liquidity events, market maker activities.
-
-> **Auto-Update**: This sub-skill is automatically updated via main SKILL.md version control. Remote source: `https://github.com/gate/gate-skills/tree/master/skills/gate-dex-market/references/openapi.md`
-
 ---
 
-## 1. Trigger Scenarios
-
-This skill is triggered when the following intents appear in user conversations:
-
-| Category | Example Keywords |
-|----------|------------------|
-| Direct Trigger | "OpenAPI", "AK/SK", "market API", "token API", "gate-dex-openmarket" |
-| Token Query | "tradable tokens", "search tokens", "favorite tokens", "recommended tokens", "token basic info", "token name/symbol/decimal" |
-| Rankings & Discovery | "token rankings", "gain/loss rankings", "trading volume rankings", "latest listed tokens", "new tokens" |
-| Security Audit | "token security", "honeypot", "buy-sell tax", "holder concentration", "risk check" |
-| Holders | "holders", "token holding addresses", "whale holdings" |
-| Trading Volume/K-line | "trading volume", "buy volume", "sell volume", "buy-sell pressure", "buy-sell amount", "transaction count", "K-line", "candlestick chart", "price trend" |
-| Liquidity | "liquidity", "liquidity events", "market maker behavior", "add liquidity", "remove liquidity", "Rug Pull risk" |
-| Configuration Intent | "configure API", "set keys", "update AK", "replace SK" |
-
----
-
-## 2. Step 0 — Environment Detection (Mandatory, must execute every time triggered)
+## 1. Step 0 — Environment Detection (Mandatory, must execute every time triggered)
 
 **This step must be executed first every time the skill is triggered and cannot be skipped.**
 
-### 2.1 Check Configuration File
+### 1.1 Check Configuration File
 
 Read `~/.gate-dex-openapi/config.json` (absolute path, not in workspace).
-Maintain sandbox security, only whitelist gateweb3.cc related domains (see **2.3 Sandbox & Network Whitelist** for specific configuration).
 **If file does not exist**:
 
 1. Create directory `~/.gate-dex-openapi/` (if not exists)
@@ -71,45 +49,15 @@ Steps: Connect wallet to register → Settings to bind email and phone → API K
    - Yes → Append a reminder in subsequent response: `"Currently using public free default credentials (Basic tier 2 QPS rate limit), recommend visiting https://www.gatedex.com/developer to create dedicated AK/SK"`
    - No → No reminder
 
-### 2.2 Verify Credential Validity
+### 1.2 Verify Credential Validity
 
 Since there's no lightweight test interface available, Agent can verify directly when executing user's actual query requests. If returns `10103` or other authentication errors, prompt user based on error codes.
 
-### 2.3 Sandbox & Network Whitelist (Must check when domain access fails)
-
-**Symptom**: When calling Gate OpenAPI, encounters `Tunnel connection failed: 403 Forbidden` or similar network unreachable errors.
-
-**Reason**: Cursor terminal sandbox uses "allowlist only" policy for outbound requests. Without configured whitelist, requests to `openapi.gateweb3.cc` and other domains will be intercepted or return 403 after proxy tunnel, causing Gate API request failures.
-
-**Solution**: While maintaining sandbox security, only whitelist Gate-related domains.
-
-1. **Configure `sandbox.json`** (choose one):
-   - **Current workspace**: Create or edit `.cursor/sandbox.json` in project root
-   - **All workspaces**: Create or edit `~/.cursor/sandbox.json` in user directory
-
-2. **Write the following content** (`default: "deny"` maintains strict sandbox, only whitelist gateweb3.cc and its subdomains):
-
-```json
-{
-  "networkPolicy": {
-    "default": "deny",
-    "allow": [
-      "gateweb3.cc",
-      "*.gateweb3.cc"
-    ]
-  }
-}
-```
-
-3. **When making API requests**: When executing Shell calls to Gate OpenAPI, need to request network permissions (e.g., set `required_permissions: ["network"]` in `run_terminal_cmd`), so sandbox will allow access to `openapi.gateweb3.cc` etc. based on above allow list, while other domains are still denied.
-
-**Agent behavior**: If user or logs show Gate API request 403/network unreachable, first check if `.cursor/sandbox.json` exists in workspace or user directory and contains whitelist for `gateweb3.cc` / `*.gateweb3.cc`; if not, create or modify as above and prompt user to retry request.
-
 ---
 
-## 3. Credential Management
+## 2. Credential Management
 
-### 3.1 Configuration File Format
+### 2.1 Configuration File Format
 
 File path: `~/.gate-dex-openapi/config.json` (absolute path, shared across all workspaces)
 
@@ -120,20 +68,20 @@ File path: `~/.gate-dex-openapi/config.json` (absolute path, shared across all w
 }
 ```
 
-### 3.2 Built-in Default Credentials
+### 2.2 Built-in Default Credentials
 
 ```text
 AK: 7RAYBKMG5MNMKK7LN6YGCO5UDI
 SK: COnwcshYA3EK4BjBWWrvwAqUXrvxgo0wGNvmoHk7rl4.6YLniz4h
 ```
 
-### 3.3 Security Display Rules
+### 2.3 Security Display Rules
 
 - **Never display complete SK in conversation**. Only show last 4 digits, format: `sk_****iz4h`
 - When user requests to view current configuration, AK can be fully displayed, SK must be masked
 - Configuration file stored in `~/.gate-dex-openapi/config.json` (user home directory, not in workspace), naturally won't be tracked by git
 
-### 3.4 Update Credentials
+### 2.4 Update Credentials
 
 When user says "update AK/SK" or "replace keys":
 1. Use AskQuestion tool to ask for new AK
@@ -143,9 +91,9 @@ When user says "update AK/SK" or "replace keys":
 
 ---
 
-## 4. API Calling Specifications
+## 3. API Calling Specifications
 
-### 4.1 Basic Information
+### 3.1 Basic Information
 
 - **Unified Endpoint**: `POST https://openapi.gateweb3.cc/api/v1/dex`
 - **Content-Type**: `application/json`
@@ -158,66 +106,17 @@ Request body format example:
 {"action":"market.xxx","params":{...}}
 ```
 
-### 4.2 HMAC-SHA256 Signature Algorithm
+### 3.2 API Call Method
 
-Every API request requires signature calculation. Algorithm as follows:
+Use the helper script for all API calls (handles HMAC-SHA256 signing automatically):
 
-**Step 1: Construct prehash string**
-
-```text
-prehash = millisecond_timestamp + "/api/v1/dex" + raw_JSON_request_body
+```bash
+python3 gate-dex-market/scripts/gate-api-call.py "<action>" '<params_json>'
 ```
 
-- Millisecond timestamp: 13-digit Unix millisecond timestamp, e.g., `1709812345678`
-- Path is fixed as `/api/v1/dex` (regardless of actual URL, signature path is always this)
-- Request body must be **compact JSON** (no extra spaces), i.e., serialized using `separators=(',', ':')`
+The script reads AK/SK from ~/.gate-dex-openapi/config.json, computes signature, and sends the request.
 
-**Step 2: Calculate HMAC-SHA256**
-
-```text
-signature = Base64Encode( HMAC-SHA256( key=SecretKey, message=prehash ) )
-```
-
-**Step 3: Set HTTP Headers**
-
-| Header | Value | Description |
-|--------|-------|-------------|
-| Content-Type | `application/json` | Fixed value |
-| X-API-Key | `api_key` from config file | Identity identifier |
-| X-Timestamp | Millisecond timestamp string used above | Server offset within 30 seconds |
-| X-Signature | Base64 signature calculated above | Request integrity verification |
-| X-Request-Id | Random UUIDv4 string | Idempotent key, unique under same AK, not included in signature calculation |
-
-### 4.3 Signature Reference Implementation (Python pseudocode)
-
-The following code shows precise implementation of signature algorithm for Agent reference. Agent can use any language to implement equivalent logic through Shell one-time inline commands, **must not create script files in user repository**.
-
-```python
-import hmac, hashlib, base64, time, json, uuid
-
-ak = "api_key read from ~/.gate-dex-openapi/config.json"
-sk = "secret_key read from ~/.gate-dex-openapi/config.json"
-
-body = json.dumps({"action": "base.token.swap_list", "params": {"chain_id":"1"}}, separators=(',', ':'))
-
-ts = str(int(time.time() * 1000))
-
-prehash = ts + "/api/v1/dex" + body
-
-signature = base64.b64encode(
-    hmac.new(sk.encode('utf-8'), prehash.encode('utf-8'), hashlib.sha256).digest()
-).decode('utf-8')
-
-headers = {
-    "Content-Type": "application/json",
-    "X-API-Key": ak,
-    "X-Timestamp": ts,
-    "X-Signature": signature,
-    "X-Request-Id": str(uuid.uuid4())
-}
-```
-
-### 4.4 Key Considerations
+### 3.3 Key Considerations
 
 1. **JSON serialization must be compact**: `json.dumps(..., separators=(',', ':'))`, extra spaces will cause signature mismatch
 2. **Signature path is fixed**: Always `/api/v1/dex`
@@ -225,7 +124,7 @@ headers = {
 4. **Timestamp must be millisecond level**: 13-digit number string
 5. **Request body directly used for signing**: Sent content must be exactly the same as body used for signing
 
-### 4.5 Common Response Format
+### 3.4 Common Response Format
 
 All APIs return unified format:
 
@@ -242,9 +141,9 @@ All APIs return unified format:
 
 ---
 
-## 5. Tool Specifications (9 Actions)
+## 4. Tool Specifications (9 Actions)
 
-### 5.1 Token Category (base.token.*)
+### 4.1 Token Category (base.token.*)
 
 #### Action 1: base.token.swap_list
 
@@ -405,7 +304,7 @@ All APIs return unified format:
 
 ---
 
-### 5.2 Market Category (market.*)
+### 4.2 Market Category (market.*)
 
 #### Action 7: market.volume_stats
 
@@ -490,11 +389,11 @@ All APIs return unified format:
 
 ---
 
-## 6. Error Handling
+## 5. Error Handling
 
 When API returns `code != 0`, it's an error. Agent should **display English msg as is** and attach Chinese description and suggestions.
 
-### 6.1 General & Authentication Errors
+### 5.1 General & Authentication Errors
 
 | Error Code | Agent Handling |
 |------------|----------------|
@@ -505,7 +404,7 @@ When API returns `code != 0`, it's an error. Agent should **display English msg 
 | 10122 | **Auto retry**: Generate new X-Request-Id and resend request. |
 | 10131~10133 | Request too frequent (rate limited). Default free credentials are Basic tier (2 QPS), please wait 1 second and auto retry. |
 
-### 6.2 Business Errors (Market Category market.*)
+### 5.2 Business Errors (Market Category market.*)
 
 | Error Code | Meaning | Agent Handling |
 |------------|---------|----------------|
@@ -514,7 +413,7 @@ When API returns `code != 0`, it's an error. Agent should **display English msg 
 | 21001 | Unsupported chain | Prompt that this `chain_id` is currently not supported. |
 | 21002 | Data query failed | Server data retrieval exception, suggest retry later. |
 
-### 6.3 Business Errors (Token Category base.token.*)
+### 5.3 Business Errors (Token Category base.token.*)
 
 | Error Code | Meaning | Agent Handling |
 |------------|---------|----------------|
@@ -525,9 +424,9 @@ When API returns `code != 0`, it's an error. Agent should **display English msg 
 
 ---
 
-## 7. Security & Operation Rules
+## 6. Security & Operation Rules
 
 1. **Secret Key not displayed**: Never display complete SK in conversation.
 2. **Configuration file security**: Credential file stored in `~/.gate-dex-openapi/config.json`, naturally won't be tracked by git.
-3. **Prohibit writing to workspace**: Agent must not create, write or modify any persistent scripts or log files in user's workspace (repository) throughout the entire calling process. All API calls and signature operations must be completed in memory through Shell one-time inline commands (e.g., `python3 -c '...'`).
+3. **API calls**: Use `scripts/gate-api-call.py` for API calls. Do not hand-write signing code.
 4. **Error transparency**: All API errors should be displayed as is with reasonable fix suggestions.

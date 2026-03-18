@@ -1,5 +1,5 @@
 ---
-name: gate-dex-dapp
+name: gate-dex-wallet-dapp
 version: "2026.3.12-1"
 updated: "2026-03-12"
 description: "Gate Wallet interaction with external DApps. Connect wallet, sign messages (EIP-712/personal_sign), sign and send DApp-generated transactions, ERC20 Approve authorization. Use when users need to interact with DeFi protocols, NFT platforms, or any DApp. Includes transaction confirmation gate and security review."
@@ -11,56 +11,33 @@ description: "Gate Wallet interaction with external DApps. Connect wallet, sign 
 
 **Trigger scenarios**: Users mention "connect DApp", "sign message", "authorization", "approve", "DApp interaction", "NFT mint", "DeFi operations", "add liquidity", "staking", "stake", "claim", "contract calls", or when other Skills guide users to perform DApp-related operations.
 
-## MCP Server Connection Detection
-
-### First Session Detection
-
-**Before the first MCP tool call in a session, perform one connection probe to confirm Gate DEX MCP Server availability. Subsequent operations do not need repeated detection.**
-
-```
-CallMcpTool(server="gate-dex", toolName="chain.config", arguments={chain: "eth"})
-```
-
-| Result | Handling |
-|--------|----------|
-| Success | MCP Server available, subsequent operations directly call business tools without re-probing |
-| Failure | Display configuration guidance based on error type (see error handling below) |
-
-### Runtime Error Fallback
-
-If business tool calls fail during subsequent operations (returning connection errors, timeouts, etc.), handle according to the following rules:
-
-| Error Type | Keywords | Handling |
-|------------|----------|----------|
-| MCP Server not configured | `server not found`, `unknown server` | Display MCP Server configuration guidance |
-| Remote service unreachable | `connection refused`, `timeout`, `DNS error` | Prompt to check server status and network connection |
-| Authentication failed | `401`, `unauthorized` | Prompt to contact administrator for authorization |
+**Prerequisites**: MCP Server available (see parent SKILL.md for detection). If not configured, see parent SKILL.md for setup guide.
 
 ## Authentication Notes
 
 All operations in this Skill **require `mcp_token`**. Before calling any tool, must confirm user is logged in.
 
-- If currently no `mcp_token` → Guide to `references/auth.md` to complete login then return.
-- If `mcp_token` expired (MCP Server returns token expiration error) → Try `auth.refresh_token` silent refresh first, guide to re-login if failed.
+- If currently no `mcp_token` → Guide to `gate-dex-wallet/references/auth.md` to complete login then return.
+- If `mcp_token` expired (MCP Server returns token expiration error) → Try `dex_auth_refresh_token` silent refresh first, guide to re-login if failed.
 
 ## DApp Interaction Scenario Overview
 
 | Scenario | Description | Core MCP Tools |
 |----------|-------------|----------------|
-| Wallet Connection | DApp requests wallet address | `wallet.get_addresses` |
-| Message Signing | DApp login verification / EIP-712 typed data signing | `wallet.sign_message` |
-| DApp Transaction Execution | Execute DApp-generated on-chain transactions (mint, stake, claim...) | `wallet.sign_transaction` → `tx.send_raw_transaction` |
-| ERC20 Approve | Authorize DApp contracts to use specified tokens | `wallet.sign_transaction` → `tx.send_raw_transaction` |
+| Wallet Connection | DApp requests wallet address | `dex_wallet_get_addresses` |
+| Message Signing | DApp login verification / EIP-712 typed data signing | `dex_wallet_sign_message` |
+| DApp Transaction Execution | Execute DApp-generated on-chain transactions (mint, stake, claim...) | `dex_wallet_sign_transaction` → `dex_tx_send_raw_transaction` |
+| ERC20 Approve | Authorize DApp contracts to use specified tokens | `dex_wallet_sign_transaction` → `dex_tx_send_raw_transaction` |
 
 ## MCP Tool Call Specifications
 
-### 1. `wallet.get_addresses` (Cross-Skill Call) — Get Wallet Addresses
+### 1. `dex_wallet_get_addresses` (Cross-Skill Call) — Get Wallet Addresses
 
 Get account wallet addresses on various chains for DApp connection. This tool belongs to `gate-dex-wallet` domain, called cross-Skill here.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `wallet.get_addresses` |
+| **Tool Name** | `dex_wallet_get_addresses` |
 | **Parameters** | `{ account_id: string, mcp_token: string }` |
 | **Return Value** | `{ addresses: { [chain: string]: string } }` |
 
@@ -69,7 +46,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="wallet.get_addresses",
+  toolName="dex_wallet_get_addresses",
   arguments={ account_id: "acc_12345", mcp_token: "<mcp_token>" }
 )
 ```
@@ -90,13 +67,13 @@ Agent behavior: EVM chains share the same address. Provide target chain address 
 
 ---
 
-### 2. `wallet.sign_message` — Sign Messages
+### 2. `dex_wallet_sign_message` — Sign Messages
 
 Use server-side custodial private keys to sign arbitrary messages, supports personal_sign and EIP-712 typed data signing.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `wallet.sign_message` |
+| **Tool Name** | `dex_wallet_sign_message` |
 | **Parameters** | `{ message: string, chain: string, account_id: string, mcp_token: string }` |
 | **Return Value** | `{ signature: string }` |
 
@@ -114,7 +91,7 @@ Call example (personal_sign):
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="wallet.sign_message",
+  toolName="dex_wallet_sign_message",
   arguments={
     message: "Welcome to Uniswap! Sign this message to verify your wallet. Nonce: abc123",
     chain: "eth",
@@ -129,7 +106,7 @@ Call example (EIP-712):
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="wallet.sign_message",
+  toolName="dex_wallet_sign_message",
   arguments={
     message: "{\"types\":{\"EIP712Domain\":[{\"name\":\"name\",\"type\":\"string\"}],\"Permit\":[{\"name\":\"owner\",\"type\":\"address\"},{\"name\":\"spender\",\"type\":\"address\"},{\"name\":\"value\",\"type\":\"uint256\"}]},\"primaryType\":\"Permit\",\"domain\":{\"name\":\"USDC\"},\"message\":{\"owner\":\"0xABC...\",\"spender\":\"0xDEF...\",\"value\":\"1000000000\"}}",
     chain: "eth",
@@ -151,13 +128,13 @@ Agent behavior: Display message content to user before signing, explain signing 
 
 ---
 
-### 3. `wallet.sign_transaction` — Sign DApp Transactions
+### 3. `dex_wallet_sign_transaction` — Sign DApp Transactions
 
 Use server-side custodial private keys to sign DApp-built unsigned transactions. **Only call after explicit user confirmation**.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `wallet.sign_transaction` |
+| **Tool Name** | `dex_wallet_sign_transaction` |
 | **Parameters** | `{ raw_tx: string, chain: string, account_id: string, mcp_token: string }` |
 | **Return Value** | `{ signed_tx: string }` |
 
@@ -175,7 +152,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="wallet.sign_transaction",
+  toolName="dex_wallet_sign_transaction",
   arguments={
     raw_tx: "0x02f8...",
     chain: "eth",
@@ -195,13 +172,13 @@ Return example:
 
 ---
 
-### 4. `tx.send_raw_transaction` — Broadcast Signed Transactions
+### 4. `dex_tx_send_raw_transaction` — Broadcast Signed Transactions
 
 Broadcast signed DApp transactions to the on-chain network.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `tx.send_raw_transaction` |
+| **Tool Name** | `dex_tx_send_raw_transaction` |
 | **Parameters** | `{ signed_tx: string, chain: string, mcp_token: string }` |
 | **Return Value** | `{ hash_id: string }` |
 
@@ -209,7 +186,7 @@ Parameter descriptions:
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `signed_tx` | Yes | Signed transaction returned by `wallet.sign_transaction` |
+| `signed_tx` | Yes | Signed transaction returned by `dex_wallet_sign_transaction` |
 | `chain` | Yes | Chain identifier |
 | `mcp_token` | Yes | Authentication token |
 
@@ -218,7 +195,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="tx.send_raw_transaction",
+  toolName="dex_tx_send_raw_transaction",
   arguments={
     signed_tx: "0x02f8b2...signed...",
     chain: "eth",
@@ -246,20 +223,9 @@ Return example:
 | NFT Trading | Buy/sell NFTs | Build Marketplace contract calls |
 | Token Approve | Authorize arbitrary contracts to use tokens | Build ERC20 approve(spender, amount) calldata |
 | Arbitrary Contract Calls | User provides ABI + parameters | Agent encodes calldata and builds transactions |
-| Message Signing | DApp login verification | `wallet.sign_message`, no on-chain transactions |
+| Message Signing | DApp login verification | `dex_wallet_sign_message`, no on-chain transactions |
 
-## Supported Chains
-
-| Chain ID | Network Name | Type | Native Gas Token | Block Explorer |
-|----------|--------------|------|------------------|----------------|
-| `eth` | Ethereum | EVM | ETH | etherscan.io |
-| `bsc` | BNB Smart Chain | EVM | BNB | bscscan.com |
-| `polygon` | Polygon | EVM | MATIC | polygonscan.com |
-| `arbitrum` | Arbitrum One | EVM | ETH | arbiscan.io |
-| `optimism` | Optimism | EVM | ETH | optimistic.etherscan.io |
-| `avax` | Avalanche C-Chain | EVM | AVAX | snowtrace.io |
-| `base` | Base | EVM | ETH | basescan.org |
-| `sol` | Solana | Non-EVM | SOL | solscan.io |
+Supported chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol. See parent SKILL.md.
 
 ## Skill Routing
 
@@ -268,11 +234,11 @@ Based on user intent after DApp operations completion, route to corresponding Sk
 | User Intent | Route Target |
 |-------------|--------------|
 | View updated balance | `gate-dex-wallet` |
-| View transaction details / history | `gate-dex-wallet` (`tx.detail`, `tx.list`) |
-| View contract security info | `gate-dex-market` (`token_get_risk_info`) |
-| Transfer tokens | `gate-dex-wallet` (`references/transfer.md`) |
+| View transaction details / history | `gate-dex-wallet` (`dex_tx_detail`, `dex_tx_list`) |
+| View contract security info | `gate-dex-market` (`dex_token_get_risk_info`) |
+| Transfer tokens | `gate-dex-wallet/references/transfer.md` |
 | Swap exchange tokens | `gate-dex-trade` |
-| Login / authentication expired | `gate-dex-wallet` (`references/auth.md`) |
+| Login / authentication expired | `gate-dex-wallet/references/auth.md` |
 
 ## Operation Flows
 
@@ -280,16 +246,16 @@ Based on user intent after DApp operations completion, route to corresponding Sk
 
 ```
 Step 0: MCP Server Connection Detection
-  Call chain.config({chain: "eth"}) to probe availability
+  Call dex_chain_config({chain: "eth"}) to probe availability
   ↓ Success
 
 Step 1: Authentication Check
   Confirm valid mcp_token and account_id
-  No token → Guide to references/auth.md login
+  No token → Guide to gate-dex-wallet/references/auth.md login
   ↓
 
 Step 2: Get Wallet Address
-  Call wallet.get_addresses({ account_id, mcp_token })
+  Call dex_wallet_get_addresses({ account_id, mcp_token })
   Extract target chain address
   ↓
 
@@ -339,7 +305,7 @@ Step 3: Display Signing Content Confirmation
   ↓ User confirms
 
 Step 4: Execute Signing
-  Call wallet.sign_message({ message, chain, account_id, mcp_token })
+  Call dex_wallet_sign_message({ message, chain, account_id, mcp_token })
   ↓
 
 Step 5: Display Signing Result
@@ -381,12 +347,12 @@ Step 2: Intent Recognition + Parameter Collection
   ↓ Parameters complete
 
 Step 3: Get Wallet Info (Cross-Skill: gate-dex-wallet)
-  Call wallet.get_addresses({ account_id, mcp_token }) → get from_address
-  Call wallet.get_token_list({ account_id, chain, mcp_token }) → get balance
+  Call dex_wallet_get_addresses({ account_id, mcp_token }) → get from_address
+  Call dex_wallet_get_token_list({ account_id, chain, mcp_token }) → get balance
   ↓
 
 Step 4: Security Review (Recommended Step)
-  Call token_get_risk_info({ chain, address: contract_address }) (Cross-Skill: gate-dex-market)
+  Call dex_token_get_risk_info({ chain, address: contract_address }) (Cross-Skill: gate-dex-market)
   Evaluate contract risk level
   ↓
 
@@ -440,12 +406,12 @@ Step 8: Display DApp Transaction Confirmation Summary (Mandatory Gate)
   User requests modification → Return to Step 2
 
 Step 9: Sign Transaction
-  Call wallet.sign_transaction({ raw_tx, chain, account_id, mcp_token })
+  Call dex_wallet_sign_transaction({ raw_tx, chain, account_id, mcp_token })
   Get signed_tx
   ↓
 
 Step 10: Broadcast Transaction
-  Call tx.send_raw_transaction({ signed_tx, chain, mcp_token })
+  Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token })
   Get hash_id
   ↓
 
@@ -459,8 +425,6 @@ Step 11: Display Result + Follow-up Suggestions
   Block Explorer: https://{explorer}/tx/{hash_id}
 
   Transaction submitted to network, confirmation time depends on network congestion.
-
-**Output Format**: Display transaction hash and block explorer URL as plain text, not as hyperlinks.
 
   You can:
   - View updated balance
@@ -522,8 +486,8 @@ Step 4: Display Approve Confirmation
   ↓ User confirms
 
 Step 5: Sign + Broadcast Approve Transaction
-  Call wallet.sign_transaction({ raw_tx: approve_tx, chain, account_id, mcp_token })
-  Call tx.send_raw_transaction({ signed_tx, chain, mcp_token })
+  Call dex_wallet_sign_transaction({ raw_tx: approve_tx, chain, account_id, mcp_token })
+  Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token })
   ↓
 
 Step 6: Approve Success
@@ -617,44 +581,6 @@ Contract Audit Status: {risk_detail}
 Reply "confirm" to still execute (at your own risk), "cancel" to abort.
 ```
 
-## Cross-Skill Workflows
-
-### Complete DApp Interaction Flow (From Login to Completion)
-
-```
-gate-dex-wallet/references/auth.md (Login, get mcp_token + account_id)
-  → gate-dex-wallet (wallet.get_addresses → get address)
-    → gate-dex-wallet (wallet.get_token_list → validate balance)
-      → gate-dex-market (token_get_risk_info → contract security review)
-        → gate-dex-wallet/references/dapp.md (Approve? → Confirm → Sign → Broadcast)
-          → gate-dex-wallet (view updated balance)
-```
-
-### DApp Message Signing (No Transactions)
-
-```
-gate-dex-wallet/references/auth.md (Login)
-  → gate-dex-wallet/references/dapp.md (wallet.sign_message → return signature result)
-```
-
-### Guided by Other Skills
-
-| Source Skill | Scenario | Description |
-|-------------|---------|-------------|
-| `gate-dex-wallet` | User views address then wants to connect DApp | Carries account_id and address info |
-| `gate-dex-market` | User views tokens then wants to participate in DeFi | Carries token and chain context |
-| `gate-dex-trade` | After Swap wants to further participate in DeFi | Carries chain and token context |
-
-### Calling Other Skills
-
-| Target Skill | Call Scenario | Used Tools |
-|-------------|---------------|------------|
-| `gate-dex-wallet` | Get wallet address for DApp connection | `wallet.get_addresses` |
-| `gate-dex-wallet` | Validate balance before DApp transactions | `wallet.get_token_list` |
-| `gate-dex-wallet` | View updated balance after DApp transactions | `wallet.get_token_list` |
-| `gate-dex-wallet` (`references/auth.md`) | Not logged in or token expired | `auth.refresh_token` or complete login flow |
-| `gate-dex-market` | Contract security review | `token_get_risk_info` |
-| `gate-dex-wallet` | View transaction details after DApp transactions | `tx.detail`, `tx.list` |
 
 ## Contract Address Validation Rules
 
@@ -732,29 +658,22 @@ Agent must parse JSON structured data into human-readable format when displaying
 
 | Scenario | Handling Method |
 |----------|----------------|
-| MCP Server not configured | Abort all operations, display Cursor configuration guidance |
-| MCP Server unreachable | Abort all operations, display network check prompt |
-| Not logged in (no `mcp_token`) | Guide to `references/auth.md` to complete login then auto-return to continue DApp operations |
-| `mcp_token` expired | Try `auth.refresh_token` silent refresh first, guide to re-login if failed |
 | Gas token balance insufficient | Abort transaction/Approve, display Gas insufficient info, suggest top-up |
 | Approve token not in holdings | Prompt user doesn't hold this token, Approve can execute but has no practical meaning. Confirm whether to continue |
 | Spender contract is high risk | Strongly warn user, recommend cancellation. User insists can still continue (needs re-confirmation) |
 | Spender contract is unknown (not indexed) | Display "unknown contract" warning, prompt user to verify contract source |
 | Contract address format invalid | Refuse to initiate transaction, prompt correct address format |
-| `wallet.sign_message` fails | Display signing error message, possible causes: incorrect message format, account anomaly. Don't auto-retry |
+| `dex_wallet_sign_message` fails | Display signing error message, possible causes: incorrect message format, account anomaly. Don't auto-retry |
 | EIP-712 JSON parsing fails | Display raw JSON content, prompt format may be incorrect, ask user to confirm or re-obtain from DApp |
-| `wallet.sign_transaction` fails | Display signing error, possible causes: invalid transaction data, account permission issues. Don't auto-retry |
-| `tx.send_raw_transaction` fails | Display broadcast error (nonce conflict, gas insufficient, network congestion, etc.), suggest corresponding measures based on error type |
+| `dex_wallet_sign_transaction` fails | Display signing error, possible causes: invalid transaction data, account permission issues. Don't auto-retry |
+| `dex_tx_send_raw_transaction` fails | Display broadcast error (nonce conflict, gas insufficient, network congestion, etc.), suggest corresponding measures based on error type |
 | User cancels confirmation (signing/transaction/Approve) | Immediately abort, don't execute any signing or broadcasting. Display cancellation prompt, remain friendly |
 | `tx.gas` estimation fails | Display error message, possible causes: contract call would revert, incorrect parameters. Suggest checking transaction data |
 | Approve amount is 0 | Treat as "cancel authorization" operation, confirm with user whether to revoke authorization to this spender |
 | User requests unlimited authorization | Display high-risk warning template, needs user secondary confirmation |
 | Repeated Approve to same spender | Prompt existing authorization, new Approve will overwrite old authorization. Confirm whether to continue |
-| Network disconnection after signing before broadcasting | Prompt signed transaction can still be broadcast later, suggest retry after network recovery |
 | DApp provided raw_tx format abnormal | Refuse signing, prompt transaction data format incorrect, suggest re-generating from DApp |
-| Chain identifier not supported | Display supported chain list, ask user to re-select |
 | Message signing request chain is Solana | Prompt Solana message signing not yet supported, only supports EVM chains |
-| Network interruption | Display network error, suggest checking network then retry |
 
 ## Safety Rules
 
@@ -762,7 +681,7 @@ Agent must parse JSON structured data into human-readable format when displaying
 2. **`account_id` masking**: When displaying to users, only show partial characters (e.g. `acc_12...89`).
 3. **Auto token refresh**: When `mcp_token` expires, prioritize silent refresh, only require re-login if refresh fails.
 4. **Confirmation required before signing**: All signing operations (message signing, transaction signing, Approve) **must** display complete content to users and get explicit "confirm" reply before execution. Cannot skip, simplify or auto-confirm.
-5. **Contract security review**: When DApp interactions involve unknown contracts, **must** call `token_get_risk_info` for security review and display results to users. High-risk contracts need additional prominent warnings.
+5. **Contract security review**: When DApp interactions involve unknown contracts, **must** call `dex_token_get_risk_info` for security review and display results to users. High-risk contracts need additional prominent warnings.
 6. **Default exact authorization**: ERC20 Approve defaults to exact authorization amount. Only use unlimited authorization when user explicitly requests it, and **must** display unlimited authorization risk warnings.
 7. **EIP-712 content transparency**: EIP-712 signing requests must be completely parsed and displayed in human-readable format to users, cannot omit any key fields (especially `verifyingContract`, `spender`, amount fields).
 8. **Mandatory gas balance validation**: **Must** validate gas token balance before DApp transactions and Approve, **prohibit** initiating signing and broadcasting when balance insufficient.

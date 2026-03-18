@@ -1,5 +1,5 @@
 ---
-name: gate-dex-opentrade
+name: gate-dex-trade-openapi
 version: "2026.3.12-1"
 updated: "2026-03-12"
 description: "Gate DEX OpenTrade trading skill. Directly calls Gate DEX aggregated trading API via AK/SK authentication, centered on Swap, covering quotes, authorization, transaction building, signing, submission, and status queries. Supports EVM (Ethereum/BSC/Arbitrum/Base and 13 other chains), Solana, SUI, Tron, Ton. Triggered when users mention swap, exchange, buy, sell, DEX trading, OpenAPI, AK/SK, quotes, Gas price, order status, transaction history."
@@ -30,71 +30,6 @@ Additional rule: When `~/.gate-dex-openapi/config.json` file already exists, pri
 ## II. Step 0 — Environment Detection (Mandatory, must execute every trigger)
 
 **This step must be executed first every time the Skill is triggered, cannot be skipped.**
-
-### 2.0 Shell Execution Permissions (Mandatory, all Shell calls must comply)
-
-All operations of this Skill involve **external network requests** (calling Gate DEX API) and **file read/write outside workspace** (`~/.gate-dex-openapi/` directory), which will be blocked by Cursor's sandbox mechanism. Therefore:
-
-**Agent must attach `required_permissions` parameter based on command type when executing any Shell commands**:
-
-| Command Type | Required Permissions | Description |
-|-------------|---------------------|-------------|
-| Read/write files in `~/.gate-dex-openapi/` directory | `required_permissions: ["all"]` | Path outside workspace, sandbox prohibits writing by default |
-| Initiate HTTP requests (API calls, RPC calls) | `required_permissions: ["full_network"]` | Sandbox only allows limited domain list by default |
-| Install dependencies (`pip3 install`, `npm install`) | `required_permissions: ["full_network"]` | Need to download packages from PyPI / npm |
-| Any combination of above (e.g., script reads config + sends HTTP) | `required_permissions: ["all"]` | Needs both file and network permissions, use all directly |
-| Pure local commands (`python3 --version`, `ls`) | No extra permissions needed | Can execute within sandbox |
-
-**Simplified rule**: If uncertain whether sandbox will block, uniformly use `required_permissions: ["all"]`. Better to request more permissions than insufficient permissions causing command failure and retry (wasting time and affecting user experience).
-
-**Typical scenarios**:
-
-```
-# ✅ Correct: API call with full_network
-Shell(command='python3 -c "..."', required_permissions=["full_network"])
-
-# ✅ Correct: Write to ~/.gate-dex-openapi/ with all
-Shell(command='mkdir -p ~/.gate-dex-openapi', required_permissions=["all"])
-
-# ✅ Correct: Script reads config and sends requests, use all directly
-Shell(command='python3 ~/.gate-dex-openapi/scripts/gate_api.py "trade.swap.chain"', required_permissions=["all"])
-
-# ❌ Wrong: API call without permissions, will be blocked by sandbox
-Shell(command='python3 -c "..."')
-```
-
-> **Note**: This is Cursor IDE's sandbox security mechanism. When Agent requests `required_permissions`, Cursor will prompt user "Allow or not". Users just need to click confirm, no additional configuration required.
-
-**(Optional) Reduce popup interruption — Configure Cursor command whitelist**:
-
-If users want to reduce permission confirmation popups when executing commands, guide users to configure command whitelist in Cursor settings:
-
-1. Open Cursor Settings → Search `allowedCommands` or `terminal.integrated.allowedCommands`
-2. Add this Skill's commonly used command prefixes to whitelist:
-
-```json
-{
-  "cursor.allowedCommands": [
-    "python3",
-    "node",
-    "pip3 install",
-    "npm install",
-    "mkdir -p ~/.gate-dex-openapi",
-    "chmod"
-  ]
-}
-```
-
-After configuration, commands in the whitelist will **automatically get permissions without popups**. Commands not in whitelist will still popup for confirmation.
-
-Agent should proactively show the following tip when first triggering Skill if user frequently encounters permission popups:
-
-```
-💡 Tip: If you find permission confirmation popups too frequent, you can search 
-"allowedCommands" in Cursor Settings and add commands like python3, node to 
-the whitelist. These commands will automatically get permissions without 
-confirmation every time.
-```
 
 ### 2.1 Check Configuration File
 
@@ -205,72 +140,15 @@ Request body format:
 {"action":"trade.swap.xxx","params":{...}}
 ```
 
-### 4.2 HMAC-SHA256 Signature Algorithm
+### 4.2 API Call Method
 
-Every API request requires signature calculation. Algorithm as follows:
+Use the helper script for all API calls (handles HMAC-SHA256 signing automatically):
 
-**Step 1: Construct prehash string**
-
-```
-prehash = millisecond_timestamp + "/api/v1/dex" + raw_JSON_request_body
+```bash
+python3 gate-dex-trade/scripts/gate-api-call.py "<action>" '<params_json>'
 ```
 
-- Millisecond timestamp: 13-digit Unix millisecond timestamp, e.g., `1709812345678`
-- Path is fixed as `/api/v1/dex` (regardless of actual URL, signature path is always this)
-- Request body must be **compact JSON** (no extra spaces), i.e., use `separators=(',', ':')` when serializing
-
-**Step 2: Calculate HMAC-SHA256**
-
-```
-signature = Base64Encode( HMAC-SHA256( key=SecretKey, message=prehash ) )
-```
-
-**Step 3: Set HTTP Headers**
-
-| Header | Value | Description |
-|--------|-------|-------------|
-| Content-Type | `application/json` | Fixed value |
-| X-API-Key | `api_key` from config file | Identity identifier |
-| X-Timestamp | The millisecond timestamp string used above | Server offset must not exceed 30 seconds |
-| X-Signature | The Base64 signature calculated above | Request integrity verification |
-| X-Request-Id | Random UUIDv4 string | Idempotency key, unique under same AK, not included in signature calculation |
-
-### 4.3 Signature Reference Implementation (Python Pseudocode)
-
-The following code shows precise implementation of signature algorithm for Agent reference. Agent can implement equivalent logic in any language through Shell one-time inline commands (like `python3 -c '...'`), **must not create script files in user repository**.
-
-```python
-import hmac, hashlib, base64, time, json, uuid
-
-ak = "api_key read from ~/.gate-dex-openapi/config.json"
-sk = "secret_key read from ~/.gate-dex-openapi/config.json"
-
-body = json.dumps({"action": "trade.swap.chain", "params": {}}, separators=(',', ':'))
-
-ts = str(int(time.time() * 1000))
-
-prehash = ts + "/api/v1/dex" + body
-
-signature = base64.b64encode(
-    hmac.new(sk.encode('utf-8'), prehash.encode('utf-8'), hashlib.sha256).digest()
-).decode('utf-8')
-
-headers = {
-    "Content-Type": "application/json",
-    "X-API-Key": ak,
-    "X-Timestamp": ts,
-    "X-Signature": signature,
-    "X-Request-Id": str(uuid.uuid4())
-}
-```
-
-### 4.4 Key Considerations
-
-1. **JSON serialization must be compact**: `json.dumps(..., separators=(',', ':'))`, extra spaces will cause signature mismatch
-2. **Signature path is fixed**: Always `/api/v1/dex`, don't use other paths
-3. **X-Request-Id not included in signature**: But must be included in request headers, and cannot be repeated under same AK
-4. **Timestamp must be millisecond level**: 13-digit number string
-5. **Request body directly used for signature**: The `data=body` sent content must be exactly the same as the body string variable used for signature
+The script reads AK/SK from ~/.gate-dex-openapi/config.json, computes signature, and sends the request.
 
 ### 4.5 Universal Response Format
 
@@ -654,7 +532,7 @@ If no approve needed, omit `signed_approve_tx_string` field:
 
 **Agent Behavior**:
 - Before call: Ensure signing completed (swap transaction + optional approve transaction)
-- After call: Display "Transaction submitted" with tx_hash and block explorer URL as plain text (no hyperlinks), then automatically enter status polling (Action 7)
+- After call: Display "Transaction submitted, tx_hash: [hash]", then automatically enter status polling (Action 7)
 - Submission strategy selection: See Chapter 9 9.3.4 Submission Strategy
 - On error:
   - 31601 (order_id expired / signature verification failed) → Prompt user need to re-execute build step
@@ -1136,189 +1014,15 @@ for signing, will not be uploaded to any server, nor sent to API.
 Private key will not be retained or stored after signing completed.
 ```
 
-Private key to address derivation principles for each chain:
-
-**EVM (Universal for all EVM chains)**:
-1. Private key is 32 bytes (64-bit hex string, without 0x prefix)
-2. Use secp256k1 elliptic curve to derive public key from private key (take uncompressed format, 64 bytes without 04 prefix)
-3. Keccak-256 hash the public key
-4. Take last 20 bytes of hash, add `0x` prefix → wallet address
-5. Use EIP-55 mixed case checksum formatting
-
-**Solana**:
-1. Private key is Ed25519 keypair (64 bytes, Base58 encoded)
-2. First 32 bytes are seed, last 32 bytes are public key
-3. Base58 encoding of public key → wallet address
-
-**SUI**:
-1. Private key is Ed25519 private key (32 bytes hex)
-2. Derive Ed25519 public key from private key (32 bytes)
-3. Add flag byte `0x00` (Ed25519 marker) before public key
-4. Blake2b-256 hash the flag + public key
-5. Hash result with `0x` prefix → SUI address
-
-**Ton**:
-1. Private key is Ed25519 private key (32 bytes hex)
-2. Derive Ed25519 public key from private key
-3. Create WalletV4R2 contract using public key
-4. Contract address is wallet address (bounceable base64 format)
-
 ### 9.2 Sign unsigned_tx
 
-Agent signs unsigned_tx based on chain type. **Must strictly follow the official demo formats below**, otherwise API broadcast will fail during parsing.
+Use the helper scripts for signing (handles all chain-specific logic):
 
-> **Execution Method**: The following code is format reference only, Agent must complete signing through Shell executing one-time inline commands (like `python3 -c '...'`, `node -e '...'`), **prohibited from creating any script files in user repository**.
+**EVM**: `echo "PRIVATE_KEY" | python3 scripts/sign-tx-evm.py '<unsigned_tx_json>' '<rpc_url>'`
+**Solana**: `echo "PRIVATE_KEY" | node scripts/sign-tx-sol.js '<unsigned_tx_base64>' '<rpc_url>'`
+**SUI/Ton**: Use `node -e` inline with the appropriate SDK.
 
-#### EVM Signing (Go Reference Implementation — Universal for all EVM chains)
-
-> **Key Requirement: Must use EIP-1559 DynamicFeeTx (Type 2) format, cannot use Legacy format.**
-> Legacy format signed transactions start with `0xf8`/`0xf9`, API cannot parse; EIP-1559 format starts with `0x02` (like `0x02f8b2...`).
-
-- unsigned_tx contains `to`, `data` (hex), `value`, `gas_limit`, `chain_id`
-- Agent needs to additionally get via RPC: `nonce` (`eth_getTransactionCount`), `gasTipCap` (`eth_maxPriorityFeePerGas`), `gasFeeCap` (`eth_gasPrice`)
-- If there's approve transaction need to sign simultaneously: approve uses nonce=N, swap uses nonce=N+1
-
-```go
-// Official EVM signing reference (Go)
-privateKey, _ := crypto.HexToECDSA("your_private_key")
-client, _ := ethclient.Dial("https://bsc-dataseed.binance.org")
-nonce, _ := client.PendingNonceAt(ctx, fromAddress)
-gasTipCap, _ := client.SuggestGasTipCap(ctx)
-gasFeeCap, _ := client.SuggestGasPrice(ctx)
-txData, _ := hexutil.Decode(unsignedTx.Data)
-
-tx := types.NewTx(&types.DynamicFeeTx{
-    ChainID:   big.NewInt(chainID),
-    Nonce:     nonce,
-    GasTipCap: gasTipCap,
-    GasFeeCap: gasFeeCap,
-    Gas:       uint64(unsignedTx.GasLimit),
-    To:        &toAddress,
-    Value:     big.NewInt(0),  // Use unsignedTx.Value for native tokens
-    Data:      txData,
-})
-
-signer := types.LatestSignerForChainID(chainID)
-signedTx, _ := types.SignTx(tx, signer, privateKey)
-signedTxBytes, _ := signedTx.MarshalBinary()
-signedTxHex := "0x" + hex.EncodeToString(signedTxBytes)
-
-// ⚠️ Key: submit interface requires signed_tx_string to be JSON array format string
-// Must use json.Marshal to wrap into '["0x02f8..."]', not raw hex "0x02f8..."
-signedTxArray, _ := json.Marshal([]string{signedTxHex})
-signedTxString := string(signedTxArray)  // Result: '["0x02f8b2..."]'
-```
-
-**Python Equivalent Implementation Points** (Agent reference when using Python):
-
-```python
-from web3 import Web3
-from eth_account import Account
-import json
-
-w3 = Web3(Web3.HTTPProvider(rpc_url))
-tx = {
-    'to': Web3.to_checksum_address(unsigned_tx['to']),
-    'value': int(unsigned_tx['value']),
-    'gas': unsigned_tx['gas_limit'],
-    'maxFeePerGas': w3.eth.gas_price,              # gasFeeCap
-    'maxPriorityFeePerGas': w3.eth.max_priority_fee, # gasTipCap
-    'nonce': w3.eth.get_transaction_count(wallet, 'pending'),
-    'chainId': unsigned_tx['chain_id'],
-    'data': unsigned_tx['data'],
-    'type': 2  # Force EIP-1559
-}
-signed = w3.eth.account.sign_transaction(tx, private_key)
-signed_tx_hex = '0x' + signed.raw_transaction.hex()
-# signed_tx_hex should start with "0x02", if starts with "0xf8"/"0xf9" indicates format error
-
-# ⚠️ Key: submit interface requires signed_tx_string to be JSON array format string
-signed_tx_string = json.dumps([signed_tx_hex])  # Result: '["0x02f8b2..."]'
-```
-
-- signed_tx_hex format: `"0x" + hex(signed transaction bytes)`, must start with `0x02`
-- **signed_tx_string format: `'["0x02..."]'` (JSON array string), this is the final value passed to submit interface**
-
-#### Solana Signing (JavaScript Reference Implementation)
-
-- unsigned_tx.data is base64 encoded VersionedTransaction
-- **Important**: Must refresh recentBlockhash via RPC `getLatestBlockhash` before signing (validity period only 60-90 seconds)
-- signed_tx_string format: **JSON array string**, internal elements are Base58 encoded signed transaction bytes
-
-```javascript
-import { Connection, Keypair, VersionedTransaction } from '@solana/web3.js';
-import { bs58 } from '@coral-xyz/anchor/dist/cjs/utils/bytes';
-
-const secretKey = bs58.decode("your_private_key_base58");
-const keypair = Keypair.fromSecretKey(secretKey);
-
-const tx = VersionedTransaction.deserialize(Buffer.from(unsignedTxData, 'base64'));
-
-const connection = new Connection("https://api.mainnet-beta.solana.com");
-const latest = await connection.getLatestBlockhash();
-tx.message.recentBlockhash = latest.blockhash;
-
-tx.sign([keypair]);
-const signedTxBase58 = bs58.encode(Buffer.from(tx.serialize()));
-
-// ⚠️ Key: submit interface requires signed_tx_string to be JSON array format string
-const signedTxString = JSON.stringify([signedTxBase58]);  // '["5K8j..."]'
-```
-
-#### SUI Signing (JavaScript Reference Implementation)
-
-- unsigned_tx.data is base64 encoded TransactionBlock
-- SUI signature format: flag(1 byte, 0x00) + signature(64 bytes) + pubkey(32 bytes), Base64 encoded
-- signed_tx_string format: **JSON array string**, internal elements are Base64 encoded
-
-```javascript
-import { Ed25519Keypair } from "@mysten/sui.js/keypairs/ed25519";
-import { TransactionBlock } from '@mysten/sui.js/transactions';
-import { hexToBytes } from '@noble/hashes/utils';
-import { SuiClient } from '@mysten/sui.js/client';
-
-const keypair = Ed25519Keypair.fromSecretKey(hexToBytes(privateKeyHex));
-const suiClient = new SuiClient({ url: "https://fullnode.mainnet.sui.io" });
-const tx = TransactionBlock.from(Buffer.from(unsignedTxData, 'base64').toString());
-tx.setSenderIfNotSet(keypair.toSuiAddress());
-const txBytes = await tx.build({ client: suiClient });
-const { signature, bytes } = await keypair.signTransactionBlock(txBytes);
-const signedTxBase64 = Buffer.from(bytes).toString('base64');
-
-// ⚠️ Key: submit interface requires signed_tx_string to be JSON array format string
-const signedTxString = JSON.stringify([signedTxBase64]);  // '["base64..."]'
-```
-
-#### Ton Signing (JavaScript Reference Implementation)
-
-- unsigned_tx contains `to`, `value`, `data` (contains body and sendMode)
-- Need to get seqno via RPC
-- signed_tx_string format: **JSON array string**, internal elements are BOC's Base64 encoding
-
-```javascript
-import { TonClient, WalletContractV4 } from '@ton/ton';
-
-const publicKey = getPublicKeyFromPrivateKey(privateKeyHex);
-const wallet = WalletContractV4.create({ workchain: 0, publicKey });
-const client = new TonClient({ endpoint: rpcUrl });
-const contract = client.open(wallet);
-const seqno = await contract.getSeqno();
-
-const txInfo = {
-    messages: [{
-        address: unsignedTx.to,
-        amount: unsignedTx.value,
-        payload: unsignedTx.data?.body,
-        sendMode: unsignedTx.data?.sendMode
-    }]
-};
-
-const transfer = await createTonConnectTransfer(seqno, contract, txInfo, keypair.secretKey);
-const bocBase64 = externalMessage(contract, seqno, transfer).toBoc({ idx: false }).toString("base64");
-
-// ⚠️ Key: submit interface requires signed_tx_string to be JSON array format string
-const signedTxString = JSON.stringify([bocBase64]);  // '["base64..."]'
-```
+All scripts output `{"signed_tx_string": "[\"...\"]"}` in the JSON array format required by submit API.
 
 ### 9.3 Agent Methods to Get Private Keys
 
@@ -1387,57 +1091,11 @@ submit_resp = api_call({
 
 ### 9.5 ERC20 Allowance Check
 
-Must check on-chain existing allowance is sufficient before calling `trade.swap.approve_transaction`.
-
-**Check Conditions** (all must be satisfied to need checking):
-1. Chain type is EVM or Tron
-2. token_in is not native token (token_in != `"-"` and from_token.is_native_token != 1)
-
-**If token_in is native token, directly skip allowance check and approve process.**
-
-**Check Method**:
-
-Call ERC20 contract's `allowance(address owner, address spender)` method:
-
-- `owner` = user wallet address (user_wallet)
-- `spender` = routing contract address returned by quote (build returned unsigned_tx.to)
-- Contract address = token_in's contract address
-- Method signature: `allowance(address,address)` → function selector = `0xdd62ed3e`
-
-Call via RPC `eth_call`:
-
-```json
-{
-  "jsonrpc": "2.0",
-  "method": "eth_call",
-  "params": [{
-    "to": "<token_in contract address>",
-    "data": "0xdd62ed3e000000000000000000000000<owner address remove 0x pad 0 to 64 bits>000000000000000000000000<spender address remove 0x pad 0 to 64 bits>"
-  }, "latest"],
-  "id": 1
-}
+Use the helper script:
+```bash
+python3 scripts/check-allowance.py "<rpc_url>" "<token>" "<owner>" "<spender>" "<amount>" "<decimals>"
 ```
-
-Return value is hex encoded uint256, representing current allowance (raw value, including decimals).
-
-**Precision Aligned Comparison**:
-
-Allowance returned is raw value (like USDT 6 decimals, 1 USDT = 1000000). Transaction amount also needs conversion to same dimension:
-
-```
-Required raw_amount = amount_in * 10^decimals
-Current allowance_raw = Value queried from chain (hex to decimal)
-
-If allowance_raw >= raw_amount → No need approve
-If allowance_raw < raw_amount → Need approve, approve_amount = amount_in (human-readable format)
-```
-
-**Note Precision Traps**:
-- Different tokens have different decimals (USDT=6, WETH=18, WBTC=8)
-- decimals obtained from quote returned `from_token.decimal` field
-- Comparison must be in same precision dimension (both use raw value or both use human-readable value)
-
-Agent needs to find corresponding chain's public RPC URL to execute `eth_call`.
+Returns `{"allowance_sufficient": true/false}`. If false, proceed with approve.
 
 ---
 
@@ -1514,10 +1172,6 @@ The following rules are **mandatory constraints**, Agent must comply in any situ
 7. **Private Key Security**: Before requesting private key from user, must first display security notice (see Chapter 9 Section 9.1), clearly inform private key only used in local context, won't upload to any server. Agent discards private key after obtaining and signing, don't retain in conversation history. Don't proactively write private key to files (unless user explicitly requests saving to specific location).
 
 8. **Error Transparency**: All API errors display English message as-is, don't hide or tamper with error information. Agent attaches Chinese explanation and suggestions.
-
-9. **Prohibited Writing to User Repository**: Agent must not create, write, or modify any files in user's workspace (repository) throughout entire Swap process (including but not limited to scripts, temporary files, log files). All operations (API calls, signing, address derivation etc.) must be completed through Shell one-time inline commands (like `python3 -c '...'`, `node -e '...'`). Only exception is `~/.gate-dex-openapi/config.json` configuration file (located in user home directory, not in workspace).
-
-10. **Shell Commands Must Carry Sandbox Permissions**: Cursor IDE's sandbox mechanism will block unauthorized network requests and file operations outside workspace. Agent must proactively attach `required_permissions` parameter when executing Shell commands (see Chapter 2 Section 2.0 detailed rules). Simplified principle: use `["full_network"]` for network requests, use `["all"]` for `~/.gate-dex-openapi/` file operations or combined operations. **Prohibited from executing without permissions first, waiting for failure then retry** — this wastes user time and causes unnecessary confirmation popups.
 
 ---
 

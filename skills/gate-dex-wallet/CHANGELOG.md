@@ -4,6 +4,36 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.18-1] - 2026-03-18
+
+### Changed
+
+- **SKILL.md Streamlined**: Removed verbose MCP detection logic, OpenClaw integration, and Claude Code specific sections; converted to pure routing layer pointing to `references/`
+- **MCP Tool Naming**: Restored `dex_` prefix for all tool references across SKILL.md and references/
+
+### Fixed
+
+- **Tool Naming Alignment**: Renamed legacy `auth.refresh_token` → `dex_auth_refresh_token`, `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
+- **Cross-Reference Paths**: Replaced stale standalone skill names (`gate-dex-auth`, `gate-dex-transfer`, `gate-dex-dapp`) with current file-based paths (`gate-dex-wallet/references/auth.md`, etc.)
+- **Legacy Skill Identifiers**: Renamed `gate-dex-cli` metadata to `gate-dex-wallet-cli` in cli.md
+
+## [2026.3.17-1] - 2026-03-17
+
+### Fixed
+
+- **Tool Naming Alignment**: Renamed legacy `auth.refresh_token` → `dex_auth_refresh_token`, `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
+- **Cross-Reference Paths**: Replaced stale standalone skill names (`gate-dex-auth`, `gate-dex-transfer`, `gate-dex-dapp`) with current file-based paths (`gate-dex-wallet/references/auth.md`, etc.)
+- **Legacy Skill Identifiers**: Renamed `gate-dex-cli` metadata to `gate-dex-wallet-cli` in cli.md
+
+## [2026.3.14-3] - 2026-03-14
+
+### Changed
+
+- **MCP Tool Cross-References**: Updated market tool references in `references/dapp.md` and `references/cli.md` to use new `dex_` prefixed names
+  - `token_get_risk_info` → `dex_token_get_risk_info`
+  - `market_get_kline` → `dex_market_get_kline`
+  - `token_list_swap_tokens` → `dex_token_list_swap_tokens`
+
 ## [2026.3.14-2] - 2026-03-14
 
 ### Added
@@ -52,7 +82,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - **Routing File Template**: `install.sh` generated CLAUDE.md / AGENTS.md adds CLI routing entries
-- **Cross-Skill Collaboration Table**: CLI caller name in SKILL.md corrected to `gate-dex-cli`
+- **Cross-Skill Collaboration Table**: CLI caller name in SKILL.md corrected to `gate-dex-wallet-cli`
 - **npm Package Name Unification**: All files unified to use `gate-wallet-cli`
 
 ## [2026.3.11-1] - 2026-03-11
@@ -82,5 +112,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Deprecated
 
-- Independent `gate-dex-wallet/references/auth`, `gate-dex-wallet/references/transfer`, `gate-dex-wallet/references/dapp` Skill directories
+- Independent `gate-dex-wallet/references/auth.md`, `gate-dex-wallet/references/transfer.md`, `gate-dex-wallet/references/dapp.md` Skill directories
 - Cross-Skill complex routing, simplified to single Skill internal module routing

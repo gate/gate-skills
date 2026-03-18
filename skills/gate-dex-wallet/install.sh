@@ -146,7 +146,7 @@ install_claude() {
     echo -e "${CYAN}🤖 Configuring Claude Code...${NC}"
     
     # Try CLI first
-    if claude mcp add --transport http gate-wallet --scope project https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
+    if claude mcp add --transport http gate-dex --scope project https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
         echo -e "${GREEN}  ✓${NC} MCP server added successfully via CLI"
     else
         cat > .mcp.json << 'EOF'
@@ -187,7 +187,7 @@ install_codex() {
     echo -e "${CYAN}⚙️ Configuring Codex CLI...${NC}"
     
     # Try CLI first
-    if codex mcp add gate-wallet --transport http --url https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
+    if codex mcp add gate-dex --transport http --url https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
         echo -e "${GREEN}  ✓${NC} MCP server added successfully via CLI"
     else
         local config_file="$HOME/.codex/config.toml"
@@ -195,11 +195,11 @@ install_codex() {
         
         cat >> "$config_file" << 'EOF'
 
-[mcp.gate-wallet]
+[mcp.gate-dex]
 transport = "http"
 url = "https://api.gatemcp.ai/mcp/dex"
 
-[mcp.gate-wallet.headers]
+[mcp.gate-dex.headers]
 Authorization = "Bearer <your_mcp_token>"
 EOF
         echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated"
