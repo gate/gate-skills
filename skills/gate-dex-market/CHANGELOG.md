@@ -4,59 +4,12 @@ All notable changes to `gate-dex-market` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2026.3.14-2] - 2026-03-14
-
-### Fixed
-
-- **Version Check Logic Enhancement**: Fixed critical version checking logic to use dynamic metadata reading
-  - Added `getCurrentSkillVersion()` function to dynamically read version and updated date from SKILL.md
-  - Replaced hardcoded version constants with real-time file metadata extraction
-  - Resolved infinite update loop issue where updated skills would still use old hardcoded versions
-  - Enhanced dual-field version checking (both `version` and `updated` fields)
-- **OAuth Authentication Documentation**: Updated authentication descriptions to support both Google OAuth and Gate OAuth
-- **URL Display Format**: Standardized MCP login URL display format without decorative quotes or brackets
-- **Auto-update System Optimization**: 
-  - Fresh installation detection (24-hour window) to skip redundant initial checks
-  - Session-based update checking with 1-hour cooldown mechanism
-  - Support for same-session re-checking after cooldown period expires
-
-### Enhanced
-
-- **Version Comparison Logic**: Now supports both version number comparison and updated date comparison
-- **User Experience**: Dynamic version display in messages instead of static hardcoded values
-- **Error Handling**: Robust fallback mechanisms for version reading failures
-- **Performance Optimizations**: Reduced redundant version checks through intelligent caching
-
-### Technical
-
-- All skill components updated: `SKILL.md`, `references/mcp.md`, `references/openapi.md`
-- Version metadata synchronized across all files
-- Comprehensive logging and status reporting for update operations
-
-## [2026.3.14-1] - 2026-03-14
-
-### Added
-
-- **Complete English Version**: Full English translation of Gate DEX Market skill package
-  - `README.md` (92 lines) — Comprehensive installation and usage guide
-  - `SKILL.md` (269 lines) — Intelligent routing and unified entry point
-  - `references/mcp.md` (934 lines) — Complete MCP mode detailed specifications
-  - `references/openapi.md` (531 lines) — Complete OpenAPI mode detailed specifications
-  - `install.sh` (188 lines) — Automated installation and configuration script
-- **Professional Technical Documentation**: 2,063 lines of professionally translated technical content
-- **Dual-language Support**: Parallel Chinese (`gate-dex-market-test`) and English (`gate-dex-market`) versions
-- **Complete Technical Preservation**: All API specifications, parameters, HMAC-SHA256 algorithms, and MCP tool formats maintained
+## [2026.3.12-1] - 2026-03-12
 
 ### Changed
 
-- **Path References**: All internal document references updated to `gate-dex-market` path structure
-- **Metadata Updates**: Skill names and identifiers properly localized for English version
-- **Documentation Structure**: Optimized file organization with proper cross-references
-
-### Removed
-
-- **Redundant Documentation**: Eliminated duplicate README files that caused content overlap
-- **Obsolete References**: Cleaned up outdated file structure references
+- **Architecture Simplification**: Removed MCP mode, now uses OpenAPI mode only
+- **Cleaner Configuration**: Single mode reduces complexity and configuration burden
 
 ---
 
@@ -64,20 +17,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **Dual-mode Architecture**: Integrated MCP and OpenAPI two calling methods into single Skill entry
-- **Intelligent Routing System**: Automatically select optimal calling mode based on environment and user intent
-  - `references/openapi.md` — OpenAPI mode complete specification (AK/SK direct calls)
-  - `references/mcp.md` — MCP mode detailed specification  
-- **MCP Tool Integration** (6 tools): K-line, token info, rankings, security audit, etc.
-- **OpenAPI Tool Integration** (9 actions): Token list, basic info, holder analysis, risk detection, etc.
-- **Unified Connection Detection**: First session detection + runtime error fallback
+- **OpenAPI Integration**: AK/SK authentication for direct API calls
+  - `references/openapi.md` — OpenAPI complete specification
+  - `references/README-openapi.md` — OpenAPI usage guide
+- **OpenAPI Tool Integration** (9 actions): Token lists, basic info, holder analysis, risk detection, K-line, etc.
+- **Environment Detection**: Auto-detect and create config file on first use
 - Support for 8 chains (ETH, BSC, Polygon, Arbitrum, Optimism, Avalanche, Base, Solana)
 
 ### Changed
 
-- **Architecture Upgrade**: Upgraded from single MCP mode to dual MCP + OpenAPI mode support
-- **Routing Optimization**: Main SKILL.md serves as intelligent distribution center, sub-module specifications maintained independently
-- **User Experience**: Automatically select most suitable calling method based on environment, reducing configuration burden
+- **Routing Optimization**: Main SKILL.md serves as entry point, detailed specifications in references/
+- **User Experience**: Auto-creates config with default credentials, reducing initial setup burden
 
 ---
 
@@ -85,7 +35,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- 9 market data query tools (all require no authentication)
-- 5 operation workflows: quote viewing, token details, rankings, security audit, new token discovery  
-- MCP Server connection detection (first session detection + runtime error fallback)
-- Cross-Skill collaboration: Provide token information and security audit for swap, dapp
+- 9 market data query actions (all read-only)
+- 5 operation flows: quote viewing, token details, rankings, security audit, new token discovery
+- Cross-Skill collaboration: provides token information and security audit for swap, dapp

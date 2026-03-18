@@ -1,14 +1,9 @@
 #!/bin/bash
 
-# Gate Market MCP Installer
+# Gate Market OpenAPI Installer
 # Interactive installer focusing on market data functionality
 
 set -e
-
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repository root is one level up from gate-dex-market/
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
 
 # Colors
 RED='\033[0;31m'
@@ -20,7 +15,7 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 echo ""
-echo -e "${BOLD}📊 Gate Market MCP Installer${NC}"
+echo -e "${BOLD}📊 Gate Market OpenAPI Installer${NC}"
 echo "===================================="
 echo "Interactive installer for market data functionality"
 echo ""
@@ -77,7 +72,7 @@ select_platform() {
     echo "  a) All platforms (recommended)"
     echo ""
     
-    read -p "Please select platforms to configure [1-${#detected_platforms[@]}/a] (default a): " choice
+    read -p "Please select platform to configure [1-${#detected_platforms[@]}/a] (default a): " choice
     choice=${choice:-a}
     
     if [ "$choice" = "a" ]; then
@@ -93,7 +88,7 @@ select_platform() {
 # Install functions (market-focused)
 install_cursor() {
     echo -e "${CYAN}📱 Configuring Cursor (market data priority)...${NC}"
-    echo -e "${GREEN}  ✓${NC} Cursor market configuration complete"
+    echo -e "${GREEN}  ✓${NC} Cursor market configuration completed"
 }
 
 install_claude() {
@@ -102,13 +97,13 @@ install_claude() {
     cat > CLAUDE.md << 'EOF'
 # Gate DEX Market Skills
 
-When users request the following operations, read the corresponding SKILL.md file and strictly follow its flow:
+When user requests the following operations, read the corresponding SKILL.md file and strictly follow its process:
 
-- 📊 Market queries, K-lines, token info, security audits, rankings → `gate-dex-market/SKILL.md`
+- 📊 Check quotes, K-lines, token info, security audits, rankings → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, buy, sell, quote → `gate-dex-trade/SKILL.md`
 - 💰 Check balance, wallet address, auth login → `gate-dex-wallet/SKILL.md`
 
-Prioritize market data related functions. Support both MCP and OpenAPI dual modes.
+Prioritize market data-related functionality. Uses OpenAPI mode with AK/SK authentication.
 EOF
     
     echo -e "${GREEN}  ✓${NC} CLAUDE.md market routing created"
@@ -116,12 +111,12 @@ EOF
 
 install_codex() {
     echo -e "${CYAN}⚙️ Configuring Codex CLI (market data priority)...${NC}"
-    echo -e "${GREEN}  ✓${NC} Codex market configuration complete"
+    echo -e "${GREEN}  ✓${NC} Codex market configuration completed"
 }
 
 install_openclaw() {
     echo -e "${CYAN}🐾 Configuring OpenClaw (market data priority)...${NC}"
-    echo -e "${GREEN}  ✓${NC} OpenClaw market configuration complete"
+    echo -e "${GREEN}  ✓${NC} OpenClaw market configuration completed"
 }
 
 # Main
@@ -143,7 +138,7 @@ main() {
     done
     
     echo "===================================="
-    echo -e "${GREEN}🎉 Gate Market installation complete!${NC}"
+    echo -e "${GREEN}🎉 Gate Market installation completed!${NC}"
     echo ""
     echo -e "${BLUE}📱 Configured platforms:${NC}"
     for platform in "${selected_platforms[@]}"; do
@@ -152,19 +147,19 @@ main() {
     echo ""
     echo -e "${BLUE}🎯 Next steps:${NC}"
     echo "1. Restart your AI tool"
-    echo "2. Try query: \"Show ETH USDT K-line chart\""
-    echo "3. View documentation: ./gate-dex-market/README.md"
+    echo "2. Try query: \"View ETH USDT K-line chart\""
+    echo "3. Check documentation: ./gate-dex-market/README.md"
     echo ""
     echo -e "${CYAN}💡 Tips:${NC}"
-    echo "  Supports both MCP (requires auth) and OpenAPI (AK/SK) dual modes"
-    echo "  OpenAPI details: ./references/openapi.md"
+    echo "  Uses OpenAPI mode with AK/SK authentication"
+    echo "  OpenAPI details: ./gate-dex-market/references/openapi.md"
     echo ""
 }
 
 # Parse arguments
 case "${1:-}" in
     --help|-h)
-        echo "Gate Market MCP Installer"
+        echo "Gate Market OpenAPI Installer"
         echo "Interactive installer for market data functionality"
         echo ""
         echo "Usage: $0 [options]"

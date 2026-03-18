@@ -5,11 +5,6 @@
 
 set -e
 
-# Get the directory where this script is located
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repository root is one level up from gate-dex-wallet/
-REPO_ROOT="$(dirname "$SCRIPT_DIR")"
-
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -29,15 +24,15 @@ echo ""
 detect_platforms() {
     local platforms=()
     
-    if command -v cursor &> /dev/null || [ -d "$HOME/.cursor" ] || [ -d "/Applications/Cursor.app" ]; then
+    if command -v cursor &> /dev/null; then
         platforms+=("cursor")
     fi
     
-    if command -v claude &> /dev/null || [ -d "$HOME/.claude" ]; then
+    if command -v claude &> /dev/null; then
         platforms+=("claude")
     fi
     
-    if command -v codex &> /dev/null || [ -d "$HOME/.codex" ]; then
+    if command -v codex &> /dev/null; then
         platforms+=("codex")
     fi
     
@@ -52,32 +47,32 @@ detect_platforms() {
 select_platform() {
     local detected_platforms=($(detect_platforms))
     
-    echo -e "${BLUE}🔍 Detected AI platforms:${NC}" >&2
+    echo -e "${BLUE}🔍 Detected AI platforms:${NC}"
     if [ ${#detected_platforms[@]} -eq 0 ]; then
-        echo "  ❌ No supported platforms detected" >&2
-        echo "" >&2
-        echo -e "${YELLOW}Please install one of the following AI platforms first:${NC}" >&2
-        echo "  • Cursor: https://cursor.com" >&2
-        echo "  • Claude Code: https://docs.anthropic.com/claude-code" >&2
-        echo "  • Codex CLI: https://developers.openai.com/codex" >&2
-        echo "  • OpenClaw (mcporter): https://github.com/mcporter-dev/mcporter" >&2
+        echo "  ❌ No supported platforms detected"
+        echo ""
+        echo -e "${YELLOW}Please install one of the following AI platforms first:${NC}"
+        echo "  • Cursor: https://cursor.com"
+        echo "  • Claude Code: https://docs.anthropic.com/claude-code"
+        echo "  • Codex CLI: https://developers.openai.com/codex"
+        echo "  • OpenClaw (mcporter): https://github.com/mcporter-dev/mcporter"
         exit 1
     fi
     
     local i=1
     for platform in "${detected_platforms[@]}"; do
         case "$platform" in
-            cursor) echo "  $i) Cursor ✅" >&2 ;;
-            claude) echo "  $i) Claude Code ✅" >&2 ;;
-            codex) echo "  $i) Codex CLI ✅" >&2 ;;
-            openclaw) echo "  $i) OpenClaw (mcporter) ✅" >&2 ;;
+            cursor) echo "  $i) Cursor ✅" ;;
+            claude) echo "  $i) Claude Code ✅" ;;
+            codex) echo "  $i) Codex CLI ✅" ;;
+            openclaw) echo "  $i) OpenClaw (mcporter) ✅" ;;
         esac
         ((i++))
     done
-    echo "  a) All platforms (recommended)" >&2
-    echo "" >&2
+    echo "  a) All platforms (recommended)"
+    echo ""
     
-    read -p "Please select platforms to configure [1-${#detected_platforms[@]}/a] (default a): " choice
+    read -p "Please select platform to configure [1-${#detected_platforms[@]}/a] (default a): " choice
     choice=${choice:-a}
     
     if [ "$choice" = "a" ]; then
@@ -85,7 +80,7 @@ select_platform() {
     elif [[ "$choice" =~ ^[0-9]+$ ]] && [ "$choice" -ge 1 ] && [ "$choice" -le ${#detected_platforms[@]} ]; then
         echo "${detected_platforms[$((choice-1))]}"
     else
-        echo -e "${RED}Invalid choice, using all platforms${NC}" >&2
+        echo -e "${RED}Invalid selection, using all platforms${NC}"
         echo "${detected_platforms[@]}"
     fi
 }
@@ -103,9 +98,10 @@ install_cursor() {
         if [ -f "$config_file" ]; then
             existing_config=$(cat "$config_file")
         fi
-        echo "$existing_config" | jq '.mcpServers["gate-dex"] = {
+        echo "$existing_config" | jq '.mcpServers["gate-wallet"] = {
           "url": "https://api.gatemcp.ai/mcp/dex",
           "headers": {
+            "x-api-key": "MCP_AK_8W2N7Q",
             "Authorization": "Bearer <your_mcp_token>"
           }
         }' > "$config_file"
@@ -113,9 +109,10 @@ install_cursor() {
         cat > "$config_file" << 'EOF'
 {
   "mcpServers": {
-    "gate-dex": {
+    "gate-wallet": {
       "url": "https://api.gatemcp.ai/mcp/dex",
       "headers": {
+        "x-api-key": "MCP_AK_8W2N7Q",
         "Authorization": "Bearer <your_mcp_token>"
       }
     }
@@ -124,21 +121,17 @@ install_cursor() {
 EOF
     fi
     
-    # Install skills to ~/.cursor/skills/
-    local skills_dir="$HOME/.cursor/skills"
-    mkdir -p "$skills_dir"
+    # Install skills
+    mkdir -p ".cursor/skills"
+    local current_dir=$(pwd)
     for skill in gate-dex-wallet gate-dex-market gate-dex-trade; do
-        if [ -d "$REPO_ROOT/$skill" ]; then
-            rm -rf "$skills_dir/$skill"
-            cp -r "$REPO_ROOT/$skill" "$skills_dir/$skill"
-            echo -e "${GREEN}  ✓${NC} Installed: $skill → $skills_dir/$skill"
-        else
-            echo -e "${YELLOW}  ⚠${NC} $skill directory not found: $REPO_ROOT/$skill"
+        if [ -d "$skill" ]; then
+            ln -sf "$current_dir/$skill" ".cursor/skills/$skill"
         fi
     done
     
     echo -e "${GREEN}  ✓${NC} MCP configuration updated: $config_file"
-    echo -e "${GREEN}  ✓${NC} Skills installed to: $skills_dir"
+    echo -e "${GREEN}  ✓${NC} Skills symbolic links created"
 }
 
 # Install for Claude Code
@@ -152,10 +145,11 @@ install_claude() {
         cat > .mcp.json << 'EOF'
 {
   "mcpServers": {
-    "gate-dex": {
+    "gate-wallet": {
       "type": "http",
       "url": "https://api.gatemcp.ai/mcp/dex",
       "headers": {
+        "x-api-key": "MCP_AK_8W2N7Q",
         "Authorization": "Bearer <your_mcp_token>"
       }
     }
@@ -169,15 +163,14 @@ EOF
     cat > CLAUDE.md << 'EOF'
 # Gate DEX Wallet Skills
 
-When users request the following operations, read the corresponding SKILL.md file and strictly follow its process:
+When users request the following operations, read the corresponding SKILL.md file and strictly follow its workflow:
 
 - 🔐 Login, authentication, session management → `gate-dex-wallet/references/auth.md`
 - 💰 Check balance, assets, wallet address, transaction history → `gate-dex-wallet/SKILL.md`
 - 💸 Transfer, send tokens → `gate-dex-wallet/references/transfer.md`
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
-- 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
+- 📊 Check prices, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`
 EOF
     echo -e "${GREEN}  ✓${NC} CLAUDE.md routing file created"
 }
@@ -200,6 +193,7 @@ transport = "http"
 url = "https://api.gatemcp.ai/mcp/dex"
 
 [mcp.gate-wallet.headers]
+x-api-key = "MCP_AK_8W2N7Q"
 Authorization = "Bearer <your_mcp_token>"
 EOF
         echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated"
@@ -209,15 +203,14 @@ EOF
     cat > AGENTS.md << 'EOF'
 # Gate DEX Wallet Skills
 
-When users request the following operations, read the corresponding SKILL.md file and strictly follow its process:
+When users request the following operations, read the corresponding SKILL.md file and strictly follow its workflow:
 
 - 🔐 Login, authentication, session management → `gate-dex-wallet/references/auth.md`
 - 💰 Check balance, assets, wallet address, transaction history → `gate-dex-wallet/SKILL.md`
 - 💸 Transfer, send tokens → `gate-dex-wallet/references/transfer.md`
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
-- 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
+- 📊 Check prices, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`
 EOF
     echo -e "${GREEN}  ✓${NC} AGENTS.md routing file created"
 }
@@ -226,18 +219,18 @@ EOF
 install_openclaw() {
     echo -e "${CYAN}🐾 Configuring OpenClaw (mcporter)...${NC}"
     
-    if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
-        echo -e "${YELLOW}  ✓${NC} gate-dex already configured"
+    if mcporter config list 2>/dev/null | grep -q "^gate-wallet$"; then
+        echo -e "${YELLOW}  ✓${NC} gate-wallet already configured"
         return 0
     fi
     
-    echo "  Need to configure MCP Server authentication"
-    read -p "  Enter MCP API Key [leave empty for default]: " user_key
+    echo "  MCP Server authentication configuration needed"
+    read -p "  Enter MCP API Key [leave blank to use default]: " user_key
     user_key=${user_key:-"MCP_AK_8W2N7Q"}
     
-    if mcporter config add gate-dex --url "https://api.gatemcp.ai/mcp/dex" \
-       --header "Authorization:Bearer <your_mcp_token>" 2>/dev/null; then
-        echo -e "${GREEN}  ✓${NC} gate-dex MCP server configured successfully"
+    if mcporter config add gate-wallet --url "https://api.gatemcp.ai/mcp/dex" \
+       --header "x-api-key:$user_key" --header "Authorization:Bearer <your_mcp_token>" 2>/dev/null; then
+        echo -e "${GREEN}  ✓${NC} gate-wallet MCP server configured successfully"
     else
         echo -e "${RED}  ✗${NC} Configuration failed, please check manually"
         return 1
@@ -276,14 +269,13 @@ main() {
     done
     echo ""
     echo -e "${BLUE}🎯 Next steps:${NC}"
-    echo "1. Restart your AI tool to load the configuration"
-    echo "2. Complete first login to obtain mcp_token"
+    echo "1. Restart your AI tool to load configuration"
+    echo "2. Complete initial login to get mcp_token"
     echo "3. Try conversation: \"Help me check USDT balance on ETH\""
     echo ""
     echo -e "${CYAN}💡 Tips:${NC}"
-    echo "  First-time use requires logging in via Google OAuth or Gate OAuth to get mcp_token"
-    echo "  For CLI command line tool (gate-wallet command), run: ./gate-dex-wallet/install_cli.sh"
-    echo "  Detailed documentation: ./gate-dex-wallet/README.md"
+    echo "  First-time use requires Google OAuth login to get mcp_token"
+    echo "  Detailed docs: ./gate-dex-wallet/README.md"
     echo ""
 }
 
@@ -307,7 +299,7 @@ case "${1:-}" in
         echo -e "${BLUE}🔍 Detected platforms:${NC}"
         platforms=($(detect_platforms))
         if [ ${#platforms[@]} -eq 0 ]; then
-            echo "  (none detected)"
+            echo "  (None detected)"
         else
             for platform in "${platforms[@]}"; do
                 echo "  ✓ $platform"
