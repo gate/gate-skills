@@ -254,7 +254,7 @@ Prioritize trading-related functions. Auto-fallback to OpenAPI mode when MCP Ser
 EOF
     
     echo -e "${GREEN}  ✓${NC} AGENTS.md created"
-    echo -e "${BLUE}  ℹ${NC} Please manually run: codex mcp add gate-wallet --transport http --url https://api.gatemcp.ai/mcp/dex"
+    echo -e "${BLUE}  ℹ${NC} Please manually run: codex mcp add gate-dex --transport http --url https://api.gatemcp.ai/mcp/dex"
 }
 
 install_openclaw() {
@@ -331,7 +331,7 @@ main() {
     done
     echo ""
     echo -e "${BLUE}🔧 Configuration Summary:${NC}"
-    echo "  • MCP Server: gate-wallet (https://api.gatemcp.ai/mcp/dex)"
+    echo "  • MCP Server: gate-dex (https://api.gatemcp.ai/mcp/dex)"
     echo "  • OpenAPI Fallback: ~/.gate-dex-openapi/config.json"
     echo "  • Routing Priority: Trading functions prioritized"
     echo ""

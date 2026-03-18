@@ -31,26 +31,15 @@ These skills are designed to work with any AI agent framework. Whether you're us
 
 | Skill | Description | Version | Status |
 |-------|-------------|---------|--------|
-| [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | End-to-end trading copilot: market judgment, risk control, order draft, execution, post-trade management | `2026.3.14-3` | ✅ Active |
 | [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi (traditional finance) read-only queries: orders, positions, market data, assets and MT5 account info | `2026.3.13-6` | ✅ Active |
-| [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
-| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account operations: browse tokens, tickers, holdings, portfolio value | `2026.3.13-1` | ✅ Active |
-| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
-| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
 | [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
-| [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: order queries, position queries, and history queries across Gate, Binance, OKX and Bybit | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
+| [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
+| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: supported pairs, swap limits, order history, order tracking | `2026.3.11-5` | ✅ Active |
-| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rates: spot fees, futures fees, VIP level query | `2026.3.11-2` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
-| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-dex-market](#-gate-dex-market) | Gate DEX market data: MCP + OpenAPI dual mode, intelligent routing, token info, K-line, rankings, security audit | `2026.3.14-2` | ✅ Active |
-| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing, Swap execution, cross-chain support | `2026.3.14-2` | ✅ Active |
-| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions, CLI commands — 5 modules with multi-skill routing | `2026.3.14-2` | ✅ Active |
-| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
 | [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
@@ -59,25 +48,24 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
 | [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
 | [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
+| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
+| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
 | [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
+| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
 | [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
 | [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
-
----
-
-## 🔬 gate-exchange-alpha
-
-> **Path**: `skills/gate-exchange-alpha/`
-
-Gate Alpha token discovery, market viewing, and account operations: browse tradable tokens (by chain/platform/address), check tickers and prices, view Alpha account balances and portfolio market value.
-
-**Example Prompts**:
-- `What coins can I trade on Alpha?`
-- `What's the price of [token] on Alpha?`
-- `How's the Alpha market?`
-- `What coins do I hold on Alpha?`
-- `How much is my Alpha portfolio worth?`
+| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
+| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | End-to-end trading copilot: market judgment, risk control, order drafting, execution, and post-trade management | `2026.3.14-3` | ✅ Active |
+| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account holdings query | `2026.3.13-1` | ✅ Active |
+| [gate-exchange-coupon](#-gate-exchange-coupon) | Gate coupon/voucher management: list, detail, usage rules, and acquisition source query | `2026.3.13-1` | ✅ Active |
+| [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: orders, positions, and history across Gate, Binance, OKX | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-transfer](#-gate-exchange-transfer) | Gate internal transfer: move funds between spot, margin, perpetual, delivery, and options accounts | `2026.3.16-2` | ✅ Active |
+| [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: currency pairs, swap limits, order history, and order details | `2026.3.11-5` | ✅ Active |
+| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rate query: spot fees, futures fees, VIP level | `2026.3.11-2` | ✅ Active |
+| [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.3.13-1` | ✅ Active |
+| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
 
 ---
 
@@ -124,6 +112,120 @@ USDT perpetual futures trading on Gate Exchange. Supports four operations: open 
 - `Close all ETH positions`
 - `Cancel my BTC buy order`
 - `Change order price to 60000`
+
+---
+
+## 🤖 gate-exchange-trading-copilot
+
+> **Path**: `skills/gate-exchange-trading-copilot/`
+
+End-to-end cryptocurrency trading copilot for Gate Exchange. Completes the full trading loop in one skill: market judgment → risk control → order drafting → explicit confirmation → execution → post-trade management. Works with both spot and futures.
+
+**Example Prompts**:
+- `Analyze BTC before placing an order`
+- `Is it safe to buy ETH now? If yes, help me buy`
+- `Check risk and then long BTC futures 10x`
+- `Analyze before buying SOL`
+
+---
+
+## 🔮 gate-exchange-alpha
+
+> **Path**: `skills/gate-exchange-alpha/`
+
+Gate Alpha token discovery, market viewing, and account operations. Browse tradable Alpha tokens, check Alpha market tickers/prices, and view Alpha holdings and portfolio value.
+
+**Example Prompts**:
+- `What coins are on Alpha?`
+- `Alpha token price for SOL`
+- `Show my Alpha holdings`
+- `Alpha portfolio value`
+- `Which Alpha tokens are on Solana?`
+
+---
+
+## 🎟️ gate-exchange-coupon
+
+> **Path**: `skills/gate-exchange-coupon/`
+
+Gate coupon/voucher management: list available coupons, search by type, view expired/used history, check coupon details, read usage rules, and trace acquisition source.
+
+**Example Prompts**:
+- `My coupons`
+- `Do I have any coupons?`
+- `Coupon details`
+- `When does my coupon expire?`
+- `How did I get this coupon?`
+
+---
+
+## 🌐 gate-exchange-crossex
+
+> **Path**: `skills/gate-exchange-crossex/`
+
+Gate CrossEx cross-exchange operations: order queries, position queries, and history queries across Gate, Binance, and OKX. Supports order management, position monitoring, and trade/interest history retrieval.
+
+**Example Prompts**:
+- `Query all open CrossEx orders`
+- `Check my CrossEx positions`
+- `CrossEx order history`
+- `CrossEx trade history`
+
+---
+
+## 💸 gate-exchange-transfer
+
+> **Path**: `skills/gate-exchange-transfer/`
+
+Gate same-UID internal transfer between trading accounts: spot, isolated margin, perpetual (USDT/BTC-margined), delivery, and options. Execution requires explicit user confirmation and source balance pre-check.
+
+**Example Prompts**:
+- `Transfer 100 USDT from spot to futures`
+- `Move funds from spot to perpetual`
+- `Transfer BTC to delivery account`
+- `Move USDT from margin to spot`
+
+---
+
+## ⚡ gate-exchange-flashswap
+
+> **Path**: `skills/gate-exchange-flashswap/`
+
+Gate Flash Swap query: browse supported currency pairs, validate swap amount limits, view flash swap order history, and look up specific order details. Read-only; no swap execution.
+
+**Example Prompts**:
+- `What pairs support flash swap?`
+- `Flash swap limits for BTC/USDT`
+- `Show my flash swap order history`
+- `Look up flash swap order #12345`
+
+---
+
+## 👑 gate-exchange-vipfee
+
+> **Path**: `skills/gate-exchange-vipfee/`
+
+Query Gate VIP tier and trading fee rates, including spot and futures fee information.
+
+**Example Prompts**:
+- `What is my VIP level?`
+- `Show me the spot and futures trading fees`
+- `Check my VIP level and trading fees`
+- `What's my fee rate?`
+
+---
+
+## 🎬 gate-info-liveroomlocation
+
+> **Path**: `skills/gate-info-liveroomlocation/`
+
+Gate live stream and replay listing. Filter by business type (Market Analysis, Hot Topics, Blockchain, Others), coin, sort order (hottest/newest), and count.
+
+**Example Prompts**:
+- `Show me the hottest live streams`
+- `Find 5 SOL-related live rooms`
+- `Latest market analysis replays`
+- `Any live streams about BTC?`
 
 ---
 
@@ -247,14 +349,13 @@ Sub-account management on Gate Exchange: query status by UID, list all sub-accou
 
 > **Path**: `skills/gate-dex-market/`
 
-Gate DEX comprehensive market data skill with MCP + OpenAPI dual-mode intelligent routing. Serves as the unified management and distribution center for market data queries. Supports token info, K-line data, rankings, security audits, and participates in the multi-skill priority & routing system with Trade and Wallet skills.
+Gate DEX market data skill using OpenAPI mode with AK/SK authentication. Provides read-only queries for token info, K-line data, rankings, and security audits.
 
 **Example Prompts**:
 - `Get BTC token info`
 - `Show me ETH K-line data`
 - `What are the top trending tokens?`
 - `Check security audit for this token`
-- `Show me market cap rankings`
 
 ---
 
@@ -262,13 +363,12 @@ Gate DEX comprehensive market data skill with MCP + OpenAPI dual-mode intelligen
 
 > **Path**: `skills/gate-dex-trade/`
 
-Gate DEX trading comprehensive skill with MCP + OpenAPI dual-mode smart routing. Pure routing layer that detects environment and dispatches to complete sub-specifications. Supports Swap execution across EVM and Solana, including cross-chain swaps. Participates in multi-skill priority & routing system with Market and Wallet skills.
+Gate DEX trading comprehensive skill with MCP + OpenAPI dual mode support. Smart routing automatically selects the optimal trading method based on environment. Supports Swap execution across EVM and Solana.
 
 **Example Prompts**:
 - `Swap 100 USDT for ETH`
 - `Exchange BNB for PEPE`
 - `Get a quote for swapping SOL to USDC`
-- `Cross-chain swap ETH to BSC`
 - `Buy some tokens using OpenAPI mode`
 
 ---
@@ -277,7 +377,7 @@ Gate DEX trading comprehensive skill with MCP + OpenAPI dual-mode smart routing.
 
 > **Path**: `skills/gate-dex-wallet/`
 
-Gate DEX comprehensive wallet skill. Unified entry point covering 5 major modules: authentication login, asset queries, transfer execution, DApp interactions, and CLI command-line operations. Features sub-function routing distribution and participates in the multi-skill priority & routing system with Market and Trade skills.
+Gate DEX comprehensive wallet skill. Unified entry point for authentication, asset queries, transfer execution, and DApp interactions. Routes to specific sub-modules based on user intent.
 
 **Example Prompts**:
 - `Log in to my wallet`
@@ -285,7 +385,6 @@ Gate DEX comprehensive wallet skill. Unified entry point covering 5 major module
 - `Transfer 0.1 ETH to 0x...`
 - `Connect my wallet to Uniswap`
 - `Sign this message`
-- `Show my transaction history`
 
 ---
 
@@ -722,22 +821,31 @@ gate-github-skills/
 ├── README_zh.md
 ├── image/                              # Installation screenshots
 └── skills/
-    ├── gate-dex-market/                # DEX market data skill (MCP + OpenAPI dual mode)
-    ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode, cross-chain)
-    ├── gate-dex-wallet/                # DEX comprehensive wallet skill (5 modules + CLI)
+    ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
+    ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
+    ├── gate-dex-wallet/                # DEX comprehensive wallet skill
+    ├── gate-exchange-affiliate/        # Exchange affiliate/partner program
+    ├── gate-exchange-alpha/            # Alpha token discovery, market & account
     ├── gate-exchange-assets/           # Exchange asset/balance queries (read-only)
+    ├── gate-exchange-coupon/           # Coupon/voucher management & query
+    ├── gate-exchange-crossex/          # CrossEx cross-exchange trading operations
     ├── gate-exchange-dual/             # Dual investment query (read-only)
+    ├── gate-exchange-flashswap/        # Flash Swap query: pairs, limits, history
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
-    ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
+    ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
-    ├── gate-exchange-subaccount/      # Sub-account management: list, create, lock/unlock
+    ├── gate-exchange-subaccount/       # Sub-account management: list, create, lock/unlock
     ├── gate-exchange-tradfi/           # TradFi query: orders, positions, market, assets, MT5 (read-only)
+    ├── gate-exchange-trading-copilot/  # End-to-end trading copilot (judgment → execution)
+    ├── gate-exchange-transfer/         # Internal transfer between trading accounts
     ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
+    ├── gate-exchange-vipfee/           # VIP tier & trading fee rate query
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill
+    ├── gate-info-liveroomlocation/     # Live stream & replay listing skill
     ├── gate-info-marketoverview/       # Market overview skill
     ├── gate-info-riskcheck/            # Token risk assessment skill
     ├── gate-info-trendanalysis/        # Trend & technical analysis skill

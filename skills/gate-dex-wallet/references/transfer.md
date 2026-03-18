@@ -1,5 +1,5 @@
 ---
-name: gate-dex-transfer
+name: gate-dex-wallet-transfer
 version: "2026.3.12-1"
 updated: "2026-03-12"
 description: "Gate Wallet transfer execution. Build transactions, sign, broadcast. Use when users want to 'send ETH', 'transfer USDT', 'transfer', 'send tokens'. Includes mandatory balance verification and user confirmation gate. Supports EVM multi-chain + Solana native/token transfers."
@@ -11,47 +11,24 @@ description: "Gate Wallet transfer execution. Build transactions, sign, broadcas
 
 **Trigger scenarios**: Users mention "transfer", "send", "transfer", "send ETH", "send tokens", "send coins", "withdraw", or when other Skills guide users to perform on-chain transfer operations.
 
-## MCP Server Connection Detection
-
-### First Session Detection
-
-**Before the first MCP tool call in a session, perform one connection probe to confirm Gate Wallet MCP Server availability. Subsequent operations do not need repeated detection.**
-
-```
-CallMcpTool(server="gate-dex", toolName="chain.config", arguments={chain: "eth"})
-```
-
-| Result | Handling |
-|--------|----------|
-| Success | MCP Server available, subsequent operations directly call business tools without re-probing |
-| Failure | Display configuration guidance based on error type (see error handling below) |
-
-### Runtime Error Fallback
-
-If business tool calls fail during subsequent operations (returning connection errors, timeouts, etc.), handle according to the following rules:
-
-| Error Type | Keywords | Handling |
-|------------|----------|----------|
-| MCP Server not configured | `server not found`, `unknown server` | Display MCP Server configuration guidance |
-| Remote service unreachable | `connection refused`, `timeout`, `DNS error` | Prompt to check server status and network connection |
-| Authentication failed | `401`, `unauthorized` | Prompt to contact administrator for authorization |
+**Prerequisites**: MCP Server available (see parent SKILL.md for detection). If not configured, see parent SKILL.md for setup guide.
 
 ## Authentication Notes
 
 All operations in this Skill **require `mcp_token`**. Before calling any tool, must confirm user is logged in.
 
-- If currently no `mcp_token` → Guide to `references/auth.md` to complete login then return.
-- If `mcp_token` expired (MCP Server returns token expiration error) → Try `auth.refresh_token` silent refresh first, guide to re-login if failed.
+- If currently no `mcp_token` → Guide to `gate-dex-wallet/references/auth.md` to complete login then return.
+- If `mcp_token` expired (MCP Server returns token expiration error) → Try `dex_auth_refresh_token` silent refresh first, guide to re-login if failed.
 
 ## MCP Tool Call Specifications
 
-### 1. `wallet.get_token_list` (Cross-Skill Call) — Query Balance for Verification
+### 1. `dex_wallet_get_token_list` (Cross-Skill Call) — Query Balance for Verification
 
 Before transfer **must** call this tool first to verify sending token balance and Gas token balance. This tool belongs to `gate-dex-wallet` domain, called cross-Skill here.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `wallet.get_token_list` |
+| **Tool Name** | `dex_wallet_get_token_list` |
 | **Parameters** | `{ account_id: string, chain: string, mcp_token: string }` |
 | **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. |
 
@@ -60,7 +37,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="wallet.get_token_list",
+  toolName="dex_wallet_get_token_list",
   arguments={ account_id: "acc_12345", chain: "eth", mcp_token: "<mcp_token>" }
 )
 ```
@@ -237,13 +214,13 @@ Return example:
 
 ---
 
-### 5. `tx.send_raw_transaction` — Broadcast Signed Transaction
+### 5. `dex_tx_send_raw_transaction` — Broadcast Signed Transaction
 
 Broadcast signed transaction to on-chain network.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `tx.send_raw_transaction` |
+| **Tool Name** | `dex_tx_send_raw_transaction` |
 | **Parameters** | `{ signed_tx: string, chain: string, mcp_token: string }` |
 | **Return Value** | `{ hash_id: string }` |
 
@@ -260,7 +237,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="tx.send_raw_transaction",
+  toolName="dex_tx_send_raw_transaction",
   arguments={
     signed_tx: "0x02f8b2...signed...",
     chain: "eth",
@@ -279,32 +256,21 @@ Return example:
 
 Agent behavior: After successful broadcast, display transaction hash to user and provide block explorer link.
 
-## Supported Chains
-
-| Chain ID | Network Name | Type | Native Gas Token | Block Explorer |
-|----------|--------------|------|------------------|----------------|
-| `eth` | Ethereum | EVM | ETH | etherscan.io |
-| `bsc` | BNB Smart Chain | EVM | BNB | bscscan.com |
-| `polygon` | Polygon | EVM | MATIC | polygonscan.com |
-| `arbitrum` | Arbitrum One | EVM | ETH | arbiscan.io |
-| `optimism` | Optimism | EVM | ETH | optimistic.etherscan.io |
-| `avax` | Avalanche C-Chain | EVM | AVAX | snowtrace.io |
-| `base` | Base | EVM | ETH | basescan.org |
-| `sol` | Solana | Non-EVM | SOL | solscan.io |
+Supported chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol. See parent SKILL.md.
 
 ## MCP Tool Call Chain Overview
 
 Complete transfer flow calls the following tools in sequence, forming a strict linear pipeline:
 
 ```
-0. chain.config                         ← First session detection (if needed)
-1. wallet.get_token_list                ← Cross-Skill: Query balance (token + Gas token)
+0. dex_chain_config                         ← First session detection (if needed)
+1. dex_wallet_get_token_list                ← Cross-Skill: Query balance (token + Gas token)
 2. tx.gas                               ← Estimate Gas fees
 3. [Agent balance validation: balance >= amount + Gas]  ← Agent internal logic, not MCP call
 4. tx.transfer_preview                  ← Build unsigned transaction + server confirmation info
 5. [Agent display confirmation summary, wait for user confirmation]     ← Mandatory gate, not MCP call
 6. wallet.sign_transaction              ← Sign after user confirmation
-7. tx.send_raw_transaction              ← Broadcast on-chain
+7. dex_tx_send_raw_transaction              ← Broadcast on-chain
 ```
 
 ## Skill Routing
@@ -314,10 +280,10 @@ Based on user intent after transfer completion, guide to corresponding Skill:
 | User Intent | Route Target |
 |-------------|-------------|
 | View updated balance | `gate-dex-wallet` |
-| View transaction details / history | `gate-dex-wallet` (`tx.detail`, `tx.list`) |
+| View transaction details / history | `gate-dex-wallet` (`dex_tx_detail`, `dex_tx_list`) |
 | Continue transfer to other addresses | Stay in this Skill |
 | Swap tokens | `gate-dex-trade` |
-| Login / authentication expired | `gate-dex-wallet` (`references/auth.md`) |
+| Login / authentication expired | `gate-dex-wallet/references/auth.md` |
 
 ## Operation Flow
 
@@ -325,12 +291,12 @@ Based on user intent after transfer completion, guide to corresponding Skill:
 
 ```
 First session detection (if needed)
-  Call chain.config({chain: "eth"}) to probe availability
+  Call dex_chain_config({chain: "eth"}) to probe availability
   ↓ Success
 
 Step 1: Authentication Check
   Confirm valid mcp_token and account_id
-  No token → Guide to references/auth.md login
+  No token → Guide to gate-dex-wallet/references/auth.md login
   ↓
 
 Step 2: Intent Recognition + Parameter Collection
@@ -353,12 +319,12 @@ Step 2: Intent Recognition + Parameter Collection
   ↓ Parameters complete
 
 Step 3: Get Wallet Address
-  Call wallet.get_addresses({ account_id, mcp_token })
+  Call dex_wallet_get_addresses({ account_id, mcp_token })
   Extract target chain's from_address
   ↓
 
 Step 4: Query Balance (Cross-Skill: gate-dex-wallet)
-  Call wallet.get_token_list({ account_id, chain, mcp_token })
+  Call dex_wallet_get_token_list({ account_id, chain, mcp_token })
   Extract:
   - Transfer token balance (e.g. USDT balance)
   - Chain native Gas token balance (e.g. ETH balance)
@@ -417,7 +383,7 @@ Step 9: Sign Transaction
   ↓
 
 Step 10: Broadcast Transaction
-  Call tx.send_raw_transaction({ signed_tx, chain, mcp_token })
+  Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token })
   Get hash_id
   ↓
 
@@ -430,8 +396,6 @@ Step 11: Display Result + Follow-up Suggestions
   Block Explorer: https://{explorer}/tx/{hash_id}
 
   Transaction submitted to network, confirmation time depends on network congestion.
-
-**Output Format**: Display transaction hash and block explorer URL as plain text, not as hyperlinks.
 
   You can:
   - View updated balance
@@ -528,35 +492,6 @@ Remaining After Transfer: {remaining_token} {token_symbol} / {remaining_gas} {ga
 Reply "confirm" to execute, "cancel" to abort, or tell me what to modify.
 ```
 
-## Cross-Skill Workflows
-
-### Complete Transfer Flow (From Login to Completion)
-
-```
-gate-dex-wallet/references/auth.md (Login, get mcp_token + account_id)
-  → gate-dex-wallet (wallet.get_token_list → verify balance)
-    → gate-dex-wallet (wallet.get_addresses → get sender address)
-      → gate-dex-wallet/references/transfer.md (tx.gas → tx.transfer_preview → confirm → sign → broadcast)
-        → gate-dex-wallet (view updated balance)
-```
-
-### Guided by Other Skills
-
-| Source Skill | Scenario | Description |
-|-------------|----------|-------------|
-| `gate-dex-wallet` | User wants to transfer after viewing balance | Carries account_id, chain, from_address info |
-| `gate-dex-trade` | User wants to transfer result tokens after Swap | Already has chain and token context |
-| `gate-dex-wallet` (`references/dapp.md`) | Tokens from DApp operations need to be transferred out | Already has chain and address context |
-
-### Calling Other Skills
-
-| Target Skill | Call Scenario | Tools Used |
-|-------------|---------------|------------|
-| `gate-dex-wallet` | Check balance before transfer | `wallet.get_token_list` |
-| `gate-dex-wallet` | Get sender address before transfer | `wallet.get_addresses` |
-| `gate-dex-wallet` | View updated balance after transfer | `wallet.get_token_list` |
-| `gate-dex-wallet` (`references/auth.md`) | Not logged in or token expired | `auth.refresh_token` or complete login flow |
-| `gate-dex-wallet` | View transaction details after transfer | `tx.detail`, `tx.list` |
 
 ## Address Validation Rules
 
@@ -582,10 +517,6 @@ Please check if the address is correct, complete, and matches the target chain.
 
 | Scenario | Handling |
 |----------|----------|
-| MCP Server not configured | Abort all operations, display Cursor configuration guidance |
-| MCP Server unreachable | Abort all operations, display network check prompt |
-| Not logged in (no `mcp_token`) | Guide to `references/auth.md` to complete login then auto-return to continue transfer |
-| `mcp_token` expired | Try `auth.refresh_token` silent refresh first, guide to re-login if failed |
 | Transfer token balance insufficient | Abort transaction, display current balance vs required amount difference, suggest reducing amount or topping up first |
 | Gas token balance insufficient | Abort transaction, display Gas token insufficient info, suggest getting Gas tokens first |
 | Invalid recipient address format | Refuse to initiate transaction, prompt correct address format |
@@ -593,14 +524,12 @@ Please check if the address is correct, complete, and matches the target chain.
 | `tx.gas` estimation failed | Display error info, possible causes: network congestion, contract call exception. Suggest retry later |
 | `tx.transfer_preview` failed | Display server-returned error message, do not silently retry |
 | `wallet.sign_transaction` failed | Display signing error, possible causes: account permissions, server exception. Do not auto-retry |
-| `tx.send_raw_transaction` failed | Display broadcast error (e.g. nonce conflict, insufficient gas, network congestion), suggest appropriate measures based on error type |
+| `dex_tx_send_raw_transaction` failed | Display broadcast error (e.g. nonce conflict, insufficient gas, network congestion), suggest appropriate measures based on error type |
 | User cancels confirmation | Immediately abort, do not execute signing and broadcast. Display cancellation notice, stay friendly |
 | Amount exceeds token precision | Prompt token precision limitation, auto-truncate or ask user to correct |
 | Transfer amount is 0 or negative | Refuse to execute, prompt to input valid positive amount |
-| Unsupported chain identifier | Display supported chain list, ask user to re-select |
 | Token doesn't match target chain | Prompt token doesn't exist on target chain, suggest correct chain |
 | Broadcast successful but transaction unconfirmed for long time | Tell user transaction submitted, confirmation time depends on network conditions, can track via block explorer |
-| Network interruption | Display network error, suggest checking network and retry. If disconnected after signing but before broadcast, prompt that signed transaction can still be broadcast later |
 | Some transfers fail in batch transfer | Mark those as failed, continue processing subsequent transfers, finally display summary results for each transfer |
 
 ## Safety Rules

@@ -4,6 +4,34 @@ All notable changes to `gate-dex-trade` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.18-1] - 2026-03-18
+
+### Changed
+
+- **SKILL.md Streamlined**: Removed verbose routing logic, multi-skill priority system, OpenClaw examples, Claude Code workarounds; converted to pure routing layer pointing to `references/`
+- **MCP Tool Naming**: Restored `dex_` prefix for all tool references in mcp.md
+
+### Fixed
+
+- **Legacy Skill Identifiers**: Renamed `gate-dex-mcpswap` → `gate-dex-trade-mcp`, `gate-dex-opentrade` → `gate-dex-trade-openapi`
+- **Cross-Reference Paths**: Replaced stale skill names (gate-dex-mcpauth, gate-dex-mcpwallet, etc.) with current file-based paths
+
+## [2026.3.17-1] - 2026-03-17
+
+### Fixed
+
+- **Legacy Skill Identifiers**: Renamed `gate-dex-mcpauth` → `gate-dex-wallet/references/auth.md`, `gate-dex-mcpwallet` → `gate-dex-wallet`, `gate-dex-mcptransfer` → `gate-dex-wallet/references/transfer.md`, `gate-dex-mcpmarket` → `gate-dex-market`, `gate-dex-mcpswap` → `gate-dex-trade` in mcp.md
+- **Metadata Name**: Changed mcp.md internal name from `gate-dex-mcpswap` to `gate-dex-trade-mcp`
+- **OpenAPI Metadata**: Changed openapi.md internal name from `gate-dex-opentrade` to `gate-dex-trade-openapi`
+
+## [2026.3.14-3] - 2026-03-14
+
+### Changed
+
+- **MCP Tool Cross-References**: Updated market tool references to use new `dex_` prefixed names
+  - `token_get_coin_info` → `dex_token_get_coin_info`
+  - `token_get_risk_info` → `dex_token_get_risk_info`
+
 ## [2026.3.14-2] - 2026-03-14
 
 ### Enhanced

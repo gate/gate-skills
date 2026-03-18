@@ -4,6 +4,50 @@ All notable changes to `gate-dex-market` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.18-1] - 2026-03-18
+
+### Changed
+
+- **SKILL.md Streamlined**: Removed verbose routing logic, priority system, OpenClaw integration examples; converted to pure routing layer pointing to `references/`
+- **MCP Tool Naming**: Restored `dex_` prefix for all MCP tools (dex_market_get_kline, dex_token_get_coin_info, etc.)
+
+### Fixed
+
+- **Cross-Reference Paths**: Added missing `.md` extensions to `gate-dex-wallet/references/transfer` references
+- **Legacy Skill Identifiers**: Renamed `gate-dex-openmarket` metadata to `gate-dex-market-openapi` in openapi.md
+- **Install Script**: Corrected echo'd documentation path in install.sh
+
+## [2026.3.17-1] - 2026-03-17
+
+### Fixed
+
+- **Cross-Reference Paths**: Added missing `.md` extensions to `gate-dex-wallet/references/transfer` references in SKILL.md and mcp.md
+- **Legacy Skill Identifiers**: Renamed `gate-dex-openmarket` metadata to `gate-dex-market-openapi` in openapi.md
+- **Install Script**: Corrected echo'd documentation path in install.sh
+
+## [2026.3.14-3] - 2026-03-14
+
+### Changed
+
+- **MCP Tool Naming Convention**: Added `dex_` prefix to all `market_` and `token_` prefixed tools for namespace clarity
+  - `market_get_kline` → `dex_market_get_kline`
+  - `market_get_tx_stats` → `dex_market_get_tx_stats`
+  - `market_get_pair_liquidity` → `dex_market_get_pair_liquidity`
+  - `token_get_coin_info` → `dex_token_get_coin_info`
+  - `token_ranking` → `dex_token_ranking`
+  - `token_get_coins_range_by_created_at` → `dex_token_get_coins_range_by_created_at`
+  - `token_get_risk_info` → `dex_token_get_risk_info`
+  - `token_list_swap_tokens` → `dex_token_list_swap_tokens`
+  - `token_list_cross_chain_bridge_tokens` → `dex_token_list_cross_chain_bridge_tokens`
+
+### Added
+
+- **MCP Tool Expansion**: Added 3 missing MCP tools to match full specification
+  - `dex_market_get_tx_stats` — Trading statistics (buy/sell count, volume, unique traders)
+  - `dex_market_get_pair_liquidity` — Trading pair liquidity pool info
+  - `dex_token_get_coins_range_by_created_at` — New token discovery
+- MCP mode tool count updated from 6 to 9
+
 ## [2026.3.14-2] - 2026-03-14
 
 ### Fixed

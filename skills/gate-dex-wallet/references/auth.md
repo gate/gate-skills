@@ -1,5 +1,5 @@
 ---
-name: gate-dex-auth
+name: gate-dex-wallet-auth
 version: "2026.3.12-1"
 updated: "2026-03-12"
 description: "Gate Wallet authentication. Use when users need to login, logout, refresh session, or when other Skills detect not logged in (no mcp_token). Supports Google OAuth and Gate OAuth login. First use will detect if MCP Server is configured and connected."
@@ -11,73 +11,23 @@ description: "Gate Wallet authentication. Use when users need to login, logout, 
 
 **Trigger scenarios**: Users mention "login", "logout", "authentication", "sign in", or other Skills detect missing `mcp_token`.
 
-## MCP Server Connection Detection
-
-### First Session Detection
-
-**Before the first MCP tool call in a session, perform one connection probe to confirm Gate Wallet MCP Server availability. Subsequent operations do not need repeated detection.**
-
-```
-CallMcpTool(server="gate-dex", toolName="chain.config", arguments={chain: "eth"})
-```
-
-| Result | Handling |
-|--------|----------|
-| Success | MCP Server available, subsequent operations directly call business tools without re-probing |
-| Failure | Display configuration guidance based on error type (see error handling below) |
-
-### Runtime Error Fallback
-
-If business tool calls fail during subsequent operations (returning connection errors, timeouts, etc.), handle according to the following rules:
-
-| Error Type | Keywords | Handling |
-|------------|----------|----------|
-| MCP Server not configured | `server not found`, `unknown server` | Display MCP Server configuration guidance |
-| Remote service unreachable | `connection refused`, `timeout`, `DNS error` | Prompt to check server status and network connection |
-| Authentication failed | `401`, `unauthorized` | Prompt to contact administrator for authorization |
-
-## MCP Server Configuration
-
-**Complete configuration format**:
-
-```json
-{
-  "mcpServers": {
-    "gate-dex": {
-      "url": "https://api.gatemcp.ai/mcp/dex",
-      "headers": {
-        "Authorization": "Bearer <your_mcp_token>"
-      }
-    }
-  }
-}
-```
-
-**Configuration notes**:
-- `Authorization`: Dynamic value containing `mcp_token` obtained after Google OAuth or Gate OAuth login
-- During initial configuration `<your_mcp_token>` is a placeholder, automatically updated after successful login
-
-**Token acquisition flow**:
-1. User logs in through authentication module (Google OAuth / Gate OAuth)
-2. After successful login, obtains `mcp_token`
-3. Agent automatically updates Authorization header in MCP configuration
-4. All subsequent MCP calls use the updated token
+**Prerequisites**: MCP Server available (see parent SKILL.md for detection). If not configured, see parent SKILL.md for setup guide.
 
 ## Authentication Notes
 
-This Skill is the authentication entry point, **performing login operations themselves does not require `mcp_token`**. `auth.refresh_token` and `auth.logout` require existing tokens.
+This Skill is the authentication entry point, **performing login operations themselves does not require `mcp_token`**. `dex_auth_refresh_token` and `dex_auth_logout` require existing tokens.
 
 The `mcp_token` and `account_id` obtained after successful login will be passed to other Skills requiring authentication (portfolio, transfer, swap, dapp).
 
 ## MCP Tool Call Specifications
 
-### 1. `auth.google_login_start` — Start Google OAuth Login
+### 1. `dex_auth_google_login_start` — Start Google OAuth Login
 
 Initiates Google Device Flow login, returns the verification URL users need to visit.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `auth.google_login_start` |
+| **Tool Name** | `dex_auth_google_login_start` |
 | **Parameters** | None |
 | **Return Value** | `{ verification_url: string, flow_id: string }` |
 
@@ -86,7 +36,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="auth.google_login_start",
+  toolName="dex_auth_google_login_start",
   arguments={}
 )
 ```
@@ -104,27 +54,15 @@ Agent behavior: Display `verification_url` directly to user, guiding them to com
 
 **Important**: URL display format must ensure the link is complete, copyable and clickable, do not add quotes, parentheses or other decorators, do not escape URL content.
 
-**Claude Code CLI Specific**: In Claude Code CLI environment, URLs should be displayed as plain text without any markdown formatting to ensure they remain clickable. Example format:
-
-```
-🔗 Please visit this URL to complete authentication:
-
-https://accounts.google.com/o/oauth2/device?user_code=ABCD-EFGH
-
-Complete the authorization and return here to continue.
-```
-
-Never use formats like `[Click here](URL)` or wrap URLs in backticks or quotes in Claude Code CLI.
-
 ---
 
-### 2. `auth.google_login_poll` — Poll Login Status
+### 2. `dex_auth_google_login_poll` — Poll Login Status
 
 Uses `flow_id` to poll Google OAuth login results, determining if user has completed browser-side authorization.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `auth.google_login_poll` |
+| **Tool Name** | `dex_auth_google_login_poll` |
 | **Parameters** | `{ flow_id: string }` |
 | **Return Value** | `{ status: string, mcp_token?: string, refresh_token?: string, account_id?: string }` |
 
@@ -133,7 +71,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="auth.google_login_poll",
+  toolName="dex_auth_google_login_poll",
   arguments={ flow_id: "flow_abc123" }
 )
 ```
@@ -171,13 +109,13 @@ CallMcpTool(
 
 ---
 
-### 4. `auth.refresh_token` — Refresh Token
+### 4. `dex_auth_refresh_token` — Refresh Token
 
 When `mcp_token` expires, use `refresh_token` to obtain a new valid token.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `auth.refresh_token` |
+| **Tool Name** | `dex_auth_refresh_token` |
 | **Parameters** | `{ refresh_token: string }` |
 | **Return Value** | `RefreshTokenResponse` (containing new `mcp_token`, new `refresh_token`) |
 
@@ -186,62 +124,22 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="auth.refresh_token",
+  toolName="dex_auth_refresh_token",
   arguments={ refresh_token: "rt_xyz789..." }
 )
 ```
 
-**Enhanced Agent Behavior**: 
-- After successful refresh, silently update internally held `mcp_token` AND update configuration file
-- Invalidate any cached tokens in other skills/sessions
-- Transparent to user, but ensures all subsequent operations use fresh token
-
-#### Token Refresh with Config Update
-
-```javascript
-async function refreshTokenWithConfigUpdate(refreshToken) {
-  try {
-    const refreshResult = await CallMcpTool(
-      server="gate-dex",
-      toolName="auth.refresh_token",
-      arguments={ refresh_token: refreshToken }
-    );
-    
-    if (refreshResult.mcp_token) {
-      // 1. Update internal cache
-      cachedMcpToken = refreshResult.mcp_token;
-      cachedAccountId = refreshResult.account_id;
-      
-      // 2. Update config file to persist changes
-      await updateMcpTokenInConfig(
-        refreshResult.mcp_token, 
-        refreshResult.refresh_token
-      );
-      
-      // 3. Broadcast token change to other skills
-      notifyTokenChange();
-      
-      console.log("✅ Token refreshed and config updated");
-      return { success: true, ...refreshResult };
-    }
-  } catch (error) {
-    console.log("❌ Token refresh failed:", error.message);
-    // Clear invalid cached tokens
-    clearTokenCache();
-    return { success: false, error: error.message };
-  }
-}
-```
+Agent behavior: After successful refresh, silently update internally held `mcp_token`, transparent to user.
 
 ---
 
-### 5. `auth.logout` — Logout
+### 5. `dex_auth_logout` — Logout
 
 Revokes current session, invalidating `mcp_token`.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `auth.logout` |
+| **Tool Name** | `dex_auth_logout` |
 | **Parameters** | `{ mcp_token: string }` |
 | **Return Value** | `"session revoked"` |
 
@@ -250,7 +148,7 @@ Call example:
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="auth.logout",
+  toolName="dex_auth_logout",
   arguments={ mcp_token: "<current_mcp_token>" }
 )
 ```
@@ -262,9 +160,9 @@ After authentication completion, route to corresponding Skill based on user's or
 | User Intent | Route Target |
 |-------------|--------------|
 | Check balance, assets, address | `gate-dex-wallet` |
-| Transfer, send tokens | `gate-dex-wallet` (`references/transfer.md`) |
+| Transfer, send tokens | `gate-dex-wallet/references/transfer.md` |
 | Exchange, swap tokens | `gate-dex-trade` |
-| DApp interaction, sign messages | `gate-dex-wallet` (`references/dapp.md`) |
+| DApp interaction, sign messages | `gate-dex-wallet/references/dapp.md` |
 | Check quotes, token info | `gate-dex-market` |
 
 When other Skills detect missing or expired `mcp_token`, they will also route to this Skill for authentication before returning to original operations.
@@ -280,7 +178,7 @@ Step 1: Intent Recognition
   Agent determines user needs to login (direct login request, or guided here by other Skills)
   ↓
 Step 2: Initiate Login
-  Call auth.google_login_start → Get verification_url + flow_id
+  Call dex_auth_google_login_start → Get verification_url + flow_id
   ↓
 Step 3: Guide User Authorization
   Display verification link to user, ask user to complete Google authorization in browser:
@@ -297,7 +195,7 @@ Step 3: Guide User Authorization
 
   ↓
 Step 4: Poll Login Results
-  After user confirms completion of authorization, call auth.google_login_poll({ flow_id })
+  After user confirms completion of authorization, call dex_auth_google_login_poll({ flow_id })
   - status == "pending" → Ask user to confirm completion, poll again later (max 10 retries, 3 second intervals)
   - status == "success" → Extract mcp_token, refresh_token, account_id, proceed to Step 5
   - status == "expired" → Notify timeout, suggest re-initiating login
@@ -332,7 +230,7 @@ Step 6: Route to User's Original Intent
 Trigger condition: Other Skills return token expiration error when calling MCP tools
   ↓
 Step 1: Auto Refresh
-  Call auth.refresh_token({ refresh_token })
+  Call dex_auth_refresh_token({ refresh_token })
   ↓
 Step 2a: Refresh Success
   Silently update mcp_token, retry original operation, transparent to user
@@ -355,7 +253,7 @@ Step 1: Intent Recognition
   User requests logout / exit
   ↓
 Step 2: Execute Logout
-  Call auth.logout({ mcp_token })
+  Call dex_auth_logout({ mcp_token })
   ↓
 Step 3: Clean State
   Clear internally held mcp_token, refresh_token, account_id
@@ -382,46 +280,18 @@ Step 3: Login Success
   Extract mcp_token, refresh_token, account_id → Same as Flow A Step 5
 ```
 
-## Cross-Skill Workflows
-
-### Called by Other Skills (Authentication Prerequisite)
-
-All Skills requiring `mcp_token` should guide to this Skill when detecting not logged in:
-
-```
-Any Skill operation (requires mcp_token)
-  → Detect no mcp_token or token expired
-    → Auto attempt auth.refresh_token (if refresh_token exists)
-      → Refresh success → Return to original Skill to continue operation
-      → Refresh failed → gate-dex-wallet/references/auth.md Flow A (login)
-        → Login success → Return to original Skill to continue operation
-```
-
-### Typical Workflows After Login
-
-```
-gate-dex-wallet/references/auth.md (login)
-  → gate-dex-wallet (check balance/assets)        # Most common subsequent operation
-  → gate-dex-wallet/references/transfer.md (transfer)                  # User explicitly wants to transfer
-  → gate-dex-trade (swap)                         # User explicitly wants to exchange
-  → gate-dex-wallet/references/dapp.md (DApp interaction)              # User explicitly wants DApp interaction
-```
-
 ## Edge Cases and Error Handling
 
 | Scenario | Handling |
 |----------|----------|
-| MCP Server not configured | Abort all operations, display Cursor configuration guidance |
-| MCP Server unreachable | Abort all operations, display network check prompt |
-| `auth.google_login_start` fails | Display error message, suggest retry later or check MCP Server status |
+| `dex_auth_google_login_start` fails | Display error message, suggest retry later or check MCP Server status |
 | User hasn't completed browser authorization | Poll returns `pending`, prompt user to complete browser operation first |
-| Login process timeout (`expired`) | Notify timeout, automatically call `auth.google_login_start` to initiate new flow |
-| `auth.google_login_poll` consecutive failures | Max 10 retries (3 second intervals), after exceeded prompt user to check network or retry |
-| `auth.refresh_token` fails | refresh_token expired or invalid → Guide through complete re-login flow |
-| `auth.logout` fails | Display error message, still clear local token state |
+| Login process timeout (`expired`) | Notify timeout, automatically call `dex_auth_google_login_start` to initiate new flow |
+| `dex_auth_google_login_poll` consecutive failures | Max 10 retries (3 second intervals), after exceeded prompt user to check network or retry |
+| `dex_auth_refresh_token` fails | refresh_token expired or invalid → Guide through complete re-login flow |
+| `dex_auth_logout` fails | Display error message, still clear local token state |
 | User repeated login | If already holding valid `mcp_token`, notify already logged in, ask if need to switch accounts |
 | Invalid code in `auth.login_google_wallet` | Display error, suggest user re-obtain authorization code or use Device Flow |
-| Network interruption | Display network error, suggest check network then retry |
 
 ## Security Rules
 

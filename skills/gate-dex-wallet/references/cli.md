@@ -1,5 +1,5 @@
 ---
-name: gate-dex-cli
+name: gate-dex-wallet-cli
 version: "2026.3.12-1"
 updated: "2026-03-12"
 description: "Gate Wallet CLI command-line tool. Dual-channel support: MCP (OAuth custodial signing) and OpenAPI (AK/SK self-custodial signing). Use when users mention gate-wallet, CLI, command line, openapi-swap, hybrid swap and other CLI-related operations. Covers authentication, asset queries, transfers, Swap, market data, and approvals."
@@ -29,30 +29,7 @@ npm install -g gate-wallet-cli
 - `gate-wallet` CLI command (global)
 - OpenAPI credential configuration (optional, for hybrid mode Swap)
 
-## MCP Server Connection Detection
-
-### First Session Detection
-
-**Before the first MCP tool call in a session, perform one connection probe to confirm Gate Wallet MCP Server availability. Subsequent operations do not need repeated detection.**
-
-```
-CallMcpTool(server="gate-dex", toolName="chain.config", arguments={chain: "eth"})
-```
-
-| Result | Handling |
-| ------ | -------- |
-| Success | MCP Server available, subsequent operations directly call business tools without re-probing |
-| Failure | Display configuration guidance based on error type (see error handling below) |
-
-### Runtime Error Fallback
-
-If business tool calls fail during subsequent operations (returning connection errors, timeouts, etc.), handle according to the following rules:
-
-| Error Type | Keywords | Handling |
-| ---------- | -------- | -------- |
-| MCP Server not configured | `server not found`, `unknown server` | Display MCP Server configuration guidance |
-| Remote service unreachable | `connection refused`, `timeout`, `DNS error` | Prompt to check server status and network connection |
-| Authentication failed | `401`, `unauthorized` | Prompt to contact administrator for authorization |
+**Prerequisites**: MCP Server available (see parent SKILL.md for detection). If not configured, see parent SKILL.md for setup guide.
 
 ## Authentication Notes
 
@@ -76,43 +53,39 @@ This project has two channels that **overlap on Swap functionality**. Agent MUST
 
 **Rule 1 — Explicit user request (highest priority)**
 
-| User says | Route to | Reason |
-| --------- | -------- | ------ |
-| "use openapi" / "openapi swap" / "AK/SK" / "direct API" / "DEX API" | **Hybrid or OpenAPI** — see Rule 1a below | User explicitly chose OpenAPI |
-| "self-signing" / "use private key" | **OpenAPI channel** → read and follow [gate-dex-trade/SKILL.md](../../gate-dex-trade/SKILL.md) | User explicitly wants self-custody signing |
-| "use MCP" / "use wallet" / "custodial signing" / "gate-wallet swap" | **MCP channel** → continue with this SKILL | User explicitly chose MCP |
+| User says | Route to |
+| --------- | -------- |
+| "use openapi" / "openapi swap" / "AK/SK" / "direct API" / "DEX API" | **Hybrid or OpenAPI** — see Rule 1a |
+| "self-signing" / "use private key" | **OpenAPI channel** → [gate-dex-trade/SKILL.md](../../gate-dex-trade/SKILL.md) |
+| "use MCP" / "use wallet" / "custodial signing" / "gate-wallet swap" | **MCP channel** → continue with this SKILL |
 
 **Rule 1a — OpenAPI request sub-routing (MUST check login status)**
 
-When user requests OpenAPI, Agent MUST check whether the user is logged in (`~/.gate-wallet/auth.json` exists and valid):
+| Condition | Route to | Command |
+| --------- | -------- | ------- |
+| User is logged in (has MCP token) | **Hybrid mode** | `gate-wallet openapi-swap --chain ... --from ... --to ... --amount ...` |
+| User is NOT logged in but has private key | **OpenAPI channel** | Agent follows gate-dex-trade Skill |
+| User is NOT logged in and no private key | **Hybrid mode** (prompt login first) | `gate-wallet login` then `gate-wallet openapi-swap ...` |
 
-| Condition | Route to | Command | Reason |
-| --------- | -------- | ------- | ------ |
-| User is logged in (has MCP token) | **Hybrid mode** → `openapi-swap` CLI command | `gate-wallet openapi-swap --chain ... --from ... --to ... --amount ...` | Uses OpenAPI for quote/build/submit + MCP for custodial signing. One CLI command handles everything. |
-| User is NOT logged in but has private key | **OpenAPI channel** → [gate-dex-trade/SKILL.md](../../gate-dex-trade/SKILL.md) | Agent follows gate-dex-trade Skill | Self-custody signing with user's private key |
-| User is NOT logged in and no private key | **Hybrid mode** (prompt login first) | `gate-wallet login` then `gate-wallet openapi-swap ...` | Login to enable MCP signing, then use hybrid flow |
-
-> **Key insight**: "use openapi" does NOT mean "use private key self-signing". Most custodial wallet users want OpenAPI's quote/build advantages (custom fee_recipient, gas price queries, etc.) while still using MCP's convenient custodial signing. The `openapi-swap` hybrid command is designed exactly for this.
+> **Key insight**: "use openapi" does NOT mean "use private key self-signing". Most custodial wallet users want OpenAPI's advantages while still using MCP's convenient custodial signing. The `openapi-swap` hybrid command is designed for this.
 
 **Rule 2 — MCP-only operations (no overlap, always MCP)**
-
-These features exist ONLY in MCP. No routing decision needed:
 
 `balance` · `address` · `tokens` · `send` / `transfer` · `approve` / `revoke` · `gas` · `token-info` · `token-risk` · `token-rank` · `kline` · `liquidity` · `tx-stats` · `swap-tokens` · `bridge-tokens` · `new-tokens` · `rpc` · `chain-config` · `tx-detail` · `tx-history`
 
 **Rule 3 — Overlapping Swap operations (agent decides)**
 
-When user requests swap/quote/swap-detail/swap-history WITHOUT specifying a channel:
+When user requests swap WITHOUT specifying a channel:
 
 | Condition | Preferred channel | Reason |
 | --------- | ---------------- | ------ |
-| User is logged in (`~/.gate-wallet/auth.json` exists and valid) | **MCP** (`gate-wallet swap`) | Simpler flow, no private key needed, one-shot swap |
-| User is NOT logged in but `~/.gate-dex-openapi/config.json` exists | **OpenAPI** | Already has AK/SK configured, can proceed without login |
-| User is NOT logged in and no OpenAPI config exists | **MCP** (prompt login first) | MCP is the default path, guide user to login |
-| User mentions private key / self-custody / fine-grained control | **OpenAPI** | OpenAPI allows step-by-step control and self-signing |
-| User needs features only in OpenAPI (custom fee_recipient, MEV protection, gas price query, chain list query) | **Hybrid** (`gate-wallet openapi-swap`) | OpenAPI features + MCP custodial signing |
+| User is logged in | **MCP** (`gate-wallet swap`) | Simpler flow, one-shot swap |
+| User is NOT logged in but has OpenAPI config | **OpenAPI** | Already has AK/SK configured |
+| User is NOT logged in and no OpenAPI config | **MCP** (prompt login first) | MCP is the default path |
+| User mentions private key / self-custody | **OpenAPI** | Self-signing control |
+| User needs OpenAPI-only features (custom fee_recipient, MEV protection) | **Hybrid** (`gate-wallet openapi-swap`) | OpenAPI features + MCP signing |
 
-> **Hybrid mode priority**: When the user needs OpenAPI features but is logged in (has MCP token), **always use `gate-wallet openapi-swap`** — never construct inline Python/Node scripts to manually call OpenAPI quote → build → sign. The CLI command handles RLP encoding, gas buffer, signing format, and timeout internally.
+> **Hybrid mode priority**: When user needs OpenAPI features but is logged in, **always use `gate-wallet openapi-swap`** — never construct inline scripts.
 
 ### Overlap Reference
 
@@ -143,14 +116,6 @@ All credentials are stored in `~/.gate-wallet/` (user home directory):
 | File | Content | Created by |
 | ---- | ------- | ---------- |
 | `~/.gate-wallet/auth.json` | OAuth `mcp_token` (30-day TTL) | `login` command (auto) |
-
-**Dynamic Token Synchronization**: The CLI automatically synchronizes token changes with MCP configuration files to ensure consistency across different access methods (CLI vs MCP Skills).
-
-```javascript
-// CLI login updates both locations
-gate-wallet login → Updates ~/.gate-wallet/auth.json AND MCP config
-MCP Skill login → Updates MCP config AND ~/.gate-wallet/auth.json (if CLI installed)
-```
 
 ---
 
@@ -204,7 +169,11 @@ gate-wallet call wallet.get_addresses
 gate-wallet call tx.gas '{"chain":"SOL","from":"BTYz..."}'
 ```
 
-**Level 3 — MCP JSON-RPC** (when Level 2 returns 401):
+---
+
+## Fallback Procedures
+
+### Level 3 — MCP JSON-RPC (when Level 2 `call` returns 401)
 
 > The CLI `call` subcommand does not guarantee auto-injection of `mcp_token` for all tools. On any 401, fall back to raw JSON-RPC, reading `mcp_token` from `~/.gate-wallet/auth.json`.
 
@@ -227,7 +196,7 @@ curl -s -X POST {MCP_URL} \
 - `result.content[0].text` is a JSON string — requires double `JSON.parse`
 - Session timeout returns "Invalid session ID" — re-initialize
 
-### Fallback: REST API Manual Login
+### REST API Manual Login (when `gate-wallet login` is unavailable)
 
 Only when `gate-wallet login` is unavailable (e.g. deps broken):
 
@@ -528,6 +497,8 @@ The command handles the entire flow automatically:
 
 ---
 
+---
+
 ## Common Pitfalls
 
 1. **Not logged in for MCP commands**: All commands except `tools`/`chain-config` require `login` first
@@ -544,7 +515,7 @@ The command handles the entire flow automatically:
 12. **SOL SPL transfer needs extra SOL for ATA rent**: If recipient has no Associated Token Account for the SPL token, ~0.002 SOL rent is required on top of gas
 13. **EVM native transfer must set `token = "ETH"`**: When calling `tx.transfer_preview` without `--token` on EVM chains (ARB/BSC/BASE/OP etc.), you MUST explicitly pass `token = "ETH"` (or `"NATIVE"`) to indicate native token. Otherwise the MCP server defaults to transferring USDT instead of native ETH. The CLI `send`/`transfer` commands now handle this automatically.
 14. **`tokens` / `wallet.get_token_list` may not show L2 balances**: The wallet API may not index assets on L2 chains (e.g. ETH/USDT on Arbitrum). To verify L2 balances, use `rpc --chain <chain>` with `eth_getBalance` (native) or `eth_call` with ERC20 `balanceOf` (0x70a08231 + padded address).
-15. **`token` param required for correct display label**: `tx.transfer_preview` defaults display to "USDT" if `token` is not passed. The CLI `send` command now auto-resolves `token` symbol via `token_list_swap_tokens`. For `transfer` (preview-only), pass `--token-symbol <sym>` explicitly if using a non-native token.
+15. **`token` param required for correct display label**: `tx.transfer_preview` defaults display to "USDT" if `token` is not passed. The CLI `send` command now auto-resolves the token symbol via `token_list_swap_tokens` and passes it as `token`. For `transfer` (preview-only), pass `--token-symbol <sym>` explicitly if using a non-native token.
 16. **Hybrid Swap use CLI command**: Always use `openapi-swap` CLI command for hybrid swap (supports EVM + Solana). Never write inline Python/Node scripts — the CLI handles RLP encoding (EVM), base58 encoding (Solana), gas buffer, signing format, and order_id timeout internally.
 17. **Gas buffer for L2 chains**: Always multiply `eth_gasPrice` by 1.2 (20%) for `maxFeePerGas`. L2 baseFee fluctuates and without buffer the tx fails with "max fee per gas less than block base fee".
 18. **OpenAPI `signed_tx_string` must be JSON array**: Use `json.dumps(["0x02f8..."])` — not raw hex string. Otherwise submit returns error 50005.
@@ -582,30 +553,3 @@ Based on user intent after CLI operations completion, route to corresponding mod
 | DApp interaction, sign messages | `gate-dex-wallet` (`references/dapp.md`) |
 | Login / authentication expired | `gate-dex-wallet` (`references/auth.md`) or `gate-wallet login` |
 
-## Cross-Skill Workflows
-
-### CLI Complete Flow (from login to operations)
-
-```
-gate-dex-wallet/references/auth.md (login, or gate-wallet login)
-  → gate-dex-wallet/references/cli.md (gate-wallet balance / tokens / send / swap / openapi-swap ...)
-    → gate-dex-wallet (view updated balance)
-```
-
-### Guided by Other Skills
-
-| Source Skill | Scenario | Description |
-| ------------ | -------- | ----------- |
-| `gate-dex-wallet` | User wants to use CLI operations after viewing assets | Carries chain and token context |
-| `gate-dex-trade` | User wants to use CLI hybrid swap mode | Carries Swap parameters |
-| `gate-dex-wallet` (`references/transfer.md`) | User wants to use CLI send command for transfer | Carries transfer parameters |
-
-### Calling Other Skills
-
-| Target Skill | Call Scenario | Using Tools |
-| ------------ | ------------- | ----------- |
-| `gate-dex-wallet` | View updated balance after CLI operations | `wallet.get_token_list` |
-| `gate-dex-wallet` | View transaction details after CLI operations | `tx.detail`, `tx.list` |
-| `gate-dex-wallet` (`references/auth.md`) | Not logged in or token expired | `gate-wallet login` or MCP authentication flow |
-| `gate-dex-trade` | Self-custody signing Swap (with private key) | Route to gate-dex-trade SKILL |
-| `gate-dex-market` | View token quotes and security audit before trading | `token_get_risk_info`, `market_get_kline` |
