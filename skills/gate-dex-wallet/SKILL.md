@@ -1,226 +1,156 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: "Gate DEX comprehensive wallet skill. Unified entry point supporting: authentication login, asset queries, transfer execution, DApp interactions, CLI command-line for five major modules. Use when users mention login, check balance, transfer, DApp interaction, signing, gate-wallet, CLI, command-line, openapi-swap and other wallet-related operations. Route to specific operation reference files through sub-function routing."
+version: "2026.3.18-1"
+updated: "2026-03-18"
+description: "Gate DEX wallet ACCOUNT MANAGEMENT skill. For personal wallet operations: login/logout authentication, check token balances, view wallet addresses, transfer/send tokens to addresses, transaction history, swap history, DApp wallet-connect and contract interactions, CLI tool. This skill manages wallet state and identity — it does not provide market data lookups or execute token swaps."
 ---
 
 # Gate DEX Wallet
 
-> **Comprehensive Wallet Skill** — Unified entry point for authentication, assets, transfers, DApp interactions, and CLI command-line. 5 major modules through sub-function routing distribution.
+> **Pure Routing Layer** — Wallet ACCOUNT MANAGEMENT only. Handles identity, balances, transfers, DApp, CLI. All sub-modules in `references/`.
 
-**Trigger Scenarios**: Use this Skill when users mention "login", "check balance", "transfer", "DApp", "sign", "wallet", "assets", "gate-wallet", "CLI", "command-line", "openapi-swap" and other wallet-related operations.
+**Trigger Scenarios**: Use when the user wants to **manage their wallet account or identity**:
+- Auth: "login", "logout", "authenticate", "token expired", "OAuth"
+- Balance: "check balance", "my assets", "total portfolio", "wallet address"
+- History: "transaction history", "swap history", "past transactions"
+- Transfer: "transfer ETH to 0xABC", "send tokens", "batch transfer"
+- DApp: "connect wallet to DApp", "sign message", "contract call", "approve spending"
+- CLI: "gate-wallet command", "CLI tool", "openapi-swap", "hybrid swap"
+
+**NOT this skill** (common misroutes):
+- "what is ETH price" → `gate-dex-market` (market data lookup)
+- "swap ETH for USDT" → `gate-dex-trade` (swap execution)
+- "is this token safe" → `gate-dex-market` (security audit)
 
 ---
 
-## Core Modules
+## Auto-Update (Session Start Only)
 
-| Module | Description | Typical Scenarios |
-|------|------|---------|
-| 🔐 **Authentication** | Google OAuth login, Token management | "login", "logout", "token expired" |
-| 💰 **Assets** | Balance queries, address retrieval, transaction history | "check balance", "total assets", "transaction history" |
-| 💸 **Transfer** | Gas estimation, transaction building, signature broadcast | "transfer", "send tokens", "batch transfer" |
-| 🎯 **DApp** | Wallet connection, message signing, contract interaction | "connect DApp", "sign message", "Approve" |
-| 🖥️ **CLI** | gate-wallet CLI dual-channel (MCP custodial signing + OpenAPI hybrid mode) | "gate-wallet", "CLI", "command-line", "openapi-swap", "hybrid swap" |
+On session start (not during interactions), check for updates once:
+
+1. Read this file's frontmatter `version` and `updated` fields.
+2. Fetch remote SKILL.md from `https://raw.githubusercontent.com/gateio/web3_wallet_skill/master/skills/gate-dex-wallet/SKILL.md`.
+3. Compare: update if remote version > local version, or same version but remote `updated` date is newer.
+4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `install_cli.sh`, `references/auth.md`, `references/transfer.md`, `references/dapp.md`, `references/cli.md`).
+5. On failure: silently continue — never block user interactions.
+6. Skip if: already checked this session, or skill was installed < 24h ago.
 
 ---
 
-## Routing Rules
+## Module Routing
 
-Route to corresponding sub-function reference files based on user intent:
+Route to corresponding sub-module based on user intent:
 
-| User Intent | Example Keywords | Reference File |
-|---------|-----------|---------|
-| **Authentication login** | "login", "login", "auth", "token expired", "session" | [references/auth.md](./references/auth.md) |
-| **Asset queries** | "check balance", "total assets", "wallet address", "transaction history", "Swap history" | Keep current SKILL.md main flow |
-| **Transfer operations** | "transfer", "send", "transfer", "batch transfer", "Gas fee" | [references/transfer.md](./references/transfer.md) |
-| **DApp interactions** | "DApp", "sign message", "Approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
-| **CLI operations** | "gate-wallet", "CLI", "command-line", "openapi-swap", "hybrid swap", "hybrid mode swap" | [references/cli.md](./references/cli.md) |
+| User Intent | Keywords | Target |
+|-------------|----------|--------|
+| **Authentication** | "login", "logout", "token expired", "OAuth" | [references/auth.md](./references/auth.md) |
+| **Asset Queries** | "check balance", "total assets", "wallet address", "transaction history", "swap history" | This file (see below) |
+| **Transfer** | "transfer", "send", "batch transfer", "gas fee" | [references/transfer.md](./references/transfer.md) |
+| **DApp Interactions** | "DApp", "sign message", "approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
+| **CLI Tool** | "gate-wallet command", "CLI", "command line", "openapi-swap", "hybrid swap" | [references/cli.md](./references/cli.md) |
 
 ---
 
 ## MCP Server Connection Detection
 
-### Initial Session Detection
+Before the first MCP tool call in a session, perform one connection probe:
 
-**Execute connection probe once before first MCP tool call in session to confirm Gate Wallet MCP Server availability. No need to repeat detection for subsequent operations.**
+1. **Server Discovery**: Scan configured MCP servers for tools `dex_wallet_get_token_list`, `dex_tx_quote`, `dex_tx_swap`
+2. **Record Identifier**: Supports flexible naming (gate-wallet, gate-dex, dex, wallet, custom names)
+3. **Verify Connection**: `CallMcpTool(server="<identifier>", toolName="dex_chain_config", arguments={chain: "eth"})`
 
-```text
-CallMcpTool(server="gate-wallet", toolName="chain.config", arguments={chain: "eth"})
+| Result | Action | Next |
+|--------|--------|------|
+| Success | Record server identifier | Use for all subsequent calls this session |
+| Failure | Display setup guide below | Re-detect next session |
+
+**Setup guide** (show at most once per session when detection fails):
+
+```
+Gate Wallet MCP Server:
+  - URL: https://api.gatemcp.ai/mcp/dex
+  - Type: HTTP
+
+  Cursor: Settings -> MCP -> Add server, or edit ~/.cursor/mcp.json
+  Claude Code: claude mcp add --transport http gate-dex --scope project https://api.gatemcp.ai/mcp/dex
 ```
 
-| Result | Handling |
-|------|------|
-| Success | MCP Server available, continue executing user-requested specific operations |
-| Failure | Show configuration guidance based on error type (see error handling below) |
+---
 
-### Runtime Error Fallback
+## Authentication State
 
-For subsequent operations, if business tool calls fail (connection error, timeout, etc.), handle according to the following rules:
+All operations requiring auth need valid `mcp_token`:
 
-| Error Type | Keywords | Handling |
-|---------|--------|------|
-| MCP Server not configured | `server not found`, `unknown server` | Show MCP Server configuration guidance |
-| Remote service unreachable | `connection refused`, `timeout`, `DNS error` | Suggest checking server status and network connection |
-| Authentication failure | `401`, `unauthorized`, `x-api-key` | Suggest contacting administrator for API Key |
+- No `mcp_token` -> Route to `references/auth.md` for login
+- Token expired -> Try `dex_auth_refresh_token` silent refresh; if failed, guide to re-login
 
 ---
 
-## Authentication State Management
+## Asset Query Module (MCP Tools)
 
-All operations requiring authentication (asset queries, transfers, DApp interactions) need valid `mcp_token`:
+### Tools
 
-- If currently no `mcp_token` → Guide to `references/auth.md` to complete login then return
-- If `mcp_token` expired (MCP Server returns token expired error) → First try `auth.refresh_token` silent refresh, guide to re-login if failed
+| Tool | Purpose | Key Parameters |
+|------|---------|----------------|
+| `dex_wallet_get_token_list` | Token balances | `chain?`, `mcp_token` |
+| `dex_wallet_get_total_asset` | Total asset value | `account_id`, `mcp_token` |
+| `dex_wallet_get_addresses` | Wallet addresses | `account_id`, `mcp_token` |
+| `dex_chain_config` | Chain configuration | `chain`, `mcp_token` |
+| `dex_tx_list` | Transaction history | `account_id`, `chain?`, `page?`, `limit?`, `mcp_token` |
+| `dex_tx_detail` | Transaction details | `hash_id`, `chain`, `mcp_token` |
+| `dex_tx_history_list` | Swap history | `account_id`, `chain?`, `page?`, `limit?`, `mcp_token` |
 
----
-
-## MCP Tool Call Specifications (Asset Query Module)
-
-### 1. `wallet.get_token_list` — Query Token Balances
-
-Query token balance list for specified chain or all chains.
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `wallet.get_token_list` |
-| **Parameters** | `{ chain?: string, network_keys?: string, account_id?: string, mcp_token: string, page?: number, page_size?: number }` |
-| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. |
-
-Call example:
+### Query Flow
 
 ```text
-CallMcpTool(
-  server="gate-wallet",
-  toolName="wallet.get_token_list",
-  arguments={ chain: "ETH", mcp_token: "<mcp_token>" }
-)
-```
-
-### 2. `wallet.get_total_asset` — Query Total Asset Value
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `wallet.get_total_asset` |
-| **Parameters** | `{ account_id: string, mcp_token: string }` |
-| **Return Value** | `{ total_value_usd: number, chains: Array<{chain: string, value_usd: number}> }` |
-
-### 3. `wallet.get_addresses` — Get Wallet Addresses
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `wallet.get_addresses` |
-| **Parameters** | `{ account_id: string, mcp_token: string }` |
-| **Return Value** | Wallet address objects for each chain |
-
-### 4. `chain.config` — Chain Configuration Info
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `chain.config` |
-| **Parameters** | `{ chain: string, mcp_token: string }` |
-| **Return Value** | Chain configuration info (RPC, block explorer, etc.) |
-
-### 5. `tx.list` — Wallet comprehensive (auth, assets, transfer, DApp) transaction list
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `tx.list` |
-| **Parameters** | `{ account_id: string, chain?: string, page?: number, limit?: number, mcp_token: string }` |
-| **Return Value** | Transaction history array |
-
-### 6. `tx.detail` — Transaction Details
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `tx.detail` |
-| **Parameters** | `{ hash_id: string, chain: string, mcp_token: string }` |
-| **Return Value** | Detailed transaction information |
-
-### 7. `tx.history_list` — Swap History Records
-
-| Field | Description |
-|------|------|
-| **Tool Name** | `tx.history_list` |
-| **Parameters** | `{ account_id: string, chain?: string, page?: number, limit?: number, mcp_token: string }` |
-| **Return Value** | Swap history array |
-
----
-
-## Operation Flows
-
-### Flow A: Query Token Balances
-
-```text
-Step 0: MCP Server connection detection
-  ↓ Success
-
+Step 0: MCP Server connection detection (once per session)
+  |
 Step 1: Authentication check
-  Confirm holding valid mcp_token and account_id
-  No token → Route to references/auth.md
-  ↓
-
+  |- No mcp_token -> Route to references/auth.md
+  +- Valid token -> Continue
+  |
 Step 2: Execute query
-  Call wallet.get_token_list({ chain?, network_keys?, mcp_token })
-  ↓
-
-Step 3: Format display
-  Group by chain, sort by value, filter zero balances
+  |- Balance: dex_wallet_get_token_list({ chain?, mcp_token })
+  |- Total assets: dex_wallet_get_total_asset({ account_id, mcp_token })
+  |- Addresses: dex_wallet_get_addresses({ account_id, mcp_token })
+  |- Tx history: dex_tx_list({ account_id, chain?, mcp_token })
+  +- Swap history: dex_tx_history_list({ account_id, chain?, mcp_token })
+  |
+Step 3: Format and display results
 ```
-
-### Flow B: Query Total Asset Value
-
-```text
-Step 0-1: Same as Flow A
-  ↓
-
-Step 2: Execute query
-  Call wallet.get_total_asset({ account_id, mcp_token })
-  ↓
-
-Step 3: Format display
-  Total value + distribution by chain
-```
-
-### Flow C-G: Other Asset Query Flows
-
-Similar to above flows, detailed specifications see original SKILL.md content.
 
 ---
 
-## Skill Routing
+## Follow-up Routing
 
-Post-asset viewing follow-up operation guidance:
-
-| User Intent | Target |
-|---------|------|
-| View token prices, K-line charts | `gate-dex-market` |
-| View token security audits | `gate-dex-market` |
-| Transfer, send tokens | This Skill `references/transfer.md` |
-| Swap/Exchange tokens | `gate-dex-trade` |
-| Interact with DApps | This Skill `references/dapp.md` |
-| Login/Auth expired | This Skill `references/auth.md` |
-| Use CLI / command-line operations / hybrid mode Swap | This Skill `references/cli.md` |
+| User Intent After Query | Target |
+|------------------------|--------|
+| View token quotes / K-line | `gate-dex-market` |
+| Token security audit | `gate-dex-market` |
+| Transfer / send tokens | `references/transfer.md` |
+| Exchange / Swap tokens | `gate-dex-trade` |
+| DApp interaction | `references/dapp.md` |
+| Login / auth expired | `references/auth.md` |
+| CLI / command line | `references/cli.md` |
 
 ---
 
 ## Cross-Skill Collaboration
 
-This Skill serves as **wallet data center**, called by other Skills:
+This skill serves as the **wallet data center**, called by other skills:
 
-| Caller | Scenario | Used Tools |
-|--------|------|---------|
-| `gate-dex-trade` | Pre-swap balance validation, token address resolution | `wallet.get_token_list` |
-| `gate-dex-trade` | Get chain-specific wallet address | `wallet.get_addresses` |
-| `gate-dex-market` | Guide to view holdings after market data query | `wallet.get_token_list` |
-| CLI sub-module | CLI dual-channel operations (MCP custodial signing / OpenAPI hybrid Swap) | `references/cli.md` |
+| Caller | Scenario | Tools Used |
+|--------|----------|------------|
+| `gate-dex-trade` | Balance verification, token address resolution | `dex_wallet_get_token_list` |
+| `gate-dex-trade` | Get chain-specific wallet address | `dex_wallet_get_addresses` |
+| `gate-dex-market` | Guide to view holdings after market query | `dex_wallet_get_token_list` |
 
 ---
 
 ## Supported Chains
 
-| Chain ID | Network Name | Type |
-|--------|----------|------|
+| Chain ID | Network | Type |
+|----------|---------|------|
 | `eth` | Ethereum | EVM |
 | `bsc` | BNB Smart Chain | EVM |
 | `polygon` | Polygon | EVM |
@@ -234,8 +164,8 @@ This Skill serves as **wallet data center**, called by other Skills:
 
 ## Security Rules
 
-1. **Authentication check**: Check `mcp_token` validity before all operations
-2. **Sensitive information**: `mcp_token` must not be displayed in plain text in conversations
+1. **Authentication check**: Verify `mcp_token` validity before all operations
+2. **Sensitive info**: `mcp_token` must not be displayed in plain text
 3. **Auto refresh**: Prioritize silent refresh when token expires
-4. **Guidance mechanism**: Guide to `references/auth.md` when authentication fails
-5. **Cross-Skill security**: Provide secure balance validation and address retrieval for other Skills
+4. **Auth guidance**: Route to `references/auth.md` when authentication fails
+5. **Cross-skill security**: Provide secure balance verification and address retrieval for other skills

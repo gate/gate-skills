@@ -1,102 +1,90 @@
 # Gate DEX Trade
 
-> **Trading Comprehensive Skill** — MCP + OpenAPI dual mode, intelligently selects the best trading method
+> **Comprehensive Trading Skill** — MCP + OpenAPI dual modes with intelligent routing
 
-Provides complete Swap trading capabilities through Gate DEX, supporting quote retrieval, slippage control, trade execution, status tracking and other functions.
-
----
-
-## 🎯 Core Modes
-
-| Mode | Connection Method | Features | Use Cases |
-|------|------------------|----------|-----------|
-| 🔗 **MCP Mode** | gate-wallet MCP Server | Unified authentication, three-step confirmation | Secure trading, wallet ecosystem integration |
-| ⚡ **OpenAPI Mode** | AK/SK direct calls | Complete lifecycle, multi-chain support | Fast trading, full process control |
+Provides complete Swap trading capabilities through Gate DEX. Designed for AI assistants (Cursor / Claude Code / Windsurf, etc.), supports EVM multi-chain + Solana, supports cross-chain Swap.
 
 ---
 
-## 🚀 Quick Installation
-
-### Method 1: Automatic Installation Script (Recommended)
+## Quick Start
 
 ```bash
-# Run trade-specific installation script
-./gate-dex-trade/install.sh
+cd gate-dex-trade
+./install.sh
 ```
 
-Script features:
-- 🔍 Auto-detect AI platforms and configure
-- 📊 Optimize Skill loading order for trading functions
-- 🔄 Configure MCP + OpenAPI dual mode support
-- 🎯 Generate trade-priority routing files
-
-### Method 2: Manual Configuration
-
-See detailed configuration method in [Root README.md](../README.md).
+Verify: `"Swap 100 USDT for ETH"` or `"Use OpenAPI mode to swap"`
 
 ---
 
-## 🚀 Quick Usage
+## Mode Overview
 
-### Trigger Methods
+| Dimension | MCP Mode | OpenAPI Mode |
+|-----------|----------|-------------|
+| **Connection** | Gate Wallet MCP Server | Direct AK/SK API |
+| **Authentication** | mcp_token (OAuth login) | HMAC-SHA256 signature |
+| **Execution** | One-shot (single call) | Step-by-step lifecycle |
+| **Cross-chain** | Supported | Same-chain only |
+| **Three-step Confirmation** | Mandatory | Mandatory |
 
-- **Trading Intent**: `swap`, `exchange`, `buy`, `sell`, `trade`
-- **Quote Query**: `quote`, `exchange rate`, `Gas fee`, `slippage`
-- **Status Query**: `trade status`, `order status`, `trade history`
+---
 
-### Example Conversations
+## Trigger Keywords
+
+- **Trading**: `swap`, `exchange`, `buy`, `sell`, `trade`, `cross-chain`
+- **Queries**: `quote`, `rate`, `gas fees`, `slippage`, `transaction status`
+- **Mode**: `OpenAPI mode`, `AK/SK`, `MCP mode`
+
+---
+
+## Routing Flow
 
 ```text
-💬 "Swap 100 USDT to ETH"              → Intelligently select best trading mode
-💬 "Check ETH to BNB quote"            → Quote retrieval
-💬 "My trading records"                → History query
+User triggers trading intent
+  ↓
+Explicitly specify mode?
+  ├─ "OpenAPI/AK/SK" → references/openapi.md
+  ├─ "MCP" → MCP mode (guide setup on failure)
+  └─ Not specified → Environment detection
+  ↓
+Cross-chain Swap?
+  ├─ Yes → Force MCP mode
+  └─ No → MCP Server detection
+  ↓
+MCP Server available?
+  ├─ Yes → references/mcp.md
+  └─ No → Prompt setup + fallback to references/openapi.md
 ```
 
 ---
 
-## 📁 File Structure
+## File Architecture
 
 ```text
 gate-dex-trade/
-├── README.md              # This document
-├── SKILL.md               # Agent dual mode routing specification
-├── CHANGELOG.md           # Change log
-└── references/            # Sub-module reference documentation
-    ├── openapi.md         # ⚡ OpenAPI mode complete specification
-    └── README-openapi.md  # OpenAPI mode usage guide
+├── SKILL.md              # Pure routing layer (AI reads this first)
+├── README.md             # This document (human-facing)
+├── CHANGELOG.md          # Change log
+├── install.sh            # Interactive installation script
+└── references/
+    ├── mcp.md            # MCP mode complete specification
+    ├── openapi.md        # OpenAPI mode complete specification
+    └── setup.md          # MCP Server setup guide (multi-platform)
 ```
 
-**MCP Mode** complete specifications are directly included in the main `SKILL.md`.
+---
+
+## Cross-Skill Collaboration
+
+| Source Skill | Scenario | Information Passed |
+|-------------|----------|-------------------|
+| `gate-dex-wallet` | Trade after viewing balance | Chain, token addresses, balance |
+| `gate-dex-market` | Buy after viewing market data | Token info, price, market cap |
+| `gate-dex-wallet` (`references/transfer.md`) | Exchange remaining after transfer | Chain, tokens, wallet addresses |
 
 ---
 
-## 🔧 Prerequisites
+## Related Skills
 
-**MCP Mode**:
-- Server Name: `gate-wallet`  
-- URL: `https://api.gatemcp.ai/mcp/dex`
-- Requires user login authentication
-
-**OpenAPI Mode**:
-- Config file: `~/.gate-dex-openapi/config.json`
-- Endpoint: `https://openapi.gateweb3.cc/api/v1/dex`
-- Supports built-in default credentials
-
-See detailed configuration method in [Root README.md](../README.md).
-
----
-
-## 🛡️ Security Features
-
-- ✅ **Dual Security Mechanism**: MCP mode three-step confirmation, OpenAPI mode private key protection
-- 🔒 **Credential Isolation**: Two modes use different authentication mechanisms
-- ⚡ **Smart Routing**: Automatically select the most suitable calling method
-- 🚨 **Risk Control**: Price difference warnings, slippage alerts, MEV protection
-- 📊 **Balance Pre-check**: Mandatory asset sufficiency verification before trading
-
----
-
-## 🔗 Related Skills
-
-- [gate-dex-wallet](../gate-dex-wallet/) — Wallet comprehensive (authentication, assets, transfers, DApp)
-- [gate-dex-market](../gate-dex-market/) — Market data queries
+- **[gate-dex-wallet](../gate-dex-wallet/)** — Wallet (authentication, assets, transfers, DApp)
+- **[gate-dex-market](../gate-dex-market/)** — Market data queries (quotes, rankings, audits)

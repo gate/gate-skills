@@ -5,6 +5,11 @@
 
 set -e
 
+# Get the directory where this script is located
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# Repository root is one level up from gate-dex-trade/
+REPO_ROOT="$(dirname "$SCRIPT_DIR")"
+
 # Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
@@ -47,11 +52,11 @@ detect_platforms() {
 select_platform() {
     local detected_platforms=($(detect_platforms))
     
-    echo -e "${BLUE}🔍 Detected AI platforms:${NC}"
+    echo -e "${BLUE}🔍 Detected AI Platforms:${NC}"
     if [ ${#detected_platforms[@]} -eq 0 ]; then
         echo "  ❌ No supported platforms detected"
         echo ""
-        echo -e "${YELLOW}Please install one of the following AI platforms first:${NC}"
+        echo -e "${YELLOW}Please install one of the following AI platforms:${NC}"
         echo "  • Cursor: https://cursor.com"
         echo "  • Claude Code: https://docs.anthropic.com/claude-code"
         echo "  • Codex CLI: https://developers.openai.com/codex"
@@ -72,7 +77,7 @@ select_platform() {
     echo "  a) All platforms (recommended)"
     echo ""
     
-    read -p "Select platform to configure [1-${#detected_platforms[@]}/a] (default a): " choice
+    read -p "Please select platforms to configure [1-${#detected_platforms[@]}/a] (default a): " choice
     choice=${choice:-a}
     
     if [ "$choice" = "a" ]; then
@@ -85,27 +90,143 @@ select_platform() {
     fi
 }
 
-# Install functions (similar to wallet but trade-focused)
+# Create OpenAPI configuration
+create_openapi_config() {
+    echo -e "${CYAN}⚡ Configuring OpenAPI fallback support...${NC}"
+    
+    local config_dir="$HOME/.gate-dex-openapi"
+    local config_file="$config_dir/config.json"
+    
+    mkdir -p "$config_dir"
+    chmod 700 "$config_dir"
+    
+    if [ ! -f "$config_file" ]; then
+        cat > "$config_file" << 'EOF'
+{
+  "api_key": "ak_default_demo_key",
+  "secret_key": "sk_default_demo_key_PLACEHOLDER",
+  "default_slippage": 0.005,
+  "base_url": "https://openapi.gateweb3.cc/api/v1/dex"
+}
+EOF
+        chmod 600 "$config_file"
+        echo -e "${GREEN}  ✓${NC} OpenAPI default configuration created"
+        echo -e "${BLUE}  ℹ${NC} Config location: $config_file"
+        echo -e "${BLUE}  ℹ${NC} Get dedicated keys: https://www.gatedex.com/developer"
+    else
+        echo -e "${YELLOW}  ⚠${NC} OpenAPI configuration already exists, skipping creation"
+    fi
+}
+
+# Install functions (trade-focused)
 install_cursor() {
     echo -e "${CYAN}📱 Configuring Cursor (trading priority)...${NC}"
-    # Same MCP config as wallet
-    # But different skills order in routing
+    
+    # Create MCP config
+    local cursor_mcp_path="$HOME/.cursor/mcp.json"
+    local cursor_mcp_dir="$(dirname "$cursor_mcp_path")"
+    
+    mkdir -p "$cursor_mcp_dir"
+    
+    if [ -f "$cursor_mcp_path" ]; then
+        echo -e "${YELLOW}  ⚠${NC} Existing MCP configuration detected, backing up to mcp.json.backup"
+        cp "$cursor_mcp_path" "$cursor_mcp_path.backup"
+    fi
+    
+    cat > "$cursor_mcp_path" << 'EOF'
+{
+  "mcpServers": {
+    "gate-dex": {
+      "transport": "http",
+      "url": "https://api.gatemcp.ai/mcp/dex",
+      "headers": {
+        "Authorization": "Bearer <your_mcp_token>"
+      }
+    }
+  }
+}
+EOF
+    
+    # Create skills directory and link
+    mkdir -p .cursor/skills
+    if [ ! -e ".cursor/skills/gate-dex-trade" ]; then
+        ln -s "$(pwd)" ".cursor/skills/gate-dex-trade"
+        echo -e "${GREEN}  ✓${NC} Skills link created"
+    else
+        echo -e "${YELLOW}  ⚠${NC} Skills link already exists"
+    fi
+    
+    # Create routing rules
+    mkdir -p .cursor/rules
+    cat > .cursor/rules/gate-dex-trade.md << 'EOF'
+# Gate DEX Trade Priority Routing
+
+When users mention the following keywords, prioritize trading-related functions:
+
+- 🔄 Swap, exchange, buy, sell, quote → gate-dex-trade/SKILL.md
+- 💱 Cross-chain exchange, bridge → gate-dex-trade/SKILL.md (MCP mode)
+- 📊 Trade after checking market data → First gate-dex-market, then route to gate-dex-trade
+
+Intelligent mode selection:
+- User explicitly says "OpenAPI" → Force OpenAPI mode  
+- Cross-chain requirements → Force MCP mode
+- Other situations → Auto-detect optimal mode
+
+Security rules:
+- All trades must have three-step confirmation (trading pair→quote→signature)
+- Exchange value difference > 5% forced warning
+- Cross-chain trading additional risk warnings
+EOF
+    
     echo -e "${GREEN}  ✓${NC} Cursor trading configuration completed"
 }
 
 install_claude() {
     echo -e "${CYAN}🤖 Configuring Claude Code (trading priority)...${NC}"
     
+    # Create project-level MCP config
+    cat > .mcp.json << 'EOF'
+{
+  "mcpServers": {
+    "gate-dex": {
+      "type": "url",
+      "url": "https://api.gatemcp.ai/mcp/dex",
+      "headers": {
+        "Authorization": "Bearer <your_mcp_token>"
+      }
+    }
+  }
+}
+EOF
+    echo -e "${GREEN}  ✓${NC} .mcp.json created"
+    
+    # Create routing file
     cat > CLAUDE.md << 'EOF'
 # Gate DEX Trade Skills
 
-When users request the following operations, read the corresponding SKILL.md file and strictly follow its process:
+When users request the following operations, read the corresponding SKILL.md file and strictly follow its processes:
 
+## Core Trading Functions
 - 🔄 Swap, exchange, buy, sell, quote → `gate-dex-trade/SKILL.md`
-- 📊 Check market, token info, security audit → `gate-dex-market/SKILL.md`
-- 💰 Check balance, wallet address, authentication login → `gate-dex-wallet/SKILL.md`
+- 💱 Cross-chain exchange → `gate-dex-trade/SKILL.md` (Force MCP mode)
+- 📊 View transaction status, order history → `gate-dex-trade/SKILL.md`
 
-Prioritize trading-related functions. When authentication needed, automatically guide to gate-dex-wallet/references/auth.md.
+## Collaboration Functions  
+- 💰 Trade after checking balance → Guide to `gate-dex-trade/SKILL.md`
+- 📈 Buy after checking market data → Guide to `gate-dex-trade/SKILL.md`
+
+## Mode Selection
+- User explicitly specifies "OpenAPI"/"AK/SK" → Force OpenAPI mode
+- Cross-chain requirements → Force MCP mode (OpenAPI doesn't support cross-chain)
+- Other situations → Intelligent routing selects optimal mode
+
+## Security Rules
+- All trades must have three-step confirmation (trading pair confirmation → quote display → signature authorization)
+- Auto-fallback to OpenAPI mode when MCP Server unavailable
+- Exchange value difference > 5% triggers forced warning
+- Cross-chain trading includes additional risk warnings
+
+Prioritize trading-related functions. Auto-guide to MCP login process or configure OpenAPI credentials when authentication needed.
 EOF
     
     echo -e "${GREEN}  ✓${NC} CLAUDE.md trading routing created"
@@ -113,13 +234,69 @@ EOF
 
 install_codex() {
     echo -e "${CYAN}⚙️ Configuring Codex CLI (trading priority)...${NC}"
-    # Similar to claude but for Codex
-    echo -e "${GREEN}  ✓${NC} Codex trading configuration completed"
+    
+    # Create AGENTS.md for Codex CLI
+    cat > AGENTS.md << 'EOF'
+# Gate DEX Trade Skills
+
+When users request the following operations, read the corresponding SKILL.md file and strictly follow its processes:
+
+## Core Trading Functions
+- 🔄 Swap, exchange, buy, sell, quote → `gate-dex-trade/SKILL.md`
+- 💱 Cross-chain exchange → `gate-dex-trade/SKILL.md` (Force MCP mode)
+- 📊 View transaction status, order history → `gate-dex-trade/SKILL.md`
+
+## Collaboration Functions  
+- 💰 Trade after checking balance → Guide to `gate-dex-trade/SKILL.md`
+- 📈 Buy after checking market data → Guide to `gate-dex-trade/SKILL.md`
+
+Prioritize trading-related functions. Auto-fallback to OpenAPI mode when MCP Server unavailable.
+EOF
+    
+    echo -e "${GREEN}  ✓${NC} AGENTS.md created"
+    echo -e "${BLUE}  ℹ${NC} Please manually run: codex mcp add gate-dex --transport http --url https://api.gatemcp.ai/mcp/dex"
 }
 
 install_openclaw() {
     echo -e "${CYAN}🐾 Configuring OpenClaw (trading priority)...${NC}"
-    # Similar to wallet but trade-focused
+    
+    # Create opencode.json config
+    cat > opencode.json << 'EOF'
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "gate-dex": {
+      "type": "remote",
+      "url": "https://api.gatemcp.ai/mcp/dex",
+      "enabled": true,
+      "headers": {
+        "Authorization": "Bearer <your_mcp_token>"
+      }
+    }
+  }
+}
+EOF
+    echo -e "${GREEN}  ✓${NC} opencode.json created"
+    
+    # Create AGENTS.md routing
+    cat > AGENTS.md << 'EOF'
+# Gate DEX Trade Skills
+
+When users request the following operations, read the corresponding SKILL.md file and strictly follow its processes:
+
+## Core Trading Functions
+- 🔄 Swap, exchange, buy, sell, quote → `gate-dex-trade/SKILL.md`
+- 💱 Cross-chain exchange → `gate-dex-trade/SKILL.md` (Force MCP mode)
+- 📊 View transaction status, order history → `gate-dex-trade/SKILL.md`
+
+## Intelligent Routing
+- Auto-detect MCP Server availability
+- Fallback to OpenAPI mode when MCP unavailable
+- Cross-chain requirements force MCP mode
+
+Prioritize trading-related functions.
+EOF
+    
     echo -e "${GREEN}  ✓${NC} OpenClaw trading configuration completed"
 }
 
@@ -129,6 +306,10 @@ main() {
     
     echo ""
     echo -e "${CYAN}🚀 Starting trading functionality configuration...${NC}"
+    echo ""
+    
+    # Always create OpenAPI config for fallback
+    create_openapi_config
     echo ""
     
     for platform in "${selected_platforms[@]}"; do
@@ -142,20 +323,38 @@ main() {
     done
     
     echo "=================================="
-    echo -e "${GREEN}🎉 Gate Trade installation completed!${NC}"
+    echo -e "${GREEN}🎉 Gate Trade Installation Complete!${NC}"
     echo ""
-    echo -e "${BLUE}📱 Configured platforms:${NC}"
+    echo -e "${BLUE}📱 Configured Platforms:${NC}"
     for platform in "${selected_platforms[@]}"; do
         echo "  ✓ $platform"
     done
     echo ""
-    echo -e "${BLUE}🎯 Next steps:${NC}"
-    echo "1. Restart your AI tool"
-    echo "2. Try trading: \"Swap 100 USDT to ETH\""
-    echo "3. View documentation: ./gate-dex-trade/README.md"
+    echo -e "${BLUE}🔧 Configuration Summary:${NC}"
+    echo "  • MCP Server: gate-dex (https://api.gatemcp.ai/mcp/dex)"
+    echo "  • OpenAPI Fallback: ~/.gate-dex-openapi/config.json"
+    echo "  • Routing Priority: Trading functions prioritized"
     echo ""
-    echo -e "${CYAN}💡 Tip:${NC}"
-    echo "  Supports MCP and OpenAPI dual modes, see ./gate-dex-trade/references/openapi.md"
+    echo -e "${BLUE}🎯 Next Steps:${NC}"
+    echo "1. Restart your AI tool"
+    echo "2. Try trading: \"Swap 100 USDT for ETH\""
+    echo "3. Check modes: \"Use OpenAPI mode to swap\" or \"Cross-chain exchange\""
+    echo "4. View documentation: ./gate-dex-trade/README.md"
+    echo ""
+    echo -e "${CYAN}💡 Tips:${NC}"
+    echo "  • Supports MCP + OpenAPI dual modes, auto-selects optimal calling method"
+    echo "  • Cross-chain trading requires MCP mode, same-chain trading supports both modes"
+    echo "  • All trades have three-step confirmation gateway for security"
+    echo ""
+    echo -e "${YELLOW}🔧 Troubleshooting:${NC}"
+    echo "  • MCP connection failed → Check network and platform configuration"
+    echo "  • OpenAPI authentication failed → Get dedicated keys to replace default config"
+    echo "  • Cross-chain not supported → Ensure MCP Server connection is normal"
+    echo ""
+    echo -e "${CYAN}🔐 Authentication Instructions:${NC}"
+    echo "  • MCP mode supports Google OAuth and Gate OAuth login"
+    echo "  • First use will auto-guide authentication method selection"
+    echo "  • Token automatically saved after successful authentication, no need to re-login"
     echo ""
 }
 
@@ -174,7 +373,7 @@ case "${1:-}" in
         exit 0
         ;;
     --list|-l)
-        echo -e "${BLUE}🔍 Detected platforms:${NC}"
+        echo -e "${BLUE}🔍 Detected Platforms:${NC}"
         platforms=($(detect_platforms))
         for platform in "${platforms[@]}"; do
             echo "  ✓ $platform"

@@ -1,113 +1,135 @@
 ---
 name: gate-dex-market
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: "Gate DEX market data skill. Uses AK/SK authentication to call Gate DEX OpenAPI, providing token and market quote read-only queries. Use when users mention quotes, prices, token information, rankings, security audits."
+version: "2026.3.18-1"
+updated: "2026-03-18"
+description: "Gate DEX READ-ONLY market data lookup skill. For data queries that NEVER execute on-chain transactions: check token prices, view K-line charts, browse token rankings, discover new tokens, analyze holders, run security audits, view trading volume and liquidity. This skill only READS data — it never buys, sells, swaps, transfers, or modifies wallet state."
 ---
 
 # Gate DEX Market
 
-> **Market Data Skill** — OpenAPI mode, AK/SK authentication for direct API calls
+> **Pure Routing Layer** — READ-ONLY data queries only. Never executes transactions. All specifications in `references/`.
 
-**Trigger Scenarios**: Use when users mention "quotes", "K-line", "prices", "token information", "rankings", "security audit", "market data", and other related operations.
+**Trigger Scenarios**: Use when the user wants to **look up or analyze** market data without executing any transaction:
+- Price lookup: "what is the price of ETH", "check SOL price", "price of 0x1234..."
+- Charts: "show K-line", "candlestick chart", "price trend"
+- Rankings: "top gainers", "trending tokens", "token rankings"
+- Security: "is this token safe", "security audit", "honeypot check", "risk analysis"
+- Discovery: "new tokens", "newly listed", "holder analysis", "whale tracking"
+- Volume: "trading volume", "buy-sell pressure", "liquidity events"
 
----
+## Project convention — MCP only
 
-## 🎯 Architecture
-
-| Mode | Connection Method | Advantages | Use Cases |
-|------|---------|------|---------|
-| ⚡ **OpenAPI Mode** | AK/SK direct calls | Strong independence, fast response | Market data queries, token information, security audits |
-
----
-
-## 📋 Environment Detection
-
-Before first API call, check if credentials are configured:
-
-| Condition | Handling |
-|--------|---------|
-| `~/.gate-dex-openapi/config.json` exists | Read credentials and proceed with API calls |
-| Config file not found | Auto-create with default credentials, prompt user to configure dedicated AK/SK |
+No OpenAPI unless user explicitly asks. MCP setup: see `gate-dex-trade/references/setup.md`.
 
 ---
 
-## 🔧 Configuration
+**NOT this skill** (common misroutes):
+- "quote for swapping X to Y" → `gate-dex-trade` (swap execution)
+- "check my balance" → `gate-dex-wallet` (account query)
+- "buy ETH" / "sell USDT" → `gate-dex-trade` (transaction execution)
 
-**Config file**: `~/.gate-dex-openapi/config.json`
+---
 
-```json
-{
-  "api_key": "your_api_key",
-  "secret_key": "your_secret_key"
-}
+## Auto-Update (Session Start Only)
+
+On session start (not during interactions), check for updates once:
+
+1. Read this file's frontmatter `version` and `updated` fields.
+2. Fetch remote SKILL.md from `https://raw.githubusercontent.com/gateio/web3_wallet_skill/master/skills/gate-dex-market/SKILL.md`.
+3. Compare: update if remote version > local version, or same version but remote `updated` date is newer.
+4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `references/mcp.md`, `references/openapi.md`).
+5. On failure: silently continue — never block user interactions.
+6. Skip if: already checked this session, or skill was installed < 24h ago.
+
+---
+
+## Routing Flow
+
+```text
+User triggers market data query
+  |
+Step 1: OpenAPI only if user explicitly asks. Else MCP only.
+Step 2: MCP discovery → success = MCP mode; fail = MCP setup guide (no OpenAPI fallback).
 ```
 
-**First use**: If file doesn't exist, Skill will auto-create config with built-in default credentials; recommend visiting [Gate DEX Developer Platform](https://www.gatedex.com/developer) to create dedicated AK/SK for better rate limiting and experience.
+---
+
+## Feature Matrix
+
+| Feature | MCP | OpenAPI | Notes |
+|---------|-----|---------|-------|
+| K-line / Candlestick | Yes | Yes | |
+| Token basic info | Yes | Yes | |
+| Token rankings | Yes | Yes | |
+| Security risk audit | Yes | Yes | |
+| Tradable token list | Yes | Yes | |
+| Cross-chain bridge tokens | Yes | No | MCP only |
+| Holder analysis (Top N) | No | Yes | OpenAPI only |
+| New token discovery | No | Yes | OpenAPI only |
+| Liquidity events (Rug Pull) | No | Yes | OpenAPI only |
+| Volume stats (multi-period) | No | Yes | OpenAPI only |
 
 ---
 
-## 📖 Complete Specification
+## Mode Dispatch
 
-All API call specifications, signature algorithms, request/response formats are documented in:
+### MCP Mode
 
-**→ [references/openapi.md](./references/openapi.md)**
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), execute according to its complete workflow.
 
-This includes:
-- HMAC-SHA256 signature algorithm
-- 9 API actions (6 token-type + 3 market-type)
-- Request/response examples
-- Error handling
+Includes: connection detection, 6 market data tools (dex_market_get_kline, dex_token_get_coin_info, dex_token_ranking, dex_token_get_risk_info, dex_token_list_swap_tokens, dex_token_list_cross_chain_bridge_tokens), no authentication required for market queries.
 
----
+### OpenAPI Mode (Progressive Loading)
 
-## Skill Routing
+Explicit user request only. Load files progressively:
 
-Post-market data query follow-up operation guidance:
+1. **Always load first**: [`references/openapi/_shared.md`](./references/openapi/_shared.md) — env detection, credentials, API call method (via helper script)
+2. **Then load based on query type**:
 
-| User Intent | Target Skill |
-|---------|-----------|
-| Buy/sell tokens | `gate-dex-trade` |
-| Transfer tokens | `gate-dex-wallet/references/transfer` |
-| View holdings | `gate-dex-wallet` |
-| View trading/Swap history | `gate-dex-wallet` |
-| Interact with DApp | `gate-dex-wallet/references/dapp` |
+| Query Type | Load File |
+|-----------|-----------|
+| Token info, rankings, new tokens, security, holders | [`openapi/token-data.md`](./references/openapi/token-data.md) |
+| Volume stats, K-line, liquidity events | [`openapi/market-data.md`](./references/openapi/market-data.md) |
 
----
-
-## Cross-Skill Workflows
-
-### Called by Other Skills
-
-This Skill serves as market data and security information provider, commonly called by these Skills:
-
-| Caller | Call Scenario | Tool Used |
-|--------|---------|---------|
-| `gate-dex-trade` | Query token info before Swap to help parse addresses | `token_get_coin_info` |
-| `gate-dex-trade` | Security audit target token before Swap | `token_get_risk_info` |
-| `gate-dex-trade` | Query available token list before Swap | `token_list_swap_tokens` |
-| `gate-dex-trade` | Query available tokens on target chain before cross-chain bridge | `token_list_cross_chain_bridge_tokens` |
-| `gate-dex-wallet/references/dapp` | Contract security audit before DApp transactions | `token_get_risk_info` |
+> Legacy monolithic file preserved at [`references/openapi.md`](./references/openapi.md) for backward compatibility.
 
 ---
 
 ## Supported Chains
 
-| Chain ID | Network Name | Type |
-|--------|----------|------|
-| `eth` | Ethereum | EVM |
-| `bsc` | BNB Smart Chain | EVM |
-| `polygon` | Polygon | EVM |
-| `arbitrum` | Arbitrum One | EVM |
-| `optimism` | Optimism | EVM |
-| `avax` | Avalanche C-Chain | EVM |
-| `base` | Base | EVM |
-| `sol` | Solana | Non-EVM |
+Actual supported chains are determined by runtime API/Resource returns:
+- **MCP Mode**: via `dex_chain_config` tool
+- **OpenAPI Mode**: chain parameter in request
+
+Common chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol.
+
+---
+
+## Cross-Skill Collaboration
+
+### Called by Other Skills
+
+| Caller | Scenario | Routing |
+|--------|----------|---------|
+| `gate-dex-trade` | Token info / security audit before Swap | Auto-select mode |
+| `gate-dex-wallet` | Real-time prices for portfolio tokens | Prefer MCP mode |
+| `gate-dex-wallet/references/dapp.md` | Contract security audit | Auto-select mode |
+
+### Follow-up Guidance
+
+| User Intent After Query | Target Skill |
+|------------------------|--------------|
+| Buy/sell tokens | `gate-dex-trade` |
+| Check portfolio | `gate-dex-wallet` |
+| Transfer tokens | `gate-dex-wallet/references/transfer.md` |
+| DApp interactions | `gate-dex-wallet/references/dapp.md` |
 
 ---
 
 ## Security Rules
 
-1. **Credential Security**: `secret_key` must not be displayed in plain text
-2. **Read-only Nature**: All operations are data queries only, no on-chain writes involved
-3. **Objective Display**: Price, rankings, and other data presented objectively, no investment advice provided
+1. **Mode transparency**: Clearly inform users of the current mode and reasons
+2. **Data objectivity**: Present prices and rankings objectively, no investment advice
+3. **Risk warnings**: Clearly remind users to judge investment risks themselves when showing security audits
+4. **Credential security**: Never display secret_key in plain text in OpenAPI mode
+5. **Read-only**: All operations are data queries, no on-chain write operations
