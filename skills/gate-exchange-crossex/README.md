@@ -8,11 +8,16 @@ providing complete account management, asset transfer, order placement, and posi
 
 ### Core Capabilities
 
-| Module        | Description                                 | Example                               |
-|---------------|---------------------------------------------|---------------------------------------|
-| **Orders**    | Query orders                                | "Query all GATE_SPOT_BTC_USDT orders" |
-| **Positions** | Query all position types, history records   | "Query all my positions"              |
-| **History**   | Query order/position/trade/interest history | "Query trade history"                 |
+| Module        | Description                                        | Example                                  |
+|---------------|----------------------------------------------------|------------------------------------------|
+| **Spot**      | Limit/market buy/sell, cross-exchange arbitrage    | "Buy 100 USDT worth of BTC"              |
+| **Margin**    | Long/short trading, margin management              | "Long 50 USDT worth of XRP on margin"    |
+| **Futures**   | USDT perpetual contracts, dual-direction positions | "Open 1 BTC futures long position"       |
+| **Transfer**  | Cross-exchange fund transfer                       | "Transfer 100 USDT from Gate to Binance" |
+| **Convert**   | Flash convert and convert quote workflow           | "Flash convert 10 USDT to BTC"           |
+| **Orders**    | Query, cancel, amend orders                        | "Cancel all BTC_USDT orders"             |
+| **Positions** | Query all position types, history records          | "Query all my positions"                 |
+| **History**   | Query order/position/trade/interest history        | "Query trade history"                    |
 
 ---
 
@@ -23,7 +28,7 @@ providing complete account management, asset transfer, order placement, and posi
 | **Gate**    | `GATE`    | ✅    | ✅      | ✅       |
 | **Binance** | `BINANCE` | ✅    | ✅      | ✅       |
 | **OKX**     | `OKX`     | ✅    | ✅      | ✅       |
-| **Bybit**   | `BYBIT`   | ✅    | ❎      | ✅       |
+| **Bybit**   | `BYBIT`   | ✅    | ❌      | ✅       |
 
 ---
 
@@ -36,12 +41,17 @@ workflows live in `references/*.md`.
 
 Intents are routed to corresponding reference documents via keywords:
 
-| Intent           | Keywords                                                | Reference                              |
-|------------------|---------------------------------------------------------|----------------------------------------|
-| Order Management | query orders, cancel order, amend order, list orders    | `references/order-management.md`       |
-| Position Query   | query positions, check positions, positions             | `references/position-query.md`         |
-| History Query    | history query, trade history, interest history, history | `references/history-query.md`          |
-| Asset Query      | query assets, total assets, available margin, assets    | Call `cex_crossex_get_crossex_account` |
+| Intent                  | Keywords                                                     | Reference                        |
+|-------------------------|--------------------------------------------------------------|----------------------------------|
+| Spot Trading            | spot buy, spot sell, buy spot, sell spot                     | `references/spot-trading.md`     |
+| Margin Trading          | margin long, margin short, long margin, short margin         | `references/margin-trading.md`   |
+| Futures Trading         | futures long, futures short, open long, open short           | `references/futures-trading.md`  |
+| Cross-Exchange Transfer | fund transfer, cross-exchange transfer, transfer, move funds | `references/transfer.md`         |
+| Convert Trading         | convert trading, flash convert, convert, quote convert       | `references/convert-trading.md`  |
+| Order Management        | query orders, cancel order, amend order, list orders         | `references/order-management.md` |
+| Position Query          | query positions, check positions, positions                  | `references/position-query.md`   |
+| History Query           | history query, trade history, interest history, history      | `references/history-query.md`    |
+| Asset Query             | query assets, total assets, available margin, assets         | Call `cex_crx_get_crx_account`   |
 
 ---
 
@@ -50,6 +60,7 @@ Intents are routed to corresponding reference documents via keywords:
 ### Prerequisites
 
 - Gate MCP configured and connected
+- Gate API Key used by MCP must have **CrossEx** permission to operate on the CrossEx account. You use only a small amount of funds for testing.
 
 ### Example Prompts
 
@@ -82,12 +93,18 @@ Intents are routed to corresponding reference documents via keywords:
 ### File Structure
 
 ```
-gate-crossex/
+gate-exchange-crossex/
 ├── README.md
 ├── SKILL.md
 ├── CHANGELOG.md
 └── references/
-    ├── order-management.md       # Order management scenarios
+    ├── runtime-rules.md  # Shared runtime rules (auth, MCP check, etc.)
+    ├── spot-trading.md            # Spot trading scenarios
+    ├── margin-trading.md          # Margin trading scenarios
+    ├── futures-trading.md         # Futures trading scenarios
+    ├── transfer.md                # Cross-exchange transfer scenarios
+    ├── convert-trading.md         # Flash convert scenarios
+    ├── order-management.md        # Order management scenarios
     ├── position-query.md         # Position query scenarios
     └── history-query.md          # History query scenarios
 ```
@@ -110,9 +127,11 @@ Format: `{EXCHANGE}_{BUSINESS_TYPE}_{BASE}_{QUOTE}`
 
 ## Security
 
-- Only call `cex_crossex_*` mcp functions
+- Only call `cex_crx_*` MCP functions
 - All trading operations require user confirmation before execution
 - Does not handle or store credentials in the skill
+- **No P2P transfer**: This skill does not support transfers between different users; only transfers within the user's own accounts (e.g., SPOT ↔ CROSSEX) are allowed.
+- **No Secret paste**: Never prompt the user to paste API Secret Key into chat; prefer secure local MCP configuration.
 
 **⚠️ Important Notice**:
 > Never reveal your API Key or Secret to anyone (including customer support).

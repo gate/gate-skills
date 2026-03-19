@@ -203,7 +203,7 @@ Advanced analytics:
 ## Support Resources
 
 - **Affiliate Dashboard**: https://www.gate.com/referral/affiliate
-- **API Documentation**: https://www.gate.io/docs/developers/apiv4
+- **API Documentation**: https://www.gate.com/docs/developers/apiv4
 - **Support Email**: support@mail.gate.com
 
 ## Next Steps

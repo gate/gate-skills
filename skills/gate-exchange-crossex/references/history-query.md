@@ -1,22 +1,26 @@
 # Gate CrossEx History Query - Scenarios and Prompt Examples
 
-Gate CrossEx history query scenarios, including order history, trade history, position history, interest history, and account ledger.
+Gate CrossEx history query scenarios, including order history, trade history, position history, interest history, and
+account ledger.
 
 ## Workflow
 
 ### Step 1: Validate query type and time range
 
-Call `cex_crossex_list_crossex_rule_symbols` with:
+Call `cex_crx_list_crx_rule_symbols` with:
+
 - `symbols`: target symbol when the user provides a pair that needs validation
 
 Key data to extract:
+
 - symbol validity
 - whether the symbol filter can be applied
 - normalized query scope
 
 ### Step 2: Query order and trade history when requested
 
-Call `cex_crossex_list_crossex_history_orders` with:
+Call `cex_crx_list_crx_history_orders` with:
+
 - `symbol` when filtering by pair
 - `from`
 - `to`
@@ -24,6 +28,7 @@ Call `cex_crossex_list_crossex_history_orders` with:
 - `limit`
 
 Key data to extract:
+
 - order history rows
 - order status
 - timestamps
@@ -31,7 +36,8 @@ Key data to extract:
 
 ### Step 3: Query position and interest history when requested
 
-Call `cex_crossex_list_crossex_history_positions` with:
+Call `cex_crx_list_crx_history_positions` with:
+
 - `symbol` when filtering by pair
 - `from`
 - `to`
@@ -39,6 +45,7 @@ Call `cex_crossex_list_crossex_history_positions` with:
 - `limit`
 
 Key data to extract:
+
 - position history rows
 - realized pnl
 - close time
@@ -46,7 +53,8 @@ Key data to extract:
 
 ### Step 4: Query ledger records when the user asks for account movements
 
-Call `cex_crossex_list_crossex_account_book` with:
+Call `cex_crx_list_crx_account_book` with:
+
 - `coin` when filtering by asset
 - `from`
 - `to`
@@ -54,6 +62,7 @@ Call `cex_crossex_list_crossex_account_book` with:
 - `limit`
 
 Key data to extract:
+
 - ledger rows
 - balance changes
 - record types
@@ -81,6 +90,7 @@ History Query Summary
 ```
 
 **Examples**:
+
 - `ORDER_HISTORY` - Query all order history
 - `TRADE_HISTORY` - Query all trade history
 - `POSITION_HISTORY` - Query all position history
@@ -89,28 +99,29 @@ History Query Summary
 
 ### Universal Query Parameters
 
-| Parameter | Description | Default |
-|-----------|-------------|---------|
-| `limit` | Return quantity (max 100) | 100 |
-| `page` | Page number (starting from 1) | 1 |
-| `from` | Start timestamp (milliseconds) | 7 days ago |
-| `to` | End timestamp (milliseconds) | Current time |
-| `symbol` | Trading pair (optional) | All |
+| Parameter | Description                    | Default      |
+|-----------|--------------------------------|--------------|
+| `limit`   | Return quantity (max 100)      | 100          |
+| `page`    | Page number (starting from 1)  | 1            |
+| `from`    | Start timestamp (milliseconds) | 7 days ago   |
+| `to`      | End timestamp (milliseconds)   | Current time |
+| `symbol`  | Trading pair (optional)        | All          |
 
 ### Query Data Sources
 
-| Query Type | MCP TOOL                                      | Description |
-|------------|-----------------------------------------------|-------------|
-| Order History | `cex_crossex_list_crossex_history_orders`          | Historical order records |
-| Trade History | `cex_crossex_list_crossex_history_trades`           | Historical trade records |
-| Position History | `cex_crossex_list_crossex_history_positions`       | Futures position history |
-| Margin Position History | `cex_crossex_list_crossex_history_margin_positions` | Margin position history |
-| Margin Interest History | `cex_crossex_list_crossex_history_margin_interests` | Margin interest records |
-| Account Ledger | `cex_crossex_list_crossex_account_book`            | Account ledger records |
+| Query Type              | MCP TOOL                                    | Description              |
+|-------------------------|---------------------------------------------|--------------------------|
+| Order History           | `cex_crx_list_crx_history_orders`           | Historical order records |
+| Trade History           | `cex_crx_list_crx_history_trades`           | Historical trade records |
+| Position History        | `cex_crx_list_crx_history_positions`        | Futures position history |
+| Margin Position History | `cex_crx_list_crx_history_margin_positions` | Margin position history  |
+| Margin Interest History | `cex_crx_list_crx_history_margin_interests` | Margin interest records  |
+| Account Ledger          | `cex_crx_list_crx_account_book`             | Account ledger records   |
 
 ### Response Field Descriptions
 
 #### Order History Fields
+
 - `order_id` - Order ID
 - `symbol` - Trading pair
 - `type` - Order type (MARKET/LIMIT)
@@ -122,6 +133,7 @@ History Query Summary
 - `update_time` - Update time
 
 #### Trade History Fields
+
 - `order_id` - Order ID
 - `symbol` - Trading pair
 - `side` - Trade direction
@@ -131,6 +143,7 @@ History Query Summary
 - `create_time` - Fill time
 
 #### Position History Fields
+
 - `symbol` - Trading pair
 - `position_side` - Position side (LONG/SHORT)
 - `close_size` - Close size
@@ -140,6 +153,7 @@ History Query Summary
 - `close_time` - Close time
 
 #### Margin Interest Fields
+
 - `symbol` - Trading pair
 - `currency` - Borrowed currency
 - `size` - Borrowed quantity
@@ -148,12 +162,13 @@ History Query Summary
 - `time` - Interest time
 
 #### Account Ledger Fields
+
 - `time` - Time
 - `type` - Type (trade/fee/transfer/deposit/withdraw)
 - `symbol` - Trading pair
 - `change` - Change amount
-  | `balance` | Balance after change |
-  | `text` | Note description |
+- `balance` - Balance after change
+- `text` - Note description
 
 ### Pre-checks
 
@@ -190,15 +205,15 @@ History Query Summary
 
 ### Error Handling
 
-| Error Code | Handling |
-|-----------|----------|
-| `INVALID_TIME_RANGE` | Time range invalid, adjust query parameters |
-| `TIME_RANGE_TOO_LONG` | Time range exceeds limit, shorten query range |
-| `INVALID_PAGE` | Page number invalid, adjust to valid range |
-| `INVALID_SYMBOL` | Trading pair format incorrect, confirm format is correct |
-| `NO_HISTORY` | No history records, prompt user can start trading |
-| `QUERY_FAILED` | Query failed, retry later |
-| `RATE_LIMIT_EXCEEDED` | Query frequency too high, retry later |
+| Error Code            | Handling                                                 |
+|-----------------------|----------------------------------------------------------|
+| `INVALID_TIME_RANGE`  | Time range invalid, adjust query parameters              |
+| `TIME_RANGE_TOO_LONG` | Time range exceeds limit, shorten query range            |
+| `INVALID_PAGE`        | Page number invalid, adjust to valid range               |
+| `INVALID_SYMBOL`      | Trading pair format incorrect, confirm format is correct |
+| `NO_HISTORY`          | No history records, prompt user can start trading        |
+| `QUERY_FAILED`        | Query failed, retry later                                |
+| `RATE_LIMIT_EXCEEDED` | Query frequency too high, retry later                    |
 
 ---
 
@@ -207,17 +222,20 @@ History Query Summary
 **Context**: User wants to view historical order records.
 
 **Prompt Examples**:
+
 - "Query order history"
 - "Show historical orders"
 - "Past orders"
 - "order history"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_history_orders` to query order history
+
+1. Call `cex_crx_list_crx_history_orders` to query order history
 2. Parameters: `limit` (max 100), `page`, `from` (start timestamp), `to` (end timestamp)
 3. Display recent order records
 
 **Report Template**:
+
 ```
 Order History (Recent 10):
 
@@ -239,16 +257,19 @@ Fill Rate: 66.7%
 **Context**: User wants to view historical trade records.
 
 **Prompt Examples**:
+
 - "Query trade history"
 - "Show my trades"
 - "Trade records"
 - "trade history"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_history_trades` to query trade history
+
+1. Call `cex_crx_list_crx_history_trades` to query trade history
 2. Display recent trade records
 
 **Report Template**:
+
 ```
 Trade History (Recent 10):
 
@@ -270,15 +291,18 @@ Total Fees: 0.9
 **Context**: User wants to view historical position records.
 
 **Prompt Examples**:
+
 - "Query position history"
 - "Show closed positions"
 - "Position records"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_history_positions` to query position history
+
+1. Call `cex_crx_list_crx_history_positions` to query position history
 2. Display recent position records
 
 **Report Template**:
+
 ```
 Position History (Recent 10):
 
@@ -300,15 +324,18 @@ Win Rate: 66.7% (2 wins, 1 loss)
 **Context**: User wants to view margin borrowing interest records.
 
 **Prompt Examples**:
+
 - "Query margin interest history"
 - "Show interest records"
 - "Borrowing costs"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_history_margin_interests` to query interest history
+
+1. Call `cex_crx_list_crx_history_margin_interests` to query interest history
 2. Display interest records
 
 **Report Template**:
+
 ```
 Margin Interest History (Recent 10):
 
@@ -327,15 +354,18 @@ Total Interest: 0.02 USDT, 0.0003 ETH
 **Context**: User wants to view account transaction records.
 
 **Prompt Examples**:
+
 - "Query account ledger"
 - "Show account history"
 - "Transaction records"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_account_book` to query account ledger
+
+1. Call `cex_crx_list_crx_account_book` to query account ledger
 2. Display recent ledger records
 
 **Report Template**:
+
 ```
 Account Ledger (Recent 10):
 
@@ -355,17 +385,20 @@ Total: 3 records
 **Context**: User wants to query history for a specific time period.
 
 **Prompt Examples**:
+
 - "Query order history for last 3 days"
 - "Show my trades from yesterday"
 - "This week's position history"
 
 **Expected Behavior**:
+
 1. Parse time range (natural language or specific dates)
 2. Convert to timestamps
 3. Call corresponding query API with `from` and `to` parameters
 4. Display records within time range
 
 **Report Template**:
+
 ```
 Order History (Last 3 Days):
 Time Range: 2026-03-08 00:00:00 to 2026-03-11 23:59:59
