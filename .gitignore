@@ -47,4 +47,5 @@ Thumbs.db
 *.flv
 *.mov
 *.wmv
+.cursor/
 
