@@ -74,6 +74,7 @@ When **staking**, **redeeming**, or **minting** GUSD (or any product whose `curr
 - Prompt: e.g. "This product accepts USDT or USDC. Which do you want to use: USDT or USDC?"
 - **Pass the user’s choice as the `coin` parameter** to the swap (or mint) tool. Do not call the tool until the user has selected one of the two.
 
+
 ### Positions: status field
 
 When **viewing staking positions** (position/balance/holdings queries), **ignore and do not display** the `status` field. Omit it from all user-facing position output.
@@ -133,7 +134,11 @@ When **viewing staking positions** (position/balance/holdings queries), **ignore
 - Positions: show mortgage_amount, freeze_amount, **redeemable** (mortgage_amount × exchange rate; get exchange rate from **`cex_earn_find_coin`** for the same **pid** and matching **currency**), income_total, yesterday_income; group by coin or show per pid. Do not use mortgage_amount − freeze_amount for redeemable. Do not display or format timestamp fields (omit createStamp, updateStamp). Do not display **status** (ignore status field when showing positions).
 - Rewards: show list entries with reward_coin, interest, bonus_date, pid, mortgage_coin; sum by reward_coin; use totalCount/page/pageCount when relevant. Do not display or format timestamp fields (e.g. omit should_bonus_stamp).
 - Products: show protocolName, currency, estimateApr, minStakeAmount, maxStakeAmount, redeemPeriod, productType, isDefi; sort by estimateApr or filter by cointype.
+<<<<<<< HEAD
+- Order history: show list with coin, amount, type (0=Stake, 1=Redeem), createStamp, status, pid, fee; use totalCount, page, pageCount for pagination. For **dynamic-rate** products (exchangeRate ≠ 1): for Stake show **exchange_amount**, for Redeem show **amount** (see Domain Knowledge).
+=======
 - Order history: show list with coin, amount, type (0=Stake, 1=Redeem), status, pid, fee; use totalCount, page, pageCount for pagination. **Do not display or format timestamps** (omit createStamp, redeem_stamp, etc.). For **dynamic-rate** products (exchangeRate ≠ 1): for Stake show **exchange_amount**, for Redeem show **amount** (see Domain Knowledge).
+>>>>>>> master
 - Stake / Redeem: follow `references/staking-swap.md`; confirm pid (and amount) before calling `cex_earn_swap_staking_coin`; show success or error message in English. For dynamic-rate products: stake confirmation shows **exchangeAmount**, redeem shows **amount**.
 
 ## Report template

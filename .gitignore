@@ -6,7 +6,7 @@
 # Node artifact files
 node_modules/
 dist/
-
+test-for-skill/
 # Compiled Java class files
 *.class
 
@@ -39,7 +39,7 @@ Thumbs.db
 *.app
 *.exe
 *.war
-
+test-for-skill
 # Large media files
 *.mp4
 *.tiff
