@@ -1,5 +1,30 @@
 # Changelog
 
+## [2026.3.18-1] - 2026-03-18
+
+### Changed
+- Added new order status `PROCESSING` with display label "In Position"
+- Removed Case 16 (KYC Not Met) — this business has no KYC restriction
+- Removed all KYC-related logic and references from SKILL.md, subscription.md, and scenarios.md
+- Compliance handling now covers Cases 15 (restricted region) and 17 (general compliance failure) only
+- Removed timestamp-to-date conversion logic — timestamp fields are not accurately convertible
+- All timestamp fields (`delivery_time`, `create_time`, `complete_time`, `delivery_timest`) are now omitted from user-facing output
+- Removed Delivery (UTC) column from all report templates
+- Removed Delivery Date from order confirmation templates
+
+## [2026.3.17-1] - 2026-03-17
+
+### Changed
+- Restored `cex_earn_place_dual_order` to Available MCP Tools — order placement is now supported
+- Cases 7-10 (subscription & order placement) now have full workflows via `references/subscription.md`
+- Re-created `references/subscription.md` with order placement workflows (Cases 7-10) and compliance handling (Cases 15-17)
+- Added Cases 15 (restricted region), 16 (KYC not met), 17 (general compliance failure) to routing rules
+- Updated SKILL.md Execution section to include order placement and compliance routing
+- Added order placement confirmation safety rule — explicit user confirmation required before calling `cex_earn_place_dual_order`
+- Added error handling entries for `cex_earn_place_dual_order` compliance and balance errors
+- Updated scenarios.md: Cases 7-10 now have full expected behaviors; added Scenarios 15-17
+- Total cases: 13 → 16 (added Cases 15, 16, 17; case numbering skips 2)
+
 ## [2026.3.12-1] - 2026-03-12
 
 ### Changed

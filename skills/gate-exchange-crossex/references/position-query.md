@@ -6,21 +6,25 @@ Gate CrossEx position query scenarios, including current positions and history r
 
 ### Step 1: Resolve the requested position scope
 
-Call `cex_crossex_get_crossex_account` with:
+Call `cex_crx_get_crx_account` with:
+
 - no required parameters for the default account overview
 
 Key data to extract:
+
 - total equity
 - available balance
 - unrealized pnl summary
 
 ### Step 2: Query futures positions when the request includes futures scope
 
-Call `cex_crossex_list_crossex_positions` with:
+Call `cex_crx_list_crx_positions` with:
+
 - `symbol`: optional symbol filter
 - `exchange_type`: optional exchange filter
 
 Key data to extract:
+
 - futures position size
 - entry price
 - leverage
@@ -28,11 +32,13 @@ Key data to extract:
 
 ### Step 3: Query margin positions when the request includes margin scope
 
-Call `cex_crossex_list_crossex_margin_positions` with:
+Call `cex_crx_list_crx_margin_positions` with:
+
 - `symbol`: optional symbol filter
 - `exchange_type`: optional exchange filter
 
 Key data to extract:
+
 - margin position size
 - entry price
 - leverage
@@ -40,7 +46,8 @@ Key data to extract:
 
 ### Step 4: Query historical position records when the user asks for history
 
-Call `cex_crossex_list_crossex_history_positions` with:
+Call `cex_crx_list_crx_history_positions` with:
+
 - `symbol` when filtering by pair
 - `from`
 - `to`
@@ -48,6 +55,7 @@ Call `cex_crossex_list_crossex_history_positions` with:
 - `limit`
 
 Key data to extract:
+
 - closed positions
 - realized pnl
 - close time
@@ -76,6 +84,7 @@ Position Query Summary
 ```
 
 **Examples**:
+
 - `ALL_POSITIONS` - Query all positions
 - `FUTURE_POSITIONS` - Query futures positions
 - `MARGIN_POSITIONS` - Query margin positions
@@ -84,27 +93,28 @@ Position Query Summary
 
 ### Query Parameters
 
-| Parameter | Description |
-|-----------|-------------|
-| `symbol` | Trading pair (optional) |
-| `position_side` | Position side (LONG/SHORT, optional) |
-| `limit` | Return quantity (optional) |
-| `from` | Start timestamp (optional, for history query) |
-| `to` | End timestamp (optional, for history query) |
+| Parameter       | Description                                   |
+|-----------------|-----------------------------------------------|
+| `symbol`        | Trading pair (optional)                       |
+| `position_side` | Position side (LONG/SHORT, optional)          |
+| `limit`         | Return quantity (optional)                    |
+| `from`          | Start timestamp (optional, for history query) |
+| `to`            | End timestamp (optional, for history query)   |
 
 ### Data Sources
 
-- **Futures Positions**: Call `cex_crossex_list_crossex_positions` → Futures position list
-- **Margin Positions**: Call `cex_crossex_list_crossex_margin_positions` → Margin position list
-- **Account Assets**: Call `cex_crossex_get_crossex_account` → Asset overview
-- **Position History**: Call `cex_crossex_list_crossex_history_positions` → Historical position records
-- **Trade History**: Call `cex_crossex_list_crossex_history_trades` → Historical trade records
-- **Margin Interest**: Call `cex_crossex_list_crossex_history_margin_interests` → Interest history
-- **Account Ledger**: Call `cex_crossex_list_crossex_account_book` → Account ledger records
+- **Futures Positions**: Call `cex_crx_list_crx_positions` → Futures position list
+- **Margin Positions**: Call `cex_crx_list_crx_margin_positions` → Margin position list
+- **Account Assets**: Call `cex_crx_get_crx_account` → Asset overview
+- **Position History**: Call `cex_crx_list_crx_history_positions` → Historical position records
+- **Trade History**: Call `cex_crx_list_crx_history_trades` → Historical trade records
+- **Margin Interest**: Call `cex_crx_list_crx_history_margin_interests` → Interest history
+- **Account Ledger**: Call `cex_crx_list_crx_account_book` → Account ledger records
 
 ### Query Response Fields
 
 #### Futures Position Fields
+
 - `size` - Position size (positive for long, negative for short)
 - `leverage` - Leverage multiplier
 - `entry_price` - Entry price
@@ -113,6 +123,7 @@ Position Query Summary
 - `unrealised_pnl` - Unrealized PnL
 
 #### Margin Position Fields
+
 - `size` - Position quantity
 - `leverage` - Leverage multiplier
 - `entry_price` - Entry price
@@ -121,6 +132,7 @@ Position Query Summary
 - `margin` - Margin
 
 #### Account Asset Fields
+
 - `total` - Total equity
 - `available` - Available balance
 - `locked` - Locked balance
@@ -143,13 +155,13 @@ Position Query Summary
 
 ### Error Handling
 
-| Error Code | Handling |
-|-----------|----------|
-| `INVALID_SYMBOL` | Trading pair format incorrect or doesn't exist, confirm format is correct |
-| `QUERY_FAILED` | Query failed, retry later |
-| `NO_POSITIONS` | No positions, prompt user can start trading |
-| `TIME_RANGE_INVALID` | Time range invalid, adjust query parameters |
-| `RATE_LIMIT_EXCEEDED` | Query frequency too high, retry later |
+| Error Code            | Handling                                                                  |
+|-----------------------|---------------------------------------------------------------------------|
+| `INVALID_SYMBOL`      | Trading pair format incorrect or doesn't exist, confirm format is correct |
+| `QUERY_FAILED`        | Query failed, retry later                                                 |
+| `NO_POSITIONS`        | No positions, prompt user can start trading                               |
+| `TIME_RANGE_INVALID`  | Time range invalid, adjust query parameters                               |
+| `RATE_LIMIT_EXCEEDED` | Query frequency too high, retry later                                     |
 
 ---
 
@@ -158,17 +170,20 @@ Position Query Summary
 **Context**: User wants to view all types of positions.
 
 **Prompt Examples**:
+
 - "Query all my positions"
 - "Show my positions"
 - "What are my current positions"
 - "positions"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_positions` to query futures positions
-2. Call `cex_crossex_list_crossex_margin_positions` to query margin positions
+
+1. Call `cex_crx_list_crx_positions` to query futures positions
+2. Call `cex_crx_list_crx_margin_positions` to query margin positions
 3. Display all positions uniformly
 
-**Report Template**:  
+**Report Template**:
+
 ```
 Current All Positions:
 
@@ -197,15 +212,18 @@ Total Unrealized PnL: +160 USDT
 **Context**: User only wants to view futures positions.
 
 **Prompt Examples**:
+
 - "Query futures positions"
 - "Show my futures holdings"
 - "futures positions"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_positions` to query futures positions
+
+1. Call `cex_crx_list_crx_positions` to query futures positions
 2. Filter and display contracts with positions
 
 **Report Template**:
+
 ```
 Futures Positions:
 
@@ -225,15 +243,18 @@ Total Unrealized PnL: +150 USDT
 **Context**: User only wants to view margin positions.
 
 **Prompt Examples**:
+
 - "Query margin positions"
 - "Show my margin holdings"
 - "margin positions"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_margin_positions` to query margin positions
+
+1. Call `cex_crx_list_crx_margin_positions` to query margin positions
 2. Filter and display pairs with positions
 
 **Report Template**:
+
 ```
 Margin Positions:
 
@@ -253,16 +274,19 @@ Total Unrealized PnL: -10 USDT
 **Context**: User wants to view historical position records.
 
 **Prompt Examples**:
+
 - "Query position history"
 - "Show historical positions"
 - "position history"
 
 **Expected Behavior**:
-1. Call `cex_crossex_list_crossex_history_positions` to query position history
+
+1. Call `cex_crx_list_crx_history_positions` to query position history
 2. Parameters: `limit`, `page`, `from`, `to`
 3. Display recent position records
 
 **Report Template**:
+
 ```
 Position History (Recent 10):
 
@@ -283,14 +307,17 @@ Total Realized PnL: -390 USDT
 **Context**: User's position risk level is high.
 
 **Prompt Examples**:
+
 - "Query my positions" (when risk level ≥ 80%)
 
 **Expected Behavior**:
+
 1. Query positions
 2. Calculate risk level
 3. Display risk warning if risk level ≥ 80%
 
 **Report Template**:
+
 ```
 Current Positions:
 

@@ -153,7 +153,7 @@ Detailed scenarios for handling various affiliate data query requests.
 
 ## Scenario 9: Application Guidance
 
-**Context**: User is not yet an affiliate and wants to know how to join the program.
+**Context**: User is not yet an affiliate and wants to know how to join the program, or asks generic application steps.
 
 **Prompt Examples**:
 - "How to become an affiliate?"
@@ -163,13 +163,48 @@ Detailed scenarios for handling various affiliate data query requests.
 
 **Expected Behavior**:
 1. Recognize application intent
-2. Skip API calls (no data to query)
+2. Optionally call GET /rebate/partner/eligibility to show eligibility before guiding
 3. Provide clear application steps
 4. Include application portal link
 5. List program benefits
 6. Mention requirements if applicable
 
-## Scenario 10: Invalid Query Handling
+## Scenario 10: Eligibility Check
+
+**Context**: User wants to know if they are eligible to apply for the partner program before applying.
+
+**Prompt Examples**:
+- "Can I apply for partner?"
+- "Am I eligible to become an affiliate?"
+- "Check my eligibility for affiliate program"
+- "Do I qualify for partner?"
+
+**Expected Behavior**:
+1. Recognize eligibility-check intent
+2. Call GET /rebate/partner/eligibility (no parameters)
+3. If data.eligible is true, confirm eligibility and provide application portal link and next steps
+4. If data.eligible is false, return block_reasons and block_reason_codes, explain how to resolve (e.g. sub_account → use main account)
+5. Include application portal link in response
+
+## Scenario 11: Application Status Query
+
+**Context**: User has already applied and wants to check the status of their recent partner application.
+
+**Prompt Examples**:
+- "My application status"
+- "Recent partner application"
+- "Application result"
+- "Has my affiliate application been approved?"
+- "Check my partner application"
+
+**Expected Behavior**:
+1. Recognize application-status intent
+2. Call GET /rebate/partner/applications/recent (returns last 30 days application record)
+3. If data is present, show audit_status (0=Pending, 1=Approved, 2=Rejected), apply_msg, and jump_url if provided
+4. If no recent application, inform user and provide application portal link
+5. Keep response in English and user-friendly
+
+## Scenario 12: Invalid Query Handling
 
 **Context**: User query cannot be parsed or doesn't match any known pattern.
 

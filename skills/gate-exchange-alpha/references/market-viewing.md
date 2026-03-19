@@ -18,12 +18,10 @@ Use the minimal tool set required:
 
 Key data to extract:
 - `currency`: token symbol
-- `last`: latest price
-- `change_percentage`: 24h price change percentage
-- `base_volume`: 24h trading volume (in token)
-- `quote_volume`: 24h trading volume (in USDT)
-- `high_24h`: 24h highest price
-- `low_24h`: 24h lowest price
+- `last`: latest price (USDT)
+- `change`: 24h price change percentage
+- `volume`: 24h trading volume (USDT)
+- `market_cap`: market capitalization (USDT)
 
 ### Step 3: Return Formatted Result
 
@@ -34,9 +32,9 @@ Present market data in a clear, scannable format.
 ```markdown
 ## Alpha Market Overview
 
-| Currency | Price (USDT) | 24h Change | 24h Volume (USDT) |
-|----------|-------------|------------|-------------------|
-| {currency} | {last} | {change_percentage}% | {quote_volume} |
+| Currency | Price (USDT) | 24h Change | 24h Volume (USDT) | Market Cap |
+|----------|-------------|------------|-------------------|------------|
+| {currency} | {last} | {change}% | {volume} | {market_cap} |
 ```
 
 For single token:
@@ -47,10 +45,9 @@ For single token:
 | Item | Value |
 |------|-------|
 | Latest Price | {last} USDT |
-| 24h Change | {change_percentage}% |
-| 24h High | {high_24h} USDT |
-| 24h Low | {low_24h} USDT |
-| 24h Volume | {quote_volume} USDT |
+| 24h Change | {change}% |
+| 24h Volume | {volume} USDT |
+| Market Cap | {market_cap} USDT |
 ```
 
 ---
@@ -66,7 +63,7 @@ For single token:
 
 **Expected Behavior**:
 1. Call `cex_alpha_list_alpha_tickers` with pagination (default `page=1`, `limit=20`).
-2. Extract latest price, 24h change percentage, and 24h USDT volume for each token.
+2. Extract latest price (`last`), 24h change (`change`), and 24h volume (`volume`) for each token.
 3. Present a paginated market overview table sorted by default order. If there are more pages, inform the user.
 
 ## Scenario 7: View Specific Token Price
@@ -80,6 +77,6 @@ For single token:
 
 **Expected Behavior**:
 1. Call `cex_alpha_list_alpha_tickers` with `currency={token_symbol}`.
-2. Extract latest price, 24h change, 24h high/low, and 24h volume.
+2. Extract latest price (`last`), 24h change (`change`), volume, and market cap.
 3. Present a detailed market data card for the specific token.
 4. If the token is not found, suggest checking the token symbol via `cex_alpha_list_alpha_currencies`.

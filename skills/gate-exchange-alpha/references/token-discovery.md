@@ -22,11 +22,12 @@ Use the minimal tool set required:
 
 Key data to extract:
 - `currency`: token symbol
-- `chain`: blockchain network
+- `name`: display name
+- `chain`: blockchain network (note: may be uppercase like `SOLANA` or lowercase like `solana` depending on endpoint)
 - `address`: contract address
-- `price_precision`: price decimal places
+- `precision`: price decimal places
 - `amount_precision`: quantity decimal places
-- `trade_status`: 1 = trading, 2 = suspended, 3 = delisted
+- `status`: 1 = trading, 2 = suspended, 3 = delisted
 
 ### Step 3: Return Formatted Result
 
@@ -119,5 +120,7 @@ Present results in a clear table format with relevant fields.
 
 **Expected Behavior**:
 1. Call `cex_alpha_list_alpha_currencies` with `currency={token_symbol}`.
-2. Extract chain, contract address, price precision, amount precision, and trading status.
+2. Extract chain, contract address, precision, amount_precision, and status.
 3. Present a detailed summary including trading status interpretation (1 = actively trading, 2 = suspended, 3 = delisted).
+
+**Note**: When the API returns an empty result for a non-existent currency, it may return `[{}, {}]` (array with empty objects) instead of `[]`. Check if the returned objects have valid fields before processing.
