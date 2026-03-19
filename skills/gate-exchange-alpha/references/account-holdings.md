@@ -21,7 +21,7 @@ Key data to extract from accounts:
 - `available`: available balance
 - `locked`: locked balance (in pending orders)
 - `chain`: blockchain network
-- `address`: contract address
+- `token_address`: contract address
 
 Key data to extract from tickers (for valuation):
 - `last`: latest price per token
@@ -39,7 +39,7 @@ For holdings:
 
 | Currency | Available | Locked | Chain | Contract Address |
 |----------|-----------|--------|-------|-----------------|
-| {currency} | {available} | {locked} | {chain} | {address} |
+| {currency} | {available} | {locked} | {chain} | {token_address} |
 ```
 
 For portfolio valuation:

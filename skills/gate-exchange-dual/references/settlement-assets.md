@@ -15,11 +15,11 @@ Settlement result query and dual asset briefing.
 
 | Field category | Rule |
 |---------------|------|
-| **Any APY/rate field** (`apy`, `apy_display`, `apy_settlement`, or any other rate field from any dual tool) | Raw decimal (e.g. `0.85`). **MUST multiply by 100** then append `%` for display (e.g. `85%`). Use raw decimal only in formulas. Applies to all dual tools. |
-| All timestamps (`delivery_time`, `create_time`, `complete_time`) | Unix timestamps. Format as **`yyyy-MM-dd`** in UTC+0. Label table header with "(UTC)" or append "UTC" inline. |
-| `status` | `INIT`→Pending, `SETTLEMENT_SUCCESS`→Settled, `SETTLEMENT_PROCESSING`→Settling, `CANCELED`→Canceled, `FAILED`→Failed, `REFUND_SUCCESS`→Early Redemption (Completed), `REFUND_PROCESSING`→Early Redemption (Processing), `REFUND_FAILED`→Early Redemption (Failed). `REFUND_*` = early redemption, never "refund". |
+| **Any APY/rate field** (`apy`, `apy_display`, `apy_settlement`, or any other rate field from any dual tool) | Raw value — **NOT a percentage**. Example: API returns `"2.7814"` which means **278.14%**. You **MUST multiply by 100** then append `%` (i.e. `2.7814 × 100 = 278.14%`). **NEVER** display the raw value directly as a percentage (e.g. `2.7814%` is WRONG). **Sanity check**: after ×100, typical ranges are 5%–2000%. If you see values like 0.1%–20%, you forgot to multiply. Applies to all dual tools. |
+| All timestamps (`delivery_time`, `create_time`, `complete_time`) | Unix timestamps (seconds). Do NOT convert to dates or display to the user — the conversion is not accurate. Omit all timestamp fields from user-facing output. |
+| `status` | `INIT`→Pending, `PROCESSING`→In Position, `SETTLEMENT_SUCCESS`→Settled, `SETTLEMENT_PROCESSING`→Settling, `CANCELED`→Canceled, `FAILED`→Failed, `REFUND_SUCCESS`→Early Redemption (Completed), `REFUND_PROCESSING`→Early Redemption (Processing), `REFUND_FAILED`→Early Redemption (Failed). `REFUND_*` = early redemption, never "refund". |
 
-> **Critical**: "Delivery date" / "Expiry date" must use **`delivery_time`** only.
+> **Critical**: Do NOT display timestamp fields to the user — the conversion is not accurate.
 > There is NO `type` field in order response. Derive sell-high / buy-low from `invest_currency`: crypto → Sell High; stablecoin → Buy Low.
 > There is NO `instrument_name`. Filter by coin using `invest_currency` or `exercise_currency`.
 
@@ -35,7 +35,9 @@ Call `cex_earn_list_dual_orders` with `from`, `to`, `page=1`, `limit=100`.
 
 After all pages are collected, if user mentions a specific coin, filter the **complete** result set locally — check if `invest_currency` or `exercise_currency` matches the coin.
 
-### Step 2: Interpret and present
+### Step 2: Transform APY, then interpret and present
+
+**First**, transform every row: `apy_display × 100` → append `%`; `apy_settlement × 100` → append `%`. E.g. raw `2.7814` → display `278.14%`.
 
 Derive type from `invest_currency`: crypto → Sell High (Call); stablecoin → Buy Low (Put).
 
@@ -49,10 +51,10 @@ Explain settlement outcome:
 - `settlement_price` ≤ `exercise_price` → "Successfully bought at target price, received crypto"
 - `settlement_price` > `exercise_price` → "Target price not reached, got back USDT + interest"
 
-Both scenarios include principal + interest. Display: `settlement_currency`, `settlement_amount`, `settlement_price`, Realized APY (`apy_settlement × 100`%), delivery date **(UTC)**.
+Both scenarios include principal + interest. Display: `settlement_currency`, `settlement_amount`, `settlement_price`, Realized APY (`apy_settlement × 100`%).
 
-> `apy_display`, `apy_settlement` are decimals — multiply by 100 before appending `%`.
-> All timestamp fields (`delivery_time`, `create_time`, `complete_time`) must be formatted as `yyyy-MM-dd` in UTC+0 and labeled "(UTC)".
+> `apy_display`, `apy_settlement` are raw values (NOT percentages) — multiply by 100 before appending `%`. E.g. `2.7814` → `278.14%`.
+> Do NOT display timestamp fields to the user — the conversion is not accurate.
 
 ## Workflow: Case 12 — Dual Asset Briefing
 
@@ -71,12 +73,11 @@ Display total dual investment locked amounts and accumulated interest in both US
 ```
 Your Settled Dual Orders
 
-| # | Coin Pair | Type | Invested | Target Price | Settlement Price | Delivery (UTC) | Result | Received | Realized APY |
-|---|-----------|------|----------|--------------|------------------|----------------|--------|----------|--------------|
-| 1 | {invest_currency}/{exercise_currency} | {Sell-High/Buy-Low} | {invest_amount} {invest_currency} | {exercise_price} | {settlement_price} | {delivery_time → yyyy-MM-dd} | {Hit/Miss} | {settlement_amount} {settlement_currency} | {apy_settlement × 100}% |
+| # | Coin Pair | Type | Invested | Target Price | Settlement Price | Result | Received | Realized APY |
+|---|-----------|------|----------|--------------|------------------|--------|----------|--------------|
+| 1 | {invest_currency}/{exercise_currency} | {Sell-High/Buy-Low} | {invest_amount} {invest_currency} | {exercise_price} | {settlement_price} | {Hit/Miss} | {settlement_amount} {settlement_currency} | {apy_settlement × 100}% |
 
-Note: apy_display / apy_settlement are decimals — multiply by 100 before appending %.
-All timestamp fields (delivery_time, create_time, complete_time) must be formatted as `yyyy-MM-dd` in UTC+0.
+Note: apy_display / apy_settlement are raw values (NOT percentages) — multiply by 100 before appending %. E.g. `2.7814` → `278.14%`.
 Settlement rule: Principal + interest are always received; settlement currency depends on whether the target price was reached.
 ```
 
@@ -93,4 +94,4 @@ Dual investment is interest-guaranteed but not principal-protected, and is subje
 
 ### Next Actions
 
-- To browse new plans: see [product-query.md](product-query.md)
+- To browse new plans: see `product-query.md`
