@@ -4,7 +4,7 @@ This document defines behavior-oriented scenario templates for 18 unified accoun
 
 ## Global Execution Gate (Mandatory)
 
-For every scenario that includes mutation calls (`cex_unified_create_unified_loan`, `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral`):
+For every scenario that includes mutation calls (`create_unified_loan`, `set_unified_mode`, `set_user_leverage_currency_setting`, `set_unified_collateral`):
 - Build and present an Action Draft first
 - Require explicit confirmation from the immediately previous user turn
 - Treat confirmation as single-use
@@ -37,7 +37,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Check my unified account overview."
 - "How much total value do I have in unified account?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_accounts` (`currency=all` optional).
+1. Fetch data via `get_unified_accounts` (`currency=all` optional).
 2. Calculate total equity and key margin indicators from returned account fields, including IMR/MMR (`totalInitialMarginRate` and `totalMaintenanceMarginRate`) when present.
 3. If presenting per-currency balances, include each currency's `imr` and `mmr` when present.
 4. Output `Unified Account Overview Report`.
@@ -53,7 +53,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "What is my current unified mode?"
 - "Am I in portfolio or cross-currency mode?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_mode`.
+1. Fetch data via `get_unified_mode`.
 2. Map mode value to user-readable description using fixed mapping (`classic`/`single_currency`/`multi_currency`/`portfolio`).
 3. Output `Unified Mode Status Report`.
 **Unexpected Behavior**:
@@ -68,10 +68,10 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Change my unified mode to multi-currency."
 - "How do I switch unified mode?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_mode` and compare current vs target mode.
+1. Fetch data via `get_unified_mode` and compare current vs target mode.
 2. Explain all four supported target modes: `经典现货模式` / `单币种保证金模式` / `跨币种保证金模式` / `组合保证金模式`.
 3. Calculate impact note and build `Mode Switch Draft`.
-4. After explicit confirmation, execute via `cex_unified_set_unified_mode` and output `Mode Switch Result Report`.
+4. After explicit confirmation, execute via `set_unified_mode` and output `Mode Switch Result Report`.
 **Unexpected Behavior**:
 1. Executes mode switch without confirmation.
 2. Ignores current mode and submits redundant or wrong target mode.
@@ -85,7 +85,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "How much BTC can I borrow?"
 - "Check my USDT borrow limit."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_borrowable` (`currency=target`).
+1. Fetch data via `get_unified_borrowable` (`currency=target`).
 2. Calculate and normalize max borrowable amount without rounding away API precision.
 3. Output `Borrowable Limit Report`.
 **Unexpected Behavior**:
@@ -98,7 +98,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "Show borrowable limits for BTC, ETH, and USDT."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_borrowable` per currency (loop).
+1. Fetch data via `get_unified_borrowable` per currency (loop).
 2. Calculate per-currency amounts and aggregate table/list.
 3. Output `Multi-Currency Borrowable Report`.
 **Unexpected Behavior**:
@@ -112,9 +112,9 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Borrow 200 USDT."
 - "I want to borrow 0.1 BTC."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_borrowable` to validate requested amount.
+1. Fetch data via `get_unified_borrowable` to validate requested amount.
 2. Calculate gap vs max borrowable and build `Borrow Draft`.
-3. After explicit confirmation, execute via `cex_unified_create_unified_loan` (`type=borrow`) and output `Borrow Result Report`.
+3. After explicit confirmation, execute via `create_unified_loan` (`type=borrow`) and output `Borrow Result Report`.
 **Unexpected Behavior**:
 1. Executes borrow without pre-checking borrowable.
 2. Borrows an amount above max borrowable and returns raw API failure only.
@@ -125,7 +125,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "Which currencies can I borrow?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_list_unified_currencies`.
+1. Fetch data via `list_unified_currencies`.
 2. Calculate supported currency list summary.
 3. Output `Supported Borrow Currencies Report`.
 **Unexpected Behavior**:
@@ -139,7 +139,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "What is the estimated borrow rate for BTC?"
 - "Check estimate rates for BTC and USDT."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_estimate_rate` (`currencies=[...]`).
+1. Fetch data via `get_unified_estimate_rate` (`currencies=[...]`).
 2. Calculate/display per-currency estimated rates.
 3. Output `Estimated Borrow Rate Report` with dynamic-rate disclaimer.
 **Unexpected Behavior**:
@@ -155,9 +155,9 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Repay 50 USDT."
 - "Repay 0.01 BTC loan."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_create_unified_loan` draft phase assumptions and validate user-provided amount.
+1. Fetch data via `create_unified_loan` draft phase assumptions and validate user-provided amount.
 2. Calculate repayment parameters and build `Partial Repay Draft`.
-3. After explicit confirmation, execute via `cex_unified_create_unified_loan` (`type=repay`, `repaid_all=false`) and output `Repay Result Report`.
+3. After explicit confirmation, execute via `create_unified_loan` (`type=repay`, `repaid_all=false`) and output `Repay Result Report`.
 **Unexpected Behavior**:
 1. Mistakenly sets `repaid_all=true` for partial request.
 2. Executes repayment without user confirmation.
@@ -171,7 +171,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Expected Behavior**:
 1. Fetch data context from user intent and validate target currency.
 2. Calculate full-repay parameters and build `Full Repay Draft`.
-3. After explicit confirmation, execute via `cex_unified_create_unified_loan` (`type=repay`, `repaid_all=true`) and output `Full Repay Result Report`.
+3. After explicit confirmation, execute via `create_unified_loan` (`type=repay`, `repaid_all=true`) and output `Full Repay Result Report`.
 **Unexpected Behavior**:
 1. Uses partial repayment payload for a full-repay request.
 2. Proceeds when currency scope is ambiguous.
@@ -183,7 +183,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Show my unified loan records."
 - "List my borrow and repay history for USDT."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_list_unified_loan_records` (optional currency/time filters).
+1. Fetch data via `list_unified_loan_records` (optional currency/time filters).
 2. Calculate sorted history summary and key fields (type, amount, time).
 3. Output `Loan History Report`.
 **Unexpected Behavior**:
@@ -197,7 +197,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "Show my interest records."
 - "How much interest did I pay on BTC loans?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_list_unified_loan_interest_records` (optional filters).
+1. Fetch data via `list_unified_loan_interest_records` (optional filters).
 2. Calculate per-record and optional aggregate interest summary.
 3. Output `Interest Records Report` with raw timestamp and readable local time.
 **Unexpected Behavior**:
@@ -212,7 +212,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "How much USDT can I transfer out?"
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_transferable` (`currency=target`).
+1. Fetch data via `get_unified_transferable` (`currency=target`).
 2. Calculate normalized max transferable amount without rounding away API precision.
 3. Output `Transferable Limit Report`.
 **Unexpected Behavior**:
@@ -225,7 +225,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "Check transferable for BTC, ETH, USDT."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_unified_transferable` per currency (loop).
+1. Fetch data via `get_unified_transferable` per currency (loop).
 2. Calculate per-currency transferable summary.
 3. Output `Multi-Currency Transferable Report`.
 **Unexpected Behavior**:
@@ -239,7 +239,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 - "What is my ETH leverage setting?"
 - "Show leverage settings for all currencies."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_get_user_leverage_currency_setting` (optional currency filter).
+1. Fetch data via `get_user_leverage_currency_setting` (optional currency filter).
 2. Calculate readable leverage mapping.
 3. Output `Leverage Settings Report`.
 **Unexpected Behavior**:
@@ -252,9 +252,9 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "Set ETH leverage to 5."
 **Expected Behavior**:
-1. Fetch current context via `cex_unified_get_user_leverage_currency_setting` if needed and validate target value.
+1. Fetch current context via `get_user_leverage_currency_setting` if needed and validate target value.
 2. Calculate change summary and build `Leverage Update Draft`.
-3. After explicit confirmation, execute via `cex_unified_set_user_leverage_currency_setting` and output `Leverage Update Result Report`.
+3. After explicit confirmation, execute via `set_user_leverage_currency_setting` and output `Leverage Update Result Report`.
 **Unexpected Behavior**:
 1. Executes leverage update without confirmation.
 2. Accepts clearly invalid leverage value without validation feedback.
@@ -268,7 +268,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Expected Behavior**:
 1. Fetch current context if available and validate enable/disable lists.
 2. Calculate resulting collateral configuration and build `Collateral Update Draft`.
-3. After explicit confirmation, execute via `cex_unified_set_unified_collateral` and output `Collateral Update Result Report`.
+3. After explicit confirmation, execute via `set_unified_collateral` and output `Collateral Update Result Report`.
 4. If API returns `500`, clearly classify as backend failure and provide retry guidance.
 **Unexpected Behavior**:
 1. Applies opposite direction (disables requested enable list).
@@ -280,7 +280,7 @@ If confirmation is missing/ambiguous/stale, do not execute any mutation call.
 **Prompt Examples**:
 - "Show unified collateral discount tiers."
 **Expected Behavior**:
-1. Fetch data via `cex_unified_list_currency_discount_tiers`.
+1. Fetch data via `list_currency_discount_tiers`.
 2. Calculate tier summary by currency and discount range.
 3. Output `Collateral Discount Tier Report`.
 **Unexpected Behavior**:

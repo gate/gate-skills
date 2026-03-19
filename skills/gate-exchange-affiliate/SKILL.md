@@ -78,7 +78,6 @@ Read and follow the shared runtime rules before proceeding:
 - **Application status**: The user's recent partner application (if any) within the last 30 days, including audit status (pending / approved / rejected), returned by the applications/recent API.
 
 ## Workflow
-
 ### Step 1: Parse User Query
 
 Identify the query type and extract parameters.
