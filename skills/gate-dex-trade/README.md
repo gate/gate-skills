@@ -80,7 +80,7 @@ gate-dex-trade/
 |-------------|----------|-------------------|
 | `gate-dex-wallet` | Trade after viewing balance | Chain, token addresses, balance |
 | `gate-dex-market` | Buy after viewing market data | Token info, price, market cap |
-| `gate-dex-wallet` (`references/transfer.md`) | Exchange remaining after transfer | Chain, tokens, wallet addresses |
+| `gate-dex-wallet/references/transfer.md` | Exchange remaining after transfer | Chain, tokens, wallet addresses |
 
 ---
 

@@ -157,7 +157,7 @@ main() {
     echo ""
     echo -e "${CYAN}💡 提示:${NC}"
     echo "  支持 MCP (需认证) 和 OpenAPI (AK/SK) 双模式"
-    echo "  OpenAPI 详见: ./references/openapi.md"
+    echo "  OpenAPI 详见: ./gate-dex-market/references/openapi.md"
     echo ""
 }
 

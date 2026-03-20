@@ -348,7 +348,7 @@ Step 2: Intent Recognition + Parameter Collection
 
 Step 3: Get Wallet Info (Cross-Skill: gate-dex-wallet)
   Call dex_wallet_get_addresses({ account_id, mcp_token }) → get from_address
-  Call dex_wallet_get_token_list({ account_id, chain, mcp_token }) → get balance
+  Call dex_wallet_get_token_list({ account_id, chain, mcp_token }) → get balance (use **`orignCoinNumber`** per token for amounts; not **`coinNumber`**)
   ↓
 
 Step 4: Security Review (Recommended Step)
