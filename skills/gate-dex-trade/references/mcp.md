@@ -71,7 +71,7 @@ Returns chain list grouped by address type (evm / solana), used for:
 |-------|-------------|
 | **Tool Name** | `dex_wallet_get_token_list` |
 | **Parameters** | `{ chain?: string, network_keys?: string, account_id?: string, mcp_token: string, page?: number, page_size?: number }` |
-| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. |
+| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. Use **`orignCoinNumber`** for balance checks; do not use **`coinNumber`** (display-formatted, error-prone). |
 
 Parameter descriptions:
 

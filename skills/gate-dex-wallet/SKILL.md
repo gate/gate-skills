@@ -1,7 +1,7 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.18-1"
-updated: "2026-03-18"
+version: "2026.3.19-1"
+updated: "2026-03-19"
 description: "Gate DEX wallet ACCOUNT MANAGEMENT skill. For personal wallet operations: login/logout authentication, check token balances, view wallet addresses, transfer/send tokens to addresses, transaction history, swap history, DApp wallet-connect and contract interactions, CLI tool. This skill manages wallet state and identity — it does not provide market data lookups or execute token swaps."
 ---
 
@@ -99,6 +99,10 @@ All operations requiring auth need valid `mcp_token`:
 | `dex_tx_list` | Transaction history | `account_id`, `chain?`, `page?`, `limit?`, `mcp_token` |
 | `dex_tx_detail` | Transaction details | `hash_id`, `chain`, `mcp_token` |
 | `dex_tx_history_list` | Swap history | `account_id`, `chain?`, `page?`, `limit?`, `mcp_token` |
+
+### Token list: use `orignCoinNumber` for balance (not `coinNumber`)
+
+Wallet / token-list APIs may return both a display-oriented `coinNumber` and a raw amount `orignCoinNumber`. **Do not rely on `coinNumber` for balances** — it can be formatted for UI and cause rounding or parsing errors. **For any balance display, comparison, or downstream math, use `orignCoinNumber`** (raw numeric string/amount as returned by the API), then apply decimals/`symbol` for human-readable formatting. See internal spec: [Lark wiki](https://gtglobal.jp.larksuite.com/wiki/ObSnwDsMlieSCEk7h2sjGtsCp2e).
 
 ### Query Flow
 

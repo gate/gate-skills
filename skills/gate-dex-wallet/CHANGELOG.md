@@ -4,6 +4,12 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.19-1] - 2026-03-19
+
+### Added
+
+- **Token list balance fields**: Documented use of `orignCoinNumber` (raw amount) instead of `coinNumber` (display-formatted) for `dex_wallet_get_token_list` parsing; updated `references/dapp.md` balance step
+
 ## [2026.3.18-1] - 2026-03-18
 
 ### Changed

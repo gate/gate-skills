@@ -30,7 +30,7 @@ Before transfer **must** call this tool first to verify sending token balance an
 |-------|-------------|
 | **Tool Name** | `dex_wallet_get_token_list` |
 | **Parameters** | `{ account_id: string, chain: string, mcp_token: string }` |
-| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. |
+| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. For correct amounts use **`orignCoinNumber`** from the API item; avoid **`coinNumber`** for balance math (may be display-formatted). |
 
 Call example:
 

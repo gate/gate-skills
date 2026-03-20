@@ -4,6 +4,12 @@ All notable changes to `gate-dex-trade` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.19-1] - 2026-03-19
+
+### Added
+
+- **Balance field note** (`references/mcp.md`): `dex_wallet_get_token_list` — use `orignCoinNumber` for balance validation, not `coinNumber`
+
 ## [2026.3.18-1] - 2026-03-18
 
 ### Changed
