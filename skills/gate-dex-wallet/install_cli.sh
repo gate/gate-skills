@@ -14,6 +14,7 @@ CYAN='\033[0;36m'
 BOLD='\033[1m'
 NC='\033[0m'
 
+
 echo ""
 echo -e "${BOLD}🖥️  Gate Wallet CLI Installer${NC}"
 echo "=================================="
