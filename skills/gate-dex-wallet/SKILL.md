@@ -1,8 +1,8 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.19-1"
+version: "2026.3.19-2"
 updated: "2026-03-19"
-description: "Gate DEX wallet ACCOUNT MANAGEMENT skill. For personal wallet operations: login/logout authentication, check token balances, view wallet addresses, transfer/send tokens to addresses, transaction history, swap history, DApp wallet-connect and contract interactions, CLI tool. This skill manages wallet state and identity — it does not provide market data lookups or execute token swaps."
+description: "Gate DEX wallet ACCOUNT MANAGEMENT skill. For personal wallet operations: login/logout authentication, check token balances, view wallet addresses, transfer/send tokens to addresses, x402 payment (402: EVM exact/upto, Solana exact/upto via dex_tx_x402_fetch), transaction history, swap history, DApp wallet-connect and contract interactions, CLI tool. This skill manages wallet state and identity — it does not provide market data lookups or execute token swaps."
 ---
 
 # Gate DEX Wallet
@@ -14,6 +14,7 @@ description: "Gate DEX wallet ACCOUNT MANAGEMENT skill. For personal wallet oper
 - Balance: "check balance", "my assets", "total portfolio", "wallet address"
 - History: "transaction history", "swap history", "past transactions"
 - Transfer: "transfer ETH to 0xABC", "send tokens", "batch transfer"
+- x402: "pay for 402 API", "x402 payment", "payment required", "pay and fetch URL"
 - DApp: "connect wallet to DApp", "sign message", "contract call", "approve spending"
 - CLI: "gate-wallet command", "CLI tool", "openapi-swap", "hybrid swap"
 
@@ -31,7 +32,7 @@ On session start (not during interactions), check for updates once:
 1. Read this file's frontmatter `version` and `updated` fields.
 2. Fetch remote SKILL.md from `https://raw.githubusercontent.com/gateio/web3_wallet_skill/master/skills/gate-dex-wallet/SKILL.md`.
 3. Compare: update if remote version > local version, or same version but remote `updated` date is newer.
-4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `install_cli.sh`, `references/auth.md`, `references/transfer.md`, `references/dapp.md`, `references/cli.md`).
+4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `install_cli.sh`, `references/auth.md`, `references/transfer.md`, `references/dapp.md`, `references/cli.md`, `references/x402.md`).
 5. On failure: silently continue — never block user interactions.
 6. Skip if: already checked this session, or skill was installed < 24h ago.
 
@@ -46,6 +47,7 @@ Route to corresponding sub-module based on user intent:
 | **Authentication** | "login", "logout", "token expired", "OAuth" | [references/auth.md](./references/auth.md) |
 | **Asset Queries** | "check balance", "total assets", "wallet address", "transaction history", "swap history" | This file (see below) |
 | **Transfer** | "transfer", "send", "batch transfer", "gas fee" | [references/transfer.md](./references/transfer.md) |
+| **x402 Payment** | "402 payment", "x402 pay", "payment required", "pay for API/URL" | [references/x402.md](./references/x402.md) |
 | **DApp Interactions** | "DApp", "sign message", "approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
 | **CLI Tool** | "gate-wallet command", "CLI", "command line", "openapi-swap", "hybrid swap" | [references/cli.md](./references/cli.md) |
 
@@ -133,6 +135,7 @@ Step 3: Format and display results
 | Token security audit | `gate-dex-market` |
 | Transfer / send tokens | `references/transfer.md` |
 | Exchange / Swap tokens | `gate-dex-trade` |
+| x402 / pay for 402 API | `references/x402.md` |
 | DApp interaction | `references/dapp.md` |
 | Login / auth expired | `references/auth.md` |
 | CLI / command line | `references/cli.md` |

@@ -4,10 +4,21 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.19-2] - 2026-03-19
+
+### Changed
+
+- **x402 documentation** ([references/x402.md](./references/x402.md)): Align with wallet MCP behavior — **accept priority** (Solana exact → EVM exact → Solana upto → EVM upto), **EVM upto** (Permit2, `extra.facilitator`), **Solana upto** (max-amount SPL signing note), error-handling table; document **English** `dex_tx_x402_fetch` tool description as returned by MCP
+- **SKILL.md** frontmatter: x402 capability line updated to mention exact/upto and `dex_tx_x402_fetch`
+
 ## [2026.3.19-1] - 2026-03-19
 
 ### Added
 
+- **x402 Payment Skill**: New sub-module [references/x402.md](./references/x402.md) for HTTP 402 Payment Required flows
+  - Trigger: "402 payment", "x402 pay", "payment required", "pay for API/URL"
+  - Tool: `dex_tx_x402_fetch` — request URL; on 402, pay with wallet (EVM EIP-3009 or Solana SPL) and retry
+  - Routing: SKILL.md and README.md updated with x402 module and follow-up routing
 - **Token list balance fields**: Documented use of `orignCoinNumber` (raw amount) instead of `coinNumber` (display-formatted) for `dex_wallet_get_token_list` parsing; updated `references/dapp.md` balance step
 
 ## [2026.3.18-1] - 2026-03-18
