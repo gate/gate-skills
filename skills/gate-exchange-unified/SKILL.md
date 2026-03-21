@@ -1,14 +1,13 @@
-## General Rules
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
----
-
 ---
 name: gate-exchange-unified
 version: "2026.3.13-4"
 updated: "2026-03-13"
 description: "Gate unified account operations skill. Use this skill whenever the user asks to check unified account equity, query borrowable or transferable limits, borrow/repay funds, inspect loan or interest records, switch unified account mode, configure per-currency leverage, or manage collateral currencies. Trigger phrases include 'unified account', 'borrow limit', 'repay loan', 'switch mode', 'set leverage', 'set collateral', or any request that combines unified account risk status with funding actions."
 ---
+
+## General Rules
+Read and follow the shared runtime rules before proceeding:
+→ [exchange-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)
 
 # Gate Unified Account Assistant
 
