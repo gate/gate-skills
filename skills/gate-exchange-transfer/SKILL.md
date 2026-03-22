@@ -5,12 +5,10 @@ updated: "2026-03-16"
 description: "Gate Exchange same-UID internal transfer skill. Use when user says 'transfer', 'move funds', 'spot to futures', 'USDT-margined', 'perpetual', 'margin'. Phase 1: internal transfer only (no main-sub). Execution requires explicit user confirmation and source balance pre-check."
 ---
 
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
-
----
-
 # Gate Exchange Transfer (Internal Transfer)
+
+## General Rules
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Execute same-UID internal transfers between Gate trading accounts: **spot**, **isolated margin**, **perpetual**, **delivery**, and **options**. Single execution endpoint: `POST /wallet/transfers` (MCP: `cex_wallet_create_transfer`).
 

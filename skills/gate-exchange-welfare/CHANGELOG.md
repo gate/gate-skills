@@ -4,47 +4,6 @@
 
 ---
 
-## [2026.3.18-6] - 2026-03-18
-
-### Language Update
-
-- **CONVERTED TO ENGLISH**: Updated all documentation and templates to English
-  - Converted all response templates from Chinese to English
-  - Updated all safety rules and instructions to English
-  - Maintained emoji usage for visual clarity
-  - Updated disclaimer text to English while preserving meaning
-- Enhanced version description to reflect English-only documentation
-
-### Files Updated
-
-- SKILL.md: All templates and instructions converted to English
-- references/scenarios.md: All examples converted to English  
-- references/mcp-data-usage.md: Complete English documentation
-- CHANGELOG.md: Updated with English language change record
-
----
-
-## [2026.3.18-5] - 2026-03-18
-
-### Critical Security Fix
-
-- **FIXED MAJOR ISSUE**: Removed all hardcoded fake reward information from templates and examples
-  - Removed fake examples like "10 points", "5 USDT trial voucher", "20 USDT bonus" from response templates
-  - Added strict requirement to use only real MCP data from `cex_welfare_get_beginner_task_list`
-  - Enhanced Safety Rules with explicit prohibition against fabricated task information
-- Updated response templates to use real MCP data fields: `task_name`, `task_desc`, `reward_num`, `reward_unit`, `status`
-- Added detailed data mapping rules for proper MCP data extraction
-- Enhanced disclaimer text to emphasize official website/App as final authority
-- **LANGUAGE UPDATE**: Converted all templates and documentation to English for consistency
-
-### Files Updated
-
-- SKILL.md: Enhanced safety rules, updated templates, added data mapping instructions
-- references/scenarios.md: Replaced fake examples with MCP data requirements  
-- CHANGELOG.md: Added this critical security fix record
-
----
-
 ## [2026.3.19-4] - 2026-03-19
 
 ### Updated
@@ -99,3 +58,44 @@
 - Read-only operations, does not execute task claiming or reward distribution.
 - New/existing user identity determination is a prerequisite step, must not show new user task list to existing users.
 - Must include disclaimer when displaying reward content: subject to actual receipt, final interpretation rights belong to Gate.
+
+---
+
+## [2026.3.18-6] - 2026-03-18
+
+### Language Update
+
+- **CONVERTED TO ENGLISH**: Updated all documentation and templates to English
+  - Converted all response templates from Chinese to English
+  - Updated all safety rules and instructions to English
+  - Maintained emoji usage for visual clarity
+  - Updated disclaimer text to English while preserving meaning
+- Enhanced version description to reflect English-only documentation
+
+### Files Updated
+
+- SKILL.md: All templates and instructions converted to English
+- references/scenarios.md: All examples converted to English  
+- references/mcp-data-usage.md: Complete English documentation
+- CHANGELOG.md: Updated with English language change record
+
+---
+
+## [2026.3.18-5] - 2026-03-18
+
+### Critical Security Fix
+
+- **FIXED MAJOR ISSUE**: Removed all hardcoded fake reward information from templates and examples
+  - Removed fake examples like "10 points", "5 USDT trial voucher", "20 USDT bonus" from response templates
+  - Added strict requirement to use only real MCP data from `cex_welfare_get_beginner_task_list`
+  - Enhanced Safety Rules with explicit prohibition against fabricated task information
+- Updated response templates to use real MCP data fields: `task_name`, `task_desc`, `reward_num`, `reward_unit`, `status`
+- Added detailed data mapping rules for proper MCP data extraction
+- Enhanced disclaimer text to emphasize official website/App as final authority
+- **LANGUAGE UPDATE**: Converted all templates and documentation to English for consistency
+
+### Files Updated
+
+- SKILL.md: Enhanced safety rules, updated templates, added data mapping instructions
+- references/scenarios.md: Replaced fake examples with MCP data requirements  
+- CHANGELOG.md: Added this critical security fix record

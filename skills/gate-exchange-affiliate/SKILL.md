@@ -2,7 +2,7 @@
 name: gate-exchange-affiliate
 version: "2026.3.18-2"
 updated: "2026-03-18"
-description: "Gate Exchange affiliate program data query and management skill. Use this skill when users ask about their affiliate/partner commission, trading volume, net fees, customer count, trading users, or want to apply for the affiliate program. Supports queries for up to 180 days (API limited to 30 days per request, agent should split longer queries). IMPORTANT: user_id parameter in APIs refers to 'trader' not 'commission receiver' - avoid using unless explicitly specified. Aggregated data from API lists should be calculated using custom scripts, not simple summation. CRITICAL TIME CONSTRAINT: All query times are calculated based on user's system current date in UTC+8 timezone. For relative time descriptions (e.g., 'last 7 days', 'last 30 days', 'this week', 'last month'), calculate start date by subtracting days from current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert to Unix timestamps. NEVER use future timestamps as query conditions. When timestamps are needed, obtain them via system functions, never generate manually. The 'to' parameter must always be less than or equal to the current Unix timestamp. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'customer trading volume', 'rebate income', 'apply for affiliate', 'can I apply', 'am I eligible', 'my application status', 'recent application', 'partner application status'."
+description: "Gate Exchange affiliate program data query and management skill. Use when users ask about affiliate/partner commission, trading volume, net fees, customer count, or want to apply for the affiliate program. Supports queries for up to 180 days. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'apply for affiliate', 'am I eligible', 'my application status'."
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -10,9 +10,7 @@ description: "Gate Exchange affiliate program data query and management skill. U
 Query and manage Gate Exchange affiliate/partner program data, including commission tracking, team performance analysis, and application guidance.
 
 ## General Rules
-
-Read and follow the shared runtime rules before proceeding:
-→ `exchange-runtime-rules.md`
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ## Important Notice
 

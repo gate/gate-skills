@@ -7,6 +7,9 @@ description: Query Gate Simple Earn flexible (Uni) and fixed-term workflows, inc
 
 # Gate Exchange Simple Earn Skill
 
+## General Rules
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
 Provide Gate Simple Earn **flexible (Uni)** and **fixed-term** operations on Gate. Use the flexible Uni references for flexible positions, interest, subscribe, redeem, and change-min-rate workflows, and use the fixed-term references for fixed-term product lists, subscribe, early redeem, positions, and history. This skill treats both workflows as supported and routes each request to the matching MCP tool family.
 
 ## Trigger Conditions

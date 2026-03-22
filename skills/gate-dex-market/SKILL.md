@@ -75,7 +75,7 @@ Step 2: MCP discovery → success = MCP mode; fail = MCP setup guide (no OpenAPI
 
 ### MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), execute according to its complete workflow.
+**Read and strictly follow** `references/mcp.md`, execute according to its complete workflow.
 
 Includes: connection detection, 6 market data tools (dex_market_get_kline, dex_token_get_coin_info, dex_token_ranking, dex_token_get_risk_info, dex_token_list_swap_tokens, dex_token_list_cross_chain_bridge_tokens), no authentication required for market queries.
 
@@ -83,15 +83,15 @@ Includes: connection detection, 6 market data tools (dex_market_get_kline, dex_t
 
 Explicit user request only. Load files progressively:
 
-1. **Always load first**: [`references/openapi/_shared.md`](./references/openapi/_shared.md) — env detection, credentials, API call method (via helper script)
+1. **Always load first**: `references/openapi/_shared.md` — env detection, credentials, API call method (via helper script)
 2. **Then load based on query type**:
 
 | Query Type | Load File |
 |-----------|-----------|
-| Token info, rankings, new tokens, security, holders | [`openapi/token-data.md`](./references/openapi/token-data.md) |
-| Volume stats, K-line, liquidity events | [`openapi/market-data.md`](./references/openapi/market-data.md) |
+| Token info, rankings, new tokens, security, holders | `references/openapi/token-data.md` |
+| Volume stats, K-line, liquidity events | `references/openapi/market-data.md` |
 
-> Legacy monolithic file preserved at [`references/openapi.md`](./references/openapi.md) for backward compatibility.
+> Legacy monolithic file preserved at `references/openapi.md` for backward compatibility.
 
 ---
 

@@ -8,9 +8,7 @@ description: "The on-chain staking (earn) function of Gate Exchange. Use this sk
 # Gate Staking Query Suite
 
 ## General Rules
-
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 
@@ -134,11 +132,7 @@ When **viewing staking positions** (position/balance/holdings queries), **ignore
 - Positions: show mortgage_amount, freeze_amount, **redeemable** (mortgage_amount × exchange rate; get exchange rate from **`cex_earn_find_coin`** for the same **pid** and matching **currency**), income_total, yesterday_income; group by coin or show per pid. Do not use mortgage_amount − freeze_amount for redeemable. Do not display or format timestamp fields (omit createStamp, updateStamp). Do not display **status** (ignore status field when showing positions).
 - Rewards: show list entries with reward_coin, interest, bonus_date, pid, mortgage_coin; sum by reward_coin; use totalCount/page/pageCount when relevant. Do not display or format timestamp fields (e.g. omit should_bonus_stamp).
 - Products: show protocolName, currency, estimateApr, minStakeAmount, maxStakeAmount, redeemPeriod, productType, isDefi; sort by estimateApr or filter by cointype.
-<<<<<<< HEAD
-- Order history: show list with coin, amount, type (0=Stake, 1=Redeem), createStamp, status, pid, fee; use totalCount, page, pageCount for pagination. For **dynamic-rate** products (exchangeRate ≠ 1): for Stake show **exchange_amount**, for Redeem show **amount** (see Domain Knowledge).
-=======
 - Order history: show list with coin, amount, type (0=Stake, 1=Redeem), status, pid, fee; use totalCount, page, pageCount for pagination. **Do not display or format timestamps** (omit createStamp, redeem_stamp, etc.). For **dynamic-rate** products (exchangeRate ≠ 1): for Stake show **exchange_amount**, for Redeem show **amount** (see Domain Knowledge).
->>>>>>> master
 - Stake / Redeem: follow `references/staking-swap.md`; confirm pid (and amount) before calling `cex_earn_swap_staking_coin`; show success or error message in English. For dynamic-rate products: stake confirmation shows **exchangeAmount**, redeem shows **amount**.
 
 ## Report template
@@ -146,6 +140,17 @@ When **viewing staking positions** (position/balance/holdings queries), **ignore
 After each query, output a short standardized result consistent with the reference (e.g. positions summary, reward summary, product table, or order list). Use the exact response fields from the API (see references) so the user sees correct field names and values.
 
 ## Safety rules
+
+### User confirmation requirement (Mandatory)
+
+**NEVER call `cex_earn_swap_staking_coin` without explicit user confirmation.** Without user confirmation, only read/query operations are allowed.
+
+Before every stake, redeem, or mint execution:
+1. Show an **Action Draft** summarizing: operation type (stake/redeem/mint), product (pid + protocolName), coin, amount, side, and key risk note (e.g. lock period, exchange rate).
+2. Wait for explicit user confirmation (e.g. "Confirm", "Yes", "Go ahead").
+3. Only after receiving confirmation in the immediately previous user turn, call `cex_earn_swap_staking_coin`.
+4. If parameters change after confirmation (amount, pid, coin), invalidate the old confirmation and re-confirm.
+5. If confirmation is ambiguous, stale, or from a different context, do NOT execute — request fresh confirmation.
 
 ### Stake, redeem, and mint
 

@@ -54,8 +54,6 @@ Script features:
 
 ### Option 2: Manual Configuration
 
-Detailed configuration methods see [Root README.md](../README.md).
-
 ---
 
 ## 🚀 Quick Usage
@@ -104,11 +102,9 @@ gate-dex-market/
 - Config file: `~/.gate-dex-openapi/config.json`
 - Endpoint: `https://openapi.gateweb3.cc/api/v1/dex`
 
-Detailed configuration methods see [Root README.md](../README.md).
-
 ---
 
 ## 🔗 Related Skills
 
-- [gate-dex-wallet](../gate-dex-wallet/) — Wallet comprehensive (auth, assets, transfer, DApp)
-- [gate-dex-trade](../gate-dex-trade/) — Trading execution
+- `gate-dex-wallet` — Wallet comprehensive (auth, assets, transfer, DApp)
+- `gate-dex-trade` — Trading execution

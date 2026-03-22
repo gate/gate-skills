@@ -41,7 +41,7 @@ Most operations in this Skill **require `mcp_token`** (except `tools`/`chain-con
 ## Dual-Channel Architecture
 
 - **MCP Channel**: OAuth login → server-side custodial signing → full-featured wallet (balance / transfer / swap / authorization / market data)
-- **OpenAPI Channel** (login-free, self-hosted): AK/SK authentication → client-side signing → DEX Swap trading. See [gate-dex-trade SKILL](../../gate-dex-trade/SKILL.md)
+- **OpenAPI Channel** (login-free, self-hosted): AK/SK authentication → client-side signing → DEX Swap trading. See `gate-dex-trade/SKILL.md` (sibling skill in the repository `skills/` tree)
 
 ---
 
@@ -56,7 +56,7 @@ This project has two channels that **overlap on Swap functionality**. Agent MUST
 | User says | Route to |
 | --------- | -------- |
 | "use openapi" / "openapi swap" / "AK/SK" / "direct API" / "DEX API" | **Hybrid or OpenAPI** — see Rule 1a |
-| "self-signing" / "use private key" | **OpenAPI channel** → [gate-dex-trade/SKILL.md](../../gate-dex-trade/SKILL.md) |
+| "self-signing" / "use private key" | **OpenAPI channel** → `gate-dex-trade/SKILL.md` (sibling skill under `skills/`) |
 | "use MCP" / "use wallet" / "custodial signing" / "gate-wallet swap" | **MCP channel** → continue with this SKILL |
 
 **Rule 1a — OpenAPI request sub-routing (MUST check login status)**

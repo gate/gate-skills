@@ -2,7 +2,7 @@
 name: gate-news-briefing
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "News briefing. Use this skill whenever the user asks for recent news or headlines. Trigger phrases include: what happened recently, today's highlights, crypto news, any new updates. MCP tools: news_events_get_latest_events, news_feed_search_news, news_feed_get_social_sentiment."
+description: "News briefing. Use this skill ONLY when the user's query is exclusively about recent news or headlines with no other analysis dimensions. Trigger phrases: what happened recently, today's highlights, crypto news, any new updates. If the query ALSO mentions coin analysis, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-news-briefing
@@ -26,6 +26,13 @@ description: "News briefing. Use this skill whenever the user asks for recent ne
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is exclusively about recent news or headlines, proceed with this Skill.
+- If the query **also** mentions coin analysis, risk check, technicals, fundamentals, or any other analysis dimension beyond news, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Step 1: Intent Recognition & Parameter Extraction
 

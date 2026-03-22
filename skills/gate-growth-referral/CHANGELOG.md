@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.17-1] - 2026-03-17
+
+### Changed
+
+- Updated shared runtime rules reference.
+
 ## [2026.3.16-1] - 2026-03-16
 
 ### Added

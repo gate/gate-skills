@@ -1,7 +1,7 @@
 ---
 name: gate-dex-trade
-version: "2026.3.18-1"
-updated: "2026-03-18"
+version: "2026.3.19-1"
+updated: "2026-03-19"
 description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transactions that MODIFY blockchain state: swap, buy, sell, exchange, convert tokens, cross-chain bridge. Every operation here results in an on-chain transaction requiring signing. This skill EXECUTES trades — it does not provide read-only data lookups or manage wallet accounts."
 ---
 
@@ -17,7 +17,7 @@ description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transac
 
 ## Project convention — MCP only (this workspace)
 
-**Do not use OpenAPI** for swap unless user explicitly asks OpenAPI/AK/SK. MCP unavailable → [`references/setup.md`](./references/setup.md) only.
+**Do not use OpenAPI** for swap unless user explicitly asks OpenAPI/AK/SK. MCP unavailable → `references/setup.md` only.
 
 ---
 
@@ -64,7 +64,7 @@ Step 3: Gate Wallet MCP Server Discovery & Detection
      └─ Failed → Step 4
   c) No matching Server → Step 4
   ↓
-Step 4: MCP unavailable → setup guide only ([`references/setup.md`](./references/setup.md)), no OpenAPI fallback
+Step 4: MCP unavailable → setup guide only (`references/setup.md`), no OpenAPI fallback
 ```
 
 ---
@@ -73,7 +73,7 @@ Step 4: MCP unavailable → setup guide only ([`references/setup.md`](./referenc
 
 ### MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), execute according to its complete workflow.
+**Read and strictly follow** `references/mcp.md`, execute according to its complete workflow.
 
 Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (dex_tx_quote / dex_tx_swap / dex_tx_swap_detail), token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
 
@@ -85,25 +85,25 @@ Includes: connection detection, authentication (mcp_token), MCP Resource/tool ca
 
 Load files progressively — only load what the current step needs:
 
-1. **Always load first**: [`references/openapi/_shared.md`](./references/openapi/_shared.md) — env detection, credentials, API call method (via helper script)
+1. **Always load first**: `references/openapi/_shared.md` — env detection, credentials, API call method (via helper script)
 2. **Then load based on swap stage**:
 
 | Stage | Load File | When |
 |-------|-----------|------|
-| Query (chain/gas) | [`openapi/quote.md`](./references/openapi/quote.md) | User asks about chains or gas |
-| Swap: get quote | [`openapi/quote.md`](./references/openapi/quote.md) + [`openapi/sop.md`](./references/openapi/sop.md) | User initiates swap |
-| Swap: build tx | [`openapi/build.md`](./references/openapi/build.md) | After quote confirmed (SOP Step 2) |
-| Swap: sign tx | [`openapi/sign.md`](./references/openapi/sign.md) | After build confirmed (SOP Step 3) |
-| Swap: submit | [`openapi/submit.md`](./references/openapi/submit.md) | After signing complete |
-| History | [`openapi/submit.md`](./references/openapi/submit.md) | User asks for swap history |
+| Query (chain/gas) | `references/openapi/quote.md` | User asks about chains or gas |
+| Swap: get quote | `references/openapi/quote.md` + `references/openapi/sop.md` | User initiates swap |
+| Swap: build tx | `references/openapi/build.md` | After quote confirmed (SOP Step 2) |
+| Swap: sign tx | `references/openapi/sign.md` | After build confirmed (SOP Step 3) |
+| Swap: submit | `references/openapi/submit.md` | After signing complete |
+| History | `references/openapi/submit.md` | User asks for swap history |
 
-3. **On error**: [`openapi/errors.md`](./references/openapi/errors.md)
+3. **On error**: `references/openapi/errors.md`
 
-> Legacy monolithic file preserved at [`references/openapi.md`](./references/openapi.md) for backward compatibility.
+> Legacy monolithic file preserved at `references/openapi.md` for backward compatibility.
 
 ### MCP Server Setup Guide
 
-When MCP detection fails and a setup guide is needed, **read and display** [`references/setup.md`](./references/setup.md). Show only the configuration for the user's current platform when identifiable. Display at most once per session.
+When MCP detection fails and a setup guide is needed, **read and display** `references/setup.md`. Show only the configuration for the user's current platform when identifiable. Display at most once per session.
 
 ---
 

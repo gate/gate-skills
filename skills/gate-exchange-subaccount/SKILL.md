@@ -7,6 +7,9 @@ description: Manage sub-accounts on Gate Exchange including querying status, lis
 
 # Gate Exchange Sub-Account Skill
 
+## General Rules
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
 Provide sub-account management capabilities on Gate, including querying sub-account status, listing all sub-accounts, creating new sub-accounts, and locking/unlocking sub-accounts.
 
 ## Prerequisites

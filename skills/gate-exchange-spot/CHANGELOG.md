@@ -1,6 +1,6 @@
 # Changelog
 
-## 2026.3.12-1 (2026-03-12)
+## [2026.3.12-1] - 2026-03-12
 
 - Added 5 trigger-order and TP/SL automation scenarios (`Scenario 32-36`) in `references/scenarios.md`:
     - Conditional trigger buy placement from live ticker with computed trigger threshold
@@ -17,7 +17,7 @@
 - Updated confirmation/safety rules in `SKILL.md` to include trigger-order placement and TP/SL-style execution flows.
 - Updated `README.md` capability list to include the new 5 trigger-order cases.
 
-## 2026.3.10-1 (2026-03-10)
+## [2026.3.10-1] - 2026-03-10
 
 - Added new advanced scenario capability for batch order amendment (`Case 31` / `Scenario 31`):
     - Query open orders by pair (BTC buy orders)
@@ -28,7 +28,7 @@
 - Updated `references/scenarios.md` from 30 to 31 scenarios with full template coverage for the new batch-amend case.
 - Updated `README.md` advanced utility summary to include batch amend support.
 
-## 2026.3.9-1 (2026-03-09)
+## [2026.3.9-1] - 2026-03-09
 
 - Expanded `references/scenarios.md` with 5 new advanced capability cases (`Scenario 26-30`):
     - Order filtering + precise batch cancellation by selected order ids
@@ -37,7 +37,7 @@
     - Multi-pair trading fee comparison
     - Account-book flow query + current balance reconciliation
 
-## 2026.3.5-1 (2026-03-05)
+## [2026.3.5-1] - 2026-03-05
 
 - Initialized the `gate-exchange-spot` skill directory and documentation structure.
 - Added `SKILL.md`, covering 25 spot trading and account operation scenarios.
