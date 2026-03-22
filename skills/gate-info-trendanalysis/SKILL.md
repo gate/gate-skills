@@ -2,7 +2,7 @@
 name: gate-info-trendanalysis
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "Trend and technical analysis. Use this skill whenever the user asks for technical or trend analysis of one coin. Trigger phrases include: technical analysis, K-line, RSI, MACD, trend, support, resistance. MCP tools: info_markettrend_get_kline, info_markettrend_get_indicator_history, info_markettrend_get_technical_analysis, info_marketsnapshot_get_market_snapshot."
+description: "Trend and technical analysis. Use this skill ONLY when the user's query is exclusively about technical indicators or trend analysis for one coin with no other analysis dimensions. Trigger phrases: technical analysis, K-line, RSI, MACD, trend, support, resistance. If the query ALSO mentions fundamentals, risk, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-info-trendanalysis
@@ -25,6 +25,13 @@ description: "Trend and technical analysis. Use this skill whenever the user ask
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is exclusively about technical indicators or trend analysis for one coin, proceed with this Skill.
+- If the query **also** mentions fundamentals, risk, news, sentiment, or any other analysis dimension beyond technicals, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Step 1: Intent Recognition & Parameter Extraction
 

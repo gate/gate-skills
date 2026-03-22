@@ -11,9 +11,7 @@ This skill is the unified entry point for Gate CrossEx cross-exchange trading. I
 order management, position query, and history query. User intents are routed to corresponding workflows.
 
 ## General Rules
-
-- Read and follow the shared runtime rules before
-  proceeding: → [references/runtime-rules.md](references/runtime-rules.md)
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 

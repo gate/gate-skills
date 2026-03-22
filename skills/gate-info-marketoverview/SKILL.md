@@ -2,7 +2,7 @@
 name: gate-info-marketoverview
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "Market overview. Use this skill whenever the user asks about overall market. Trigger phrases include: how is the market, market overview, what is happening in crypto. MCP tools: info_marketsnapshot_get_market_overview, info_coin_get_coin_rankings, info_platformmetrics_get_defi_overview, news_events_get_latest_events, info_macro_get_macro_summary."
+description: "Market overview. Use this skill ONLY when the user's query is exclusively about overall market conditions with no specific coin analysis. Trigger phrases: how is the market, market overview, what is happening in crypto. If the query ALSO mentions a specific coin to analyze, risk to check, technicals to review, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-info-marketoverview
@@ -26,6 +26,13 @@ description: "Market overview. Use this skill whenever the user asks about overa
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is exclusively about overall market conditions with no specific coin to deep-dive, proceed with this Skill.
+- If the query **also** mentions a specific coin to analyze, risk to check, technicals to review, or any other analysis dimension beyond market overview, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Step 1: Intent Recognition
 

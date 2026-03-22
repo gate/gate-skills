@@ -44,12 +44,12 @@ Route to corresponding sub-module based on user intent:
 
 | User Intent | Keywords | Target |
 |-------------|----------|--------|
-| **Authentication** | "login", "logout", "token expired", "OAuth" | [references/auth.md](./references/auth.md) |
+| **Authentication** | "login", "logout", "token expired", "OAuth" | `references/auth.md` |
 | **Asset Queries** | "check balance", "total assets", "wallet address", "transaction history", "swap history" | This file (see below) |
-| **Transfer** | "transfer", "send", "batch transfer", "gas fee" | [references/transfer.md](./references/transfer.md) |
-| **x402 Payment** | "402 payment", "x402 pay", "payment required", "pay for API/URL" | [references/x402.md](./references/x402.md) |
-| **DApp Interactions** | "DApp", "sign message", "approve", "connect wallet", "contract call" | [references/dapp.md](./references/dapp.md) |
-| **CLI Tool** | "gate-wallet command", "CLI", "command line", "openapi-swap", "hybrid swap" | [references/cli.md](./references/cli.md) |
+| **Transfer** | "transfer", "send", "batch transfer", "gas fee" | `references/transfer.md` |
+| **x402 Payment** | "402 payment", "x402 pay", "payment required", "pay for API/URL" | `references/x402.md` |
+| **DApp Interactions** | "DApp", "sign message", "approve", "connect wallet", "contract call" | `references/dapp.md` |
+| **CLI Tool** | "gate-wallet command", "CLI", "command line", "openapi-swap", "hybrid swap" | `references/cli.md` |
 
 ---
 

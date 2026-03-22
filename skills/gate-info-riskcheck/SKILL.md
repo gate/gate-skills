@@ -2,7 +2,7 @@
 name: gate-info-riskcheck
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "Token and address risk assessment. Use this skill whenever the user asks about token, contract, or address safety. Trigger phrases include: is this token safe, check contract risk, is this address safe, honeypot, rug. MCP tools: info_compliance_check_token_security, info_coin_get_coin_info; Address mode: info_onchain_get_address_info."
+description: "Token and address risk assessment. Use this skill ONLY when the user's query is exclusively about token/contract/address security with no other analysis dimensions. Trigger phrases: is this token safe, check contract risk, is this address safe, honeypot, rug. If the query ALSO mentions fundamentals, technicals, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report. Address risk mode (is this address safe) is exclusive to this skill and must NOT be routed to gate-info-research."
 ---
 
 # gate-info-riskcheck
@@ -27,6 +27,14 @@ description: "Token and address risk assessment. Use this skill whenever the use
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is about **address safety** (e.g., "is this address safe", "check 0x..."), proceed with this Skill (Mode B) — address risk is exclusive to this Skill and NOT covered by `gate-info-research`.
+- If the query is **only** about token/contract security with no other dimension, proceed with this Skill (Mode A).
+- If the query **also** mentions fundamentals, technicals, news, sentiment, comparison, or any other analysis dimension beyond security, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Mode A: Token Security Check (Core Mode — Ready)
 

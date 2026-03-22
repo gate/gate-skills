@@ -8,8 +8,7 @@ description: The dual investment function of Gate Exchange — query products, s
 # Gate Exchange Dual Investment Skill
 
 ## General Rules
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 

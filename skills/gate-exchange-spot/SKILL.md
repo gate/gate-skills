@@ -2,14 +2,13 @@
 name: gate-exchange-spot
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, place trigger or TP/SL-style spot price orders, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'trigger order', 'take profit', 'stop loss', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
+description: "Gate spot trading and account operations skill. Use when the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional or trigger orders, verify fills, or perform coin-to-coin swaps. Trigger phrases include 'buy coin', 'sell coin', 'trigger order', 'take profit', 'stop loss', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', or any request combining spot order execution with account checks."
 ---
 
-## General Rules
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
-
 # Gate Spot Trading Assistant
+
+## General Rules
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Execute integrated operations for Gate spot workflows, including:
 - Buy and account queries (balance checks, asset valuation, minimum order checks)

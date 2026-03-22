@@ -2,7 +2,7 @@
 name: gate-info-coinanalysis
 version: "2026.3.12-2"
 updated: "2026-03-11"
-description: "Coin comprehensive analysis. Use this skill whenever the user asks to analyze a single coin. Trigger phrases include: analyze, how is, worth buying, look at. MCP tools: info_coin_get_coin_info, info_marketsnapshot_get_market_snapshot, info_markettrend_get_technical_analysis, news_feed_search_news, news_feed_get_social_sentiment."
+description: "Single-coin comprehensive analysis. Use this skill ONLY when the user asks to analyze one coin with no additional explicit dimension (e.g., no separate risk check, no separate trend-only request). Trigger phrases: analyze SOL, how is BTC, is ETH worth buying. If the query ALSO mentions security/risk, event attribution, multi-coin comparison, or any other analysis dimension beyond single-coin comprehensive, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-info-coinanalysis
@@ -26,6 +26,13 @@ description: "Coin comprehensive analysis. Use this skill whenever the user asks
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is a standard single-coin analysis (e.g., "analyze SOL", "how is BTC"), proceed with this Skill.
+- If the query **also** mentions security/risk check, event attribution, multi-coin comparison, or any other analysis dimension beyond single-coin comprehensive, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Step 1: Intent Recognition & Parameter Extraction
 

@@ -2,7 +2,7 @@
 name: gate-news-eventexplain
 version: "2026.3.12-1"
 updated: "2026-03-12"
-description: "Event attribution and explanation. Use this skill whenever the user asks for the reason behind a price move. Trigger phrases include: why did X crash, what just happened, why is it pumping, what caused. MCP tools: news_events_get_latest_events, info_marketsnapshot_get_market_snapshot, news_events_get_event_detail, info_onchain_get_token_onchain, news_feed_search_news."
+description: "Event attribution and explanation. Use this skill ONLY when the user's query is exclusively about the reason behind a price move with no other analysis dimensions. Trigger phrases: why did X crash, what just happened, why is it pumping, what caused. If the query ALSO mentions fundamentals, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-news-eventexplain
@@ -26,6 +26,13 @@ description: "Event attribution and explanation. Use this skill whenever the use
 ---
 
 ## Execution Workflow
+
+### Step 0: Multi-Dimension Intent Check
+
+Before executing this Skill, check if the user's query involves multiple analysis dimensions:
+
+- If the query is exclusively about the reason behind a price move, proceed with this Skill.
+- If the query **also** mentions fundamentals, risk check, technicals, comparison, or any other analysis dimension beyond event attribution, route to `gate-info-research` — it handles multi-dimension queries with unified tool deduplication and coherent report aggregation.
 
 ### Step 1: Intent Recognition & Parameter Extraction
 

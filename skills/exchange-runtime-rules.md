@@ -1,7 +1,7 @@
 # Exchange Common Runtime Rules
 
 > Shared runtime rules for all `gate-exchange-*` skills.
-> Each skill's SKILL.md should include: `Read and follow [exchange-runtime-rules.md](../exchange-runtime-rules.md) first.`
+> Each skill's SKILL.md should include: Read and follow `../exchange-runtime-rules.md` first (path relative to `skills/<skill-name>/SKILL.md`; use inline code, not a relative markdown link — Skills Hub cannot resolve repo-relative links).
 
 ---
 

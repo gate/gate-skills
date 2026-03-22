@@ -3,9 +3,6 @@ name: gate-info-liveroomlocation
 version: "2026.3.13-1"
 updated: "2026-03-13"
 description: The live and replay listing function of Gate Exchange. Use this skill whenever the user asks to find live streams or replays by business type (tag), coin, sort (hottest/newest), or count. Trigger phrases include "最热直播", "live room list", "行情分析直播间", "给我5个SOL相关直播", "latest replays", "tag coin live replay", or any request involving live room location, replay list, or tag/coin/sort filter.
-metadata:
-  owner_team: Live
-  domain: "live"
 ---
 
 # Gate Info Liveroom Location — Live & Replay Listing
