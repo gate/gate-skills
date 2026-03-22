@@ -52,3 +52,9 @@ An L2 composite AI Agent skill — **Market Research Copilot** — that orchestr
 | S3 | Technicals | `info_markettrend_get_kline`, `info_markettrend_get_indicator_history`, `info_markettrend_get_technical_analysis` |
 | S4 | News / Sentiment | `news_events_get_latest_events`, `news_feed_search_news`, `news_feed_get_social_sentiment`, `news_events_get_event_detail` (conditional) |
 | S5 | Security / Risk | `info_compliance_check_token_security`, `info_coin_get_coin_info` |
+
+## Support
+
+- **Email**: support@gate.com (general support), business@gate.com (business inquiries)
+- **Help Center**: [https://www.gate.com/help](https://www.gate.com/help)
+- **GitHub Issues**: Report bugs or feature requests via the repository's Issues page.

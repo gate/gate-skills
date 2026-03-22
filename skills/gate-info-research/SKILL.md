@@ -1,8 +1,8 @@
 ---
 name: gate-info-research
-version: "2026.3.20-1"
-updated: "2026-03-20"
-description: "Market Research Copilot — an L2 composite skill that orchestrates 12 read-only MCP tools across Gate-Info and Gate-News to produce structured market briefs, single-coin deep dives, multi-coin comparisons, trend analyses, event attribution, and risk checks. Use this skill whenever the user wants to understand the market, research a coin, compare tokens, check risk, or get a daily briefing. Trigger phrases include: market brief, analyze, research, compare coins, risk check, why pumping, why dumping, daily brief, sentiment, technical analysis, fundamentals, worth buying, trend, overview, report."
+version: "2026.3.22-2"
+updated: "2026-03-22"
+description: "Market Research Copilot — an L2 composite skill that orchestrates 12 read-only MCP tools across Gate-Info and Gate-News to produce structured market briefs, single-coin deep dives, multi-coin comparisons, trend analyses, event attribution, and risk checks. Use this skill whenever the user wants to understand the market, research a coin, compare tokens, check risk, or get a daily briefing, or whenever a research query spans multiple analysis dimensions (e.g. fundamentals + technicals + news + risk). Trigger phrases include: market brief, analyze, research, compare coins, risk check, why pumping, why dumping, daily brief, sentiment, technical analysis, fundamentals, worth buying, trend, overview, report."
 ---
 
 # Market Research Copilot
@@ -70,6 +70,8 @@ User queries often span multiple analysis dimensions (e.g., "How is BTC doing?" 
 
 ## Workflow
 
+For concrete prompt examples and expected behavior per scenario, see `references/scenarios.md`.
+
 **MCP tool calls**: Only **Step 3** invokes Gate-Info / Gate-News MCP tools (`info_*`, `news_*`). **Steps 1, 2, 4, and 5** are orchestration, signal planning, aggregation, and formatting — **no MCP tool call in those steps**.
 
 ### Step 1: Intent Gate — Research vs. Execution
@@ -93,13 +95,13 @@ Extract parameters from the user query:
 
 Then independently evaluate each of the 5 signal dimensions (non-exclusive, multiple can fire):
 
-| Signal | Dimension | Trigger Condition | Trigger Keywords | Activated Tools |
-|--------|-----------|-------------------|------------------|-----------------|
-| S1 | Market / Macro | No specific coin + broad market focus | market, overall, sector, DeFi, macro, daily brief, today, interest rate | `info_marketsnapshot_get_market_snapshot`(BTC/ETH/top coins), `info_platformmetrics_get_defi_overview`, `news_events_get_latest_events` |
-| S2 | Fundamentals / Project | Specific coin + project attribute focus | fundamentals, project, funding, team, tokenomics, worth buying, potential | `info_coin_get_coin_info`({symbol}), `info_marketsnapshot_get_market_snapshot`({symbol}) |
-| S3 | Technicals / K-line | Specific coin + price/indicator focus; **or** user wording (any language) **semantically** asks for a **holistic / comprehensive** read that includes **market or technical** stance per coin (e.g. 综合、全面、整体 together with fundamentals). **Intent-based**, not a closed keyword list. | K-line, support, resistance, RSI, MACD, overbought, oversold, technicals, trend, pattern; **illustrative** for holistic intent: 综合, 全面, holistic, full picture | `info_markettrend_get_kline`, `info_markettrend_get_indicator_history`, `info_markettrend_get_technical_analysis`, `info_marketsnapshot_get_market_snapshot` |
-| S4 | News / Sentiment / Attribution | Event or reason focus (coin optional) | why pumping, why dumping, reason, news, sentiment, event, what happened | `news_events_get_latest_events`, `news_feed_search_news`, `news_feed_get_social_sentiment`, `news_events_get_event_detail` (conditional), `info_onchain_get_token_onchain` (conditional) |
-| S5 | Security / Risk | Contract security / scam-risk focus; **or** the user’s wording (any language) **semantically** expresses **long-term holding** of the token(s) under discussion, **or** **coin selection** (choosing / comparing which coin(s) to favor). Use **intent semantics**, not matching a fixed multilingual keyword list. **Do not** treat「长线」by itself as sufficient to satisfy the long-term-holding branch. | Security axis (illustrative): safe, risk, honeypot, rug, scam, audit, security, trustworthy. Long-term holding / coin selection: **no** closed keyword list — infer from user meaning. | `info_compliance_check_token_security`, `info_coin_get_coin_info` |
+| Signal | Dimension | Trigger Condition | Trigger Keywords (illustrative English cues only; match **intent** in **any** human language, not literal string-only) | Activated Tools |
+|--------|-----------|-------------------|-------------------------------------------------------------------------------------------------------------|-----------------|
+| S1 | Market / Macro | No specific coin + broad market focus | market, overall, sector, broad market, majors, macro, daily brief, today, rates / policy, hot sectors, tape, whole-market view | `info_marketsnapshot_get_market_snapshot`(BTC/ETH/top coins), `info_platformmetrics_get_defi_overview`, `news_events_get_latest_events` |
+| S2 | Fundamentals / Project | Specific coin + project attribute focus | fundamentals, project, funding, team, tokenomics, worth buying, upside, quality, how is it | `info_coin_get_coin_info`({symbol}), `info_marketsnapshot_get_market_snapshot`({symbol}) |
+| S3 | Technicals / K-line | Specific coin + price/indicator focus; **or** user wording (any language) **semantically** asks for a **holistic / comprehensive** read that includes **market or technical** stance per coin (often alongside fundamentals). **Intent-based**, not a closed keyword list. | **Price / indicators**: K-line, candlestick, support, resistance, levels, overbought, oversold, RSI, MACD, Bollinger, technicals, trend, pattern, trajectory, outlook, follow-up path · **Holistic**: comprehensive, holistic, full picture, overall | `info_markettrend_get_kline`, `info_markettrend_get_indicator_history`, `info_markettrend_get_technical_analysis`, `info_marketsnapshot_get_market_snapshot` |
+| S4 | News / Sentiment / Attribution | Event or reason focus (coin optional) | why pumping, dumping, up, down, reason, catalyst, news, narrative, sentiment, event, what happened, rebound, recovery | `news_events_get_latest_events`, `news_feed_search_news`, `news_feed_get_social_sentiment`, `news_events_get_event_detail` (conditional), `info_onchain_get_token_onchain` (conditional) |
+| S5 | Security / Risk | Contract security / scam-risk focus; **or** the user’s wording (any language) **semantically** expresses **long-term holding** of the token(s) under discussion, **or** **coin selection** (choosing / comparing which coin(s) to favor). Use **intent semantics**, not a fixed keyword list. **Do not** treat a bare English "long-term" **by itself** as sufficient for the long-term-holding branch without clearer hold / selection intent. | **Security**: safe, risk, contract security, honeypot, rug, scam, audit, trustworthy, screen, token risk, due diligence · **Long-term / selection**: infer meaning from context — **no** closed keyword list | `info_compliance_check_token_security`, `info_coin_get_coin_info` |
 
 **Fallback rules** (when no signal is explicitly activated):
 - `symbols == 0` -> activate S1 (market overview)
@@ -107,7 +109,7 @@ Then independently evaluate each of the 5 signal dimensions (non-exclusive, mult
 - `symbols >= 2` -> activate S2 x N (multi-coin comparison)
 - `symbols >= 2` **and** the user **semantically** asks for a **comprehensive / holistic** multi-coin view (same spirit as single-coin S2+S3) -> also activate **S3 x N** (i.e. S2 x N + S3 x N)
 
-**Screening mode** (when `symbols == 0` and query contains "filter", "find", "recommend", "which", "ranking", "top"):
+**Screening mode** (when `symbols == 0` and the query contains screening cues — e.g. filter, find, recommend, which, ranking, top, screen, pick, best, shortlist, highest potential):
 - Phase 1: Activate S1 to fetch top-coin snapshots
 - LLM intermediate aggregation: Extract symbols from Phase 1 results
 - Phase 2: Activate S2/S3/S4/S5 per remaining signal keywords
@@ -119,19 +121,25 @@ Key data to extract:
 - `activated_signals[]`: List of activated signal dimensions (S1-S5)
 - `screening_mode`: Boolean
 
-**Signal Routing Examples**:
+**Signal Routing Examples** (English phrasing; same routing logic applies to equivalent questions in any language):
 
-| User Query | symbols | Activated Signals | Explanation |
-|------------|---------|-------------------|-------------|
+| User Query (example) | symbols | Activated Signals | Explanation |
+|----------------------|---------|-------------------|-------------|
 | "How is BTC doing?" | [BTC] | S2 + S3 (fallback) | No explicit dimension keywords; fallback: single-coin comprehensive |
-| "Show me DOT support and resistance" | [DOT] | S3 | "support/resistance" triggers Technicals |
-| "DOT support levels + news" | [DOT] | S3 + S4 | Technicals + News dual activation |
-| "Why did the market crash yesterday?" | [] | S4 + S1 | "why/crash" triggers S4; "market" triggers S1 |
-| "Is ADA safe?" | [ADA] | S5 | "safe" triggers Security |
-| "Full research report on XRP" | [XRP] | S2 + S3 + S4 + S5 | "research report" = all dimensions |
-| "Compare BTC, ETH, SOL" | [BTC,ETH,SOL] | S2 x 3 (fallback) | Multi-coin, no keywords; fallback: comparison |
-| "BTC、ETH、SOL 综合对比一下" | [BTC,ETH,SOL] | S2 x 3 + S3 x 3 | Comprehensive / holistic multi-coin intent -> stack technicals per coin (aligned with single-coin S2+S3) |
-| "Which coins are oversold? Analyze 2" | [] | S1 -> S3 + S2 (screening) | "which" enters screening; "oversold" + "analyze" activate S3 + S2 in P2 |
+| "Show me DOT support and resistance" | [DOT] | S3 | Support / resistance wording triggers Technicals |
+| "DOT support levels plus the latest news" | [DOT] | S3 + S4 | Technicals + News dual activation |
+| "Why did the market crash yesterday?" | [] | S4 + S1 | Why / crash triggers S4; market context triggers S1 |
+| "Is sentiment recovering?" | [] | S4 (+ S1 if "market" scope) | Recovery / sentiment triggers S4; add S1 if query is market-wide |
+| "Is ADA safe?" | [ADA] | S5 | Safety wording triggers Security |
+| "Full weekend research report on XRP — price, news, and risk" | [XRP] | S2 + S3 + S4 + S5 | Full research report implies all dimensions |
+| "Compare BTC, ETH, and SOL" | [BTC,ETH,SOL] | S2 x 3 (fallback) | Multi-coin, no extra keywords; fallback: comparison |
+| "Comprehensive comparison of BTC, ETH, and SOL" | [BTC,ETH,SOL] | S2 x 3 + S3 x 3 | Comprehensive multi-coin -> stack technicals per coin |
+| "Long-term hold: compare BTC, ETH, and SOL holistically" | [BTC,ETH,SOL] | S2 x 3 + S3 x 3 + S5 x 3 | Long-term selection + holistic view often implies fundamentals + technicals + risk |
+| "Daily market brief — majors, hot sectors, drivers, and tomorrow's outlook" | [] | S1 + S4 + S3(BTC) | Macro brief + causes + outlook -> S1, S4, optional S3 for trend |
+| "Screen the top 5 gainers today and analyze the most promising one" | [] | S1 -> S2 + S3 (screening) | Screening + top gainers / potential -> P1 snapshots, P2 deep dive on picked symbol |
+| "Why is DeFi up? Leader coin fundamentals and technicals" | [] (+ sector) | S1 + S4 -> S2 + S3 | Sector + why -> S1/S4 then leader symbol -> S2 + S3 |
+| "Which coins are oversold? Pick two and analyze them" | [] | S1 -> S3 + S2 (screening) | Open-ended which + oversold/overbought + pick -> screening; P2 S3 + S2 |
+| "Check ADA token risk and fundamentals" | [ADA] | S5 + S2 | Due diligence + token safety + fundamentals -> S5 + S2 |
 
 ### Step 3: Assemble Tool Set & Execute
 
@@ -172,7 +180,7 @@ Pass all tool responses to the LLM for aggregation:
 1. **Merge** data from all dimensions into a coherent narrative.
 2. **Deduplicate** overlapping information (e.g., price from multiple snapshot calls).
 3. **Conflict resolution**: If sources contradict each other, present both viewpoints with attribution — never merge contradictory conclusions into one sentence.
-4. **Data timestamp**: Label each data point with its source tool and approximate data time.
+4. **Data timestamp**: Label each data point with its approximate data time (e.g., "as of 2026-03-21 12:00 UTC"). Do NOT include internal tool names or API field names in the output.
 5. **Missing data**: If a tool failed or returned empty, annotate "Data unavailable for this section" — never fabricate data.
 
 Key data to extract:
@@ -218,7 +226,7 @@ Key data to extract:
 
 ### Key Events (Past 24h)
 
-1. **{event_title}** — {impact_summary} (Source: `news_events_get_latest_events`)
+1. **{event_title}** — {impact_summary}
 2. ...
 
 ### Market Sentiment
@@ -262,7 +270,7 @@ Key data to extract:
 | 7d Change | {change_7d}% | {Up/Down/Flat} |
 | RSI(14) | {rsi} | {Overbought/Oversold/Neutral} |
 
-**Technical Signals** (from `info_markettrend_get_technical_analysis`):
+**Technical Signals**:
 - Short-term (1h/4h): {signal}
 - Medium-term (1d): {signal}
 - Support: ${support} | Resistance: ${resistance}
@@ -329,7 +337,7 @@ Key data to extract:
 
 ### Root Cause Analysis
 
-1. **{event/cause 1}**: {explanation with data} (Source: `news_events_get_latest_events`)
+1. **{event/cause 1}**: {explanation with data}
 2. **{event/cause 2}**: {explanation}
 
 ### On-Chain Evidence
@@ -391,7 +399,7 @@ Key data to extract:
 | No symbols and no explicit dimension keywords | Fallback: activate S1 (market overview) |
 | 1 symbol and no explicit dimension keywords | Fallback: activate S2 + S3 (single-coin comprehensive) |
 | 2+ symbols and no explicit dimension keywords | Fallback: activate S2 x N (multi-coin comparison) |
-| 2+ symbols and user semantically asks for comprehensive/holistic multi-coin analysis (e.g. 综合/全面-type intent, any language) | Activate S2 x N + S3 x N |
+| 2+ symbols and user semantically asks for comprehensive/holistic multi-coin analysis (same intent may be expressed in any language) | Activate S2 x N + S3 x N |
 | Symbols == 0 + screening keywords (filter/find/top/which) | Enter screening mode: S1 in P1 -> extract symbols -> targeted signals in P2 |
 | Query contains "research report" or "full report" | Activate all signals: S2 + S3 + S4 + S5 |
 | A single tool times out or returns empty | Skip that dimension; annotate "Data unavailable" |
@@ -434,7 +442,7 @@ This Skill uses only Gate-Info MCP and Gate-News MCP. It does **not** include `g
 | Ambiguous "liquidity" without CEX/DEX context | "this coin's liquidity" | Default to CEX interpretation; if user clarifies DEX, re-route |
 | User asks about NFT / options | "NFT", "options", "derivatives" | Explain coverage boundary; route to specialized skill if available |
 | User asks "Is this coin listed on Gate?" | "listed", "can I buy" | Brief listing check + risk note; or route to listing/new-coin skill |
-| Multi-language / mixed Chinese-English input | N/A | Parse intent normally; if "research" intent with no DEX/execution signals, enter this Skill |
+| Multi-language or mixed-language user input | N/A | Parse intent normally; if "research" intent with no DEX/execution signals, enter this Skill |
 
 ### No Confirmation Required
 
@@ -478,7 +486,10 @@ If the user appends execution intent (e.g., "analyze then buy"), this Skill comp
 1. **No investment advice**: All output is data-driven analysis. Every report must include the disclaimer: "does not constitute investment advice."
 2. **No price predictions**: Do not output specific target prices or directional predictions (e.g., "will reach $100K").
 3. **No fund operations**: This Skill calls only read-only `info_*` and `news_*` tools. Never call `cex_*` tools.
-4. **Data transparency**: Label data source (tool name) and approximate data time for each section.
+4. **Data transparency**: Label approximate data time for each section (e.g., "Data as of ..."). Use natural-language source labels (e.g., "Gate market data", "Gate news") instead of internal tool names or API field names. Never expose `info_*`, `news_*`, `cex_*` tool identifiers or raw JSON field names (e.g., `snapshot_time`, `total_defi_tvl`) in user-facing output.
 5. **No data fabrication**: When a tool returns empty or fails, clearly state "Data unavailable" — never fabricate numbers.
 6. **Conflict disclosure**: When sources contradict, present both sides with attribution rather than silently picking one.
 7. **No auth required**: All 12 tools are public read-only; no API Key or OAuth2 is needed.
+8. **No internal identifiers in output**: The final user-facing report must NOT contain any internal tool names (e.g., `info_marketsnapshot_get_market_snapshot`, `news_events_get_latest_events`), API field names (e.g., `snapshot_time`, `total_defi_tvl`, `total_liquidation_24h`, `market_cap`), or MCP service prefixes (`info_*`, `news_*`, `cex_*`). Present all data using natural-language descriptions only. Tool names and field names are internal orchestration details — they must never leak into the report.
+9. **Age restriction**: This skill is intended for users aged 18 or above with full civil capacity, consistent with Gate's platform requirements.
+10. **Data flow declaration**: All data flows exclusively through Gate MCP to Gate API. No user data is transmitted to third parties.
