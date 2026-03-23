@@ -10,7 +10,7 @@ description: "The coupon management function of Gate Exchange: query available c
 Query and inspect coupon/voucher accounts on Gate Exchange. Supports six scenarios: list available coupons, search by coupon type, view expired/used history, view full coupon details, read usage rules, and trace coupon acquisition source.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 

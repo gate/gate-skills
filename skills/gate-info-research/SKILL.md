@@ -13,7 +13,7 @@ description: "Market Research Copilot — an L2 composite skill that orchestrate
 
 **Target Users**: Casual / beginner traders, content-oriented users, and pre-decision users who need to quickly understand the market, a coin, or risk before acting.
 
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 

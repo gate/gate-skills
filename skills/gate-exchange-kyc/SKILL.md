@@ -8,7 +8,7 @@ description: Guides users to the Gate KYC portal to complete identity verificati
 # KYC Portal Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Guides users to the Gate KYC portal. This skill only provides the link and brief instructions; it does not perform verification.
 

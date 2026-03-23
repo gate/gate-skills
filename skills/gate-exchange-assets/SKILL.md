@@ -8,7 +8,7 @@ description: "Gate Exchange asset and balance query skill. Use when user asks to
 # Gate Exchange Assets Assistant
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Execute read-only asset and balance queries for Gate Exchange. Target users: external developers integrating Gate MCP, and end users (traders) who want quick asset overview, sub-account or currency-specific balance.
 

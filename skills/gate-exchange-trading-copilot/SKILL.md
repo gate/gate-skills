@@ -14,7 +14,7 @@ This is an **L2 composite skill** for users who want a single skill to complete 
 It is neither a pure research skill nor a pure execution skill. Its purpose is to provide a complete trading workflow inside one skill.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Before calling any named MCP tool, verify that the concrete tool name exists in the current runtime tool list. If a helper tool is absent, disclose the mismatch, use only the nearest valid fallback combination, and do not overclaim unavailable coverage such as rankings, macro breadth, or automated fund-flow tracing.
 
@@ -147,7 +147,7 @@ Read `references/execution-and-guardrails.md` for:
 
 Before analysis or execution:
 
-- read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)
 - resolve any required runtime, update, or authorization gate before continuing
 - verify that the named tools you plan to call exist in the current runtime before relying on them
 

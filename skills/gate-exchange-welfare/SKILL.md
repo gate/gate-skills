@@ -8,7 +8,7 @@ description: "Gate Exchange welfare center new user task skill with MCP tools in
 # Gate Exchange Welfare Center
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ## Overview
 

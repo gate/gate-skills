@@ -10,7 +10,7 @@ description: "Gate Alpha token discovery, market viewing, trading, account, and 
 This skill is the single entry for Gate Alpha operations. It supports **seven modules**: Token Discovery, Market Viewing, Trading (Buy), Trading (Sell), Account & Holdings, Account Book, and Order Management. User intent is routed to the matching workflow.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 
