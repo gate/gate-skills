@@ -8,7 +8,7 @@ description: "Gate Exchange USDT perpetual futures: open/close position, cancel/
 # Gate Futures Trading Suite
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 This skill is the single entry for Gate USDT perpetual futures. It supports **seven operations**: open position, close position, cancel order, amend order, take profit / stop loss (TP/SL), conditional open, and price-triggered order management. User intent is routed to the matching workflow.
 

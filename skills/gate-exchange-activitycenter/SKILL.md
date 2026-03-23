@@ -10,7 +10,7 @@ description: "Activity center for platform campaigns. Use this skill whenever th
 > Activity center aggregates platform campaigns (trading competitions, airdrops, newcomer activities, referral activities, etc.), supporting activity recommendations and my activities entry.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 **Trigger Scenarios**: User mentions "recommend activities", "what activities", "airdrop activities", "trading competition", "VIP activities", "my activities", etc.
 

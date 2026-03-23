@@ -10,7 +10,7 @@ description: "Gate Exchange affiliate program data query and management skill. U
 Query and manage Gate Exchange affiliate/partner program data, including commission tracking, team performance analysis, and application guidance.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ## Important Notice
 

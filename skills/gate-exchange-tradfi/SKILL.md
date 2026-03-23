@@ -8,7 +8,7 @@ description: "Gate TradFi (traditional finance) skill using MCP tools prefixed w
 # Gate TradFi Suite
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 This skill is the single entry for Gate TradFi (traditional finance). All MCP tools used are prefixed with `cex_tradfi`. It supports **query** modules (orders, positions, market, assets) and **trading** modules (place order, amend order, cancel order, modify position, close position). Read the MCP tool definitions for exact tool names, parameters, and value constraints; declare conditions and limits in this skill and in each reference.
 

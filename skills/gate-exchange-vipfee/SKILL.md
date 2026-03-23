@@ -8,7 +8,7 @@ description: "Query Gate VIP tier and trading fee rates. Use this skill whenever
 # Gate VIP & Fee Query Assistant
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 ---
 

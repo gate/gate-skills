@@ -8,7 +8,7 @@ description: "Gate spot trading and account operations skill. Use when the user 
 # Gate Spot Trading Assistant
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
 
 Execute integrated operations for Gate spot workflows, including:
 - Buy and account queries (balance checks, asset valuation, minimum order checks)
