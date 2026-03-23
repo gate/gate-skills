@@ -8,7 +8,7 @@ description: Query and manage Gate multi-collateral loan. Use this skill wheneve
 # Gate Exchange Multi-Collateral Loan Skill
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
 
 Provide multi-collateral loan operations on Gate: create current (flexible) or fixed-term loan orders, repay (partial/full), add collateral (append), and redeem collateral. All write operations require explicit user confirmation before submit.
 

@@ -8,7 +8,7 @@ description: "Gate Exchange same-UID internal transfer skill. Use when user says
 # Gate Exchange Transfer (Internal Transfer)
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
 
 Execute same-UID internal transfers between Gate trading accounts: **spot**, **isolated margin**, **perpetual**, **delivery**, and **options**. Single execution endpoint: `POST /wallet/transfers` (MCP: `cex_wallet_create_transfer`).
 
