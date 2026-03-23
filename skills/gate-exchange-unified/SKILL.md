@@ -8,7 +8,7 @@ description: "Gate unified account operations skill. Use this skill whenever the
 # Gate Unified Account Assistant
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
 
 Execute integrated operations for Gate unified-account workflows, including:
 - Account overview and mode checks (equity, margin metrics, unified mode)

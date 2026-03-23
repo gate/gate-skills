@@ -8,7 +8,7 @@ description: "The LaunchPool staking and airdrop function of Gate Exchange. Use 
 # Gate LaunchPool Suite
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
 
 ---
 
