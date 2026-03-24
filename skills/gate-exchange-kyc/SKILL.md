@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-kyc
-version: "2026.3.18-2"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: Guides users to the Gate KYC portal to complete identity verification. Use this skill whenever the user asks to do KYC, verify identity, find the verification page, or why they cannot withdraw. Trigger phrases include "complete KYC", "verify my identity", "where to do verification", "why can't I withdraw".
 ---
 
 # KYC Portal Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Guides users to the Gate KYC portal. This skill only provides the link and brief instructions; it does not perform verification.
 

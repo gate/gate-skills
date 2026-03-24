@@ -27,3 +27,8 @@ An AI Agent skill that **explains why a coin pumped or dumped** by tracing trigg
 - **Input**: User message with coin (optional) and time hint (default past 24h).
 - **Tools**: Phase 1 — `news_events_get_latest_events`, `info_marketsnapshot_get_market_snapshot`. Phase 2a — `news_events_get_event_detail`, `info_onchain_get_token_onchain`. Phase 2b — `news_feed_search_news`, `info_onchain_get_token_onchain`. See SKILL.md for params.
 - **Output**: Attribution report or "No clear event" composite analysis. **Reasoning Logic** (event matching, volatility magnitude, on-chain anomaly), **Error Handling**, **Safety** (no causal certainty, no predictions) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

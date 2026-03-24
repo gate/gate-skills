@@ -57,3 +57,8 @@ gate-exchange-spot/
 - cancel order / amend order / unfilled order handling
 - did it fill / how much received / total account value
 - spot trading / buy / sell / amend / cancel
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

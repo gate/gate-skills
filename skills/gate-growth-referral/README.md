@@ -50,3 +50,8 @@ gate-growth-referral/
 - help & get coupons / coupon / trial voucher / discount coupon
 - super commission / commission / rebate / passive income
 - how to earn / invitation reward / how to invite
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

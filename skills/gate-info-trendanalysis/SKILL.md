@@ -1,11 +1,19 @@
 ---
 name: gate-info-trendanalysis
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Trend and technical analysis. Use this skill ONLY when the user's query is exclusively about technical indicators or trend analysis for one coin with no other analysis dimensions. Trigger phrases: technical analysis, K-line, RSI, MACD, trend, support, resistance. If the query ALSO mentions fundamentals, risk, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-info-trendanalysis
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > A technicals-focused Skill. The user inputs a coin name + technical analysis intent; the system calls 4 Tools (K-line data, indicator history, multi-timeframe signals, real-time market snapshot) in parallel, then the LLM aggregates into a multi-dimensional technical analysis report.
 

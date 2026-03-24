@@ -35,7 +35,7 @@ This skill automatically checks for updates from the [Gate Skills Repository](ht
 | 🔐 **Authentication** | Google OAuth and Gate OAuth login, token management | Login verification, session management, auto refresh |
 | 💰 **Assets** | Balance queries, address retrieval, transaction history | View holdings, total assets, historical records |
 | 💸 **Transfer** | Gas estimation, transaction building, signature broadcasting | Token transfers, batch transfers, fee calculation |
-| 💳 **x402 Payment** | HTTP 402 — `dex_tx_x402_fetch`: pay (EVM exact / EVM upto / Solana) and retry | Gated API, flight order, usage-based upto (see `references/x402.md`) |
+| 💳 **x402 Payment** | HTTP 402 — `dex_tx_x402_fetch`: pay (EVM exact / EVM upto / Solana) and retry | Gated API, flight order, usage-based upto (see [references/x402.md](./references/x402.md)) |
 | 🎯 **DApp** | Wallet connection, message signing, contract interaction | DeFi operations, NFT interactions, contract approvals |
 
 ---
@@ -281,17 +281,17 @@ gate-dex-wallet/
 
 ## 🔗 Related Skills
 
-- `gate-dex-trade` — Trade/DEX trading and swap
-- `gate-dex-market` — Market data and token information queries
+- [gate-dex-trade](../gate-dex-trade/) — Trade/DEX trading and swap
+- [gate-dex-market](../gate-dex-market/) — Market data and token information queries
 
 ## 📖 Detailed Documentation
 
-- **Authentication Module**: `references/auth.md`
-- **Transfer Module**: `references/transfer.md`
-- **x402 Payment Module**: `references/x402.md` — tool `dex_tx_x402_fetch` (MCP description in English); supports exact + upto, EVM Permit2 prerequisites for upto
-- **DApp Module**: `references/dapp.md`
-- **CLI Implementation**: `references/cli.md`
-- **Change Log**: `CHANGELOG.md`
+- **Authentication Module**: [references/auth.md](./references/auth.md)
+- **Transfer Module**: [references/transfer.md](./references/transfer.md)
+- **x402 Payment Module**: [references/x402.md](./references/x402.md) — tool `dex_tx_x402_fetch` (MCP description in English); supports exact + upto, EVM Permit2 prerequisites for upto
+- **DApp Module**: [references/dapp.md](./references/dapp.md)
+- **CLI Implementation**: [references/cli.md](./references/cli.md)
+- **Change Log**: [CHANGELOG.md](./CHANGELOG.md)
 
 ## 🚧 Troubleshooting
 
@@ -308,7 +308,7 @@ For technical support, please provide specific error information and usage scena
 
 ## 🆕 Update Log
 
-View `CHANGELOG.md` for detailed version change records.
+View [CHANGELOG.md](./CHANGELOG.md) for detailed version change records.
 
 ---
 

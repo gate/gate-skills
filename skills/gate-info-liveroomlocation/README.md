@@ -19,3 +19,8 @@ An AI Agent skill that returns a filtered list of live streams and replays on Ga
 - **Output**: List of lines: title + link (streaming: `https://www.gate.io/live/video/{id}?type=live`, video: `https://www.gate.io/live/video/{id}`).
 - **Restricted regions**: Do not call the API; reply that the feature is not available.
 - **No MCP**: This skill uses HTTP only; no MCP dependency.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

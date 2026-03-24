@@ -56,3 +56,8 @@ gate-exchange-transfer/
 - Gate MCP configured and connected
 - Authentication (OAuth) required
 - Sufficient balance in source account
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

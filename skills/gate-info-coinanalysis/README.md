@@ -27,3 +27,8 @@ An AI Agent skill that performs **comprehensive single-coin analysis** (fundamen
 - **Input**: User message with coin symbol (e.g. SOL, BTC).
 - **Tools**: See SKILL.md tool table — `info_coin_get_coin_info`, `info_marketsnapshot_get_market_snapshot`, `info_markettrend_get_technical_analysis`, `news_feed_search_news`, `news_feed_get_social_sentiment`.
 - **Output**: Fixed five-section report; technical section must state bullish / bearish / neutral. **Judgment Logic** (RSI/volume/funding/fear_greed/unlock), **Error Handling** (empty → "No data"), **Cross-Skill** routing, **Safety** (read-only, no advice) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

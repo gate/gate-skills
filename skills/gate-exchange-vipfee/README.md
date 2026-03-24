@@ -54,3 +54,12 @@ Trigger this Skill with prompts such as:
 |------|---------|---------------|
 | `cex_account_get_account_detail` | Get account profile including VIP tier | Yes |
 | `cex_wallet_get_wallet_fee` | Get spot and futures trading fee rates | Yes |
+
+## Authentication
+
+This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

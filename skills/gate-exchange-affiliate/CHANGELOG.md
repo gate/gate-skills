@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026.3.24-1] - 2026-03-24
+
+### Added
+- `README.md`: Overview, core capabilities, MCP tool table, architecture layout, authentication note.
+
+### Changed
+- `SKILL.md`: General Rules — MCP tool allowlist bullet (aligned with `gate-exchange-crossex` template).
+
 ## [2026.3.18-2] - 2026-03-18
 
 ### Added

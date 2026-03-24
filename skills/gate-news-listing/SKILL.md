@@ -1,11 +1,19 @@
 ---
 name: gate-news-listing
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Exchange listing tracker. Use this skill whenever the user asks about exchange listing, delisting, or maintenance announcements. Trigger phrases include: any new coins listed recently, what did Binance list, new listings, delisted. MCP tools: news_feed_get_exchange_announcements, info_coin_get_coin_info, info_marketsnapshot_get_market_snapshot."
 ---
 
 # gate-news-listing
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > Listing radar Skill. The user queries exchange listing/delisting/maintenance announcements, the system first calls the exchange announcements Tool, then supplements high-interest coins with fundamentals and market data. The LLM aggregates everything into a structured exchange activity report.
 

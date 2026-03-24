@@ -58,3 +58,8 @@ An L2 composite AI Agent skill — **Market Research Copilot** — that orchestr
 - **Email**: support@gate.com (general support), business@gate.com (business inquiries)
 - **Help Center**: [https://www.gate.com/help](https://www.gate.com/help)
 - **GitHub Issues**: Report bugs or feature requests via the repository's Issues page.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

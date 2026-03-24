@@ -1,11 +1,19 @@
 ---
 name: gate-news-eventexplain
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Event attribution and explanation. Use this skill ONLY when the user's query is exclusively about the reason behind a price move with no other analysis dimensions. Trigger phrases: why did X crash, what just happened, why is it pumping, what caused. If the query ALSO mentions fundamentals, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-news-eventexplain
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > The "Why is it pumping/dumping?" Skill. When the market experiences abnormal volatility and the user asks why, the system traces the event source through multi-step calls, cross-references market data to verify impact magnitude, and delivers a complete "Event → Impact Chain → Market Reaction" analysis report.
 

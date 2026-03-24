@@ -1,11 +1,19 @@
 ---
 name: gate-info-coincompare
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Coin comparison. Use this skill whenever the user asks to compare two or more coins. Trigger phrases include: compare, versus, vs, which is better, difference. MCP tools: info_marketsnapshot_get_market_snapshot, info_coin_get_coin_info per coin (or batch/search when available)."
 ---
 
 # gate-info-coincompare
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > Side-by-side comparison Skill. The user inputs 2-5 coins, the system calls market snapshot + fundamentals tools for each coin in parallel, and the LLM aggregates multi-dimensional data into a comparison table with overall analysis.
 

@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-simpleearn
-version: "2026.3.18-5"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: Query Gate Simple Earn flexible (Uni) and fixed-term workflows, including product lists, positions, interest, subscribe, redeem, and change-min-rate intents. Use this skill whenever the user asks about Simple Earn, Uni, fixed-term, subscribe, redeem, positions, interest, or top APY. Trigger phrases include "Simple Earn", "Uni", "flexible earn", "fixed-term", "subscribe", "redeem", "positions", "interest", "top APY", or equivalent.
 ---
 
 # Gate Exchange Simple Earn Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Provide Gate Simple Earn **flexible (Uni)** and **fixed-term** operations on Gate. Use the flexible Uni references for flexible positions, interest, subscribe, redeem, and change-min-rate workflows, and use the fixed-term references for fixed-term product lists, subscribe, early redeem, positions, and history. This skill treats both workflows as supported and routes each request to the matching MCP tool family.
 

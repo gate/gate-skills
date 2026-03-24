@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-staking
-version: "2026.3.16-1"
-updated: "2026-03-16"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "The on-chain staking (earn) function of Gate Exchange. Use this skill to query staking positions, rewards, products, order history, or to perform stake, redeem, or mint (mint = immediate stake) via swap. Trigger phrases include: staking, stake, redeem, mint, unstake, earn, staking rewards, staking positions, earning records, staking history, available coins, stake USDT, redeem BTC."
 ---
 
 # Gate Staking Query Suite
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

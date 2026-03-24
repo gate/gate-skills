@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-futures
-version: "2026.3.17-1"
-updated: "2026-03-17"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Gate Exchange USDT perpetual futures: open/close position, cancel/amend order, take profit, stop loss, conditional open. Use this skill whenever the user wants to trade USDT perpetual futures on Gate. Trigger phrases include open, close, cancel, amend, take profit, stop loss, TP/SL, conditional order, price trigger, when price reaches."
 ---
 
 # Gate Futures Trading Suite
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 This skill is the single entry for Gate USDT perpetual futures. It supports **seven operations**: open position, close position, cancel order, amend order, take profit / stop loss (TP/SL), conditional open, and price-triggered order management. User intent is routed to the matching workflow.
 

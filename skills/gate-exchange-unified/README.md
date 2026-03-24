@@ -73,3 +73,8 @@ gate-exchange-unified/
 - loan records / interest records / borrow rate
 - max transferable / transferable limit
 - set leverage / leverage config / set collateral currencies
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

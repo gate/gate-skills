@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-flashswap
-version: "2026.3.18-5"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: Gate Flash Swap Skill for querying supported pairs, previewing quotes, and executing one-to-one, one-to-many, and many-to-one flash swap orders. Use this skill whenever you need to flash swap, convert, or exchange cryptocurrencies, preview swap quotes, check flash swap pairs, or view flash swap order history. Trigger phrases include "flash swap", "convert", "swap BTC to USDT", "buy BTC ETH SOL", "sell multiple coins", "flash swap order history", or any request involving cryptocurrency conversion.
 ---
 
 # Gate Flash Swap
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

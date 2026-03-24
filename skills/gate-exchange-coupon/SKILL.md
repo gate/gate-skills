@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-coupon
-version: "2026.3.13-1"
-updated: "2026-03-13"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "The coupon management function of Gate Exchange: query available coupons, check coupon details, view usage rules, and trace coupon source. Use this skill whenever the user asks about their coupons, vouchers, or bonus cards on Gate Exchange. Trigger phrases include 'my coupons', 'do I have any coupons', 'coupon list', 'check my voucher', 'coupon details', 'when does my coupon expire', 'coupon rules', 'how did I get this coupon', 'coupon source'."
 ---
 
@@ -10,7 +10,12 @@ description: "The coupon management function of Gate Exchange: query available c
 Query and inspect coupon/voucher accounts on Gate Exchange. Supports six scenarios: list available coupons, search by coupon type, view expired/used history, view full coupon details, read usage rules, and trace coupon acquisition source.
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

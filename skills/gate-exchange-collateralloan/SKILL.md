@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-collateralloan
-version: "2026.3.18-3"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: Query and manage Gate multi-collateral loan. Use this skill whenever the user asks about collateral loan, current loan, fixed loan, repay, add collateral, or redeem collateral. Trigger phrases include "collateral loan", "current loan", "fixed loan", "repay", "add collateral", "redeem collateral", or equivalent in other languages.
 ---
 
 # Gate Exchange Multi-Collateral Loan Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Provide multi-collateral loan operations on Gate: create current (flexible) or fixed-term loan orders, repay (partial/full), add collateral (append), and redeem collateral. All write operations require explicit user confirmation before submit.
 

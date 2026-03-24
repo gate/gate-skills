@@ -1,11 +1,19 @@
 ---
 name: gate-mcp-openclaw-installer
-version: "2026.3.10-1"
-updated: "2026-03-10"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: One-click installer for all Gate.com MCP servers including spot/futures trading, DEX, market info, and news. Use when users need to install, configure, or manage Gate MCP servers with mcporter.
 ---
 
 # Gate MCP
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Complete Gate.com MCP server installer for OpenClaw.
 

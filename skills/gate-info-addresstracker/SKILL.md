@@ -1,11 +1,19 @@
 ---
 name: gate-info-addresstracker
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Address tracker and analysis. Use this skill whenever the user provides an on-chain address or asks to track or query an address. Trigger phrases include: track this address, who owns this address, fund flow, check address. MCP tools: info_onchain_get_address_info, info_onchain_get_address_transactions, info_onchain_trace_fund_flow."
 ---
 
 # gate-info-addresstracker
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > The on-chain detective Skill. The user inputs an on-chain address; the system first calls the address info Tool to get the profile, then based on user intent depth (simple query vs. fund tracing) decides whether to additionally call transaction history and fund flow tracing Tools.
 

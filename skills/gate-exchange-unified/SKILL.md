@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-unified
-version: "2026.3.13-4"
-updated: "2026-03-13"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Gate unified account operations skill. Use this skill whenever the user asks to check unified account equity, query borrowable or transferable limits, borrow/repay funds, inspect loan or interest records, switch unified account mode, configure per-currency leverage, or manage collateral currencies. Trigger phrases include 'unified account', 'borrow limit', 'repay loan', 'switch mode', 'set leverage', 'set collateral', or any request that combines unified account risk status with funding actions."
 ---
 
 # Gate Unified Account Assistant
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Execute integrated operations for Gate unified-account workflows, including:
 - Account overview and mode checks (equity, margin metrics, unified mode)

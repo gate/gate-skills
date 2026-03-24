@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-launchpool
-version: "2026.3.18-2"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "The LaunchPool staking and airdrop function of Gate Exchange. Use this skill whenever you need to browse LaunchPool projects, stake tokens, redeem staked assets, query pledge records, or check airdrop reward history. Trigger phrases include: LaunchPool, launch pool, staking event, airdrop, pledge, redeem, LaunchPool rewards, LaunchPool projects."
 ---
 
 # Gate LaunchPool Suite
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

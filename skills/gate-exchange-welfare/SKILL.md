@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-welfare
-version: "2026.3.19-4"
-updated: "2026-03-19"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Gate Exchange welfare center new user task skill with MCP tools integration. Use this skill whenever user asks about welfare benefits, new user rewards, how to claim rewards, or available tasks. Trigger phrases include: what welfare, how to claim rewards, new user benefits, new user tasks, what tasks can I do, claim reward. CRITICAL: Must use real MCP data, never provide fake reward information. All documentation in English."
 ---
 
 # Gate Exchange Welfare Center
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ## Overview
 

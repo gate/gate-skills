@@ -1,11 +1,19 @@
 ---
 name: gate-info-coinanalysis
-version: "2026.3.12-2"
-updated: "2026-03-11"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Single-coin comprehensive analysis. Use this skill ONLY when the user asks to analyze one coin with no additional explicit dimension (e.g., no separate risk check, no separate trend-only request). Trigger phrases: analyze SOL, how is BTC, is ETH worth buying. If the query ALSO mentions security/risk, event attribution, multi-coin comparison, or any other analysis dimension beyond single-coin comprehensive, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
 # gate-info-coinanalysis
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 > The most frequently used Skill. The user inputs a coin name, the system calls 5 MCP Tools in parallel to fetch fundamentals + market data + technicals + news + social sentiment, then the LLM aggregates the results into a structured analysis report.
 

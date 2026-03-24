@@ -26,3 +26,8 @@ An AI Agent skill that **tracks exchange listing, delisting, and maintenance ann
 - **Input**: Optional exchange, coin, announcement_type (default listing); limit default 10.
 - **Tools**: `news_feed_get_exchange_announcements` first; then for listing-type results supplement with `info_coin_get_coin_info` and `info_marketsnapshot_get_market_snapshot` (parallel per coin).
 - **Output**: Exchange Activity Report. **Decision Logic** (post-listing volatility, volume, multi-exchange listing, delisting urgency), **Error Handling**, **Safety** (no listing prediction, new-coin risk reminder) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

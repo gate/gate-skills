@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-vipfee
-version: "2026.3.11-2"
-updated: "2026-03-11"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Query Gate VIP tier and trading fee rates. Use this skill whenever the user asks about their VIP level, trading fee rates, spot fees, or futures/contract fees on Gate. Trigger phrases include 'VIP level', 'trading fee', 'fee rate', 'spot fee', 'futures fee'."
 ---
 
 # Gate VIP & Fee Query Assistant
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

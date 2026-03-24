@@ -4,18 +4,29 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.24-1] - 2026-03-24
+
+### Changed
+
+- **SKILL.md streamlined**: Removed redundant sections already covered by `gate-runtime-rules.md` (Auto-Update, Authentication State); removed Cross-Skill Collaboration (covered in `references/asset-query.md`); merged Security Rules from 6 to 3 (auth routing now defers to runtime-rules §3)
+- **SKILL.md frontmatter**: Flattened nested `metadata` structure to top-level `version`/`updated` fields
+- **Supported Chains**: Condensed from full table to single-line summary
+- **Setup Guide**: Normalized MCP server name from `gate-wallet` to `gate-dex` in CLI examples
+- **gate-runtime-rules.md**: Minor formatting fixes
+- **gate-skills-disambiguation.md**: Minor formatting fixes
+
 ## [2026.3.19-2] - 2026-03-19
 
 ### Changed
 
-- **x402 documentation** (`references/x402.md`): Align with wallet MCP behavior — **accept priority** (Solana exact → EVM exact → Solana upto → EVM upto), **EVM upto** (Permit2, `extra.facilitator`), **Solana upto** (max-amount SPL signing note), error-handling table; document **English** `dex_tx_x402_fetch` tool description as returned by MCP
+- **x402 documentation** ([references/x402.md](./references/x402.md)): Align with wallet MCP behavior — **accept priority** (Solana exact → EVM exact → Solana upto → EVM upto), **EVM upto** (Permit2, `extra.facilitator`), **Solana upto** (max-amount SPL signing note), error-handling table; document **English** `dex_tx_x402_fetch` tool description as returned by MCP
 - **SKILL.md** frontmatter: x402 capability line updated to mention exact/upto and `dex_tx_x402_fetch`
 
 ## [2026.3.19-1] - 2026-03-19
 
 ### Added
 
-- **x402 Payment Skill**: New sub-module `references/x402.md` for HTTP 402 Payment Required flows
+- **x402 Payment Skill**: New sub-module [references/x402.md](./references/x402.md) for HTTP 402 Payment Required flows
   - Trigger: "402 payment", "x402 pay", "payment required", "pay for API/URL"
   - Tool: `dex_tx_x402_fetch` — request URL; on 402, pay with wallet (EVM EIP-3009 or Solana SPL) and retry
   - Routing: SKILL.md and README.md updated with x402 module and follow-up routing

@@ -98,3 +98,8 @@ The skill gracefully handles various error scenarios:
 - **Authentication required**: All operations except project browsing need user authentication
 - **Compliance handling**: Regional restrictions are respected and communicated clearly
 - **No fabrication**: Only displays data from actual API responses
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

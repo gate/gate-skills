@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-subaccount
-version: "2026.3.12-1"
-updated: "2026-03-12"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: Manage sub-accounts on Gate Exchange including querying status, listing, creating, locking, and unlocking sub-accounts. Use this skill whenever the user asks about sub-account management, sub-account status, creating sub-accounts, locking or unlocking sub-accounts. Trigger phrases include "sub-account", "subaccount", "sub account status", "create sub-account", "lock sub-account", "unlock sub-account", "list sub-accounts", "my sub-accounts", or any request involving sub-account queries or management operations.
 ---
 
 # Gate Exchange Sub-Account Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Provide sub-account management capabilities on Gate, including querying sub-account status, listing all sub-accounts, creating new sub-accounts, and locking/unlocking sub-accounts.
 

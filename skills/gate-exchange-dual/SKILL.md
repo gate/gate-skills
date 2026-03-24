@@ -1,14 +1,19 @@
 ---
 name: gate-exchange-dual
-version: "2026.3.18-1"
-updated: "2026-03-18"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: The dual investment function of Gate Exchange — query products, simulate settlements, place orders, and manage positions. Use this skill whenever the user asks about dual investment, dual currency, target price settlement simulation, placing dual orders, or checking dual investment positions. Trigger phrases include "dual investment", "dual currency", "target price", "exercise price", "dual orders", "dual balance", "shuang-bi", "sell-high", "buy-low", "place dual order", "subscribe dual", or any request involving dual investment product queries, order placement, or checking dual investment balance.
 ---
 
 # Gate Exchange Dual Investment Skill
 
 ## General Rules
-Read and follow [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 
