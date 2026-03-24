@@ -158,8 +158,8 @@ If confirmation is missing, ambiguous, or stale, do not execute any write tool c
 **Expected Behavior**:
 1. Activate S5 signal.
 2. Execute in parallel: `cex_unified_get_unified_borrowable` (currency=USDT), `cex_unified_get_unified_accounts`, `cex_unified_get_unified_estimate_rate`.
-3. Display borrowable limit and estimated rate.
-4. Generate **high-risk** Action Draft: operation=borrow, currency=USDT, amount=500 (or max if exceeded), rate=estimated rate, risk="interest accrues hourly" (amount + currency + rate are mandatory fields).
+3. Display borrowable limit and estimated rate. **Rate semantics:** `cex_unified_get_unified_estimate_rate` returns **hourly** estimated borrow rates (per currency); state "hourly" in user-facing text — do not label the raw value as annual APR unless converted and marked reference-only.
+4. Generate **high-risk** Action Draft: operation=borrow, currency=USDT, amount=500 (or max if exceeded), rate=estimated **hourly** rate, risk="interest accrues hourly" (amount + currency + rate are mandatory fields).
 5. Wait for explicit user confirmation.
 6. After confirmation, execute `cex_unified_create_unified_loan` (type=borrow, currency=USDT, amount=confirmed amount).
 7. Output "Borrow Result Report".
@@ -234,7 +234,7 @@ If confirmation is missing, ambiguous, or stale, do not execute any write tool c
 **Expected Behavior**:
 1. Activate S1 signal (inquiry subset), NOT S5.
 2. Execute in parallel: `cex_unified_get_unified_borrowable`, `cex_unified_get_unified_estimate_rate`, `cex_unified_get_unified_accounts`.
-3. Display borrowable limit and estimated rate.
+3. Display borrowable limit and estimated rate. **`cex_unified_get_unified_estimate_rate`** values are **hourly** estimated borrow rates per currency (not annualized APR by default).
 4. Do not generate Action Draft or enter write flow.
 5. If user later says "go ahead and borrow", then activate S5 (Scenario 9).
 6. Signal note: This scenario does NOT activate S5 (S5 is reserved for queries with execution intent — see Routing Rules). This is pure read mode; no Action Draft, no `create_loan` call. User wanting to actually borrow should use Scenario 9.

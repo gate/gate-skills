@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.24-6] - 2026-03-24
+
+### Changed
+
+- **SKILL.md**: Documented that `cex_unified_get_unified_estimate_rate` returns **hourly** estimated unified-account borrow rates (per-currency string decimals; not annualized APR/APY). Added Domain Knowledge subsection, tool-inventory clarification, Common Misconceptions row, Action Draft / high-risk grading wording, and report template line for interest rate.
+
 ## [2026.3.24-5] - 2026-03-24
 
 ### Changed
