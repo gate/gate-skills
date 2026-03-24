@@ -11,7 +11,7 @@ All notable changes to this skill will be documented in this file.
 
 ### Changed
 - Fixed heading hierarchy: H1 now appears before H2 General Rules
-- Fixed General Rules reference: now points to [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) instead of `scenarios.md`
+- Fixed General Rules reference: now points to `exchange-runtime-rules.md` instead of `scenarios.md`
 - Translated all Chinese content to English (trigger examples, error messages, labels)
 - Expanded Error Handling table with 401/400/429/500/Network error scenarios
 - Fixed link placeholder format: `[{activity_title}]({processed_url})`
