@@ -1,6 +1,6 @@
 ---
 name: gate-exchange-assets-manager
-version: "2026.3.24-5"
+version: "2026.3.24-6"
 updated: "2026-03-24"
 description: "Gate account and asset manager L2 skill. Use this skill whenever the user asks to check total assets across all accounts, view margin and liquidation risk, review SimpleEarn or staking earnings snapshots, query affiliate commissions, or execute unified-account borrowing, collateral, and leverage settings. Trigger phrases include 'total assets', 'margin check', 'liquidation risk', 'earn interest', 'staking rewards', 'affiliate commissions', 'borrow USDT', 'add margin', 'set collateral', or any request that combines multi-account asset overview with risk control actions."
 ---
@@ -186,7 +186,7 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 | 13 | `cex_unified_get_unified_mode` | R | Current unified account mode |
 | 14 | `cex_unified_get_unified_borrowable` | R | Borrowable limit per currency |
 | 15 | `cex_unified_get_unified_transferable` | R | Transferable limit |
-| 16 | `cex_unified_get_unified_estimate_rate` | R | Estimated borrow rate |
+| 16 | `cex_unified_get_unified_estimate_rate` | R | **Hourly** estimated unified-account borrow rate per currency (API string decimals; **not** annualized APR/APY). See Domain Knowledge: Unified account estimated borrow rate. |
 | 17 | `cex_unified_list_unified_currencies` | R | Supported unified currencies |
 | 18 | `cex_unified_list_unified_loan_records` | R | Loan records |
 | 19 | `cex_unified_list_unified_loan_interest_records` | R | Loan interest records |
@@ -295,10 +295,17 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 - Does NOT produce a total PnL ledger across all business lines (inconsistent data sources)
 - Does NOT provide idle fund allocation advice or product comparison — route to smart earn
 
+### Unified account estimated borrow rate (`cex_unified_get_unified_estimate_rate`)
+
+- **Semantics (Gate API):** The tool returns **estimated borrow interest rates for the current hour**, per currency, as **string decimals** (e.g. `"0.000002"`). This matches the public API contract: hourly estimate, not a fixed annual quote.
+- **User-facing output:** Always state that the value is a **hourly estimated rate** (or equivalent). **Do not** present the raw number as **annualized APR/APY** unless you perform an explicit conversion and label it clearly as a **reference only** (e.g. simple scaling: hourly × 24 × 365 — actual accrual follows platform rules).
+- **Distinction:** SimpleEarn tools such as `cex_earn_list_uni_rate` expose **product APY-style** figures; they are a different product line from unified-account **borrow** estimates. Do not mix units in one sentence without naming each source.
+
 ### Common Misconceptions
 
 | Misconception | Reality |
 |---------------|---------|
+| The number from `cex_unified_get_unified_estimate_rate` is an annual percentage (APR) | It is an **hourly** estimated borrow rate per currency. Label it as hourly; only annualize with explicit conversion and “reference only” wording if the user asks. |
 | "Check my account and buy BTC" will execute trades via this skill | This skill only handles account/asset/risk queries and limited write operations (borrow/settings). Trading execution routes to the trading copilot. |
 | Liquidation warning equals the actual liquidation line | This skill evaluates risk based on snapshot data. Always note "subject to the exchange's actual liquidation rules." |
 | This skill can query or manage sub-accounts | This skill covers main account only; sub-account management is out of scope. |
@@ -330,10 +337,11 @@ Note: Unified account specifications (margin ratio calculation, borrowing rules,
 | Risk level | Operation type | Involved tools | Confirmation requirement |
 |------------|------------------|----------------|--------------------------|
 | **Medium** | Switch unified account mode / set per-currency leverage / set collateral | `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral` | **Single confirmation** plus a **risk disclosure** in the Action Draft. If the operation includes **mode switch** (`cex_unified_set_unified_mode`), the draft **must** state that **the mode change is irreversible** (or equivalent clear wording). |
-| **High** | Lending — borrow or repay | `cex_unified_create_unified_loan` | **Action Draft** must list **amount**, **currency**, and **estimated or applicable interest rate** (from `cex_unified_get_unified_estimate_rate` or API response), then **user confirmation** before execution. |
+| **High** | Lending — borrow or repay | `cex_unified_create_unified_loan` | **Action Draft** must list **amount**, **currency**, and **estimated or applicable interest rate** (from `cex_unified_get_unified_estimate_rate` — **hourly** estimate — or API response), then **user confirmation** before execution. |
 
 **Implementation notes**
 
+- **`cex_unified_get_unified_estimate_rate`:** Treat returned rates as **hourly** estimates when quoting to the user or filling Action Drafts (see Domain Knowledge: Unified account estimated borrow rate).
 - **Medium vs High**: Medium-risk tools still use an Action Draft; the difference is emphasis — medium-risk settings require a concise risk tip (and irreversibility when switching mode). High-risk lending requires the financial fields (amount, currency, rate) to be explicit in the draft before confirmation.
 - **One tool per confirmation batch** if parameters differ; do not bundle unrelated writes under one generic “OK”.
 
@@ -441,7 +449,7 @@ Reply **Y** to confirm or **N** to cancel.
 | Operation | {borrow / repay} |
 | Currency | {e.g. USDT} |
 | Amount | {numeric amount} |
-| Interest rate | {estimated or applicable rate from read tools / API} |
+| Interest rate | {hourly estimated rate from `cex_unified_get_unified_estimate_rate` / API; state **hourly** — not APR unless explicitly converted and labeled reference-only} |
 | Risk warning | {e.g. interest accrual, repayment obligation} |
 
 Reply **Y** to confirm or **N** to cancel.
