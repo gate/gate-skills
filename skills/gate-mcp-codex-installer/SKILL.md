@@ -1,11 +1,19 @@
 ---
 name: gate-mcp-codex-installer
-version: "2026.3.11-1"
-updated: "2026-03-11"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: One-click installer for Gate MCP and all Gate Skills in Codex. Installs Gate MCP servers (main/dex/info/news, selectable) and all skills from the gate-skills repository. Installs all MCPs + all skills by default; skills are always fully installed.
 ---
 
 # Gate One-Click Installer (Codex: MCP + Skills)
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Use this skill when the user says "one-click install Gate", "install Gate MCP and skills", "Codex install gate-mcp", etc., and is using **Codex**.
 

@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.18-2"
-updated: "2026-03-18"
+version: "2026.3.24-1"
+updated: "2026-03-24"
 description: "Gate Exchange affiliate program data query and management skill. Use when users ask about affiliate/partner commission, trading volume, net fees, customer count, or want to apply for the affiliate program. Supports queries for up to 180 days. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'apply for affiliate', 'am I eligible', 'my application status'."
 ---
 
@@ -10,7 +10,12 @@ description: "Gate Exchange affiliate program data query and management skill. U
 Query and manage Gate Exchange affiliate/partner program data, including commission tracking, team performance analysis, and application guidance.
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ## Important Notice
 

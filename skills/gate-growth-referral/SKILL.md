@@ -1,14 +1,19 @@
 ---
 name: gate-growth-referral
-version: "2026.3.17-1"
-updated: "2026-03-17"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Gate invite friends activity recommendation and rule interpretation skill. Use this skill whenever the user asks about referral programs, invitation rewards, how to invite friends, earn-together events, coupon assistance, super commission, referral links, or any request related to Gate's invite-a-friend campaigns. Trigger phrases include 'invite friends', 'referral', 'invitation reward', 'earn together', 'coupon', 'commission', 'rebate', 'referral link', 'invite reward', 'referral bonus', 'earn with friends', 'passive income from referrals'."
 ---
 
-## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
-
 # Gate Invite Friends Activity Recommendation & Rule Interpretation
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 Help users understand Gate's invite-friends feature by aggregating various referral programs, introducing and recommending Gate's three main referral programs (Earn Together, Help & Get Coupons, Super Commission), explaining activity rules and invitation rewards, and helping users understand how to earn rewards by inviting friends.
 

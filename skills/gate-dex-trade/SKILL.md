@@ -7,6 +7,14 @@ description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transac
 
 # Gate DEX Trade
 
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
 > **Pure Routing Layer** — Swap EXECUTION only. Every operation produces an on-chain transaction. All specifications in `references/`.
 
 **Trigger Scenarios**: Use when the user wants to **execute a token exchange** that modifies blockchain state:

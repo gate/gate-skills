@@ -26,3 +26,8 @@ An AI Agent skill that **compares multiple coins** side-by-side. **Spec (preferr
 - **Input**: User message with two or more coin symbols.
 - **Tools**: **Preferred**: `info_marketsnapshot_batch_market_snapshot`, `info_coin_search_coins`. **Fallback**: for each coin `info_coin_get_coin_info` + `info_marketsnapshot_get_market_snapshot` (same timeframe/source).
 - **Output**: 5-section report (Key Metrics, Fundamentals, Technical optional, Comparative Summary, Dimension-by-Dimension Winners) + Risk Warnings. **Decision Logic** (performance divergence, FDV/circulating ratio, volume, RSI, cross-sector), **Error Handling** (one coin → ask or route; coin not found; timeout), **Safety** (no recommendation, no investment advice) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

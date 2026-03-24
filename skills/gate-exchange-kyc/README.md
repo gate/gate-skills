@@ -28,3 +28,8 @@ gate-exchange-kyc/
 ## Trigger Phrases
 
 complete KYC, verify my identity, where to do verification, why can't I withdraw
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

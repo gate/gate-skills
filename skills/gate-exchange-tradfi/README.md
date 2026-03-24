@@ -73,3 +73,12 @@ gate-exchange-tradfi/
 - **Read-only**: This skill only queries data. It does **not** place or cancel orders, and does **not** perform fund transfers or balance transfers.
 - No credentials are stored or logged; balance, position, and MT5 account data are displayed only in the current response.
 - Confirmation is not required for query-only flows.
+
+## Authentication
+
+This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

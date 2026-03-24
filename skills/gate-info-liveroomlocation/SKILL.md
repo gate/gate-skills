@@ -1,11 +1,19 @@
 ---
 name: gate-info-liveroomlocation
-version: "2026.3.13-1"
-updated: "2026-03-13"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: The live and replay listing function of Gate Exchange. Use this skill whenever the user asks to find live streams or replays by business type (tag), coin, sort (hottest/newest), or count. Trigger phrases include "最热直播", "live room list", "行情分析直播间", "给我5个SOL相关直播", "latest replays", "tag coin live replay", or any request involving live room location, replay list, or tag/coin/sort filter.
 ---
 
 # Gate Info Liveroom Location — Live & Replay Listing
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 This skill returns a filtered list of live streams and replays on Gate Exchange. Each item is **title + link**. Parameters (tag, coin, sort, limit) are inferred from natural language; use defaults when not specified and do not ask the user for missing params.
 

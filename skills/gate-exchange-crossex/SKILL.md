@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-crossex
-version: "2026.3.19-2"
-updated: "2026-03-19"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: 'Use this skill for Gate CrossEx cross-exchange operations: order placement, transfer, convert, and order/position/history queries across Gate, Binance, OKX and Bybit. Trigger phrases include "buy spot", "transfer", "convert", "query positions", "order history".'
 ---
 
@@ -11,7 +11,10 @@ This skill is the unified entry point for Gate CrossEx cross-exchange trading. I
 order management, position query, and history query. User intents are routed to corresponding workflows.
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 

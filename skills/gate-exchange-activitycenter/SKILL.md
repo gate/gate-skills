@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-activitycenter
-version: "2026.3.19-18"
-updated: "2026-03-19"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Activity center for platform campaigns. Use this skill whenever the user asks about platform activities, activity recommendations, or my activities. Trigger phrases include: recommend activities, what activities, airdrop activities, trading competition, VIP activities, my activities. MCP tools: cex_activity_list_activity_types, cex_activity_list_activities, cex_activity_get_my_activity_entry."
 ---
 
@@ -10,7 +10,12 @@ description: "Activity center for platform campaigns. Use this skill whenever th
 > Activity center aggregates platform campaigns (trading competitions, airdrops, newcomer activities, referral activities, etc.), supporting activity recommendations and my activities entry.
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 **Trigger Scenarios**: User mentions "recommend activities", "what activities", "airdrop activities", "trading competition", "VIP activities", "my activities", etc.
 

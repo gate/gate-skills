@@ -1,7 +1,7 @@
 ---
 name: gate-info-research
-version: "2026.3.22-2"
-updated: "2026-03-22"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Market Research Copilot — an L2 composite skill that orchestrates 12 read-only MCP tools across Gate-Info and Gate-News to produce structured market briefs, single-coin deep dives, multi-coin comparisons, trend analyses, event attribution, and risk checks. Use this skill whenever the user wants to understand the market, research a coin, compare tokens, check risk, or get a daily briefing, or whenever a research query spans multiple analysis dimensions (e.g. fundamentals + technicals + news + risk). Trigger phrases include: market brief, analyze, research, compare coins, risk check, why pumping, why dumping, daily brief, sentiment, technical analysis, fundamentals, worth buying, trend, overview, report."
 ---
 
@@ -13,7 +13,13 @@ description: "Market Research Copilot — an L2 composite skill that orchestrate
 
 **Target Users**: Casual / beginner traders, content-oriented users, and pre-decision users who need to quickly understand the market, a coin, or risk before acting.
 
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 

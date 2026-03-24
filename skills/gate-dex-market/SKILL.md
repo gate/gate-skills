@@ -7,6 +7,14 @@ description: "Gate DEX READ-ONLY market data lookup skill. For data queries that
 
 # Gate DEX Market
 
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
 > **Pure Routing Layer** — READ-ONLY data queries only. Never executes transactions. All specifications in `references/`.
 
 **Trigger Scenarios**: Use when the user wants to **look up or analyze** market data without executing any transaction:

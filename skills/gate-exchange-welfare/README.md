@@ -38,3 +38,8 @@ This Skill covers the following scenarios:
 - Case 1: Existing user query → Guide to Web / App
 - Case 2: New user query → Show new user task list
 - Exception handling: Covers all user identity restrictions and system exception situations (error codes 1001-1008)
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

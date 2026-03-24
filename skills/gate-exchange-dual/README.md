@@ -69,3 +69,8 @@ User Query
 - No investment advice is provided; all data is for informational purposes only
 - Dual investment is interest-guaranteed but not principal-protected — this is clearly communicated in every response
 - Sensitive user data (API keys, balances) is never logged or exposed in responses
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

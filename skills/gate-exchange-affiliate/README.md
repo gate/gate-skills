@@ -2,56 +2,54 @@
 
 ## Overview
 
-A read-oriented skill for Gate Exchange **Partner (affiliate)** data: commission history, referred users’ trading activity, subordinate lists, eligibility to apply, and recent application status. It uses Partner APIs only (not deprecated Agency APIs). Queries can span up to **180 days** by splitting into **30-day** API windows.
+`gate-exchange-affiliate` helps partners query and interpret Gate Exchange affiliate (Partner) program data: commission history, referred users’ trading activity, subordinate lists, eligibility to apply, and recent application status. It uses **Partner APIs only** (Agency APIs are out of scope). Queries can cover up to **180 days** by splitting requests into **30-day segments** per API limits.
 
-### Core Capabilities
+## Core Capabilities
 
-- Commission and rebate history for the authenticated partner
-- Trading volume and net fees from referred users’ transaction history
-- Subordinate (referred user) list and customer counts
-- Partner program eligibility check and recent application status (last 30 days)
-- Time-range queries with UTC+8 boundaries and **no future timestamps**
-- Safe aggregation guidance (avoid blind summation of list fields; respect `user_id` semantics)
+| Capability | Description |
+|------------|-------------|
+| Commission & trading history | Referred users’ trading records and commission records (time-bounded queries) |
+| Team / subordinates | Subordinate list and customer counts |
+| Partner onboarding | Eligibility check and recent application status (last 30 days for application API) |
 
-## Execution Guardrail (Mandatory)
+### MCP Tools (when Gate MCP is configured)
 
-- **Authentication**: Requires a valid Gate identity with **partner** privileges (e.g. via configured MCP / `X-Gate-User-Id` as documented in `SKILL.md`).
-- **`user_id` filter**: In `commission_history` and `transaction_history`, `user_id` filters by **trader**, not commission receiver. Do **not** use it for generic “my commission” queries—only when the user explicitly asks about a **specific trader UID**.
-- **Time rules**: Compute ranges from the user’s current date in **UTC+8**; `to` must be ≤ current Unix time. Reject future-dated ranges.
-- **Data scope**: Only query data for the authenticated partner; do not infer or access other partners’ data.
+| MCP tool | Purpose |
+|----------|---------|
+| `cex_rebate_partner_transaction_history` | Referred users’ trading records |
+| `cex_rebate_partner_commissions_history` | Commission records |
+| `cex_rebate_partner_sub_list` | Subordinate list |
+| `cex_rebate_get_partner_eligibility` | Whether the user may apply for partner |
+| `cex_rebate_get_partner_application_recent` | Recent partner application record |
+
+When MCP is not available, the skill documents equivalent REST paths under `GET /rebate/partner/*` in `SKILL.md`.
 
 ## Architecture
 
 ```
 gate-exchange-affiliate/
-├── SKILL.md
-├── README.md
-├── CHANGELOG.md
+├── SKILL.md                 # Agent runtime instructions, workflows, API reference
+├── README.md                # This file
+├── CHANGELOG.md             # Version history
 └── references/
-    ├── scenarios.md
-    └── quick-start.md
+    ├── scenarios.md         # Scenario-based examples
+    └── quick-start.md       # Quick start notes
 ```
 
-## Usage Examples
+**Pattern**: Standard architecture — routing, judgment logic, and report templates live in `SKILL.md`.
 
-```
-"Show my affiliate commission for the last 7 days."
-"How much trading volume did my referrals generate this month?"
-"Am I eligible to apply for the partner program?"
-"What’s the status of my recent partner application?"
-"List my subordinates and how many are direct vs indirect."
-```
+## Usage examples
 
-## Trigger Phrases
+- "What is my affiliate commission this week?"
+- "Show my partner team performance"
+- "Am I eligible to apply for the affiliate program?"
+- "What is the status of my partner application?"
 
-- my affiliate data / partner earnings / commission this week
-- team performance / referral volume / net fees from referrals
-- apply for affiliate / am I eligible / application status
-- subordinate list / customer count / referred users
+## Authentication
 
-## Related Documentation
+The skill does not embed credentials. The Gate MCP layer injects the user context (e.g. `X-Gate-User-Id`) when calling Partner APIs or MCP tools. Configure the Gate MCP server per your client (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup).
 
-- Runtime rules shared with other exchange skills: follow the instruction in `SKILL.md` to read `exchange-runtime-rules.md` from the repository (see GitHub Gate Skills tree for the canonical copy).
-- Detailed workflow, API tables, and report templates: `SKILL.md`
-- Scenarios: `references/scenarios.md`
-- Quick start: `references/quick-start.md`
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

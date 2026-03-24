@@ -36,3 +36,8 @@ Activity center aggregation platform for Gate Exchange campaigns. **Step 1**: Id
 1. **Fixed page_size=3**: All activity list queries use `page_size=3`, no pagination
 2. **No Type Clarification**: For hot recommendation, call API directly without asking user
 3. **Type Matching**: Case-insensitive matching for activity types
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

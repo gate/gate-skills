@@ -57,3 +57,8 @@ Full MCP arguments: **`references/mcl-mcp-tools.md`**. Scenarios: **`references/
 |--------|-------|
 | Simple Earn | gate-exchange-simpleearn |
 | Multi-collateral loan | **gate-exchange-collateralloan** (this skill) |
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

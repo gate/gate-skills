@@ -95,6 +95,15 @@ MCP tool arguments and response: `references/earn-uni-mcp-tools.md`, `references
 - Sensitive user data (API keys, balances) is never logged or exposed in responses.
 - On auth failure (401/403), prompt the user to configure Gate CEX API Key with earn/account permission; never expose keys.
 
+## Authentication
+
+This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)
+
 ## Related skills
 
 | User intent | Skill |

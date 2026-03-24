@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-alpha
-version: "2026.3.17-4"
-updated: "2026-03-17"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Gate Alpha token discovery, market viewing, trading, account, and order management skill. Use this skill whenever the user asks to browse Alpha tokens, check Alpha market tickers, buy or sell Alpha tokens, view Alpha holdings, check transaction history, or manage Alpha orders. Trigger phrases include 'alpha tokens', 'alpha market', 'alpha holdings', 'alpha portfolio', 'buy alpha', 'sell alpha', 'alpha order', 'alpha history', or any request involving Gate Alpha operations."
 ---
 
@@ -10,7 +10,12 @@ description: "Gate Alpha token discovery, market viewing, trading, account, and 
 This skill is the single entry for Gate Alpha operations. It supports **seven modules**: Token Discovery, Market Viewing, Trading (Buy), Trading (Sell), Account & Holdings, Account Book, and Order Management. User intent is routed to the matching workflow.
 
 ## General Rules
-Read and follow [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first.
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 
