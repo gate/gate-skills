@@ -1,13 +1,9 @@
 ---
-
-## name: gate-dex-asset-query  
-description: >  
-  Gate Wallet asset query module. Query token balances, total portfolio value,  
-  wallet addresses, transaction history, and swap history. Use when the user wants  
-  to check their holdings, view past transactions, or retrieve wallet addresses.  
-metadata:  
-  version: "2.1.0"  
-  updated: "2026-03-23"
+name: gate-dex-asset-query
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet asset query module. Query token balances, total portfolio value, wallet addresses, transaction history, and swap history. Use when the user wants to check their holdings, view past transactions, or retrieve wallet addresses."
+---
 
 # Gate DEX Asset Query
 

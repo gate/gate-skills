@@ -4,6 +4,14 @@ All notable changes to `gate-dex-market` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.24-1] - 2026-03-24
+
+### Changed
+
+- **SKILL.md streamlined**: Removed Auto-Update section (now handled by `gate-runtime-rules.md` §1); removed Cross-Skill Collaboration (non-actionable); consolidated Security Rules (credential handling defers to runtime-rules §3)
+- **General Rules**: Added mandatory reference to `gate-runtime-rules.md` before any tool call
+
+
 ## [2026.3.18-1] - 2026-03-18
 
 ### Changed

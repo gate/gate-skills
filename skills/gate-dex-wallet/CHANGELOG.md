@@ -12,8 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **SKILL.md frontmatter**: Flattened nested `metadata` structure to top-level `version`/`updated` fields
 - **Supported Chains**: Condensed from full table to single-line summary
 - **Setup Guide**: Normalized MCP server name from `gate-wallet` to `gate-dex` in CLI examples
-- **gate-runtime-rules.md**: Minor formatting fixes
-- **gate-skills-disambiguation.md**: Minor formatting fixes
+
 
 ## [2026.3.19-2] - 2026-03-19
 

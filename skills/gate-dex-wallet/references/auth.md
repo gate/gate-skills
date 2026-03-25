@@ -1,12 +1,9 @@
 ---
-
-## name: gate-dex-auth
-
-description: >  
-  Gate Wallet authentication module. Manages Google OAuth and Gate OAuth login, and logout. Use when the user needs to log in, log out, or refresh an expired session, or when another skill detects a missing mcp_token.  
-metadata:  
-  version: "2.1.0"  
-  updated: "2026-03-23"
+name: gate-dex-auth
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet authentication module. Manages Google OAuth and Gate OAuth login, and logout. Use when the user needs to log in, log out, or refresh an expired session, or when another skill detects a missing mcp_token."
+---
 
 # Gate DEX Auth
 

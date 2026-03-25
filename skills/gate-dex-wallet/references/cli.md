@@ -1,13 +1,8 @@
 ---
 name: gate-dex-cli
-description: >
-  Gate Wallet CLI command-line tool. Dual-channel support: MCP (OAuth custodial
-  signing) and OpenAPI (AK/SK self-custodial signing). Use when the user mentions
-  gate-wallet, CLI, command line, openapi-swap, hybrid swap, or script automation.
-  Covers authentication, asset queries, transfers, swap, market data, and approvals.
-metadata:
-  version: "2.1.0"
-  updated: "2026-03-23"
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet CLI command-line tool. Dual-channel support: MCP (OAuth custodial signing) and OpenAPI (AK/SK self-custodial signing). Use when the user mentions gate-wallet, CLI, command line, openapi-swap, hybrid swap, or script automation. Covers authentication, asset queries, transfers, swap, market data, and approvals."
 ---
 
 # Gate DEX CLI
