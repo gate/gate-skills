@@ -1,14 +1,8 @@
 ---
 name: gate-dex-dapp
-description: >
-  Gate Wallet DApp interaction module. Connect wallet, sign messages (EIP-712 /
-  personal_sign), sign and send DApp-generated transactions, and manage ERC20
-  Approve authorizations. Use when the user needs to interact with DeFi protocols,
-  NFT platforms, or any DApp. Includes mandatory confirmation gates and contract
-  security review.
-metadata:
-  version: "2.1.0"
-  updated: "2026-03-23"
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet DApp interaction module. Connect wallet, sign messages (EIP-712 / personal_sign), sign and send DApp-generated transactions, and manage ERC20 Approve authorizations. Use when the user needs to interact with DeFi protocols, NFT platforms, or any DApp. Includes mandatory confirmation gates and contract security review."
 ---
 
 # Gate DEX DApp

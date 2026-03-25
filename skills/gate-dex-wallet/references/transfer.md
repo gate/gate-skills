@@ -1,13 +1,8 @@
 ---
 name: gate-dex-transfer
-description: >
-  Gate Wallet transfer execution module. Builds transactions, signs, and broadcasts.
-  Use when the user wants to send tokens to an address, including single and batch
-  transfers. Includes mandatory balance verification and user confirmation gate.
-  Supports EVM multi-chain and Solana native/token transfers.
-metadata:
-  version: "2.1.0"
-  updated: "2026-03-23"
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet transfer execution module. Builds transactions, signs, and broadcasts. Use when the user wants to send tokens to an address, including single and batch transfers. Includes mandatory balance verification and user confirmation gate. Supports EVM multi-chain and Solana native/token transfers."
 ---
 
 # Gate DEX Transfer

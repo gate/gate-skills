@@ -32,7 +32,7 @@ This skill automatically checks for updates from the [Gate Skills Repository](ht
 
 | Mode | Connection Method | Features | Use Cases |
 |------|------------------|----------|-----------|
-| 🔗 **MCP Mode** | gate-wallet MCP Server | No credentials required, high integration | Wallet collaboration, unified sessions |
+| 🔗 **MCP Mode** | gate-dex MCP Server | No credentials required, high integration | Wallet collaboration, unified sessions |
 | ⚡ **OpenAPI Mode** | Direct AK/SK calls | Independent & fast, feature-rich | Independent queries, lightweight scenarios |
 
 ---
@@ -53,6 +53,8 @@ Script features:
 - 🎯 Generate market data prioritized routing files
 
 ### Option 2: Manual Configuration
+
+Detailed configuration methods see [Root README.md](../README.md).
 
 ---
 
@@ -95,16 +97,18 @@ gate-dex-market/
 ## 🔧 Prerequisites
 
 **MCP Mode**:
-- Server Name: `gate-wallet`
+- Server Name: `gate-dex`
 - URL: `https://api.gatemcp.ai/mcp/dex`
 
 **OpenAPI Mode**:
 - Config file: `~/.gate-dex-openapi/config.json`
 - Endpoint: `https://openapi.gateweb3.cc/api/v1/dex`
 
+Detailed configuration methods see [Root README.md](../README.md).
+
 ---
 
 ## 🔗 Related Skills
 
-- `gate-dex-wallet` — Wallet comprehensive (auth, assets, transfer, DApp)
-- `gate-dex-trade` — Trading execution
+- [gate-dex-wallet](../gate-dex-wallet/) — Wallet comprehensive (auth, assets, transfer, DApp)
+- [gate-dex-trade](../gate-dex-trade/) — Trading execution
