@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-assets-manager
-version: "2026.3.24-6"
-updated: "2026-03-24"
+version: "2026.3.25-1"
+updated: "2026-03-25"
 description: "Gate account and asset manager L2 skill. Use this skill whenever the user asks to check total assets across all accounts, view margin and liquidation risk, review SimpleEarn or staking earnings snapshots, query affiliate commissions, or execute unified-account borrowing, collateral, and leverage settings. Trigger phrases include 'total assets', 'margin check', 'liquidation risk', 'earn interest', 'staking rewards', 'affiliate commissions', 'borrow USDT', 'add margin', 'set collateral', or any request that combines multi-account asset overview with risk control actions."
 ---
 
@@ -15,7 +15,9 @@ This skill is intended for users aged 18 or above with full civil capacity.
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [exchange-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ## Sub-Modules
 
@@ -322,7 +324,7 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 
 ### Reference Documents
 
-- `exchange-runtime-rules.md` — Exchange runtime rules (precision, price limits), referenced before executing borrow operations
+- `gate-runtime-rules.md` — Exchange runtime rules (precision, price limits), referenced before executing borrow operations
 
 Note: Unified account specifications (margin ratio calculation, borrowing rules, mode switching constraints) are embedded in the Domain Knowledge and Safety Rules sections of this SKILL.md. For detailed unified-account rules, refer to the `gate-exchange-unified` L1 skill.
 

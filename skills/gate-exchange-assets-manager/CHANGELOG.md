@@ -1,5 +1,12 @@
 # Changelog
 
+## [2026.3.25-1] - 2026-03-25
+
+### Changed
+
+- **CHANGELOG** (historical entry 2026.3.24-3): General Rules bullet now names canonical `gate-runtime-rules.md` to match current `SKILL.md`.
+- **SKILL.md** frontmatter: `version` / `updated` aligned with this release.
+
 ## [2026.3.24-6] - 2026-03-24
 
 ### Changed
@@ -23,7 +30,7 @@
 
 ### Changed
 
-- **General Rules**: Canonical block (STOP, tool-call guard, `exchange-runtime-rules.md` link) per gate-skill-cr; L2 intro paragraphs moved above `## General Rules`.
+- **General Rules**: Canonical block (STOP, tool-call guard, `gate-runtime-rules.md` link) per gate-skill-cr; L2 intro paragraphs moved above `## General Rules`.
 - **S4 Affiliate / rebate**: Documented that `cex_rebate_user_info` may be empty while `cex_rebate_partner_commissions_history` still supports reporting; `commissionAsset` (USDT, POINT), optional source dimensions (FUTURES, SPOT, TradFi, ALPHA); pagination and sum-by-asset rules for USDT/POINT totals; no fabricated lifetime totals; official totals via App/Web partner or rebate center; optional rebate-only follow-up pagination without mixing earn/staking.
 - **Report template**, **Edge Case** table, **Common Misconceptions**, **Sub-Modules** and tool inventory for `cex_rebate_user_info` aligned with the above.
 - **references/scenarios.md**: Expanded Scenario 7 and Scenario 12; added Scenario 16 (rebate totals with empty user_info and pagination).
