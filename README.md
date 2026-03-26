@@ -36,18 +36,18 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
-| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.12-2` | ✅ Active |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.25-1` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
-| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.12-1` | ✅ Active |
-| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.12-1` | ✅ Active |
-| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.12-1` | ✅ Active |
-| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.12-1` | ✅ Active |
-| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.12-1` | ✅ Active |
-| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.12-1` | ✅ Active |
-| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.12-1` | ✅ Active |
-| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.12-1` | ✅ Active |
+| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
+| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
+| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.25-1` | ✅ Active |
+| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.25-1` | ✅ Active |
+| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.25-1` | ✅ Active |
+| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.25-1` | ✅ Active |
+| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.25-1` | ✅ Active |
+| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.25-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
 | [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
@@ -66,6 +66,14 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rate query: spot fees, futures fees, VIP level | `2026.3.11-2` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-referral](#-gate-exchange-referral) | Invite-friends campaigns and rules: Earn Together, Help & Get Coupons, Super Commission; read-only guidance | `2026.3.26-1` | ✅ Active |
+| [gate-exchange-assets-manager](#-gate-exchange-assets-manager) | L2 composite: multi-account assets, margin/liquidation risk, earn/staking/affiliate, unified borrow & collateral | `2026.3.25-1` | ✅ Active |
+| [gate-info-research](#-gate-info-research) | L2 Market Research Copilot: Gate-Info + Gate-News read-only briefs, comparisons, and risk checks | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-welfare](#-gate-exchange-welfare) | Welfare center new-user tasks and rewards (MCP-backed; no fabricated numbers) | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-launchpool](#-gate-exchange-launchpool) | LaunchPool: browse projects, stake/redeem, pledge records, airdrop reward history | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-kyc](#-gate-exchange-kyc) | KYC portal guidance (complete verification on the official site only) | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-collateralloan](#-gate-exchange-collateralloan) | Multi-collateral loan: query, repay, add collateral, redeem collateral | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-activitycenter](#-gate-exchange-activitycenter) | Platform activity center: campaigns, recommendations, and my activities | `2026.3.23-1` | ✅ Active |
 
 ---
 
@@ -569,6 +577,115 @@ bash skills/gate-mcp-codex-installer/scripts/install.sh
 ```
 
 Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to install selected MCPs.
+
+---
+
+## 🎁 gate-exchange-referral
+
+> **Path**: `skills/gate-exchange-referral/`
+
+Invite-friends activity recommendation and rule interpretation. Introduces Gate's main referral programs (Earn Together, Help & Get Coupons, Super Commission), explains rules and rewards, and links to the official invite page.
+
+**Example Prompts**:
+- `How does the referral program work?`
+- `Earn Together referral rules`
+- `Where is my referral link?`
+- `What rewards do I get for inviting friends?`
+
+---
+
+## 🗂️ gate-exchange-assets-manager
+
+> **Path**: `skills/gate-exchange-assets-manager/`
+
+L2 composite skill: orchestrates multi-account balance overview, margin and liquidation risk, SimpleEarn/staking snapshots, affiliate commissions, and unified-account borrow/collateral/leverage actions (writes require confirmation).
+
+**Example Prompts**:
+- `Show my total assets across all accounts`
+- `What's my liquidation risk on ETH?`
+- `Summarize my staking and SimpleEarn earnings`
+- `I want to borrow USDT on unified account`
+
+---
+
+## 🔬 gate-info-research
+
+> **Path**: `skills/gate-info-research/`
+
+Market Research Copilot — an L2 composite skill that combines Gate-Info and Gate-News tools for structured market briefs, single-coin deep dives, multi-coin comparisons, trends, events, and risk checks (read-only; no trading).
+
+**Example Prompts**:
+- `Give me a market research brief`
+- `Compare BTC and ETH fundamentals and risk`
+- `Why is SOL pumping today?`
+- `Daily brief on the crypto market`
+
+---
+
+## 🎉 gate-exchange-welfare
+
+> **Path**: `skills/gate-exchange-welfare/`
+
+Welfare center for new-user tasks and rewards using MCP data. Never fabricates reward amounts; guides new vs existing users.
+
+**Example Prompts**:
+- `What welfare tasks can I do?`
+- `How do I claim new user rewards?`
+- `What benefits are available for new users?`
+
+---
+
+## 🌊 gate-exchange-launchpool
+
+> **Path**: `skills/gate-exchange-launchpool/`
+
+LaunchPool suite: browse projects, stake and redeem, query pledge history, and airdrop reward records.
+
+**Example Prompts**:
+- `What LaunchPool projects are running?`
+- `Stake into LaunchPool for project X`
+- `My LaunchPool airdrop history`
+- `Redeem my staked tokens from LaunchPool`
+
+---
+
+## 🪪 gate-exchange-kyc
+
+> **Path**: `skills/gate-exchange-kyc/`
+
+Guides users to the Gate KYC portal for identity verification. Does not perform KYC inside chat.
+
+**Example Prompts**:
+- `Where do I complete KYC?`
+- `Why can't I withdraw?`
+- `Link to verify my identity`
+
+---
+
+## 💰 gate-exchange-collateralloan
+
+> **Path**: `skills/gate-exchange-collateralloan/`
+
+Multi-collateral loan: flexible or fixed-term loans, repay, add collateral, or redeem collateral (writes require explicit confirmation).
+
+**Example Prompts**:
+- `My collateral loan orders`
+- `Repay part of my loan`
+- `Add collateral to loan order ...`
+- `Current loan interest rate and LTV`
+
+---
+
+## 🎯 gate-exchange-activitycenter
+
+> **Path**: `skills/gate-exchange-activitycenter/`
+
+Platform activity center: campaign types, hot recommendations, activity lists, and my entries (trading competitions, airdrops, newcomer events, etc.).
+
+**Example Prompts**:
+- `What activities are running on Gate?`
+- `Recommend trading competitions`
+- `Show my activity entries`
 
 ---
 

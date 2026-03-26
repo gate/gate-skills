@@ -36,18 +36,18 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate 交易所联盟/合伙人计划：佣金、交易量、净手续费、客户数、交易用户数查询与申请指引 | `2026.3.13` | ✅ Active |
 | [gate-exchange-unified](#-gate-exchange-unified) | Gate 统一账户：权益、借还、借贷与利息、模式切换、杠杆与抵押币 | `2026.3.13-4` | ✅ Active |
 | [gate-exchange-assets](#-gate-exchange-assets) | Gate 交易所资产查询：总资产、现货持仓、账户估值、账户流水（只读） | `2026.3.12-3` | ✅ Active |
-| [gate-info-coinanalysis](#-gate-info-coinanalysis) | 单币种综合分析：基本面、技术面、新闻、社交情绪 | `2026.3.12-2` | ✅ Active |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | 单币种综合分析：基本面、技术面、新闻、社交情绪 | `2026.3.25-1` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate 双币理财：产品发现、结算模拟、持仓与余额查询（只读） | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate 理财/质押：持仓、收益、产品发现、订单历史（只读） | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate 子账户管理：查询状态、列表、创建、锁定/解锁（写操作需确认） | `2026.3.12-1` | ✅ Active |
-| [gate-info-addresstracker](#-gate-info-addresstracker) | 链上地址追踪：地址画像、交易历史、资金流向分析 | `2026.3.12-1` | ✅ Active |
-| [gate-info-coincompare](#-gate-info-coincompare) | 多币种对比：多维度对比表与总结 | `2026.3.12-1` | ✅ Active |
-| [gate-info-marketoverview](#-gate-info-marketoverview) | 加密市场总览：板块排行、DeFi、事件、宏观摘要 | `2026.3.12-1` | ✅ Active |
-| [gate-info-riskcheck](#-gate-info-riskcheck) | 代币与合约风险评估：蜜罐检测、Rug Pull、税费、持币集中度 | `2026.3.12-1` | ✅ Active |
-| [gate-info-trendanalysis](#-gate-info-trendanalysis) | 趋势与技术分析：K线、RSI、MACD、多周期信号 | `2026.3.12-1` | ✅ Active |
-| [gate-news-briefing](#-gate-news-briefing) | 加密新闻简报：重大事件、热门新闻、社交情绪 | `2026.3.12-1` | ✅ Active |
-| [gate-news-eventexplain](#-gate-news-eventexplain) | 事件归因与解释：价格异动原因追溯与影响链分析 | `2026.3.12-1` | ✅ Active |
-| [gate-news-listing](#-gate-news-listing) | 交易所上架/下架追踪：公告监控与新币基本面补充 | `2026.3.12-1` | ✅ Active |
+| [gate-info-addresstracker](#-gate-info-addresstracker) | 链上地址追踪：地址画像、交易历史、资金流向分析 | `2026.3.25-1` | ✅ Active |
+| [gate-info-coincompare](#-gate-info-coincompare) | 多币种对比：多维度对比表与总结 | `2026.3.25-1` | ✅ Active |
+| [gate-info-marketoverview](#-gate-info-marketoverview) | 加密市场总览：板块排行、DeFi、事件、宏观摘要 | `2026.3.25-1` | ✅ Active |
+| [gate-info-riskcheck](#-gate-info-riskcheck) | 代币与合约风险评估：蜜罐检测、Rug Pull、税费、持币集中度 | `2026.3.25-1` | ✅ Active |
+| [gate-info-trendanalysis](#-gate-info-trendanalysis) | 趋势与技术分析：K线、RSI、MACD、多周期信号 | `2026.3.25-1` | ✅ Active |
+| [gate-news-briefing](#-gate-news-briefing) | 加密新闻简报：重大事件、热门新闻、社交情绪 | `2026.3.25-1` | ✅ Active |
+| [gate-news-eventexplain](#-gate-news-eventexplain) | 事件归因与解释：价格异动原因追溯与影响链分析 | `2026.3.25-1` | ✅ Active |
+| [gate-news-listing](#-gate-news-listing) | 交易所上架/下架追踪：公告监控与新币基本面补充 | `2026.3.25-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX 行情数据（OpenAPI 模式）：代币信息、K线、排行、安全审计 | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX 交易：MCP + OpenAPI 双模式，智能路由执行 Swap | `2026.3.12-1` | ✅ Active |
 | [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | 为 Claude Code (Claude CLI) 提供的一键安装 Gate MCP 与 Skills | `2026.3.11-1` | ✅ Active |
@@ -66,6 +66,14 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP 等级与手续费率查询：现货费率、合约费率、VIP 等级 | `2026.3.11-2` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate 直播与回放列表：按分类、币种、热度/最新排序筛选 | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
+| [gate-exchange-referral](#-gate-exchange-referral) | 邀请好友：活动推荐与规则解读（Earn Together、助领券、超级返佣）等（只读） | `2026.3.26-1` | ✅ Active |
+| [gate-exchange-assets-manager](#-gate-exchange-assets-manager) | L2 账户资产管家：多账户概览、保证金/爆仓风险、理财/质押/联盟、统一账户借还抵押（读+写） | `2026.3.25-1` | ✅ Active |
+| [gate-info-research](#-gate-info-research) | L2 市场研究 Copilot：聚合 Gate-Info 与 Gate-News 只读研报、对比与风险检查 | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-welfare](#-gate-exchange-welfare) | 福利中心：新用户任务与奖励（MCP 查询，禁止编造奖励） | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-launchpool](#-gate-exchange-launchpool) | LaunchPool：项目浏览、质押、赎回、质押记录、空投奖励 | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-kyc](#-gate-exchange-kyc) | KYC：门户引导（仅官网完成身份验证） | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-collateralloan](#-gate-exchange-collateralloan) | 多币抵押借贷：查询、还款、追加/赎回抵押品 | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-activitycenter](#-gate-exchange-activitycenter) | 活动中心：平台活动推荐、活动列表、我的活动 | `2026.3.23-1` | ✅ Active |
 
 ---
 
@@ -569,6 +577,115 @@ bash skills/gate-mcp-codex-installer/scripts/install.sh
 ```
 
 可选：`--no-skills` 仅安装 MCP；`--mcp main --mcp dex` 等只安装指定 MCP。
+
+---
+
+## 🎁 gate-exchange-referral
+
+> **路径**: `skills/gate-exchange-referral/`
+
+邀请好友活动推荐与规则解读：介绍 Earn Together、助领券、超级返佣等主计划，说明规则与奖励，并引导至官方邀请页。
+
+**示例提示词**：
+- `邀请好友活动怎么玩？`
+- `Earn Together 规则是什么？`
+- `我的邀请链接在哪里？`
+- `邀请好友有什么奖励？`
+
+---
+
+## 🗂️ gate-exchange-assets-manager
+
+> **路径**: `skills/gate-exchange-assets-manager/`
+
+L2 复合账户资产管家：多账户余额全景、保证金与爆仓风险、活期/质押收益快照、联盟佣金，以及统一账户借还、抵押与杠杆等写操作（需用户确认）。
+
+**示例提示词**：
+- `我所有账户总资产是多少？`
+- `我 ETH 仓位的爆仓风险是多少？`
+- `总结我的理财和质押收益`
+- `我想在统一账户借 USDT`
+
+---
+
+## 🔬 gate-info-research
+
+> **路径**: `skills/gate-info-research/`
+
+Market Research Copilot — L2 复合技能，聚合 Gate-Info 与 Gate-News 只读工具，产出市场简报、单币深挖、多币对比、趋势与事件归因及风险检查（不涉及交易）。
+
+**示例提示词**：
+- `帮我做一份市场研究简报`
+- `对比 BTC 和 ETH 基本面与风险`
+- `为什么 SOL 今天大涨？`
+- `今日加密市场概览`
+
+---
+
+## 🎉 gate-exchange-welfare
+
+> **路径**: `skills/gate-exchange-welfare/`
+
+福利中心新用户任务与奖励，基于 MCP 真实数据，不得编造奖励金额；区分新老用户引导。
+
+**示例提示词**：
+- `有哪些福利任务可以做？`
+- `新用户奖励怎么领取？`
+- `新用户有什么福利？`
+
+---
+
+## 🌊 gate-exchange-launchpool
+
+> **路径**: `skills/gate-exchange-launchpool/`
+
+LaunchPool：浏览项目、质押与赎回、质押记录与空投奖励记录。
+
+**示例提示词**：
+- `现在有哪些 LaunchPool 项目？`
+- `参与 LaunchPool 质押 X 项目`
+- `我的 LaunchPool 空投记录`
+- `从 LaunchPool 赎回质押资产`
+
+---
+
+## 🪪 gate-exchange-kyc
+
+> **路径**: `skills/gate-exchange-kyc/`
+
+引导用户前往 Gate KYC 门户完成身份验证；不在对话内完成认证流程。
+
+**示例提示词**：
+- `在哪里完成 KYC？`
+- `为什么我无法提币？`
+- `身份验证页面链接`
+
+---
+
+## 💰 gate-exchange-collateralloan
+
+> **路径**: `skills/gate-exchange-collateralloan/`
+
+多币抵押借贷：活期/定期借款、还款、追加/赎回抵押品（写操作需明确确认）。
+
+**示例提示词**：
+- `我的抵押借贷订单`
+- `部分还款`
+- `给订单追加抵押`
+- `当前借款利率和 LTV`
+
+---
+
+## 🎯 gate-exchange-activitycenter
+
+> **路径**: `skills/gate-exchange-activitycenter/`
+
+活动中心：平台活动类型、热门推荐、活动列表与我的活动入口（交易赛、空投、新人活动等）。
+
+**示例提示词**：
+- `现在有哪些平台活动？`
+- `推荐交易竞赛类活动`
+- `我的活动入口`
 
 ---
 

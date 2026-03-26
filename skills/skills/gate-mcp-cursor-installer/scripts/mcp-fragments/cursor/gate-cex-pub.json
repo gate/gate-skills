@@ -1,0 +1,6 @@
+{
+  "gate-cex-pub": {
+    "url": "https://api.gatemcp.ai/mcp",
+    "transport": "streamable-http"
+  }
+}
