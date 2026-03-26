@@ -4,6 +4,15 @@
 
 ---
 
+## [2026.3.25-1] - 2026-03-25
+
+### Added
+
+- **Runtime rules**: SKILL.md references shared `info-news-runtime-rules.md` with `gate-runtime-rules.md`; **Trigger update** (check / confirm / apply) and **Routing Rules** aligned to the gate-info / gate-news rollout.
+- **Update scripts**: `scripts/update-skill.sh`, `scripts/update-skill.ps1` (same pilot implementation as sibling Info/News skills).
+
+---
+
 ## [2026.3.12-2] - 2026-03-12 — Initialization
 
 ### Added

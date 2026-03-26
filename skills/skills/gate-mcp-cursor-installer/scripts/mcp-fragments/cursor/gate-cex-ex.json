@@ -1,6 +1,0 @@
-{
-  "gate-cex-ex": {
-    "url": "https://api.gatemcp.ai/mcp/exchange",
-    "transport": "streamable-http"
-  }
-}

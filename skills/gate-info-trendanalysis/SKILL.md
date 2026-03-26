@@ -1,7 +1,7 @@
 ---
 name: gate-info-trendanalysis
-version: "2026.3.23-1"
-updated: "2026-03-23"
+version: "2026.3.25-1"
+updated: "2026-03-25"
 description: "Trend and technical analysis. Use this skill ONLY when the user's query is exclusively about technical indicators or trend analysis for one coin with no other analysis dimensions. Trigger phrases: technical analysis, K-line, RSI, MACD, trend, support, resistance. If the query ALSO mentions fundamentals, risk, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 ---
 
@@ -12,12 +12,91 @@ description: "Trend and technical analysis. Use this skill ONLY when the user's 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > A technicals-focused Skill. The user inputs a coin name + technical analysis intent; the system calls 4 Tools (K-line data, indicator history, multi-timeframe signals, real-time market snapshot) in parallel, then the LLM aggregates into a multi-dimensional technical analysis report.
 
 **Trigger Scenarios**: User explicitly mentions technical analysis, K-line, indicators, trend, support/resistance, or similar keywords.
+
+**Per-skill updates:** This directory includes `scripts/update-skill.sh` and `scripts/update-skill.ps1`. Policy: [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) §1. The **Trigger update** steps below apply in addition to [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md); when scripts are present, use this flow for version checks before execution.
+
+---
+
+## Trigger update (with Execution)
+
+**Default (PD / blocking):** On each trigger, run **`check`** first **without** **`GATE_SKILL_UPDATE_MODE=auto`**. The script **only compares** local vs remote; if `Result=update_available`, it **does not** overwrite files. **STOP** — ask the user whether to update **before** any **`apply`**, **`run`**, or skill Execution. In sandboxes (e.g. Cursor), use **full / all permissions** when later running **`apply`**. This matches **blocking update confirmation** in the independent-script TEST_REPORT: blocking is enforced by these SKILL instructions plus **check-only** behavior (not by silent auto-apply).
+
+**Strict check (Agent / IDE — recommended on `check`):** Use **`GATE_SKILL_CHECK_STRICT=1`**. When `Result=update_available`, **`check`** **exits 3** and prints **`GATE_SKILL_CHECK_EXIT=3`** — it stops **only** that shell step. **Hard rule:** after you ask the user, **end this assistant turn**; do **not** call **`apply`**, **`run`**, or MCP in the **same** message. **`run`** applies without a prior user step — **do not** use **`run`** in chat for the blocking flow; use **`check` → user confirms → `apply`**.
+
+### Step 1 — Check
+
+**Install root:** `check` / `apply` read **`$DEST/SKILL.md`**. Typical **`$SKILL_ROOT`**: **`$HOME/.cursor/skills/<name>/`**, **`$HOME/.codex/skills/<name>/`**, **`$HOME/.openclaw/skills/<name>/`**, **`$HOME/.agents/skills/<name>/`**, **`$HOME/.gemini/antigravity/skills/<name>/`**. Single-arg: the script resolves **`DEST`** in that order when **`SKILL.md`** exists; otherwise **`DEST`** is `scripts/../`. Workspace-only trees need two-arg **`check`** / **`apply`** with explicit **`DEST`**.
+
+**Bash** (blocking — no auto; example Cursor):
+
+```bash
+GATE_SKILL_CHECK_STRICT=1 bash "$HOME/.cursor/skills/gate-info-trendanalysis/scripts/update-skill.sh" check "gate-info-trendanalysis"
+```
+
+**PowerShell:**
+
+```powershell
+$env:GATE_SKILL_CHECK_STRICT = '1'
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-info-trendanalysis\scripts\update-skill.ps1" check "gate-info-trendanalysis"
+```
+
+**Result semantics:** `skipped` = no action. `update_available` = remote newer; **with blocking flow, do not apply until the user agrees**. `check_failed` = could not compare — proceed with current version per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
+
+**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=…`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
+
+### Step 2 — Confirm or Reject (blocking)
+
+**If `update_available`:**
+
+1. **STOP** — do NOT proceed to Execution yet.
+2. Inform the user (e.g. newer version available; summarize if helpful).
+3. **Wait for the user’s reply** — blocking step.
+
+   **Hard rule (Cursor / Agent):** When `check` reports **`update_available`**, or **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`**, or strict **`exit 3`**, **end this turn** after asking. **Only** in the **user’s next message** run **`apply`** (if they agree) or **`revoke-pending`** (if they decline). Do **not** chain **`apply`** in the same turn as **`check`** for this flow.
+
+   - User **agrees** → run **`apply`** with **`GATE_SKILL_CONFIRM_TOKEN`** from strict **`check`** stdout when required, then Execution.
+   - User **declines** → **`revoke-pending`**, then Execution on the current install.
+
+**Two-step gate (strict `check`):** **`apply`** / **`run`** (without **`GATE_SKILL_UPDATE_MODE=auto`**) **fail** until **`GATE_SKILL_CONFIRM_TOKEN`** matches **`.gate-skill-apply-token`**. User decline → **`revoke-pending`**.
+
+```bash
+GATE_SKILL_CONFIRM_TOKEN="<paste from check stdout>" bash "$HOME/.cursor/skills/gate-info-trendanalysis/scripts/update-skill.sh" apply "gate-info-trendanalysis"
+```
+
+```bash
+bash "$HOME/.cursor/skills/gate-info-trendanalysis/scripts/update-skill.sh" revoke-pending "gate-info-trendanalysis"
+```
+
+```powershell
+$env:GATE_SKILL_CONFIRM_TOKEN = '<paste from check stdout>'
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-info-trendanalysis\scripts\update-skill.ps1" apply "gate-info-trendanalysis"
+```
+
+```powershell
+powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-info-trendanalysis\scripts\update-skill.ps1" revoke-pending "gate-info-trendanalysis"
+```
+
+**If Step 1 was not strict** (no pending token): **`apply`** without **`GATE_SKILL_CONFIRM_TOKEN`** is allowed.
+
+**If `skipped` or `check_failed`:** no update step; proceed to Execution.
+
+### Optional — `GATE_SKILL_UPDATE_MODE=auto`
+
+For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`** on **`check`** makes the script **apply immediately** when the remote is newer — **no** user confirmation and **incompatible** with **blocking update confirmation** tests. Do **not** use **`auto`** on **`check`** when reproducing the blocking PD flow.
+
+### Parameters
+
+- **name**: Frontmatter `name` above; must match `skills/<name>/` on gate-skills.
+- **Invoke**: Use **`$SKILL_ROOT/scripts/update-skill.sh`** (or `.ps1`) where **`$SKILL_ROOT/SKILL.md`** is this skill — e.g. **`~/.cursor/skills/<name>`**, **`~/.codex/skills/<name>`**, **`~/.openclaw/skills/<name>`**, **`~/.agents/skills/<name>`**, **`~/.gemini/antigravity/skills/<name>`**; do not treat **`~/.cursor`** (or any host root without **`skills/<name>/SKILL.md`**) as the install. With one arg, the script resolves **`$SKILL_ROOT`** in that order before falling back to the script’s directory; workspace installs need **explicit `DEST`**.
+
+**Do not** dump raw script logs into the user-facing reply except when debugging. On **`check` exit 3** (strict), do not run Execution until Step 2 is resolved. On **`check_failed`** or **`apply` failure**, still run Execution when appropriate per runtime rules.
 
 ---
 
