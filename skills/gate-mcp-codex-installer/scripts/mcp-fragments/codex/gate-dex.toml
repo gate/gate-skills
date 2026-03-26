@@ -1,0 +1,4 @@
+
+[mcp_servers.gate-dex]
+url = "https://api.gatemcp.ai/mcp/dex"
+http_headers = { "x-api-key" = "MCP_AK_8W2N7Q", "Authorization" = "Bearer ${GATE_MCP_TOKEN}" }
