@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.25-1] - 2026-03-25
+
+### Changed
+
+- **SKILL.md**: `description` opening clause now highlights **TradFi** alongside other account lines; added `'TradFi'` to trigger phrases for routing alignment.
+
 ## [2026.3.12-3] - 2026-03-12
 
 - Translated all Chinese content to English in scenarios.md, SKILL.md, and CHANGELOG.md.

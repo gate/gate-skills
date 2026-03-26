@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.3.25-1] - 2026-03-25
+
+### Changed
+
+- **SKILL.md**: Shortened frontmatter `description`; moved UTC+8 / time-window rules into **Important Notice → Query time and timezone (UTC+8)**; **Safety Rules** now references that section instead of duplicating conversion details.
+
 ## [2026.3.24-1] - 2026-03-24
 
 ### Added
