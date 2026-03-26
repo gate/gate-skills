@@ -1,8 +1,8 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.24-1"
-updated: "2026-03-24"
-description: "Gate Exchange affiliate program data query and management skill. Use when users ask about affiliate/partner commission, trading volume, net fees, customer count, or want to apply for the affiliate program. Supports queries for up to 180 days. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'apply for affiliate', 'am I eligible', 'my application status'."
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Partner affiliate data and application skill. Use for commission, volume, fees, customers, or partner signup (up to 180 days via 30-day API segments). Trigger phrases include 'my affiliate data', 'commission', 'partner earnings', 'apply for affiliate', 'am I eligible', 'my application status'."
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -24,7 +24,10 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Authentication**: Requires `X-Gate-User-Id` header with partner privileges.
 - **CRITICAL - user_id Parameter**: In both `commission_history` and `transaction_history` APIs, the `user_id` parameter filters by "trader/trading user" NOT "commission receiver". Only use this parameter when explicitly querying a specific trader's contribution. For general commission queries, DO NOT use user_id parameter.
 - **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations.
-- **⚠️ CRITICAL - Time Constraint**: All query times are calculated based on the user's system current date in UTC+8 timezone. For relative time descriptions like "last 7 days", "last 30 days", "this week", "last month", etc., calculate the start date by subtracting the requested days from the current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert these times to Unix timestamps. **NEVER use future timestamps as query conditions**. The `to` parameter must always be ≤ current timestamp. If user specifies a future date, reject the query and explain that only historical data is available.
+
+### Query time and timezone (UTC+8)
+
+All query windows use the user's **current calendar date** in **UTC+8**. For relative phrases ("last 7 days", "last 30 days", "this week", "last month"): compute the start date by subtracting the requested span from today, convert start and end to UTC+8 00:00:00 and 23:59:59 respectively, then to Unix timestamps. **NEVER** use future timestamps as query bounds. The `to` parameter must always be ≤ current Unix time. If the user specifies a future date, reject the query and explain that only historical data is available.
 
 ## Available APIs (Partner Only)
 
@@ -57,7 +60,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ## Safety Rules
 
-- **No future timestamps**: Never use future timestamps as query conditions. The `to` parameter must be less than or equal to the current Unix timestamp. For relative ranges (e.g. "last 7 days"), compute start and end from the user's current date (UTC+8) and convert to Unix; reject queries that request future dates.
+- **Query times (UTC+8)**: Follow **Important Notice → Query time and timezone (UTC+8)** for relative ranges, day boundaries, and Unix conversion. Never use future timestamps; `to` must be ≤ current Unix time; reject user-specified future dates.
 - **user_id usage**: Use the `user_id` parameter only when the user explicitly asks about a specific trader's contribution (e.g. "UID 123456's volume"). Do not use `user_id` for "my commission" or "my earnings"—those are the partner's own totals across all referred users.
 - **Data scope**: Query only data for the authenticated partner. Do not attempt to access other partners' data or to infer data outside the API responses.
 - **Aggregation**: Do not sum list fields blindly. Use documented aggregation rules and respect asset types, deduplication, and period boundaries to avoid incorrect totals.

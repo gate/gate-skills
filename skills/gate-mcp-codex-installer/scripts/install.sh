@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
-# Gate Codex One-Click Installer: MCP (main/dex/info/news selectable) + all gate-skills
-# Usage: install.sh [--mcp main] [--mcp dex] ... [--no-skills]  Installs all MCPs when no --mcp is passed
-# DEX MCP uses fixed x-api-key: MCP_AK_8W2N7Q
+# Gate Codex One-Click Installer: MCP + all gate-skills
+# Usage: install.sh [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]
+#   cex-public / cex-exchange = Remote CEX at api.gatemcp.ai (see gate-mcp README)
+# Installs all MCPs when no --mcp is passed. DEX uses fixed x-api-key: MCP_AK_8W2N7Q
 
 set -e
 
@@ -15,17 +16,20 @@ SKILLS_DIR="${CODEX_HOME}/skills"
 
 # Default: install all MCPs, install skills
 MCP_MAIN=0
+MCP_CEX_PUBLIC=0
+MCP_CEX_EXCHANGE=0
 MCP_DEX=0
 MCP_INFO=0
 MCP_NEWS=0
 INSTALL_SKILLS=1
 
 usage() {
-  echo "Usage: $0 [--mcp main|dex|info|news] ... [--no-skills]"
+  echo "Usage: $0 [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]"
   echo "  Installs all MCPs when no --mcp is passed; pass multiple --mcp to install only specified ones."
   echo "  --no-skills  Install MCP only, do not clone gate-skills."
   echo "Examples: $0"
   echo "          $0 --mcp main --mcp dex"
+  echo "          $0 --mcp cex-public --mcp cex-exchange"
   exit 0
 }
 
@@ -34,11 +38,13 @@ while [[ $# -gt 0 ]]; do
     --mcp)
       shift
       case "$1" in
-        main)   MCP_MAIN=1 ;;
-        dex)    MCP_DEX=1 ;;
-        info)   MCP_INFO=1 ;;
-        news)   MCP_NEWS=1 ;;
-        *)      echo "Unknown MCP: $1 (available: main, dex, info, news)" >&2; exit 1 ;;
+        main)         MCP_MAIN=1 ;;
+        cex-public)   MCP_CEX_PUBLIC=1 ;;
+        cex-exchange) MCP_CEX_EXCHANGE=1 ;;
+        dex)          MCP_DEX=1 ;;
+        info)         MCP_INFO=1 ;;
+        news)         MCP_NEWS=1 ;;
+        *)            echo "Unknown MCP: $1 (available: main, cex-public, cex-exchange, dex, info, news)" >&2; exit 1 ;;
       esac
       shift
       ;;
@@ -49,8 +55,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no --mcp specified, select all
-if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
+if [[ $MCP_MAIN -eq 0 && $MCP_CEX_PUBLIC -eq 0 && $MCP_CEX_EXCHANGE -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
   MCP_MAIN=1
+  MCP_CEX_PUBLIC=1
+  MCP_CEX_EXCHANGE=1
   MCP_DEX=1
   MCP_INFO=1
   MCP_NEWS=1
@@ -161,6 +169,32 @@ TOML
   echo "  Added MCP: Gate (main)"
 }
 
+append_mcp_gate_remote_public() {
+  if grep -q '^\[mcp_servers\.gate-cex-pub\]' "$CONFIG_TOML" 2>/dev/null; then
+    echo "  [mcp_servers.gate-cex-pub] already exists, skipping"
+    return
+  fi
+  cat >> "$CONFIG_TOML" << 'TOML'
+
+[mcp_servers.gate-cex-pub]
+url = "https://api.gatemcp.ai/mcp"
+TOML
+  echo "  Added MCP: gate-cex-pub (Remote CEX public, no auth)"
+}
+
+append_mcp_gate_remote_exchange() {
+  if grep -q '^\[mcp_servers\.gate-cex-ex\]' "$CONFIG_TOML" 2>/dev/null; then
+    echo "  [mcp_servers.gate-cex-ex] already exists, skipping"
+    return
+  fi
+  cat >> "$CONFIG_TOML" << 'TOML'
+
+[mcp_servers.gate-cex-ex]
+url = "https://api.gatemcp.ai/mcp/exchange"
+TOML
+  echo "  Added MCP: gate-cex-ex (Remote CEX private, Gate OAuth2)"
+}
+
 append_mcp_gate_dex() {
   if grep -q '^\[mcp_servers\.gate-dex\]' "$CONFIG_TOML" 2>/dev/null; then
     echo "  [mcp_servers.gate-dex] already exists, skipping"
@@ -204,6 +238,8 @@ TOML
 echo "Writing MCP config to: $CONFIG_TOML"
 GATE_MAIN_USE_NPX=0
 [[ $MCP_MAIN -eq 1 ]] && append_mcp_gate
+[[ $MCP_CEX_PUBLIC -eq 1 ]] && append_mcp_gate_remote_public
+[[ $MCP_CEX_EXCHANGE -eq 1 ]] && append_mcp_gate_remote_exchange
 [[ $MCP_DEX -eq 1 ]]  && append_mcp_gate_dex
 [[ $MCP_INFO -eq 1 ]] && append_mcp_gate_info
 [[ $MCP_NEWS -eq 1 ]] && append_mcp_gate_news
@@ -257,6 +293,13 @@ if [[ $MCP_MAIN -eq 1 && -z "$USER_GATE_API_KEY" ]]; then
   echo "    https://www.gate.com/myaccount/profile/api-key/manage"
   echo "  After creation, add GATE_API_KEY and GATE_API_SECRET to the [mcp_servers.Gate] env field in $CONFIG_TOML:"
   echo "    env = { GATE_API_KEY = \"your-key\", GATE_API_SECRET = \"your-secret\" }"
+fi
+
+if [[ $MCP_CEX_EXCHANGE -eq 1 ]]; then
+  echo ""
+  echo "gate-cex-ex (OAuth2): Complete Gate login when Codex prompts on first use."
+  echo "  See https://github.com/gate/gate-mcp"
+  echo ""
 fi
 
 if [[ $MCP_DEX -eq 1 ]]; then

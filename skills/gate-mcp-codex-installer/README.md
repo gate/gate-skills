@@ -2,6 +2,8 @@
 
 One-click installation of Gate MCP servers and all [gate-skills](https://github.com/gate/gate-skills) skills for **Codex**.
 
+CEX: **Local** (`gate-mcp` stdio), **Remote public** (`/mcp`), **Remote exchange** (`/mcp/exchange` + OAuth2). See [gate-mcp](https://github.com/gate/gate-mcp).
+
 ## Installation
 
 ### One-click install from this repository
@@ -20,37 +22,39 @@ bash skills/gate-mcp-codex-installer/scripts/install.sh --no-skills
 ### Install specific MCPs only
 
 ```bash
-# Install only Gate (main) and Gate-Dex
+# Local + Dex
 bash skills/gate-mcp-codex-installer/scripts/install.sh --mcp main --mcp dex
 
-# Install only Gate, Info, and News
-bash skills/gate-mcp-codex-installer/scripts/install.sh --mcp main --mcp info --mcp news
+# Remote CEX only
+bash skills/gate-mcp-codex-installer/scripts/install.sh --mcp cex-public --mcp cex-exchange
 ```
 
 ## What Gets Installed
 
 | Component | Description |
 |-----------|-------------|
-| **Gate** | Main MCP, `npx -y gate-mcp`, [gate-mcp](https://github.com/gate/gate-mcp) |
-| **gate-dex** | https://api.gatemcp.ai/mcp/dex (x-api-key built-in, Authorization: Bearer ${GATE_MCP_TOKEN}) |
-| **gate-info** | https://api.gatemcp.ai/mcp/info |
-| **gate-news** | https://api.gatemcp.ai/mcp/news |
+| **Gate** (`main`) | Local CEX, `npx -y gate-mcp`, [gate-mcp](https://github.com/gate/gate-mcp) |
+| **gate-cex-pub** (`cex-public`) | `https://api.gatemcp.ai/mcp` |
+| **gate-cex-ex** (`cex-exchange`) | `https://api.gatemcp.ai/mcp/exchange` (OAuth2) |
+| **gate-dex** | `https://api.gatemcp.ai/mcp/dex` |
+| **gate-info** | `https://api.gatemcp.ai/mcp/info` |
+| **gate-news** | `https://api.gatemcp.ai/mcp/news` |
 | **gate-skills** | Cloned from [gate-skills](https://github.com/gate/gate-skills), installs all skills under `skills/` |
 
 ## Config File Locations
 
-- **MCP config**: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`), Gate-related tables are appended under `[mcp_servers]` without overwriting existing config.
-- **Skills**: `~/.codex/skills/` (or `$CODEX_HOME/skills/`).
+- **MCP config**: `~/.codex/config.toml` (or `$CODEX_HOME/config.toml`), merged with care (append-only for Gate tables).
+- **Skills**: `$CODEX_HOME/skills/` (default `~/.codex/skills/`).
 
 ## Dependencies
 
-- **Bash**: Required to run `install.sh` (built-in on macOS/Linux; use Git Bash or WSL on Windows).
-- **git**: Used to clone gate-skills (not required when using `--no-skills`).
+- **Bash**, **Node.js** (optional for some flows), **git** for skills clone unless `--no-skills`.
 
 ## Getting API Keys & Authorization
 
-- **Gate (main)** spot/futures requires API Key + Secret: Visit **https://www.gate.com/myaccount/profile/api-key/manage** to create one, then set the environment variables `GATE_API_KEY` and `GATE_API_SECRET`.
-- **Gate-Dex**: When a query returns an authorization required message, first open https://web3.gate.com/ to create or bind a wallet, then click the Google authorization link returned by the assistant to complete the process.
+- **Gate (main)**: https://www.gate.com/myaccount/profile/api-key/manage
+- **gate-cex-ex**: Gate OAuth2 on first use in Codex.
+- **gate-dex**: https://web3.gate.com/ + OAuth as needed.
 
 ## After Installation
 

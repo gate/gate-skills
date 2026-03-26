@@ -1,8 +1,8 @@
 ---
 name: gate-mcp-claude-installer
-version: "2026.3.23-1"
-updated: "2026-03-23"
-description: One-click installer for Gate MCP and all Gate Skills in Claude Code (Claude CLI). Installs Gate MCP servers (main/dex/info/news, selectable) and all skills from the gate-skills repository. Installs all MCPs + all skills by default; skills are always fully installed.
+version: "2026.3.25-2"
+updated: "2026-03-25"
+description: One-click installer for Gate MCP and all Gate Skills in Claude Code (Claude CLI). Installs Local CEX (stdio), Remote CEX public/exchange, Dex/Info/News (selectable), and all gate-skills. Default installs all MCPs + all skills.
 ---
 
 # Gate One-Click Installer (Claude Code: MCP + Skills)
@@ -17,36 +17,52 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 Use this skill when the user says "one-click install Gate", "install Gate MCP and skills", "Claude install gate-mcp", etc., and is using **Claude Code (Claude CLI)**.
 
+## CEX MCP modes (read before configuring)
+
+Aligned with [gate-mcp](https://github.com/gate/gate-mcp) documentation:
+
+| Mode | What it is | Auth | Typical use |
+|------|------------|------|----------------|
+| **Local CEX** | stdio `npx -y gate-mcp` (npm package **gate-mcp**) | Optional `GATE_API_KEY` / `GATE_API_SECRET` (public-only works without keys; set `GATE_READONLY=true` for read-only) | Full local tool surface; tool names use abbreviations (`fx`, `dc`, …) — see gate-mcp **gate-local-mcp-tools** doc |
+| **Remote CEX — Public** | `https://api.gatemcp.ai/mcp` | **None** | Public market data only (~58 tools, `cex_*` names) |
+| **Remote CEX — Exchange** | `https://api.gatemcp.ai/mcp/exchange` | **Gate OAuth2** (browser login) | Private trading & account (~400+ tools); **does not** duplicate the full public market-data set — use **Public** remote or Local for market queries as needed |
+
+**Non-CEX** (same host): **Dex** (`/mcp/dex`, Google/Gate OAuth + fixed x-api-key), **Info** (`/mcp/info`), **News** (`/mcp/news`).
+
 ## Resources
 
 | Type | Name | Endpoint / Config |
 |------|------|-------------------|
-| MCP | Gate (main) | `npx -y gate-mcp`, see [gate-mcp](https://github.com/gate/gate-mcp) |
-| MCP | Gate Dex | https://api.gatemcp.ai/mcp/dex, fixed x-api-key |
-| MCP | Gate Info | https://api.gatemcp.ai/mcp/info |
-| MCP | Gate News | https://api.gatemcp.ai/mcp/news |
-| Skills | gate-skills | https://github.com/gate/gate-skills (installs all under skills/) |
+| MCP | **Gate** (Local CEX, `main`) | stdio `npx -y gate-mcp`, env `GATE_API_KEY` / `GATE_API_SECRET` — [gate-mcp](https://github.com/gate/gate-mcp) |
+| MCP | **gate-cex-pub** (`cex-public`) | `https://api.gatemcp.ai/mcp`, HTTP, `type`+`url` only (no headers), no auth |
+| MCP | **gate-cex-ex** (`cex-exchange`) | `https://api.gatemcp.ai/mcp/exchange`, HTTP, `type`+`url` only; Gate OAuth2 on first use |
+| MCP | **Gate-Dex** (`dex`) | `https://api.gatemcp.ai/mcp/dex`, fixed `x-api-key` + `Authorization: Bearer ${GATE_MCP_TOKEN}` |
+| MCP | **Gate-Info** (`info`) | `https://api.gatemcp.ai/mcp/info` |
+| MCP | **Gate-News** (`news`) | `https://api.gatemcp.ai/mcp/news` |
+| Skills | gate-skills | https://github.com/gate/gate-skills (installs all under `skills/`) |
 
 ## Behavior Rules
 
-1. **Default**: When the user does not specify which MCPs to install, install **all MCPs** (main, dex, info, news) + **all gate-skills**.
-2. **Selectable MCPs**: Users can choose to install only specific MCPs (e.g. main only, dex only, etc.); follow the user's selection.
+1. **Default**: When the user does not specify which MCPs to install, install **all MCPs** (`main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news`) + **all gate-skills**.
+2. **Selectable MCPs**: Users can choose to install only specific MCPs; follow the user's selection (`--mcp` can be repeated).
 3. **Skills**: Unless `--no-skills` is passed, always install **all** skills from the gate-skills repository's **skills/** directory.
 
 ## Installation Steps
 
 ### 1. Confirm User Selection (MCPs)
 
-- If the user does not specify which MCPs -> install all: main, dex, info, news.
-- If the user specifies "only install xxx" -> install only the specified MCPs.
+- If the user does not specify which MCPs → install all: `main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news`.
+- If the user specifies "only install xxx" → install only the specified MCPs.
 
 ### 2. Write Claude Code MCP Config
 
 - User-level config: `~/.claude.json` (Windows: `%USERPROFILE%\.claude.json`). If using directory format, use the corresponding config under `~/.claude/`.
 - If it already exists, **merge** into the existing `mcpServers`; do not overwrite other MCPs.
 - Config details:
-  - **Gate (main)**: stdio, `command: npx`, `args: ["-y", "gate-mcp"]`
-  - **Gate-Dex**: http, `url` + `headers["x-api-key"]` fixed as MCP_AK_8W2N7Q + `headers["Authorization"]` = `Bearer ${GATE_MCP_TOKEN}`
+  - **Gate (main)**: stdio, `command: npx`, `args: ["-y", "gate-mcp"]`, optional `env` for API keys
+  - **gate-cex-pub**: `type: http`, `url` only (remote CEX public; no extra headers)
+  - **gate-cex-ex**: `type: http`, `url` for `/mcp/exchange` only; OAuth2 is completed in the client when prompted
+  - **Gate-Dex**: http, `url` + `headers["x-api-key"]` = `MCP_AK_8W2N7Q` + `Authorization` = `Bearer ${GATE_MCP_TOKEN}`
   - **Gate-Info / Gate-News**: http, `url`
 
 ### 3. Install gate-skills (all)
@@ -56,17 +72,18 @@ Use this skill when the user says "one-click install Gate", "install Gate MCP an
 
 ### 4. Post-Installation Prompt
 
-- Inform the user of the installed MCP list and "all gate-skills have been installed" (unless --no-skills was used).
+- Inform the user of the installed MCP list and "all gate-skills have been installed" (unless `--no-skills` was used).
 - Prompt to reopen Claude Code or start a new session to load the MCPs.
-- **Getting API Key**: If the user uses Gate (main) for spot/futures trading, prompt them to visit https://www.gate.com/myaccount/profile/api-key/manage to create an API Key and set `GATE_API_KEY` and `GATE_API_SECRET`.
-- **Gate-Dex Authorization**: If Gate-Dex was installed and a query returns an authorization required message, prompt the user to first open https://web3.gate.com/ to create or bind a wallet, then the assistant will return a clickable Google authorization link for the user to complete OAuth.
+- **Local API Key**: If **Gate (main)** is used for trading via API keys, direct the user to https://www.gate.com/myaccount/profile/api-key/manage and set `GATE_API_KEY` / `GATE_API_SECRET` in the Gate entry `env`.
+- **Remote Exchange OAuth2**: If **gate-cex-ex** was installed, the user completes **Gate OAuth2** in the browser when the client prompts (scopes: `market`, `profile`, `trade`, `wallet`, `account`).
+- **Gate-Dex Authorization**: If Gate-Dex was installed and a query returns an authorization required message, prompt the user to first open https://web3.gate.com/ to create or bind a wallet, then complete OAuth via the link the assistant provides.
 
 ## Script
 
 Use the **scripts/install.sh** in this skill directory for one-click installation.
 
 - Usage:  
-  `./scripts/install.sh [--mcp main|dex|info|news] ... [--no-skills]`  
+  `./scripts/install.sh [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]`  
   Installs all MCPs when no `--mcp` is passed; pass multiple `--mcp` to install only specified ones; `--no-skills` installs MCP only.
 - The DEX x-api-key is fixed as `MCP_AK_8W2N7Q` and written to the config.
 

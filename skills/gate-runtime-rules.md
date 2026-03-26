@@ -1,6 +1,6 @@
 ---
-version: v1.1.0
-last_updated: 2026-03-17
+version: v1.2.2
+last_updated: 2026-03-25
 ---
 
 # Gate Skills Common Runtime Rules
@@ -37,29 +37,53 @@ https://github.com/gate/gate-skills
 
 ---
 
-## 2. MCP Installation Check
-Before using MCP-dependent capabilities, check whether Gate MCP is installed.
-- If not installed, guide the user to one-click install Gate MCP and Gate Skills:
+## 2. MCP Detection & Installation
+
+Before using MCP-dependent capabilities, detect whether the required Gate MCP is already configured.
+
+**Detection method:**
+- List available MCP tools (e.g. `tools/list` or client's MCP panel)
+- If tools with `cex_` prefix exist → CEX MCP is configured
+- If tools with `dex_` prefix exist → DEX MCP is configured
+- If tools with `info_` / `news_` prefix exist → Info / News MCP is configured
+
+**If required MCP is not configured:**
+- Follow the deployment selection guide in Section 3 below to choose Remote MCP or Local MCP.
+- Or guide the user to one-click install Gate MCP and Gate Skills:
   https://github.com/gate/gate-skills/tree/master/skills
-- Ask whether the user wants one-click installation.
-- If the user agrees and the environment supports it, install required MCPs and Skills first, then continue the task.
 
 ---
 
-## 3. Authorization Error Handling
+## 3. MCP Deployment Selection & Authorization
 
-When an error occurs, read the documentation first and try documented solutions before asking the user for more action.
+Before selecting tools, follow the decision flow below to determine the correct MCP endpoint. When an authorization error occurs during use, consult the authorization details tables to guide recovery.
 
 ### CEX (`gate-exchange-*`)
 
-CEX 有两种部署方式，授权方式不同：
+CEX supports two deployment methods. **Prefer Remote MCP; fall back to Local MCP when the environment does not support OAuth.**
 
-| | Local MCP (`gate-mcp` npm) | Remote MCP (`api.gatemcp.ai/mcp/exchange`) |
-|------|---------------------------|-------------------------------------------|
-| **Auth method** | API Key (AK/SK) via environment variables `GATE_API_KEY` / `GATE_API_SECRET` | Gate OAuth2 (browser login on first connect) |
-| **If recovery fails** | Guide user to configure env vars or `--api-key` / `--api-secret` args | Guide user to re-authorize via OAuth flow in client |
-| **Setup page** | Web: `https://www.gate.com/zh/myaccount/profile/api-key/manage` / App: search "API" | OAuth consent page auto-opens in browser |
-| **Note** | Public market data does not require AK/SK; set `GATE_READONLY=true` for read-only mode | Scopes (market / profile / trade / wallet / account) control access level |
+| | Remote MCP | Local MCP |
+|------|-----------|-----------|
+| **When to use** | Client supports OAuth (Cursor, Claude Desktop, Claude Code CLI, Trae, Qoder, etc.) | No OAuth support, enterprise intranet, CI/CD, or scripts |
+| **Auth method** | Gate OAuth2 — requires opening a browser for login and authorization on first connect | API Key / API Secret — configure via `GATE_API_KEY` / `GATE_API_SECRET` env vars or `--api-key` / `--api-secret` args (config only, no browser needed) |
+| **On auth failure** | Guide user to re-authorize via browser OAuth flow | Guide user to verify env vars or args are correctly set |
+| **API Key setup** | Not needed (OAuth handles auth) | https://www.gate.com/myaccount/profile/api-key/manage |
+
+**Agent decision flow (execute in order):**
+
+```
+1. Already configured?
+   → If tools with `cex_` prefix exist in tools/list → use the existing MCP.
+   → On auth error → consult the table above for recovery steps.
+
+2. Not configured → choose deployment method:
+   a. Client supports OAuth → recommend Remote MCP
+   b. No OAuth / intranet / CI → recommend Local MCP
+
+3. Guide installation:
+   → Direct the user to the setup guide: https://github.com/gate/gate-mcp
+   → Or suggest one-click install: https://github.com/gate/gate-skills
+```
 
 ### DEX (`gate-dex-*`)
 

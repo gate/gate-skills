@@ -1,8 +1,8 @@
 ---
 name: gate-exchange-assets
-version: "2026.3.23-1"
-updated: "2026-03-23"
-description: "Gate Exchange asset and balance query skill. Use when user asks to check total assets, account balance, specific currency holdings, or sub-account assets (spot, futures, margin, options, finance, Alpha, TradFi). Trigger phrases: 'how much do I have', 'total assets', 'account balance', 'how many BTC', 'spot balance', 'futures account', 'margin account', 'options account', 'finance account', 'Alpha account', 'TradFi account'. Read-only, no trading."
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Exchange asset and balance query skill covering TradFi, spot, futures, margin, options, finance, and Alpha. Use when user asks to check total assets, account balance, specific currency holdings, or sub-account assets across those lines. Trigger phrases: 'how much do I have', 'total assets', 'TradFi', 'account balance', 'how many BTC', 'spot balance', 'futures account', 'margin account', 'options account', 'finance account', 'Alpha account', 'TradFi account'. Read-only, no trading."
 ---
 
 # Gate Exchange Assets Assistant
