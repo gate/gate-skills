@@ -17,7 +17,42 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-Gate Flash Swap supports instant cryptocurrency conversion with three swap modes: one-to-one, one-to-many, and many-to-one. This Skill covers the full lifecycle: querying pairs, previewing quotes, executing swaps, and tracking orders.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_fc_get_fc_order
+- cex_fc_list_fc_currency_pairs
+- cex_fc_list_fc_orders
+- cex_fc_preview_fc_multi_currency_many_to_one_order
+- cex_fc_preview_fc_multi_currency_one_to_many_order
+- cex_fc_preview_fc_order_v1
+
+**Execution Operations (Write)**
+
+- cex_fc_create_fc_multi_currency_many_to_one_order
+- cex_fc_create_fc_multi_currency_one_to_many_order
+- cex_fc_create_fc_order_v1
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Fc:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Trigger Conditions
 

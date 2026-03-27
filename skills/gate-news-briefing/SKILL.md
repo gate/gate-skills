@@ -100,6 +100,32 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-News | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- news_events_get_latest_events
+- news_feed_get_social_sentiment
+- news_feed_search_news
+
+### Authentication
+- API Key Required: No
+
+### Installation Check
+- Required: Gate-News
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Routing Rules
 
 | User Intent | Keywords | Action |

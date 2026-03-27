@@ -15,7 +15,26 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-This skill returns a filtered list of live streams and replays on Gate Exchange. Each item is **title + link**. Parameters (tag, coin, sort, limit) are inferred from natural language; use defaults when not specified and do not ask the user for missing params.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Info | ✅ Required |
+
+### Authentication
+- API Key Required: No
+
+### Installation Check
+- Required: Gate-Info
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Workflow
 

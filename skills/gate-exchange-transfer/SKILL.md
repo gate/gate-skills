@@ -23,6 +23,40 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_delivery_list_delivery_account_book
+- cex_fx_list_futures_account_book
+- cex_margin_list_margin_account_book
+- cex_options_list_options_account_book
+- cex_spot_list_spot_account_book
+
+**Execution Operations (Write)**
+
+- cex_wallet_create_transfer
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Delivery:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Wallet:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Preconditions
 
 | Precondition | If not met |

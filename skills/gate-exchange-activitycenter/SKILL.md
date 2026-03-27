@@ -23,6 +23,34 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_activity_get_my_activity_entry
+- cex_activity_list_activities
+- cex_activity_list_activity_types
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Activity:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Routing Rules
 
 | User Intent | Keywords/Pattern | Action |

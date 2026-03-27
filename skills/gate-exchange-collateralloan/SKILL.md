@@ -15,7 +15,47 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Provide multi-collateral loan operations on Gate: create current (flexible) or fixed-term loan orders, repay (partial/full), add collateral (append), and redeem collateral. All write operations require explicit user confirmation before submit.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_mcl_get_multi_collateral_current_rate
+- cex_mcl_get_multi_collateral_fix_rate
+- cex_mcl_get_multi_collateral_ltv
+- cex_mcl_get_multi_collateral_order_detail
+- cex_mcl_list_multi_collateral_orders
+- cex_mcl_list_multi_collateral_records
+- cex_mcl_list_multi_repay_records
+- cex_mcl_list_user_currency_quota
+- cex_mcl_operate_multi_collateral
+
+**Execution Operations (Write)**
+
+- cex_mcl_create_multi_collateral
+- cex_mcl_repay_multi_collateral_loan
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Mcl:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Trigger Conditions
 

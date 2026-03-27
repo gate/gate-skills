@@ -19,6 +19,43 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_alpha_get_alpha_order
+- cex_alpha_list_alpha_account_book
+- cex_alpha_list_alpha_accounts
+- cex_alpha_list_alpha_currencies
+- cex_alpha_list_alpha_orders
+- cex_alpha_list_alpha_tickers
+- cex_alpha_list_alpha_tokens
+- cex_alpha_quote_alpha_order
+
+**Execution Operations (Write)**
+
+- cex_alpha_place_alpha_order
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Alpha:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Module Overview
 
 | Module | Description | Trigger Keywords |

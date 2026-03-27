@@ -100,6 +100,33 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Info | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- info_onchain_get_address_info
+- info_onchain_get_address_transactions
+- info_onchain_get_transaction
+- info_onchain_trace_fund_flow
+
+### Authentication
+- API Key Required: No
+
+### Installation Check
+- Required: Gate-Info
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Routing Rules
 
 | User Intent | Keywords/Pattern | Action |

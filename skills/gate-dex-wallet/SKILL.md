@@ -15,6 +15,39 @@ description: "Gate DEX wallet account management. Handles authentication (Google
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Dex | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- dex_tx_quote
+- dex_wallet_get_token_list
+
+**Execution Operations (Write)**
+
+- dex_tx_swap
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Write
+
+### Installation Check
+- Required: Gate-Dex
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Applicable Scenarios
 
 Use this skill when the user wants to **manage their on-chain wallet account, identity, or assets**:

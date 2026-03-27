@@ -23,6 +23,41 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Info | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- info_coin_get_coin_info
+- info_compliance_check_token_security
+- info_marketsnapshot_get_market_snapshot
+- info_markettrend_get_indicator_history
+- info_markettrend_get_kline
+- info_markettrend_get_technical_analysis
+- info_onchain_get_token_onchain
+- info_platformmetrics_get_defi_overview
+- news_events_get_event_detail
+- news_events_get_latest_events
+- news_feed_get_social_sentiment
+- news_feed_search_news
+
+### Authentication
+- API Key Required: No
+
+### Installation Check
+- Required: Gate-Info
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Domain Knowledge
 
 ### Common Misconceptions

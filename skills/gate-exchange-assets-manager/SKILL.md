@@ -19,6 +19,94 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_alpha_list_alpha_accounts
+- cex_alpha_list_alpha_currencies
+- cex_alpha_list_alpha_tickers
+- cex_alpha_list_alpha_tokens
+- cex_earn_asset_list
+- cex_earn_award_list
+- cex_earn_find_coin
+- cex_earn_get_uni_currency
+- cex_earn_get_uni_interest
+- cex_earn_list_dual_balance
+- cex_earn_list_dual_orders
+- cex_earn_list_structured_orders
+- cex_earn_list_uni_currencies
+- cex_earn_list_uni_rate
+- cex_earn_list_user_uni_lends
+- cex_earn_order_list
+- cex_fx_get_fx_accounts
+- cex_fx_get_fx_candlesticks
+- cex_fx_get_fx_contract
+- cex_fx_get_fx_funding_rate
+- cex_fx_get_fx_order_book
+- cex_fx_get_fx_premium_index
+- cex_fx_get_fx_tickers
+- cex_fx_get_fx_trades
+- cex_fx_list_fx_liq_orders
+- cex_fx_list_fx_positions
+- cex_margin_list_margin_accounts
+- cex_options_list_options_account
+- cex_rebate_broker_commission_history
+- cex_rebate_broker_transaction_history
+- cex_rebate_partner_commissions_history
+- cex_rebate_partner_sub_list
+- cex_rebate_partner_transaction_history
+- cex_rebate_user_info
+- cex_rebate_user_sub_relation
+- cex_spot_get_spot_accounts
+- cex_spot_get_spot_candlesticks
+- cex_spot_get_spot_order_book
+- cex_spot_get_spot_tickers
+- cex_spot_get_spot_trades
+- cex_spot_list_spot_account_book
+- cex_tradfi_query_user_assets
+- cex_unified_get_unified_accounts
+- cex_unified_get_unified_borrowable
+- cex_unified_get_unified_estimate_rate
+- cex_unified_get_unified_mode
+- cex_unified_get_unified_transferable
+- cex_unified_get_user_leverage_currency_setting
+- cex_unified_list_currency_discount_tiers
+- cex_unified_list_unified_currencies
+- cex_unified_list_unified_loan_interest_records
+- cex_unified_list_unified_loan_records
+- cex_wallet_get_total_balance
+
+**Execution Operations (Write)**
+
+- cex_unified_create_unified_loan
+- cex_unified_set_unified_collateral
+- cex_unified_set_unified_mode
+- cex_unified_set_user_leverage_currency_setting
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Alpha:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Rebate:Read, Spot:Read, Tradfi:Read, Unified:Write, Wallet:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Sub-Modules
 
 | Module | L1 Source | Tool Count | Read/Write | Purpose |
