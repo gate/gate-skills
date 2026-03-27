@@ -15,7 +15,52 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-This skill is the single entry for Gate TradFi (traditional finance). All MCP tools used are prefixed with `cex_tradfi`. It supports **query** modules (orders, positions, market, assets) and **trading** modules (place order, amend order, cancel order, modify position, close position). Read the MCP tool definitions for exact tool names, parameters, and value constraints; declare conditions and limits in this skill and in each reference.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_tradfi_query_categories
+- cex_tradfi_query_mt5_account_info
+- cex_tradfi_query_order_history_list
+- cex_tradfi_query_order_list
+- cex_tradfi_query_position_history_list
+- cex_tradfi_query_position_list
+- cex_tradfi_query_symbol_detail
+- cex_tradfi_query_symbol_kline
+- cex_tradfi_query_symbol_ticker
+- cex_tradfi_query_symbols
+- cex_tradfi_query_user_assets
+
+**Execution Operations (Write)**
+
+- cex_tradfi_close_position
+- cex_tradfi_create_tradfi_order
+- cex_tradfi_delete_order
+- cex_tradfi_update_order
+- cex_tradfi_update_position
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Tradfi:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Sub-Modules
 

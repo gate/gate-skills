@@ -15,6 +15,36 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_welfare_get_beginner_task_list
+- cex_welfare_get_user_identity
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Welfare:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Overview
 
 > Welfare center new user task entry Skill (version 2026.3.18-6, with MCP tools integration). When users ask about benefits/rewards/tasks, first determine if they are new users. Show all new user onboarding task details for new users, guide existing users to official website or App.

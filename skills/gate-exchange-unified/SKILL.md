@@ -15,12 +15,26 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Execute integrated operations for Gate unified-account workflows, including:
-- Account overview and mode checks (equity, margin metrics, unified mode)
-- Borrowing and repayment (borrowable checks, loan submission, repayment workflows)
-- Loan and interest management (loan records, interest records, currency support, rate estimates)
-- Transferability and risk configuration (transferable limits, leverage setting, collateral setting)
-- Risk and collateral analytics (discount tiers, account-level risk context)
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Domain Knowledge
 

@@ -15,7 +15,45 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Execute read-only asset and balance queries for Gate Exchange. Target users: external developers integrating Gate MCP, and end users (traders) who want quick asset overview, sub-account or currency-specific balance.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_delivery_list_delivery_accounts
+- cex_earn_list_dual_balance
+- cex_earn_list_dual_orders
+- cex_earn_list_structured_orders
+- cex_fx_get_fx_accounts
+- cex_margin_list_margin_accounts
+- cex_options_list_options_account
+- cex_spot_get_spot_accounts
+- cex_spot_list_spot_account_book
+- cex_tradfi_query_user_assets
+- cex_unified_get_unified_accounts
+- cex_wallet_get_total_balance
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Delivery:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Tradfi:Read, Unified:Read, Wallet:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Domain Knowledge
 

@@ -17,7 +17,37 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-Provide dual investment product discovery, settlement simulation, order history, and balance queries on Gate. Dual investment allows users to earn enhanced yield by setting a target price — if the market price reaches the target at delivery, the settlement is in the exercise currency; otherwise, the user keeps the original investment plus yield.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_earn_list_dual_balance
+- cex_earn_list_dual_investment_plans
+- cex_earn_list_dual_orders
+
+**Execution Operations (Write)**
+
+- cex_earn_place_dual_order
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Earn:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Prerequisites
 

@@ -17,6 +17,39 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_rebate_get_partner_application_recent
+- cex_rebate_get_partner_eligibility
+- cex_rebate_partner_commissions_history
+- cex_rebate_partner_sub_list
+- cex_rebate_partner_transaction_history
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Rebate:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Important Notice
 
 - **Role**: This skill uses Partner APIs only. The term "affiliate" in user queries refers to Partner role.
@@ -570,20 +603,6 @@ while True:
 - Convert string amounts to numbers for calculation
 - Display with appropriate precision (USDT: 2 decimals, BTC: 8 decimals)
 - Add thousand separators for large numbers
-
-## MCP Dependencies
-
-This skill requires Partner rebate APIs. When an MCP server (e.g. Gate MCP) is configured, use the following tools instead of calling API paths directly. The expected pattern is: Call `tool_name` with the appropriate parameters.
-
-| API / Use case | MCP tool name |
-|----------------|---------------------------------|
-| Transaction history | `cex_rebate_partner_transaction_history` |
-| Commission history | `cex_rebate_partner_commissions_history` |
-| Subordinate list | `cex_rebate_partner_sub_list` |
-| Eligibility check | `cex_rebate_get_partner_eligibility` |
-| Recent application | `cex_rebate_get_partner_application_recent` |
-
-If no MCP server is configured, the agent must call the Partner APIs via the documented HTTP endpoints (see API Parameter Reference). Ensure the MCP project path is set up so that these tools are discovered when running skill validation.
 
 ## Validation Examples
 

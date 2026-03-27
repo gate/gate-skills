@@ -15,7 +15,26 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Help users understand Gate's invite-friends feature by aggregating various referral programs, introducing and recommending Gate's three main referral programs (Earn Together, Help & Get Coupons, Super Commission), explaining activity rules and invitation rewards, and helping users understand how to earn rewards by inviting friends.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Domain Knowledge
 

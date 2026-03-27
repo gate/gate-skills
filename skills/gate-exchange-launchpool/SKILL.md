@@ -17,7 +17,38 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-This skill is the single entry for Gate Exchange LaunchPool operations. It supports **five modules**: project browsing, staking, redemption, pledge records, and reward records. User intent is routed to the matching reference and MCP tool.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_launch_list_launch_pool_pledge_records
+- cex_launch_list_launch_pool_projects
+- cex_launch_list_launch_pool_reward_records
+
+**Execution Operations (Write)**
+
+- cex_launch_create_launch_pool_order
+- cex_launch_redeem_launch_pool
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Launch:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Module overview
 
