@@ -19,6 +19,24 @@ Market tape analysis covering thirteen scenarios, such as liquidity, momentum, l
 
 ---
 
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Sub-Modules
 
 | Module | Purpose | Document |

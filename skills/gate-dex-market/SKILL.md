@@ -23,6 +23,35 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - Discovery: "new tokens", "newly listed", "holder analysis", "whale tracking"
 - Volume: "trading volume", "buy-sell pressure", "liquidity events"
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Dex | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- dex_chain_config
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate-Dex
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Project convention — MCP only
 
 No OpenAPI unless user explicitly asks. MCP setup: see `gate-dex-trade/references/setup.md`.

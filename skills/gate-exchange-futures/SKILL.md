@@ -15,7 +15,59 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-This skill is the single entry for Gate USDT perpetual futures. It supports **seven operations**: open position, close position, cancel order, amend order, take profit / stop loss (TP/SL), conditional open, and price-triggered order management. User intent is routed to the matching workflow.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_fx_get_fx_accounts
+- cex_fx_get_fx_contract
+- cex_fx_get_fx_dual_position
+- cex_fx_get_fx_order
+- cex_fx_get_fx_order_book
+- cex_fx_get_fx_position
+- cex_fx_get_fx_price_triggered_order
+- cex_fx_get_fx_tickers
+- cex_fx_list_fx_orders
+- cex_fx_list_fx_positions
+- cex_fx_list_fx_price_triggered_orders
+
+**Execution Operations (Write)**
+
+- cex_fx_amend_fx_order
+- cex_fx_cancel_all_fx_orders
+- cex_fx_cancel_fx_order
+- cex_fx_cancel_fx_price_triggered_order
+- cex_fx_cancel_fx_price_triggered_order_list
+- cex_fx_create_fx_order
+- cex_fx_create_fx_price_triggered_order
+- cex_fx_update_fx_dual_position_cross_mode
+- cex_fx_update_fx_dual_position_leverage
+- cex_fx_update_fx_position_cross_mode
+- cex_fx_update_fx_position_leverage
+- cex_fx_update_fx_price_triggered_order
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Fx:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Module overview
 

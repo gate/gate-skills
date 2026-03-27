@@ -15,7 +15,29 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Use this skill when the user says "one-click install Gate", "install Gate MCP and skills", "Codex install gate-mcp", etc., and is using **Codex**.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+| Gate-Dex | ✅ Required |
+| Gate-Info | ✅ Required |
+| Gate-News | ✅ Required |
+
+### Authentication
+- API Key Required: No
+
+### Installation Check
+- Required: Gate (main), Gate-Dex, Gate-Info, Gate-News
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## CEX MCP modes
 

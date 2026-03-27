@@ -15,7 +15,48 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
-Provide Gate Simple Earn **flexible (Uni)** and **fixed-term** operations on Gate. Use the flexible Uni references for flexible positions, interest, subscribe, redeem, and change-min-rate workflows, and use the fixed-term references for fixed-term product lists, subscribe, early redeem, positions, and history. This skill treats both workflows as supported and routes each request to the matching MCP tool family.
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_earn_change_uni_lend
+- cex_earn_get_uni_currency
+- cex_earn_get_uni_interest
+- cex_earn_list_earn_fixed_term_history
+- cex_earn_list_earn_fixed_term_lends
+- cex_earn_list_earn_fixed_term_products
+- cex_earn_list_earn_fixed_term_products_by_asset
+- cex_earn_list_uni_rate
+- cex_earn_list_user_uni_lends
+
+**Execution Operations (Write)**
+
+- cex_earn_create_earn_fixed_term_lend
+- cex_earn_create_earn_fixed_term_pre_redeem
+- cex_earn_create_uni_lend
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Earn:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Trigger Conditions
 

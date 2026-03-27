@@ -22,6 +22,39 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - Cross-chain: "bridge ETH from Arbitrum to Base", "cross-chain swap"
 - Swap quote: "how much USDT will I get for 1 ETH" (with intent to trade)
 
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Dex | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- dex_chain_config
+- dex_tx_quote
+
+**Execution Operations (Write)**
+
+- dex_tx_swap
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
+
+### Installation Check
+- Required: Gate-Dex
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
+
 ## Project convention — MCP only (this workspace)
 
 **Do not use OpenAPI** for swap unless user explicitly asks OpenAPI/AK/SK. MCP unavailable → [`references/setup.md`](./references/setup.md) only.

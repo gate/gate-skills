@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-staking
 version: "2026.3.23-1"
-updated: "2026-03-23"
+updated: "2026-03-26"
 description: "The on-chain staking (earn) function of Gate Exchange. Use this skill to query staking positions, rewards, products, order history, or to perform stake, redeem, or mint (mint = immediate stake) via swap. Trigger phrases include: staking, stake, redeem, mint, unstake, earn, staking rewards, staking positions, earning records, staking history, available coins, stake USDT, redeem BTC."
 ---
 
@@ -17,7 +17,38 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-This skill is the single entry for Gate Exchange staking (on-chain earn). It supports **five modules**: positions, rewards, products, order history, and **stake/redeem (swap)**. User intent is routed to the matching reference and MCP tool.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_earn_asset_list
+- cex_earn_award_list
+- cex_earn_find_coin
+- cex_earn_order_list
+
+**Execution Operations (Write)**
+
+- cex_earn_swap_staking_coin
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Earn:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Module overview
 
