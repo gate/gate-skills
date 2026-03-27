@@ -4,6 +4,21 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.3.27-1] - 2026-03-27
+
+### Added
+
+- **Withdraw module** ([references/withdraw.md](./references/withdraw.md)): New sub-module for on-chain withdraw to Gate Exchange
+  - Trigger: "withdraw to Gate", "cash out to exchange", "send funds to deposit address", "move coins from wallet to Gate", "bind Gate UID"
+  - Covers deposit address resolution, UID binding/rebinding, min-deposit check, and on-chain transfer execution
+
+### Changed
+
+- **SKILL.md routing**: Added `references/withdraw.md` entry for "withdraw to Gate Exchange" intent (distinct from arbitrary transfer)
+- **SKILL.md description**: Updated frontmatter description to include on-chain withdraw capability
+- **SKILL.md**: Removed redundant MCP Dependencies section (covered by `gate-runtime-rules.md`)
+- **SKILL.md Applicable Scenarios**: Added on-chain withdraw to Gate Exchange scenario
+
 ## [2026.3.24-1] - 2026-03-24
 
 ### Changed
@@ -12,7 +27,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - **SKILL.md frontmatter**: Flattened nested `metadata` structure to top-level `version`/`updated` fields
 - **Supported Chains**: Condensed from full table to single-line summary
 - **Setup Guide**: Normalized MCP server name from `gate-wallet` to `gate-dex` in CLI examples
-
+- **gate-runtime-rules.md**: Minor formatting fixes
+- **gate-skills-disambiguation.md**: Minor formatting fixes
 
 ## [2026.3.19-2] - 2026-03-19
 

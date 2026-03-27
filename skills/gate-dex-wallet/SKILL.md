@@ -1,8 +1,8 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.25-1"
-updated: "2026-03-25"
-description: "Gate DEX wallet account management. Handles authentication (Google OAuth and Gate OAuth), token balance queries, wallet address retrieval, transaction and swap history, token transfers, x402 payment (HTTP 402 Payment Required with EVM exact/upto and Solana exact/upto schemes), DApp wallet-connect and contract interactions, and CLI tooling. Use when the user wants to manage their on-chain wallet identity or assets — not for market data lookups or token swap execution."
+version: "2026.3.27-1"
+updated: "2026-03-27"
+description: "Gate DEX wallet account management. Handles authentication (Google OAuth and Gate OAuth), token balance queries, wallet address retrieval, transaction and swap history, token transfers, on-chain withdraw to Gate Exchange (deposit address, UID binding, min-deposit), x402 payment (HTTP 402 Payment Required with EVM exact/upto and Solana exact/upto schemes), DApp wallet-connect and contract interactions, and CLI tooling. Use when the user wants to manage their on-chain wallet identity or assets — not for market data lookups or token swap execution."
 ---
 
 # Gate DEX Wallet
@@ -15,39 +15,6 @@ description: "Gate DEX wallet account management. Handles authentication (Google
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 
-
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate-Dex | ✅ Required |
-
-### MCP Tools Used
-
-**Query Operations (Read-only)**
-
-- dex_tx_quote
-- dex_wallet_get_token_list
-
-**Execution Operations (Write)**
-
-- dex_tx_swap
-
-### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Dex:Write
-
-### Installation Check
-- Required: Gate-Dex
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
-
 ## Applicable Scenarios
 
 Use this skill when the user wants to **manage their on-chain wallet account, identity, or assets**:
@@ -56,6 +23,7 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 - Query token balances, total portfolio value, or wallet addresses
 - View transaction history or past swap records
 - Transfer or send tokens to an address (single or batch)
+- Withdraw or cash out **on-chain** to their Gate Exchange account (deposit address resolved for their UID; not CEX-internal balance moves from this skill)
 - Pay for HTTP 402 resources via x402 protocol (EVM exact/upto, Solana exact/upto)
 - Interact with DApps (connect wallet, sign messages, approve tokens, call contracts)
 - Use the gate-wallet CLI tool for any of the above
@@ -70,6 +38,7 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 | Authentication & session management | Token price / K-line queries -> `gate-dex-market` |
 | Balance & address queries | Token swap execution -> `gate-dex-trade` |
 | Transaction & swap history | Token security audits -> `gate-dex-market` |
+| Token transfers (EVM + Solana); on-chain withdraw to Gate Exchange (deposit address flow) | |
 | x402 payment (EVM exact/upto + Solana exact/upto) | |
 | DApp interactions & approvals | |
 | CLI dual-channel operations | |
@@ -84,6 +53,7 @@ Route to the corresponding sub-module based on user intent:
 |-------------|--------|
 | Login, logout, sign in, sign out, token expired, session expired, OAuth, Google login, Gate login, authenticate, re-login, switch account, "I can't access my wallet", "not logged in" | [references/auth.md](./references/auth.md) |
 | Check balance, total assets, portfolio value, wallet address, my address, how much do I have, show my tokens, tx history, transaction history, swap history, past transactions, "what do I own", "how many ETH", "list my coins", "show holdings" | [references/asset-query.md](./references/asset-query.md) |
+| Withdraw to Gate Exchange, cash out to my Gate account, send funds to the exchange deposit address, move coins from wallet to Gate (on-chain deposit), bind or rebind Gate UID for withdraw | [references/withdraw.md](./references/withdraw.md) |
 | Transfer, send tokens, send to address, batch transfer, "send 1 ETH to 0x...", "transfer USDT", "move tokens", "pay someone", "send crypto to a friend" (arbitrary or known on-chain address — not exchange deposit resolution) | [references/transfer.md](./references/transfer.md) |
 | 402 payment, x402 pay, payment required, pay for API, pay for URL, "fetch and pay", "call this URL and pay", "paid endpoint", "pay for access", "HTTP 402", Permit2 payment, upto payment | [references/x402.md](./references/x402.md) |
 | DApp connect, connect wallet, sign message, approve, revoke approval, contract call, EIP-712, Permit, personal_sign, "interact with Uniswap", "add liquidity", "stake on Lido", "mint NFT", "sign for DApp login", authorize contract | [references/dapp.md](./references/dapp.md) |
@@ -147,6 +117,7 @@ After completing an operation, **proactively suggest 2-4 relevant next actions**
 | View token prices, K-line charts, market cap, trading volume | `gate-dex-market` |
 | Run a token security audit, check if token is safe | `gate-dex-market` |
 | Transfer or send tokens to an arbitrary on-chain address | [references/transfer.md](./references/transfer.md) |
+| Withdraw or cash out on-chain to Gate Exchange | [references/withdraw.md](./references/withdraw.md) |
 | Swap, exchange, buy, sell, convert tokens on DEX | `gate-dex-trade` |
 | Pay for a 402 resource, x402 payment | [references/x402.md](./references/x402.md) |
 | Interact with a DApp, connect wallet, sign, approve | [references/dapp.md](./references/dapp.md) |
