@@ -1,22 +1,73 @@
 ---
 name: gate-exchange-spot
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: "Gate spot trading and account operations skill. Use this skill whenever the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional buy/sell plans, place trigger or TP/SL-style spot price orders, verify fills, or perform coin-to-coin swaps in Gate spot trading. Trigger phrases include 'buy coin', 'sell coin', 'monitor market', 'trigger order', 'take profit', 'stop loss', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', 'buy/sell', or any request that combines spot order execution with account checks."
+version: "2026.3.23-1"
+updated: "2026-03-23"
+description: "Gate spot trading and account operations skill. Use when the user asks to buy/sell crypto, check account value, cancel/amend spot orders, place conditional or trigger orders, verify fills, or perform coin-to-coin swaps. Trigger phrases include 'buy coin', 'sell coin', 'trigger order', 'take profit', 'stop loss', 'cancel order', 'amend order', 'break-even price', 'rebalance', 'spot trading', or any request combining spot order execution with account checks."
 ---
-
-## General Rules
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
 
 # Gate Spot Trading Assistant
 
-Execute integrated operations for Gate spot workflows, including:
-- Buy and account queries (balance checks, asset valuation, minimum order checks)
-- Smart monitoring and trading (automatic price-condition orders and trigger-order workflows)
-- Order management and amendment (price updates, cancellations, fill verification, cost-basis checks, swaps)
-- Trigger-order and TP/SL-style automation (create/query/cancel trigger orders, progress checks, single/batch cancellations)
-- Advanced execution utilities (batch cancel, batch amend, batch order placement, slippage simulation, fee comparison, account-book checks)
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_spot_get_currency
+- cex_spot_get_currency_pair
+- cex_spot_get_spot_accounts
+- cex_spot_get_spot_batch_fee
+- cex_spot_get_spot_candlesticks
+- cex_spot_get_spot_order_book
+- cex_spot_get_spot_price_triggered_order
+- cex_spot_get_spot_tickers
+- cex_spot_list_spot_account_book
+- cex_spot_list_spot_my_trades
+- cex_spot_list_spot_orders
+- cex_spot_list_spot_price_triggered_orders
+- cex_wallet_get_wallet_fee
+
+**Execution Operations (Write)**
+
+- cex_spot_amend_spot_batch_orders
+- cex_spot_amend_spot_order
+- cex_spot_cancel_all_spot_orders
+- cex_spot_cancel_spot_batch_orders
+- cex_spot_cancel_spot_order
+- cex_spot_cancel_spot_price_triggered_order
+- cex_spot_cancel_spot_price_triggered_order_list
+- cex_spot_create_spot_batch_orders
+- cex_spot_create_spot_order
+- cex_spot_create_spot_price_triggered_order
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Spot:Write, Wallet:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Domain Knowledge
 

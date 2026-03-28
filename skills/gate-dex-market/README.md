@@ -32,7 +32,7 @@ This skill automatically checks for updates from the [Gate Skills Repository](ht
 
 | Mode | Connection Method | Features | Use Cases |
 |------|------------------|----------|-----------|
-| 🔗 **MCP Mode** | gate-wallet MCP Server | No credentials required, high integration | Wallet collaboration, unified sessions |
+| 🔗 **MCP Mode** | gate-dex MCP Server | No credentials required, high integration | Wallet collaboration, unified sessions |
 | ⚡ **OpenAPI Mode** | Direct AK/SK calls | Independent & fast, feature-rich | Independent queries, lightweight scenarios |
 
 ---
@@ -97,7 +97,7 @@ gate-dex-market/
 ## 🔧 Prerequisites
 
 **MCP Mode**:
-- Server Name: `gate-wallet`
+- Server Name: `gate-dex`
 - URL: `https://api.gatemcp.ai/mcp/dex`
 
 **OpenAPI Mode**:

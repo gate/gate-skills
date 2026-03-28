@@ -27,3 +27,8 @@ An AI Agent skill that performs **on-chain address tracking**. **Phase 1**: alwa
 - **Input**: User message with address (and optionally chain). Infer chain from prefix (0x, bc1, T) or ask.
 - **Tools**: Always `info_onchain_get_address_info`(address, chain, scope=with_defi). If Deep: parallel `info_onchain_get_address_transactions` and `info_onchain_trace_fund_flow` with **adaptive min_value_usd** (balance tier → see SKILL.md table).
 - **Output**: Basic report (address profile, holdings, DeFi, PnL) or Deep (+ tx history, fund flow, risk warnings). **Decision Logic** (risk_score, concentration, mixer, OFAC), **Error Handling**, **Safety** (privacy, labels, data source) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

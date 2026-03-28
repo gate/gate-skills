@@ -27,3 +27,8 @@ An AI Agent skill that provides **market-wide overview** (snapshot for major coi
 - **Input**: User message asking about market as a whole.
 - **Tools**: See SKILL.md — `info_marketsnapshot_get_market_snapshot`, `info_coin_get_coin_rankings`, `info_platformmetrics_get_defi_overview`, `news_events_get_latest_events`, `info_macro_get_macro_summary`. All in parallel; if a tool is missing, that report section shows "No data".
 - **Output**: 6-section report. **Decision Logic** (fear_greed, dominance, gainer/loser ratio, TVL), **Error Handling**, **Safety** (read-only) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

@@ -46,3 +46,8 @@ gate-exchange-assets/
 
 - Gate MCP configured and connected
 - Authentication (OAuth) for balance and history queries
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

@@ -1,16 +1,22 @@
 # Changelog
 
-## 2026.3.12-3 (2026-03-12)
+## [2026.3.25-1] - 2026-03-25
+
+### Changed
+
+- **SKILL.md**: `description` opening clause now highlights **TradFi** alongside other account lines; added `'TradFi'` to trigger phrases for routing alignment.
+
+## [2026.3.12-3] - 2026-03-12
 
 - Translated all Chinese content to English in scenarios.md, SKILL.md, and CHANGELOG.md.
 
-## 2026.3.12-2 (2026-03-12)
+## [2026.3.12-2] - 2026-03-12
 
 - Removed deposit history and withdrawal history from skill scope.
 - Removed `cex_wallet_list_deposits` and `cex_wallet_list_withdrawals` from MCP tool mapping.
 - Removed Scenario 8 (Deposit History) and Scenario 9 (Withdrawal History) from scenarios.
 
-## 2026.3.12-1 (2026-03-12)
+## [2026.3.12-1] - 2026-03-12
 
 - Replaced REST API endpoints with Gate gate-mcp tool names: `cex_wallet_get_total_balance`, `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_delivery_list_delivery_accounts`, `cex_options_list_options_account`, `cex_margin_list_margin_accounts`, `cex_tradfi_query_user_assets`, `cex_earn_list_dual_balance`/`cex_earn_list_dual_orders`/`cex_earn_list_structured_orders`, `cex_spot_list_spot_account_book`.
 - Added comprehensive cases from asset query skills (external) PDF specification.
@@ -31,7 +37,7 @@
 - Added recommendation engine (P1–P4) and transfer path restrictions.
 - Expanded `references/scenarios.md` with full scenario templates and edge cases.
 
-## 2026.3.11-1 (2026-03-11)
+## [2026.3.11-1] - 2026-03-11
 
 - Initialized the `gate-exchange-assets` skill directory and documentation structure.
 - Added `SKILL.md`, covering 9 read-only asset and balance query scenarios.

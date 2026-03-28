@@ -1,19 +1,68 @@
 ---
 name: gate-exchange-simpleearn
-version: "2026.3.12-2"
-updated: "2026-03-12"
-description: Query Gate Simple Earn (Uni) flexible. Use this skill whenever the user asks about Simple Earn, subscribe or redeem intent, position query, interest query, or top APY. Trigger phrases include "Simple Earn", "Uni", "subscribe", "redeem", "flexible earn", "positions", "interest", "top APY", or any request involving Simple Earn subscribe, redeem, positions, or interest.
+version: "2026.3.23-1"
+updated: "2026-03-23"
+description: Query Gate Simple Earn flexible (Uni) and fixed-term workflows, including product lists, positions, interest, subscribe, redeem, and change-min-rate intents. Use this skill whenever the user asks about Simple Earn, Uni, fixed-term, subscribe, redeem, positions, interest, or top APY. Trigger phrases include "Simple Earn", "Uni", "flexible earn", "fixed-term", "subscribe", "redeem", "positions", "interest", "top APY", or equivalent.
 ---
 
 # Gate Exchange Simple Earn Skill
 
-Provide Simple Earn (Uni) flexible **read operations** on Gate: single-currency or all positions query, single-currency interest query, and estimated APY (rate) query. **Subscribe (lend), redeem, and change_uni_lend are disabled**—do not call `cex_earn_create_uni_lend` or `cex_earn_change_uni_lend`. When users ask to subscribe, redeem, or change settings, reply that the feature is currently not supported.
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_earn_change_uni_lend
+- cex_earn_get_uni_currency
+- cex_earn_get_uni_interest
+- cex_earn_list_earn_fixed_term_history
+- cex_earn_list_earn_fixed_term_lends
+- cex_earn_list_earn_fixed_term_products
+- cex_earn_list_earn_fixed_term_products_by_asset
+- cex_earn_list_uni_rate
+- cex_earn_list_user_uni_lends
+
+**Execution Operations (Write)**
+
+- cex_earn_create_earn_fixed_term_lend
+- cex_earn_create_earn_fixed_term_pre_redeem
+- cex_earn_create_uni_lend
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Earn:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Trigger Conditions
 
 Activate this skill when the user expresses any of the following intents:
-- Simple Earn, Uni, subscribe, redeem, positions, interest, top APY, one-click subscribe top APY
-- Any request involving Simple Earn subscribe, redeem, position query, or interest query
+- Simple Earn, Uni, flexible earn, fixed earn, fixed-term, subscribe, redeem, positions, interest, top APY
+- Any request involving Simple Earn subscribe, redeem, position query, interest query, fixed-term product list, or fixed-term history query
 
 ## Prerequisites
 
@@ -21,78 +70,118 @@ Activate this skill when the user expresses any of the following intents:
 - **Authentication**: Position and write operations require API key authentication; rate and currency queries are public.
 - **Disclaimer**: Always append when showing APY or rates: _"This information is for reference only and does not constitute investment advice. APY may change. Please understand the product terms before subscribing."_
 
-## Service Restrictions (Current)
+## Supported Workflows
 
-- **Do not call subscribe or redeem APIs in any form**: This skill **must not** call `cex_earn_create_uni_lend` for subscribe (`type: lend`) or redeem (`type: redeem`). Regardless of user confirmation or provided amount/currency, **calling this API is forbidden**. When the user requests subscribe, redeem, or one-click subscribe top APY, reply only: "Simple Earn subscribe and redeem are currently not supported." Position query, interest query, and rate query (read-only) are unaffected.
-- **Do not call the change-lend API in any form**: This skill **must not** call `cex_earn_change_uni_lend` (e.g. change min rate). Regardless of user confirmation or provided currency/min_rate, **calling this API is forbidden**. When the user requests changing Simple Earn settings (e.g. min rate), reply that the operation is not supported and do not call MCP.
+### Flexible (Uni)
+- Single-currency or all positions query
+- Single-currency interest query
+- Estimated APY query
+- Subscribe (lend), redeem, and change min rate operations with user confirmation
+
+### Fixed-term
+- Product list and product list by currency
+- Subscribe and early redeem with user confirmation
+- Current total positions and single-order detail queries
+- History queries for subscribe, redeem, interest, and extra bonus
 
 ## Available MCP Tools
 
+### Flexible (Uni)
+
 | Tool | Auth | Description | Reference |
 |------|------|-------------|-----------|
-| `cex_earn_list_uni_currencies` | No | List Simple Earn currencies (min_rate, min_lend_amount, etc.) | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_get_uni_currency` | No | Single-currency details (min_rate for subscribe) | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_create_uni_lend` | Yes | **Do not use for subscribe/redeem**; API reference only, do not call | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_change_uni_lend` | Yes | **Do not call in any form**; API reference only, do not call | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_list_user_uni_lends` | Yes | User positions (optional currency filter) | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_get_uni_interest` | Yes | Single-currency cumulative interest | [earn-uni-api.md](references/earn-uni-api.md) |
-| `cex_earn_list_uni_rate` | No | Estimated APY per currency (for top APY) | [earn-uni-api.md](references/earn-uni-api.md) |
+| `cex_earn_list_uni_rate` | No | Estimated APY per currency (currency enumeration; use with get_uni_currency for limits) | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_get_uni_currency` | No | Single-currency details (min_rate for subscribe) | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_create_uni_lend` | Yes | Create lend (subscribe) or redeem | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_change_uni_lend` | Yes | Change min rate for lend | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_list_user_uni_lends` | Yes | User positions (optional currency filter) | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_get_uni_interest` | Yes | Single-currency cumulative interest | `references/earn-uni-mcp-tools.md` |
+| `cex_earn_list_uni_rate` | No | Estimated APY per currency (for top APY) | `references/earn-uni-mcp-tools.md` |
+
+### Fixed-term
+
+| Tool | Auth | Description | Reference |
+|------|------|-------------|-----------|
+| `cex_earn_list_earn_fixed_term_products` | No | List all fixed-term products | `references/fixed-earn-mcp-tools.md` |
+| `cex_earn_list_earn_fixed_term_products_by_asset` | No | List fixed-term products by currency | `references/fixed-earn-mcp-tools.md` |
+| `cex_earn_create_earn_fixed_term_lend` | Yes | Create fixed-term lend (subscribe) | `references/fixed-earn-mcp-tools.md` |
+| `cex_earn_create_earn_fixed_term_pre_redeem` | Yes | Early redeem fixed-term order | `references/fixed-earn-mcp-tools.md` |
+| `cex_earn_list_earn_fixed_term_lends` | Yes | User fixed-term positions | `references/fixed-earn-mcp-tools.md` |
+| `cex_earn_list_earn_fixed_term_history` | Yes | Fixed-term history records | `references/fixed-earn-mcp-tools.md` |
 
 ## Routing Rules
 
+### Flexible requests
+
 | Case | User Intent | Signal Keywords | Action |
 |------|-------------|-----------------|--------|
-| 1 | Subscribe (lend) | "subscribe", "lend to Simple Earn" | **Disabled**: Tell user "Simple Earn subscribe and redeem are currently not supported." Do not call MCP. |
-| 2 | Redeem | "redeem", "redeem from Simple Earn" | **Disabled**: Tell user "Simple Earn subscribe and redeem are currently not supported." Do not call MCP. |
-| 3 | Single-currency position | "my USDT Simple Earn", "position for one currency" | See [scenarios.md](references/scenarios.md) Scenario 3 |
-| 4 | All positions | "all Simple Earn positions", "total positions" | See [scenarios.md](references/scenarios.md) Scenario 4 |
-| 5 | Single-currency interest | "interest", "USDT interest" | See [scenarios.md](references/scenarios.md) Scenario 5 |
-| 6 | Subscribe top APY | "top APY", "one-click subscribe top APY" | **Disabled**: Tell user "Simple Earn subscribe and redeem are currently not supported." Do not call MCP. |
-| 7 | Change lend settings (e.g. min rate) | "change min_rate", "change Simple Earn settings" | **Disabled**: Do not call `cex_earn_change_uni_lend`; tell user the operation is not supported. |
+| 1 | Subscribe (lend) | "subscribe", "lend to Simple Earn" | Collect currency/amount/min_rate and confirm, then call `cex_earn_create_uni_lend` with `type: lend`. |
+| 2 | Redeem | "redeem", "redeem from Simple Earn" | Collect currency/amount and confirm, then call `cex_earn_create_uni_lend` with `type: redeem`. |
+| 3 | Single-currency position | "my USDT Simple Earn", "position for one currency" | See `references/scenarios.md` flexible scenario section |
+| 4 | All positions | "all Simple Earn positions", "total positions" | See `references/scenarios.md` flexible scenario section |
+| 5 | Single-currency interest | "interest", "USDT interest" | See `references/scenarios.md` flexible scenario section |
+| 6 | Subscribe top APY | "top APY", "one-click subscribe top APY" | Show top APY via `cex_earn_list_uni_rate`, ask confirmation, then call `cex_earn_create_uni_lend`. |
+| 7 | Change lend settings (e.g. min rate) | "change min_rate", "change Simple Earn settings" | Collect currency/min_rate and confirm, then call `cex_earn_change_uni_lend`. |
 | 8 | Auth failure (401/403) | MCP returns 401/403 | Do not expose keys; prompt user to configure Gate CEX API Key (earn). |
+
+### Fixed-term requests
+
+| Case | User Intent | Signal Keywords | Action |
+|------|-------------|-----------------|--------|
+| 1 | All fixed-term products | "fixed-term products" | See `references/scenarios.md` fixed-term section 1 and `references/fixed-earn-mcp-tools.md` §1 |
+| 2 | Fixed-term products by currency | "USDT fixed-term products" | See `references/scenarios.md` fixed-term section 2 and `references/fixed-earn-mcp-tools.md` §2 |
+| 3 | Fixed-term subscribe | "subscribe 1 SOL fixed-term" | Collect currency/amount/term and confirm, then call `cex_earn_create_earn_fixed_term_lend`. |
+| 4 | Fixed-term early redeem | "redeem order 5862443199" | Collect `order_id` and confirm, then call `cex_earn_create_earn_fixed_term_pre_redeem`. |
+| 5 | Fixed-term total positions | "total fixed-term positions", "current total fixed-term position amount" | Call `cex_earn_list_earn_fixed_term_lends` with `order_type: "1"`, `page`, and `limit`. |
+| 6 | Single fixed-term order detail | "order 5862443199" | Call `cex_earn_list_earn_fixed_term_lends` with `order_type: "1"` and `order_id`. |
+| 7 | Fixed-term history | "subscription records", "redeem records", "interest records" | Call `cex_earn_list_earn_fixed_term_history` with `type`, `page`, `limit`, and optional time range. |
+| 8 | Compliance / region restriction | region restriction questions | Return the standard compliance error message if the API rejects the request. |
+| 9 | Compliance check failure | compliance validation failed | Do not retry or expose internal logic; return the API error message when available. |
 
 ## Execution
 
-1. Identify user intent from the Routing Rules table above.
-2. For **Cases 1, 2, 6** (subscribe/redeem/one-click subscribe top APY): **Do not call** `cex_earn_create_uni_lend` (regardless of user confirmation). Reply only: "Simple Earn subscribe and redeem are currently not supported."
-3. For **Case 7** (change lend/min rate): **Do not call** `cex_earn_change_uni_lend` (regardless of user confirmation). Reply that the operation is not supported; do not call MCP.
-4. For Cases 3, 4, 5: Read the corresponding scenario in [scenarios.md](references/scenarios.md) and follow the workflow (position, interest read-only operations).
-5. For Case 8: Do not expose API keys or raw errors; prompt the user to configure API key / log in again.
-6. If the user's intent is ambiguous (e.g. missing currency or amount), ask a clarifying question before routing.
+1. Identify user intent from the routing rules above.
+2. For flexible subscribe/redeem/top APY and fixed-term subscribe/early redeem: collect required params, confirm with the user, then call the corresponding MCP tool.
+3. For flexible or fixed-term read-only queries: read the matching scenario section in `references/scenarios.md` and follow the workflow there.
+4. For auth failures: do not expose API keys or raw errors; prompt the user to configure API key / log in again.
+5. If the intent is ambiguous, ask a clarifying question before routing.
 
 ## Domain Knowledge
 
-### Core Concepts
+### Flexible (Uni)
 
-- **Subscribe (lend)**: User lends a specified amount of a currency to the Simple Earn pool. Interest is paid at each settlement time; min_rate from currency details should be passed to avoid rejections.
-- **Redeem**: User redeems a specified amount from the pool. Redeemed funds arrive at the next settlement time; interest for the current period is still credited.
-- **min_rate**: Minimum acceptable hourly rate for the currency (concept only; this skill does not perform subscribe, so do not call create_uni_lend).
-- **est_rate**: Estimated APY from `cex_earn_list_uni_rate`; used to pick the top APY currency. Not guaranteed; for reference only.
-- **Interest**: Cumulative interest for a currency from `cex_earn_get_uni_interest`.
-- Settlement windows: Lend and redeem are not allowed in the two minutes before and after each whole hour (platform settlement); failed subscribe funds return immediately.
+- Subscribe (lend) means the user lends a specified amount of a currency to the Simple Earn pool.
+- Redeem means the user redeems a specified amount from the pool.
+- `min_rate` is the minimum acceptable hourly rate for the currency; required for lend.
+- Settlement windows: lend and redeem are not allowed in the two minutes before and after each whole hour (use for errors/logic only; do not surface specific clock times or timestamps to the user unless the user explicitly asks when settlement applies).
+- **User-facing display (flexible only)**: In any reply based on flexible Uni MCP data, **do not show time-related fields**—omit timestamps, dates, time-of-day, countdowns, chart time axes, history operation times, and any API field whose purpose is *when* something occurred. Show only non-time facts (currency, amounts, balances, rates/APY, `interest_status`, success/failure). If a tool returns only time-series data (e.g. APY chart), summarize without timestamps (e.g. latest estimated APY only) or skip the series.
 
-### Subscribe / Redeem (Case 1, 2, 6)
+### Fixed-term
 
-**Do not call subscribe/redeem API.** Do not show subscribe/redeem draft; do not call `cex_earn_create_uni_lend` (whether type is lend or redeem). Reply only: "Simple Earn subscribe and redeem are currently not supported."
+- Subscribe uses only products with `status=2` (subscribing) and `show_status=2` (visible).
+- Product list queries can be filtered by currency and product type.
+- Fixed-term positions and history should be presented using the table formats defined in `references/scenarios.md` and `references/fixed-earn-mcp-tools.md`.
+- Early redeem uses the fixed-term order ID and returns the redeemed principal.
 
 ## Safety Rules
 
-- **Subscribe/redeem**: **Do not** call `cex_earn_create_uni_lend` for subscribe or redeem; reply not supported. This skill does not provide any subscribe/redeem API calls.
-- **Change lend**: **Do not** call `cex_earn_change_uni_lend` in any form (e.g. change min rate); reply not supported; do not call MCP.
-- **No investment advice**: Do not recommend specific currencies or predict rates. Present data (e.g. top APY from list_uni_rate) and let the user decide.
-- **Sensitive data**: Never expose API keys, internal endpoint URLs, or raw error traces to the user.
-- **Amount and currency**: Reject negative or zero amounts; validate currency is supported (e.g. from list_uni_currencies or get_uni_currency).
+- Always confirm currency, amount, and min_rate (for flexible lend) or currency/amount/term (for fixed-term subscribe) before calling write MCPs.
+- Always confirm order_id before calling fixed-term early redeem.
+- Do not recommend specific currencies or predict rates.
+- Never expose API keys, internal endpoint URLs, or raw error traces to the user.
+- Reject negative or zero amounts; validate that the currency is supported.
 
 ## Error Handling
 
 | Condition | Response |
 |-----------|----------|
 | Auth endpoint returns 401/403 | "Please configure your Gate CEX API Key in MCP with earn/account permission." Do not expose keys or internal details. |
-| User requests subscribe/redeem | Do not call API; reply "Simple Earn subscribe and redeem are currently not supported." |
-| User requests change lend (e.g. min rate) | Do not call `cex_earn_change_uni_lend`; reply that the operation is not supported. |
-| `cex_earn_list_user_uni_lends` or `cex_earn_get_uni_interest` fails | "Unable to load positions/interest. Please check your API key has earn/account read permission." |
+| Flexible subscribe/redeem or fixed-term write request fails validation | Validate inputs, confirm details, then call the corresponding write tool. |
+| Position or history query fails | "Unable to load positions/history. Please check your API key has earn/account read permission." |
 | Empty positions or no rate data | "No positions found." / "No rate data available at the moment." |
 
-## Prompt Examples & Scenarios
+## Reference Files
 
-See [scenarios.md](references/scenarios.md) for full prompt examples and expected behaviors covering all six scenarios (subscribe, redeem, single-currency position, all positions, single-currency interest, subscribe top APY).
+- Flexible (Uni) MCP tools: `references/earn-uni-mcp-tools.md`
+- Fixed-term MCP tools: `references/fixed-earn-mcp-tools.md`
+- Prompt examples and routing: `references/scenarios.md`

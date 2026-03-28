@@ -1,8 +1,8 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.18-2"
-updated: "2026-03-18"
-description: "Gate Exchange affiliate program data query and management skill. Use this skill when users ask about their affiliate/partner commission, trading volume, net fees, customer count, trading users, or want to apply for the affiliate program. Supports queries for up to 180 days (API limited to 30 days per request, agent should split longer queries). IMPORTANT: user_id parameter in APIs refers to 'trader' not 'commission receiver' - avoid using unless explicitly specified. Aggregated data from API lists should be calculated using custom scripts, not simple summation. CRITICAL TIME CONSTRAINT: All query times are calculated based on user's system current date in UTC+8 timezone. For relative time descriptions (e.g., 'last 7 days', 'last 30 days', 'this week', 'last month'), calculate start date by subtracting days from current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert to Unix timestamps. NEVER use future timestamps as query conditions. When timestamps are needed, obtain them via system functions, never generate manually. The 'to' parameter must always be less than or equal to the current Unix timestamp. Trigger phrases include 'my affiliate data', 'commission this week', 'partner earnings', 'team performance', 'customer trading volume', 'rebate income', 'apply for affiliate', 'can I apply', 'am I eligible', 'my application status', 'recent application', 'partner application status'."
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Partner affiliate data and application skill. Use for commission, volume, fees, customers, or partner signup (up to 180 days via 30-day API segments). Trigger phrases include 'my affiliate data', 'commission', 'partner earnings', 'apply for affiliate', 'am I eligible', 'my application status'."
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -11,8 +11,44 @@ Query and manage Gate Exchange affiliate/partner program data, including commiss
 
 ## General Rules
 
-Read and follow the shared runtime rules before proceeding:
-→ `exchange-runtime-rules.md`
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_rebate_get_partner_application_recent
+- cex_rebate_get_partner_eligibility
+- cex_rebate_partner_commissions_history
+- cex_rebate_partner_sub_list
+- cex_rebate_partner_transaction_history
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Rebate:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Important Notice
 
@@ -21,7 +57,10 @@ Read and follow the shared runtime rules before proceeding:
 - **Authentication**: Requires `X-Gate-User-Id` header with partner privileges.
 - **CRITICAL - user_id Parameter**: In both `commission_history` and `transaction_history` APIs, the `user_id` parameter filters by "trader/trading user" NOT "commission receiver". Only use this parameter when explicitly querying a specific trader's contribution. For general commission queries, DO NOT use user_id parameter.
 - **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations.
-- **⚠️ CRITICAL - Time Constraint**: All query times are calculated based on the user's system current date in UTC+8 timezone. For relative time descriptions like "last 7 days", "last 30 days", "this week", "last month", etc., calculate the start date by subtracting the requested days from the current date, then convert both start and end dates to UTC+8 00:00:00 and 23:59:59 respectively, then convert these times to Unix timestamps. **NEVER use future timestamps as query conditions**. The `to` parameter must always be ≤ current timestamp. If user specifies a future date, reject the query and explain that only historical data is available.
+
+### Query time and timezone (UTC+8)
+
+All query windows use the user's **current calendar date** in **UTC+8**. For relative phrases ("last 7 days", "last 30 days", "this week", "last month"): compute the start date by subtracting the requested span from today, convert start and end to UTC+8 00:00:00 and 23:59:59 respectively, then to Unix timestamps. **NEVER** use future timestamps as query bounds. The `to` parameter must always be ≤ current Unix time. If the user specifies a future date, reject the query and explain that only historical data is available.
 
 ## Available APIs (Partner Only)
 
@@ -54,7 +93,7 @@ Read and follow the shared runtime rules before proceeding:
 
 ## Safety Rules
 
-- **No future timestamps**: Never use future timestamps as query conditions. The `to` parameter must be less than or equal to the current Unix timestamp. For relative ranges (e.g. "last 7 days"), compute start and end from the user's current date (UTC+8) and convert to Unix; reject queries that request future dates.
+- **Query times (UTC+8)**: Follow **Important Notice → Query time and timezone (UTC+8)** for relative ranges, day boundaries, and Unix conversion. Never use future timestamps; `to` must be ≤ current Unix time; reject user-specified future dates.
 - **user_id usage**: Use the `user_id` parameter only when the user explicitly asks about a specific trader's contribution (e.g. "UID 123456's volume"). Do not use `user_id` for "my commission" or "my earnings"—those are the partner's own totals across all referred users.
 - **Data scope**: Query only data for the authenticated partner. Do not attempt to access other partners' data or to infer data outside the API responses.
 - **Aggregation**: Do not sum list fields blindly. Use documented aggregation rules and respect asset types, deduplication, and period boundaries to avoid incorrect totals.
@@ -78,7 +117,6 @@ Read and follow the shared runtime rules before proceeding:
 - **Application status**: The user's recent partner application (if any) within the last 30 days, including audit status (pending / approved / rejected), returned by the applications/recent API.
 
 ## Workflow
-
 ### Step 1: Parse User Query
 
 Identify the query type and extract parameters.
@@ -565,20 +603,6 @@ while True:
 - Convert string amounts to numbers for calculation
 - Display with appropriate precision (USDT: 2 decimals, BTC: 8 decimals)
 - Add thousand separators for large numbers
-
-## MCP Dependencies
-
-This skill requires Partner rebate APIs. When an MCP server (e.g. Gate MCP) is configured, use the following tools instead of calling API paths directly. The expected pattern is: Call `tool_name` with the appropriate parameters.
-
-| API / Use case | MCP tool name |
-|----------------|---------------------------------|
-| Transaction history | `cex_rebate_partner_transaction_history` |
-| Commission history | `cex_rebate_partner_commissions_history` |
-| Subordinate list | `cex_rebate_partner_sub_list` |
-| Eligibility check | `cex_rebate_get_partner_eligibility` |
-| Recent application | `cex_rebate_get_partner_application_recent` |
-
-If no MCP server is configured, the agent must call the Partner APIs via the documented HTTP endpoints (see API Parameter Reference). Ensure the MCP project path is set up so that these tools are discovered when running skill validation.
 
 ## Validation Examples
 

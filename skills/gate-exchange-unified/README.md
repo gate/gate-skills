@@ -14,7 +14,7 @@ An integrated execution skill for Gate unified account operations, covering acco
 
 ## Execution Guardrail (Mandatory)
 
-Before any real mutation action (`cex_unified_create_unified_loan`, `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral`), the assistant must:
+Before any real mutation action (`create_unified_loan`, `set_unified_mode`, `set_user_leverage_currency_setting`, `set_unified_collateral`), the assistant must:
 
 1. Send an **Action Draft** first (target, amount/config, pre-check result, risk note)
 2. Wait for explicit user confirmation (for example: `Confirm action`, `Confirm`, `Proceed`)
@@ -50,6 +50,7 @@ gate-exchange-unified/
 ├── SKILL.md
 ├── README.md
 ├── CHANGELOG.md
+├── bug.xls
 └── references/
     └── scenarios.md
 ```
@@ -72,3 +73,8 @@ gate-exchange-unified/
 - loan records / interest records / borrow rate
 - max transferable / transferable limit
 - set leverage / leverage config / set collateral currencies
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

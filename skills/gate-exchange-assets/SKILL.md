@@ -1,13 +1,59 @@
 ---
 name: gate-exchange-assets
-version: "2026.3.12-3"
-updated: "2026-03-12"
-description: "Gate Exchange asset and balance query skill. Use when user asks to check total assets, account balance, specific currency holdings, or sub-account assets (spot, futures, margin, options, finance, Alpha, TradFi). Trigger phrases: 'how much do I have', 'total assets', 'account balance', 'how many BTC', 'spot balance', 'futures account', 'margin account', 'options account', 'finance account', 'Alpha account', 'TradFi account'. Read-only, no trading."
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Exchange asset and balance query skill covering TradFi, spot, futures, margin, options, finance, and Alpha. Use when user asks to check total assets, account balance, specific currency holdings, or sub-account assets across those lines. Trigger phrases: 'how much do I have', 'total assets', 'TradFi', 'account balance', 'how many BTC', 'spot balance', 'futures account', 'margin account', 'options account', 'finance account', 'Alpha account', 'TradFi account'. Read-only, no trading."
 ---
 
 # Gate Exchange Assets Assistant
 
-Execute read-only asset and balance queries for Gate Exchange. Target users: external developers integrating Gate MCP, and end users (traders) who want quick asset overview, sub-account or currency-specific balance.
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_delivery_list_delivery_accounts
+- cex_earn_list_dual_balance
+- cex_earn_list_dual_orders
+- cex_earn_list_structured_orders
+- cex_fx_get_fx_accounts
+- cex_margin_list_margin_accounts
+- cex_options_list_options_account
+- cex_spot_get_spot_accounts
+- cex_spot_list_spot_account_book
+- cex_tradfi_query_user_assets
+- cex_unified_get_unified_accounts
+- cex_wallet_get_total_balance
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Delivery:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Tradfi:Read, Unified:Read, Wallet:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Domain Knowledge
 

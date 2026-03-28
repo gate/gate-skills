@@ -103,3 +103,8 @@ gate-exchange-futures/
 ## License
 
 MIT
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

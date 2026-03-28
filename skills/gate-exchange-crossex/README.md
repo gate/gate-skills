@@ -157,3 +157,8 @@ MIT
 
 - **Online Ticket**: Submit ticket after login
 - **Email Support**: [mm@gate.com](mailto:mm@gate.com)
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

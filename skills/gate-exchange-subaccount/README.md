@@ -69,3 +69,8 @@ User Query
 - Current state is checked to avoid redundant operations
 - Only normal sub-accounts can be created through this skill
 - Sensitive user data (API keys, balances) is never logged or exposed in responses
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

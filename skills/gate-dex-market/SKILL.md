@@ -1,13 +1,19 @@
 ---
 name: gate-dex-market
-version: "2026.3.18-1"
-updated: "2026-03-18"
+version: "2026.3.24-1"
+updated: "2026-03-24"
 description: "Gate DEX READ-ONLY market data lookup skill. For data queries that NEVER execute on-chain transactions: check token prices, view K-line charts, browse token rankings, discover new tokens, analyze holders, run security audits, view trading volume and liquidity. This skill only READS data — it never buys, sells, swaps, transfers, or modifies wallet state."
 ---
 
 # Gate DEX Market
 
 > **Pure Routing Layer** — READ-ONLY data queries only. Never executes transactions. All specifications in `references/`.
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 
 **Trigger Scenarios**: Use when the user wants to **look up or analyze** market data without executing any transaction:
 - Price lookup: "what is the price of ETH", "check SOL price", "price of 0x1234..."
@@ -16,6 +22,35 @@ description: "Gate DEX READ-ONLY market data lookup skill. For data queries that
 - Security: "is this token safe", "security audit", "honeypot check", "risk analysis"
 - Discovery: "new tokens", "newly listed", "holder analysis", "whale tracking"
 - Volume: "trading volume", "buy-sell pressure", "liquidity events"
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Dex | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- dex_chain_config
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate-Dex
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only
 
@@ -27,19 +62,6 @@ No OpenAPI unless user explicitly asks. MCP setup: see `gate-dex-trade/reference
 - "quote for swapping X to Y" → `gate-dex-trade` (swap execution)
 - "check my balance" → `gate-dex-wallet` (account query)
 - "buy ETH" / "sell USDT" → `gate-dex-trade` (transaction execution)
-
----
-
-## Auto-Update (Session Start Only)
-
-On session start (not during interactions), check for updates once:
-
-1. Read this file's frontmatter `version` and `updated` fields.
-2. Fetch remote SKILL.md from `https://raw.githubusercontent.com/gateio/web3_wallet_skill/master/skills/gate-dex-market/SKILL.md`.
-3. Compare: update if remote version > local version, or same version but remote `updated` date is newer.
-4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `references/mcp.md`, `references/openapi.md`).
-5. On failure: silently continue — never block user interactions.
-6. Skip if: already checked this session, or skill was installed < 24h ago.
 
 ---
 
@@ -105,31 +127,9 @@ Common chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol.
 
 ---
 
-## Cross-Skill Collaboration
-
-### Called by Other Skills
-
-| Caller | Scenario | Routing |
-|--------|----------|---------|
-| `gate-dex-trade` | Token info / security audit before Swap | Auto-select mode |
-| `gate-dex-wallet` | Real-time prices for portfolio tokens | Prefer MCP mode |
-| `gate-dex-wallet/references/dapp.md` | Contract security audit | Auto-select mode |
-
-### Follow-up Guidance
-
-| User Intent After Query | Target Skill |
-|------------------------|--------------|
-| Buy/sell tokens | `gate-dex-trade` |
-| Check portfolio | `gate-dex-wallet` |
-| Transfer tokens | `gate-dex-wallet/references/transfer.md` |
-| DApp interactions | `gate-dex-wallet/references/dapp.md` |
-
----
-
 ## Security Rules
 
-1. **Mode transparency**: Clearly inform users of the current mode and reasons
-2. **Data objectivity**: Present prices and rankings objectively, no investment advice
-3. **Risk warnings**: Clearly remind users to judge investment risks themselves when showing security audits
-4. **Credential security**: Never display secret_key in plain text in OpenAPI mode
-5. **Read-only**: All operations are data queries, no on-chain write operations
+1. **Data objectivity**: Present prices and rankings objectively, no investment advice
+2. **Risk warnings**: Clearly remind users to judge investment risks themselves when showing security audits
+3. **Credential security**: Follow §3 of [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) for auth/credential handling
+4. **Read-only**: All operations are data queries, no on-chain write operations

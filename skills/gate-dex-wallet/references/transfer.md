@@ -1,548 +1,492 @@
 ---
-name: gate-dex-wallet-transfer
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: "Gate Wallet transfer execution. Build transactions, sign, broadcast. Use when users want to 'send ETH', 'transfer USDT', 'transfer', 'send tokens'. Includes mandatory balance verification and user confirmation gate. Supports EVM multi-chain + Solana native/token transfers."
+name: gate-dex-transfer
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate Wallet transfer execution module. Builds transactions, signs, and broadcasts. Use when the user wants to send tokens to an address, including single and batch transfers. Includes mandatory balance verification and user confirmation gate. Supports EVM multi-chain and Solana native/token transfers."
 ---
 
 # Gate DEX Transfer
 
-> Transfer domain — Gas estimation, transaction preview, balance verification, signing, broadcasting, includes mandatory user confirmation gates. 4 MCP tools + 1 cross-Skill call.
+> Transfer module — gas estimation, transaction preview, balance verification, signing, and broadcasting. Includes mandatory user confirmation gates. 4 MCP tools + 1 cross-skill call.
 
-**Trigger scenarios**: Users mention "transfer", "send", "transfer", "send ETH", "send tokens", "send coins", "withdraw", or when other Skills guide users to perform on-chain transfer operations.
+## Applicable Scenarios
 
-**Prerequisites**: MCP Server available (see parent SKILL.md for detection). If not configured, see parent SKILL.md for setup guide.
+Use when the user wants to:
+- Send or transfer tokens to an on-chain address: "send ETH to 0x...", "transfer USDT", "pay someone"
+- Execute batch transfers to multiple recipients: "send to these 3 addresses"
+- Transfer native tokens (ETH, BNB, SOL) or token standards (ERC20, SPL)
+- Move assets between their own wallets: "move my USDT to my other address"
+- Another skill routes the user here for transfer operations
 
-## Authentication Notes
+## Capability Boundaries
 
-All operations in this Skill **require `mcp_token`**. Before calling any tool, must confirm user is logged in.
+- **Supports**: Native token transfers, ERC20 transfers, SPL token transfers, batch transfers
+- **Supported chains**: eth, bsc, polygon, arbitrum, optimism, avax, base, sol
+- **Does not support**: Swap/exchange (-> `gate-dex-trade`), DApp contract calls (-> [dapp.md](./dapp.md)), x402 payment (-> [x402.md](./x402.md)), market data (-> `gate-dex-market`)
 
-- If currently no `mcp_token` → Guide to `gate-dex-wallet/references/auth.md` to complete login then return.
-- If `mcp_token` expired (MCP Server returns token expiration error) → Try `dex_auth_refresh_token` silent refresh first, guide to re-login if failed.
+**Prerequisites**: MCP Server available (see parent SKILL.md). All operations require a valid `mcp_token`. If missing or expired, route to [auth.md](./auth.md).
 
-## MCP Tool Call Specifications
+---
 
-### 1. `dex_wallet_get_token_list` (Cross-Skill Call) — Query Balance for Verification
+## MCP Tools
 
-Before transfer **must** call this tool first to verify sending token balance and Gas token balance. This tool belongs to `gate-dex-wallet` domain, called cross-Skill here.
+| Tool | Purpose | Key Parameters |
+|------|---------|----------------|
+| `dex_wallet_get_token_list` | Balance verification (cross-skill) | `account_id`, `chain`, `mcp_token` |
+| `dex_tx_gas` | Estimate gas fee | `chain`, `from_address`, `to_address`, `value?`, `data?`, `mcp_token` |
+| `dex_tx_transfer_preview` | Build unsigned tx + confirmation message | `chain`, `from_address`, `to_address`, `token_address`, `amount`, `account_id`, `mcp_token` |
+| `dex_wallet_sign_transaction` | Server-side signing (user must confirm first) | `raw_tx`, `chain`, `account_id`, `mcp_token` |
+| `dex_tx_send_raw_transaction` | Broadcast signed tx | `signed_tx`, `chain`, `mcp_token` |
+
+### Tool Details
+
+#### `dex_wallet_get_token_list` (Cross-Skill) — Query Balance
+
+Called before every transfer to verify the sending token balance and gas token balance.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `dex_wallet_get_token_list` |
 | **Parameters** | `{ account_id: string, chain: string, mcp_token: string }` |
-| **Return Value** | Token array, each item contains `symbol`, `balance`, `price`, `value`, `chain`, `contract_address`, etc. |
+| **Returns** | Token array with `symbol`, `balance`, `price`, `value`, `chain`, `contract_address` |
 
-Call example:
+#### `dex_tx_gas` — Estimate Gas Fees
 
-```
-CallMcpTool(
-  server="gate-dex",
-  toolName="dex_wallet_get_token_list",
-  arguments={ account_id: "acc_12345", chain: "eth", mcp_token: "<mcp_token>" }
-)
-```
-
-Agent behavior: Extract transfer token balance and chain native token balance (for Gas) from returned list to prepare for subsequent balance verification.
-
----
-
-### 2. `tx.gas` — Estimate Gas Fees
-
-Estimate Gas fees for transactions on specified chain, returns gas price and estimated consumption.
+Estimates gas for a transaction on the specified chain.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `tx.gas` |
-| **Parameters** | `{ chain: string, from_address: string, to_address: string, value?: string, data?: string, mcp_token: string }` |
-| **Return Value** | `{ gas_limit: string, gas_price: string, estimated_fee: string, fee_usd: number }` |
+| **Parameters** | `{ chain, from_address, to_address, value?, data?, mcp_token }` |
+| **Returns** | `{ gas_limit, gas_price, estimated_fee, fee_usd }` |
 
-Parameter descriptions:
+- For native token transfers: pass the `value` in wei/lamports.
+- For ERC20 transfers: set `value` to `"0"` and provide `data` (transfer calldata).
+- Solana gas structure differs (fee in lamports); handle according to actual returns.
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `chain` | Yes | Chain identifier (e.g. `"eth"`, `"bsc"`, `"sol"`) |
-| `from_address` | Yes | Sender address |
-| `to_address` | Yes | Recipient address |
-| `value` | No | Native token transfer amount (wei / lamports format). ERC20 transfers can be `"0"` |
-| `data` | No | Transaction data (transfer calldata for ERC20 transfers) |
-| `mcp_token` | Yes | Authentication token |
+#### `dex_tx_transfer_preview` — Build Transaction Preview
 
-Call example (native token transfer):
-
-```
-CallMcpTool(
-  server="gate-dex",
-  toolName="tx.gas",
-  arguments={
-    chain: "eth",
-    from_address: "0xABCdef1234567890ABCdef1234567890ABCdef12",
-    to_address: "0xDEF4567890ABCdef1234567890ABCdef12345678",
-    value: "1000000000000000000",
-    mcp_token: "<mcp_token>"
-  }
-)
-```
-
-Return example:
-
-```json
-{
-  "gas_limit": "21000",
-  "gas_price": "30000000000",
-  "estimated_fee": "0.00063",
-  "fee_usd": 1.21
-}
-```
-
-Call example (ERC20 token transfer):
-
-```
-CallMcpTool(
-  server="gate-dex",
-  toolName="tx.gas",
-  arguments={
-    chain: "eth",
-    from_address: "0xABCdef1234567890ABCdef1234567890ABCdef12",
-    to_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    value: "0",
-    data: "0xa9059cbb000000000000000000000000DEF4567890ABCdef1234567890ABCdef123456780000000000000000000000000000000000000000000000000000000077359400",
-    mcp_token: "<mcp_token>"
-  }
-)
-```
-
-Agent behavior: Solana chain's Gas structure differs (fee in lamports), parameters and return fields may vary, handle according to actual returns.
-
----
-
-### 3. `tx.transfer_preview` — Build Transaction Preview
-
-Build unsigned transaction and return confirmation summary, includes server-side `confirm_message`. This is the final preview step before signing.
+Builds an unsigned transaction and returns a confirmation summary including server-side `confirm_message`.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `tx.transfer_preview` |
-| **Parameters** | `{ chain: string, from_address: string, to_address: string, token_address: string, amount: string, account_id: string, mcp_token: string }` |
-| **Return Value** | `{ raw_tx: string, confirm_message: string, estimated_gas: string, nonce: number }` |
+| **Parameters** | `{ chain, from_address, to_address, token_address, amount, account_id, mcp_token }` |
+| **Returns** | `{ raw_tx, confirm_message, estimated_gas, nonce }` |
 
-Parameter descriptions:
+- `token_address`: Use `"native"` for native tokens.
+- `amount`: Human-readable format (e.g., `"1.5"`, not wei).
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `chain` | Yes | Chain identifier |
-| `from_address` | Yes | Sender address |
-| `to_address` | Yes | Recipient address |
-| `token_address` | Yes | Token contract address. Use `"native"` for native tokens |
-| `amount` | Yes | Transfer amount (human-readable format, e.g. `"1.5"` not wei) |
-| `account_id` | Yes | User account ID |
-| `mcp_token` | Yes | Authentication token |
+**CRITICAL**: After receiving `raw_tx`, do **not** sign directly. Display the confirmation summary and wait for explicit user confirmation.
 
-Call example:
+#### `dex_wallet_sign_transaction` — Server-side Signing
 
-```
-CallMcpTool(
-  server="gate-dex",
-  toolName="tx.transfer_preview",
-  arguments={
-    chain: "eth",
-    from_address: "0xABCdef1234567890ABCdef1234567890ABCdef12",
-    to_address: "0xDEF4567890ABCdef1234567890ABCdef12345678",
-    token_address: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    amount: "1000",
-    account_id: "acc_12345",
-    mcp_token: "<mcp_token>"
-  }
-)
-```
-
-Return example:
-
-```json
-{
-  "raw_tx": "0x02f8...",
-  "confirm_message": "Transfer 1000 USDT to 0xDEF4...5678 on Ethereum",
-  "estimated_gas": "0.003",
-  "nonce": 42
-}
-```
-
-Agent behavior: After getting `raw_tx`, **must not sign directly**, must first display confirmation summary to user and wait for explicit confirmation.
-
----
-
-### 4. `wallet.sign_transaction` — Server-side Signing
-
-Use server-side custodial private keys to sign unsigned transactions. **Only call after explicit user confirmation**.
+Signs an unsigned transaction using server-side custodial keys. **Only call after explicit user confirmation.**
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `wallet.sign_transaction` |
-| **Parameters** | `{ raw_tx: string, chain: string, account_id: string, mcp_token: string }` |
-| **Return Value** | `{ signed_tx: string }` |
+| **Parameters** | `{ raw_tx, chain, account_id, mcp_token }` |
+| **Returns** | `{ signed_tx }` |
 
-Parameter descriptions:
+#### `dex_tx_send_raw_transaction` — Broadcast
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `raw_tx` | Yes | Unsigned transaction from `tx.transfer_preview` |
-| `chain` | Yes | Chain identifier |
-| `account_id` | Yes | User account ID |
-| `mcp_token` | Yes | Authentication token |
+Broadcasts a signed transaction to the on-chain network.
 
-Call example:
+| Field | Description |
+|-------|-------------|
+| **Parameters** | `{ signed_tx, chain, mcp_token }` |
+| **Returns** | `{ hash_id }` |
+
+---
+
+## Tool Call Chain
+
+Complete transfer flow in strict linear sequence:
 
 ```
-CallMcpTool(
-  server="gate-dex",
-  toolName="wallet.sign_transaction",
-  arguments={
-    raw_tx: "0x02f8...",
-    chain: "eth",
-    account_id: "acc_12345",
-    mcp_token: "<mcp_token>"
-  }
-)
-```
-
-Return example:
-
-```json
-{
-  "signed_tx": "0x02f8b2...signed..."
-}
+0. dex_chain_config                          <- Session detection (if needed)
+1. dex_wallet_get_token_list                 <- Cross-skill: query balance (token + gas)
+2. dex_tx_gas                                <- Estimate gas fees
+3. [Agent balance validation]                <- Internal logic, not an MCP call
+4. dex_tx_transfer_preview                   <- Build unsigned tx + confirmation info
+5. [Display confirmation, wait for user]     <- MANDATORY gate, not an MCP call
+6. dex_wallet_sign_transaction               <- Sign after user confirms
+7. dex_tx_send_raw_transaction               <- Broadcast on-chain
 ```
 
 ---
 
-### 5. `dex_tx_send_raw_transaction` — Broadcast Signed Transaction
+## Execution Flow
 
-Broadcast signed transaction to on-chain network.
-
-| Field | Description |
-|-------|-------------|
-| **Tool Name** | `dex_tx_send_raw_transaction` |
-| **Parameters** | `{ signed_tx: string, chain: string, mcp_token: string }` |
-| **Return Value** | `{ hash_id: string }` |
-
-Parameter descriptions:
-
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `signed_tx` | Yes | Signed transaction from `wallet.sign_transaction` |
-| `chain` | Yes | Chain identifier |
-| `mcp_token` | Yes | Authentication token |
-
-Call example:
+### Flow A: Standard Transfer
 
 ```
-CallMcpTool(
-  server="gate-dex",
-  toolName="dex_tx_send_raw_transaction",
-  arguments={
-    signed_tx: "0x02f8b2...signed...",
-    chain: "eth",
-    mcp_token: "<mcp_token>"
-  }
-)
-```
-
-Return example:
-
-```json
-{
-  "hash_id": "0xa1b2c3d4e5f6...7890"
-}
-```
-
-Agent behavior: After successful broadcast, display transaction hash to user and provide block explorer link.
-
-Supported chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol. See parent SKILL.md.
-
-## MCP Tool Call Chain Overview
-
-Complete transfer flow calls the following tools in sequence, forming a strict linear pipeline:
-
-```
-0. dex_chain_config                         ← First session detection (if needed)
-1. dex_wallet_get_token_list                ← Cross-Skill: Query balance (token + Gas token)
-2. tx.gas                               ← Estimate Gas fees
-3. [Agent balance validation: balance >= amount + Gas]  ← Agent internal logic, not MCP call
-4. tx.transfer_preview                  ← Build unsigned transaction + server confirmation info
-5. [Agent display confirmation summary, wait for user confirmation]     ← Mandatory gate, not MCP call
-6. wallet.sign_transaction              ← Sign after user confirmation
-7. dex_tx_send_raw_transaction              ← Broadcast on-chain
-```
-
-## Skill Routing
-
-Based on user intent after transfer completion, guide to corresponding Skill:
-
-| User Intent | Route Target |
-|-------------|-------------|
-| View updated balance | `gate-dex-wallet` |
-| View transaction details / history | `gate-dex-wallet` (`dex_tx_detail`, `dex_tx_list`) |
-| Continue transfer to other addresses | Stay in this Skill |
-| Swap tokens | `gate-dex-trade` |
-| Login / authentication expired | `gate-dex-wallet/references/auth.md` |
-
-## Operation Flow
-
-### Flow A: Standard Transfer (Main Flow)
-
-```
-First session detection (if needed)
-  Call dex_chain_config({chain: "eth"}) to probe availability
-  ↓ Success
-
-Step 1: Authentication Check
-  Confirm valid mcp_token and account_id
-  No token → Guide to gate-dex-wallet/references/auth.md login
-  ↓
-
-Step 2: Intent Recognition + Parameter Collection
-  Extract transfer intent from user input, collect necessary parameters:
-  - to_address: Recipient address (required)
-  - amount: Transfer amount (required)
-  - token: Transfer token (required, e.g. ETH, USDT)
-  - chain: Target chain (optional, infer from token or context)
-
-  When parameters missing, ask user item by item:
-
-  ────────────────────────────
-  Please provide transfer information:
-  - Recipient address: (required, provide complete address)
-  - Transfer amount: (required, e.g. 1.5)
-  - Token: (required, e.g. ETH, USDT)
-  - Chain: (optional, default Ethereum. Supports eth/bsc/polygon/arbitrum/optimism/avax/base/sol)
-  ────────────────────────────
-
-  ↓ Parameters complete
-
-Step 3: Get Wallet Address
-  Call dex_wallet_get_addresses({ account_id, mcp_token })
-  Extract target chain's from_address
-  ↓
-
-Step 4: Query Balance (Cross-Skill: gate-dex-wallet)
+Step 1: Authentication check
+  No mcp_token -> route to auth.md
+  |
+Step 2: Intent recognition + parameter collection
+  Extract: to_address (required), amount (required), token (required), chain (optional)
+  If parameters missing, ask the user for each:
+  "Please provide: recipient address, transfer amount, token (e.g., ETH, USDT), and chain (optional, default Ethereum)."
+  |
+Step 3: Get wallet address
+  Call dex_wallet_get_addresses({ account_id, mcp_token }) -> extract from_address for target chain
+  |
+Step 4: Query balance (cross-skill)
   Call dex_wallet_get_token_list({ account_id, chain, mcp_token })
-  Extract:
-  - Transfer token balance (e.g. USDT balance)
-  - Chain native Gas token balance (e.g. ETH balance)
-  ↓
-
-Step 5: Estimate Gas Fees
-  Call tx.gas({ chain, from_address, to_address, value?, data?, mcp_token })
-  Get estimated_fee (native token pricing) and fee_usd
-  ↓
-
-Step 6: Agent Balance Validation (Mandatory)
-  Validation rules:
-  a) Native token transfer: balance >= amount + estimated_fee
-  b) ERC20 token transfer: token_balance >= amount AND native_balance >= estimated_fee
-  c) Solana SPL token transfer: token_balance >= amount AND sol_balance >= estimated_fee
-
-  Validation failed → Abort transaction, display insufficient info:
-
-  ────────────────────────────
-  ❌ Insufficient balance, cannot execute transfer
-
-  Transfer amount: 1000 USDT
-  Current USDT balance: 800 USDT (insufficient, short 200 USDT)
-
-  Or:
-
-  Transfer amount: 1.0 ETH
-  Estimated Gas: 0.003 ETH
-  Total needed: 1.003 ETH
-  Current ETH balance: 0.9 ETH (insufficient, short 0.103 ETH)
-
-  Suggestions:
-  - Reduce transfer amount
-  - Top up tokens to wallet first
-  ────────────────────────────
-
-  ↓ Validation passed
-
-Step 7: Build Transaction Preview
-  Call tx.transfer_preview({ chain, from_address, to_address, token_address, amount, account_id, mcp_token })
-  Get raw_tx and confirm_message
-  ↓
-
-Step 8: Display Confirmation Summary (Mandatory Gate)
-  Must display complete confirmation information to user and wait for explicit "confirm" reply before continuing.
-  Display content per "Transaction Confirmation Template" below.
-  ↓
-
-  User replies "confirm" → Continue Step 9
-  User replies "cancel" → Abort transaction, display cancellation notice
-  User requests modification → Return to Step 2 to re-collect modified parameters
-
-Step 9: Sign Transaction
-  Call wallet.sign_transaction({ raw_tx, chain, account_id, mcp_token })
-  Get signed_tx
-  ↓
-
-Step 10: Broadcast Transaction
-  Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token })
-  Get hash_id
-  ↓
-
-Step 11: Display Result + Follow-up Suggestions
-
-  ────────────────────────────
-  ✅ Transfer broadcast successful!
-
-  Transaction Hash: {hash_id}
-  Block Explorer: https://{explorer}/tx/{hash_id}
-
-  Transaction submitted to network, confirmation time depends on network congestion.
-
-  You can:
-  - View updated balance
-  - View transaction details
-  - Continue other operations
-  ────────────────────────────
+  Extract transfer token balance and native gas token balance
+  |
+Step 5: Estimate gas
+  Call dex_tx_gas({ chain, from_address, to_address, value?, data?, mcp_token })
+  |
+Step 6: Balance validation (MANDATORY)
+  Rules:
+  a) Native transfer:  balance >= amount + estimated_fee
+  b) ERC20 transfer:   token_balance >= amount AND native_balance >= estimated_fee
+  c) SPL transfer:     token_balance >= amount AND sol_balance >= estimated_fee
+  Validation failed -> abort and display shortfall details with suggestions
+  |
+Step 7: Build transaction preview
+  Call dex_tx_transfer_preview({ chain, from_address, to_address, token_address, amount, account_id, mcp_token })
+  |
+Step 8: Display confirmation (MANDATORY GATE)
+  Show: chain, type, sender, recipient, amount, balances, gas estimate, server confirm_message
+  Wait for explicit "confirm" reply.
+  - "confirm" -> proceed to Step 9
+  - "cancel"  -> abort, display cancellation notice
+  - modification request -> return to Step 2
+  |
+Step 9: Sign transaction
+  Call dex_wallet_sign_transaction({ raw_tx, chain, account_id, mcp_token })
+  |
+Step 10: Broadcast
+  Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token }) -> get hash_id
+  |
+Step 11: Display result + proactive suggestions
+  Show tx hash, block explorer link, and post-transfer suggestions (see Post-Transfer Suggestions)
 ```
 
 ### Flow B: Batch Transfer
 
+Each transfer independently goes through Steps 3-8, confirmed one by one:
+
 ```
-First session detection (if needed)
-  ↓ Success
+Step 1-2: Auth + collect all transfer intents
 
-Step 1-2: Authentication + Parameter Collection
-  Identify multiple transfer intents, collect to_address, amount, token, chain for each transfer
-  ↓
+Step 3-8: Per transfer (sequential)
+  Each transfer gets its own confirmation:
+  "confirm" -> Execute this transfer
+  "skip"    -> Skip this transfer, continue to next
+  "cancel all" -> Abort remaining transfers
 
-Step 3-8: Execute individually for each transfer
-  Each transfer independently goes through Step 3 ~ Step 8 (check balance → Gas → validate → preview → confirm)
-  Display confirmation summary for each transfer individually, confirm one by one:
+Step 9-10: Sign + broadcast confirmed transfers only
 
-  ────────────────────────────
-  📦 Batch Transfer (1/3 transfers)
-
-  [Display confirmation summary for this transaction]
-
-  Reply "confirm" to execute this one, "skip" to skip this one, "cancel all" to abort remaining transfers.
-  ────────────────────────────
-
-  ↓ User confirms one by one
-
-Step 9-10: Sign + Broadcast individually (only for confirmed transfers)
-  ↓
-
-Step 11: Summary Results
-
-  ────────────────────────────
-  📦 Batch Transfer Results
-
-  | # | Recipient Address | Amount | Status | Hash |
-  |---|-------------------|--------|--------|------|
+Step 11: Summary table + proactive suggestions
+  | # | To | Amount | Status | Hash |
+  |---|-----|--------|--------|------|
   | 1 | 0xDEF...5678 | 100 USDT | ✅ Success | 0xa1b2... |
-  | 2 | 0x123...ABCD | 200 USDT | ✅ Success | 0xc3d4... |
-  | 3 | 0x456...EF01 | 50 USDT  | ⏭ Skipped | — |
-
-  Successful: 2/3 transfers
-  ────────────────────────────
+  | 2 | 0x123...ABCD | 200 USDT | ⏭ Skipped | — |
 ```
 
-## Transaction Confirmation Template
+---
 
-**This confirmation summary is mandatory gate - Agent must not execute signing before user explicitly replies "confirm". This cannot be skipped.**
+## Transaction Confirmation Templates
 
-### Native Token Transfer Confirmation
+**These confirmations are MANDATORY gates. Agent must NOT sign before receiving explicit user confirmation.**
+
+### Native Token Transfer
 
 ```
 ========== Transaction Confirmation ==========
-Chain: {chain_name} (e.g. Ethereum)
-Type: Native token transfer
-Sender Address: {from_address}
-Recipient Address: {to_address}
-Transfer Amount: {amount} {symbol} (e.g. 1.5 ETH)
----------- Balance Info ----------
-{symbol} Balance: {balance} {symbol} (Sufficient ✅)
----------- Fee Info ----------
-Estimated Gas: {estimated_fee} {gas_symbol} (≈ ${fee_usd})
-Remaining After Transfer: {remaining_balance} {symbol}
+Chain:          {chain_name}
+Type:           Native token transfer
+From:           {from_address}
+To:             {to_address}
+Amount:         {amount} {symbol}
+---------- Balance ----------
+{symbol} Balance: {balance} (Sufficient ✅)
+---------- Fees ----------
+Estimated Gas:  {estimated_fee} {gas_symbol} (≈ ${fee_usd})
+Remaining:      {remaining_balance} {symbol}
 ---------- Server Confirmation ----------
-{confirm_message from tx.transfer_preview}
-===============================
-Reply "confirm" to execute, "cancel" to abort, or tell me what to modify.
+{confirm_message}
+===============================================
+Reply "confirm" to execute, "cancel" to abort, or describe changes.
 ```
 
-### ERC20 / SPL Token Transfer Confirmation
+### ERC20 / SPL Token Transfer
 
 ```
 ========== Transaction Confirmation ==========
-Chain: {chain_name} (e.g. Ethereum)
-Type: ERC20 token transfer
-Sender Address: {from_address}
-Recipient Address: {to_address}
-Transfer Amount: {amount} {token_symbol} (e.g. 1000 USDT)
-Token Contract: {token_address}
----------- Balance Info ----------
-{token_symbol} Balance: {token_balance} {token_symbol} (Sufficient ✅)
-{gas_symbol} Balance (Gas): {gas_balance} {gas_symbol} (Sufficient ✅)
----------- Fee Info ----------
-Estimated Gas: {estimated_fee} {gas_symbol} (≈ ${fee_usd})
-Remaining After Transfer: {remaining_token} {token_symbol} / {remaining_gas} {gas_symbol}
+Chain:          {chain_name}
+Type:           ERC20 token transfer
+From:           {from_address}
+To:             {to_address}
+Amount:         {amount} {token_symbol}
+Contract:       {token_address}
+---------- Balance ----------
+{token_symbol} Balance: {token_balance} (Sufficient ✅)
+{gas_symbol} Balance (Gas): {gas_balance} (Sufficient ✅)
+---------- Fees ----------
+Estimated Gas:  {estimated_fee} {gas_symbol} (≈ ${fee_usd})
+Remaining:      {remaining_token} {token_symbol} / {remaining_gas} {gas_symbol}
 ---------- Server Confirmation ----------
-{confirm_message from tx.transfer_preview}
-===============================
-Reply "confirm" to execute, "cancel" to abort, or tell me what to modify.
+{confirm_message}
+===============================================
+Reply "confirm" to execute, "cancel" to abort, or describe changes.
 ```
 
+---
 
-## Address Validation Rules
+## Address Validation
 
-Before initiating transfer, Agent must validate recipient address format:
+| Chain Type | Format | Regex |
+|------------|--------|-------|
+| EVM (eth/bsc/polygon/...) | `0x` + 40 hex chars (42 total) | `^0x[0-9a-fA-F]{40}$` |
+| Solana | Base58, 32-44 chars | `^[1-9A-HJ-NP-Za-km-z]{32,44}$` |
 
-| Chain Type | Format Requirements | Validation Rules |
-|-----------|---------------------|------------------|
-| EVM (eth/bsc/polygon/...) | Starts with `0x`, 40 hex characters (42 total) | Regex `^0x[0-9a-fA-F]{40}$`, recommend EIP-55 checksum validation |
-| Solana | Base58 encoded, 32-44 characters | Regex `^[1-9A-HJ-NP-Za-km-z]{32,44}$` |
+Validation failure -> Reject transfer with format guidance. Same-address warning -> Confirm intentional operation.
 
-When validation fails:
+---
 
+## Supported Chains
+
+| Chain ID | Network | Gas Token | Block Explorer |
+|----------|---------|-----------|----------------|
+| `eth` | Ethereum | ETH | etherscan.io |
+| `bsc` | BNB Smart Chain | BNB | bscscan.com |
+| `polygon` | Polygon | MATIC | polygonscan.com |
+| `arbitrum` | Arbitrum One | ETH | arbiscan.io |
+| `optimism` | Optimism | ETH | optimistic.etherscan.io |
+| `avax` | Avalanche C-Chain | AVAX | snowtrace.io |
+| `base` | Base | ETH | basescan.org |
+| `sol` | Solana | SOL | solscan.io |
+
+---
+
+## Conversation Examples
+
+**Example 1 (Happy Path): Successful ETH transfer**
+User: "Send 0.5 ETH to 0xDEF...5678"
+Agent:
+1. Verify auth -> call `dex_wallet_get_addresses` -> get `from_address`.
+2. Call `dex_wallet_get_token_list` -> check ETH balance.
+3. Call `dex_tx_gas` -> estimate gas fee.
+4. Validate: 0.5 + gas <= ETH balance.
+5. Call `dex_tx_transfer_preview` -> display confirmation template.
+6. User replies "confirm".
+7. Call `dex_wallet_sign_transaction` -> call `dex_tx_send_raw_transaction`.
+8. Display tx hash + etherscan link + post-transfer suggestions.
+
+**Example 2 (Happy Path): ERC20 transfer with full details**
+User: "Send 100 USDT to 0xABC...1234 on Ethereum"
+Agent:
+1. Verify auth -> get wallet address for ETH chain.
+2. Call `dex_wallet_get_token_list({ chain: "eth" })` -> verify USDT balance >= 100 AND ETH balance >= gas fee.
+3. Call `dex_tx_gas` -> estimate gas.
+4. Call `dex_tx_transfer_preview` -> display ERC20 confirmation template.
+5. User replies "confirm".
+6. Call `dex_wallet_sign_transaction` -> call `dex_tx_send_raw_transaction`.
+7. Display tx hash + explorer link + post-transfer suggestions.
+
+**Example 3 (Happy Path): Solana native transfer**
+User: "Send 2 SOL to BTYz...bfxE"
+Agent:
+1. Verify auth -> get Solana wallet address.
+2. Call `dex_wallet_get_token_list({ chain: "sol" })` -> verify SOL balance >= 2 + gas.
+3. Call `dex_tx_transfer_preview({ chain: "sol", token_address: "native", amount: "2", ... })`.
+4. Display confirmation. On confirm -> sign -> broadcast -> display tx hash + solscan link.
+
+**Example 4 (Happy Path): SPL token transfer (e.g., USDC on Solana)**
+User: "Transfer 50 USDC to my friend's Solana address BTYz..."
+Agent:
+1. Verify auth -> get Solana address.
+2. Call `dex_wallet_get_token_list({ chain: "sol" })` -> verify USDC balance >= 50 AND SOL >= gas + ATA rent.
+3. Call `dex_tx_transfer_preview` with token mint address.
+4. Display confirmation including note about possible ATA creation fee.
+5. On confirm -> sign -> broadcast.
+
+**Example 5 (Happy Path): Transfer on L2 (Arbitrum)**
+User: "Send 200 USDT to 0xDEF... on Arbitrum"
+Agent:
+1. Get wallet address (same as ETH — EVM chains share address).
+2. Check USDT balance on Arbitrum and ETH balance for gas.
+3. Build preview, display confirmation with Arbitrum-specific gas estimate.
+4. On confirm -> sign -> broadcast -> display arbiscan link.
+
+**Example 6 (Edge Case): Insufficient token balance**
+User: "Transfer 1000 USDT on Ethereum"
+Agent:
+1. Call `dex_wallet_get_token_list` -> USDT balance is 800.
+2. Abort: "Insufficient balance. You have 800 USDT but need 1000 USDT. Please reduce the amount or top up first."
+3. Suggest: "You can check your balances on other chains or swap tokens to get more USDT."
+
+**Example 7 (Edge Case): Insufficient gas token**
+User: "Send 100 USDT to 0xDEF... on Ethereum"
+Agent:
+1. Call `dex_wallet_get_token_list` -> USDT balance is 200 (sufficient), ETH balance is 0.0001 (insufficient for gas).
+2. Abort: "Insufficient gas. You need approximately 0.003 ETH for gas but only have 0.0001 ETH. Please acquire more ETH for gas fees."
+
+**Example 8 (Edge Case): Missing parameters — vague request**
+User: "I want to send some tokens"
+Agent:
+1. Identify intent: transfer, but missing recipient, amount, and token.
+2. Reply: "Please provide: recipient address, transfer amount, and token (e.g., ETH, USDT). Optionally specify the chain (default Ethereum)."
+
+**Example 9 (Edge Case): Missing only the chain**
+User: "Send 50 USDT to 0xABC..."
+Agent:
+1. Chain not specified. Default to Ethereum.
+2. Optionally ask: "I'll default to Ethereum. Would you like to send on a different chain (e.g., Arbitrum, BSC)?"
+
+**Example 10 (Edge Case): Invalid address format**
+User: "Send 1 ETH to abc123"
+Agent:
+1. Validate address: "abc123" does not match EVM (`0x` + 40 hex) or Solana (Base58) format.
+2. Reject: "Invalid address format. EVM addresses start with 0x and are 42 characters. Solana addresses are 32-44 Base58 characters. Please check and retry."
+
+**Example 11 (Edge Case): Sender == recipient**
+User: "Send 1 ETH to 0x... (same as own address)"
+Agent:
+1. Detect sender and recipient are identical.
+2. Warn: "The recipient address is the same as your wallet address. Are you sure you want to proceed? This will only consume gas without moving tokens."
+
+**Example 12 (Edge Case): User cancels confirmation**
+User: (After seeing confirmation) "cancel"
+Agent:
+1. Immediately abort. No signing or broadcasting occurs.
+2. Reply: "Transfer cancelled. No transaction was signed or broadcast."
+
+**Example 13 (Edge Case): User modifies parameters after preview**
+User: (After seeing confirmation) "Change the amount to 0.3 ETH"
+Agent:
+1. Return to parameter collection with updated amount.
+2. Re-run balance check, gas estimation, and preview with new amount.
+
+**Example 14 (Edge Case): Batch transfer**
+User: "Send 100 USDT to 0xAAA..., 200 USDT to 0xBBB..., and 50 USDT to 0xCCC..."
+Agent:
+1. Parse 3 transfer intents.
+2. Process each sequentially with individual confirmations.
+3. Display summary table at end.
+
+**Example 15 (Boundary Case): Not this module — swap request**
+User: "Swap ETH for USDT"
+Agent: This is a swap operation. Route to `gate-dex-trade`.
+
+**Example 16 (Boundary Case): Not this module — DApp interaction**
+User: "Connect my wallet to Uniswap"
+Agent: This is a DApp interaction. Route to [dapp.md](./dapp.md).
+
+**Example 17 (Boundary Case): Not this module — x402 payment**
+User: "Pay for this API endpoint"
+Agent: This is an x402 payment. Route to [x402.md](./x402.md).
+
+**Example 18 (Boundary Case): Not this module — balance check only**
+User: "How much ETH do I have?"
+Agent: This is a balance query, not a transfer. Route to [asset-query.md](./asset-query.md).
+
+---
+
+## Post-Transfer Suggestions
+
+After a successful transfer, **proactively display next actions**. This template is paired with the Follow-up Routing Table below.
+
+**After successful single transfer:**
 ```
-❌ Invalid recipient address format
+✅ Transfer broadcast successfully!
+Tx Hash: {hash_id}
+Explorer: https://{explorer}/tx/{hash_id}
+Transaction submitted. Confirmation time depends on network congestion.
 
-Provided address: {user_input}
-Expected format: {expected_format}
-
-Please check if the address is correct, complete, and matches the target chain.
+You can:
+- Check your updated balance
+- View transaction details on block explorer
+- Make another transfer
+- Swap tokens on DEX
 ```
 
-## Edge Cases and Error Handling
+**After successful batch transfer:**
+```
+✅ Batch transfer complete! {success_count}/{total_count} transfers succeeded.
+See the summary table above for individual tx hashes.
+
+You can:
+- Check your updated balances
+- View details of any specific transaction
+- Make additional transfers
+- Swap tokens on DEX
+```
+
+**After user cancels transfer:**
+```
+Transfer cancelled. No transaction was signed or broadcast.
+
+You can:
+- Start a new transfer with different parameters
+- Check your current balances
+- Swap tokens instead
+```
+
+**After transfer fails (balance insufficient):**
+```
+Transfer could not proceed due to insufficient balance.
+
+You can:
+- Check your balances across all chains
+- Swap tokens to acquire the needed asset
+- Try a smaller transfer amount
+```
+
+### Follow-up Routing Table
+
+| User Follow-up Intent | Target |
+|------------------------|--------|
+| View updated balance | [asset-query.md](./asset-query.md) (`dex_wallet_get_token_list`) |
+| View transaction details / history | [asset-query.md](./asset-query.md) (`dex_tx_detail`, `dex_tx_list`) |
+| Continue transferring to other addresses | Stay in this module |
+| Swap tokens | `gate-dex-trade` |
+| Pay for a 402 resource | [x402.md](./x402.md) |
+| Interact with a DApp | [dapp.md](./dapp.md) |
+| Login / auth expired | [auth.md](./auth.md) |
+| Check token prices | `gate-dex-market` |
+| Use CLI commands | [cli.md](./cli.md) |
+
+---
+
+## Error Handling
 
 | Scenario | Handling |
 |----------|----------|
-| Transfer token balance insufficient | Abort transaction, display current balance vs required amount difference, suggest reducing amount or topping up first |
-| Gas token balance insufficient | Abort transaction, display Gas token insufficient info, suggest getting Gas tokens first |
-| Invalid recipient address format | Refuse to initiate transaction, prompt correct address format |
-| Recipient address same as sender address | Warn user and confirm if intentional operation, avoid mistakes |
-| `tx.gas` estimation failed | Display error info, possible causes: network congestion, contract call exception. Suggest retry later |
-| `tx.transfer_preview` failed | Display server-returned error message, do not silently retry |
-| `wallet.sign_transaction` failed | Display signing error, possible causes: account permissions, server exception. Do not auto-retry |
-| `dex_tx_send_raw_transaction` failed | Display broadcast error (e.g. nonce conflict, insufficient gas, network congestion), suggest appropriate measures based on error type |
-| User cancels confirmation | Immediately abort, do not execute signing and broadcast. Display cancellation notice, stay friendly |
-| Amount exceeds token precision | Prompt token precision limitation, auto-truncate or ask user to correct |
-| Transfer amount is 0 or negative | Refuse to execute, prompt to input valid positive amount |
-| Token doesn't match target chain | Prompt token doesn't exist on target chain, suggest correct chain |
-| Broadcast successful but transaction unconfirmed for long time | Tell user transaction submitted, confirmation time depends on network conditions, can track via block explorer |
-| Some transfers fail in batch transfer | Mark those as failed, continue processing subsequent transfers, finally display summary results for each transfer |
+| Not logged in / `mcp_token` missing | Attempt silent refresh via `dex_auth_refresh_token`; on failure route to [auth.md](./auth.md) |
+| Token expired mid-transfer | Attempt silent refresh; on failure route to re-login, preserve transfer intent for retry |
+| Transfer token balance insufficient | Abort; show current balance vs. required amount; suggest reducing amount or topping up |
+| Gas token balance insufficient | Abort; display gas token shortfall; suggest acquiring gas tokens |
+| Invalid recipient address format | Refuse to initiate; show correct format for the target chain |
+| Recipient == sender | Warn user; confirm if intentional |
+| `dex_tx_gas` estimation failed | Display error; suggest retry later (possible network congestion or contract issue) |
+| `dex_tx_transfer_preview` failed | Display server error; do not silently retry |
+| `dex_wallet_sign_transaction` failed | Display signing error; do not auto-retry |
+| `dex_tx_send_raw_transaction` failed | Display broadcast error (nonce conflict, gas too low, network congestion); suggest action based on error type |
+| User cancels confirmation | Immediately abort; do not sign or broadcast |
+| Amount is 0 or negative | Refuse to execute; prompt for a valid positive amount |
+| Amount exceeds token precision | Prompt precision limit; auto-truncate or ask user to correct |
+| Token not available on target chain | Prompt that the token doesn't exist on the target chain; suggest the correct chain |
+| Unsupported chain | Show supported chain list from Supported Chains table |
+| Broadcast succeeds but tx unconfirmed | Inform user tx submitted; confirmation depends on network |
+| Network interruption after signing | Inform signed tx can be broadcast later; do not discard |
+| Batch transfer partial failure | Mark failed transfers, continue remaining; show summary at end |
 
-## Safety Rules
+---
 
-1. **`mcp_token` confidentiality**: Never display `mcp_token` in plaintext to users, only use placeholders like `<mcp_token>` in call examples.
-2. **`account_id` masking**: When displaying to users, only show partial characters (e.g. `acc_12...89`).
-3. **Auto token refresh**: When `mcp_token` expires, prioritize silent refresh, only require re-login if refresh fails.
-4. **Mandatory balance validation**: Before each transfer **must** validate balance (token + Gas), **prohibit** initiating signing and broadcasting when balance insufficient.
-5. **Mandatory user confirmation**: Before signing **must** display complete confirmation summary to users and get explicit "confirm" reply. Cannot skip, simplify or auto-confirm.
-6. **Individual confirmation for batches**: For batch transfers, each transaction displays confirmation summary individually, wait for user confirmation one by one.
-7. **No auto-retry failed transactions**: After signing or broadcasting failures, clearly display error messages to users, don't auto-retry in background.
-8. **Address validation**: Validate recipient address format before sending to prevent asset loss due to incorrect addresses.
-9. **Prohibit operations when MCP Server not configured or unreachable**: If Step 0 connection detection fails, abort all subsequent steps.
-10. **Transparent MCP Server errors**: All error messages returned by MCP Server should be displayed to users truthfully, without hiding or tampering.
-11. **`raw_tx` confidentiality**: Unsigned transaction raw data should only flow between Agent and MCP Server, do not display hex raw content to users.
-12. **Broadcast immediately after signing**: After successful signing, should broadcast immediately, should not hold signed transactions for long periods.
+## Security Rules
+
+1. **Token confidentiality**: Never display `mcp_token` in plaintext.
+2. **Account ID masking**: Show only partial `account_id` characters in user-facing output.
+3. **Silent refresh**: Attempt `dex_auth_refresh_token` before routing to re-login.
+4. **Mandatory balance validation**: Always validate balance (token + gas) before transfer. Never initiate signing when balance is insufficient.
+5. **Mandatory user confirmation**: Before signing, display a complete confirmation summary and get an explicit "confirm" reply. Never skip, simplify, or auto-confirm.
+6. **Individual confirmation for batches**: Each transaction in a batch must be confirmed individually.
+7. **No auto-retry on failure**: After signing or broadcast failure, display the error clearly. Never auto-retry in the background.
+8. **Address validation**: Validate recipient address format before sending to prevent asset loss.
+9. **MCP Server required**: Abort all operations if connection detection fails.
+10. **Transparent errors**: Display all MCP Server errors truthfully without modification.
+11. **Raw tx confidentiality**: `raw_tx` hex data flows only between Agent and MCP Server — never display to users.
+12. **Broadcast immediately after signing**: Do not hold signed transactions for extended periods.

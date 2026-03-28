@@ -35,6 +35,7 @@ This skill automatically checks for updates from the [Gate Skills Repository](ht
 | 🔐 **Authentication** | Google OAuth and Gate OAuth login, token management | Login verification, session management, auto refresh |
 | 💰 **Assets** | Balance queries, address retrieval, transaction history | View holdings, total assets, historical records |
 | 💸 **Transfer** | Gas estimation, transaction building, signature broadcasting | Token transfers, batch transfers, fee calculation |
+| 💳 **x402 Payment** | HTTP 402 — `dex_tx_x402_fetch`: pay (EVM exact / EVM upto / Solana) and retry | Gated API, flight order, usage-based upto (see [references/x402.md](./references/x402.md)) |
 | 🎯 **DApp** | Wallet connection, message signing, contract interaction | DeFi operations, NFT interactions, contract approvals |
 
 ---
@@ -182,6 +183,7 @@ In AI tools like Cursor, automatically triggered when conversation contains the 
 - **Authentication Related**: `login`, `logout`, `authenticate`, `OAuth`, `token expired`
 - **Asset Queries**: `check balance`, `total assets`, `wallet address`, `transaction history`, `token balance`
 - **Transfer Operations**: `transfer`, `send tokens`, `batch transfer`, `gas fee`
+- **x402 Payment**: `402 payment`, `x402 pay`, `payment required`, `pay for API/URL`, `dex_tx_x402_fetch`
 - **DApp Interactions**: `connect DApp`, `sign message`, `approve`, `contract call`, `authorization`
 
 **Example Conversations**:
@@ -233,6 +235,7 @@ gate-dex-wallet/
 └── references/            # Sub-module reference documentation
     ├── auth.md            # 🔐 Authentication module complete specification
     ├── transfer.md        # 💸 Transfer module complete specification
+    ├── x402.md            # 💳 x402 payment (402 Payment Required) specification
     ├── dapp.md            # 🎯 DApp module complete specification
     └── cli.md             # 🖥️ CLI implementation complete specification
 ```
@@ -285,6 +288,7 @@ gate-dex-wallet/
 
 - **Authentication Module**: [references/auth.md](./references/auth.md)
 - **Transfer Module**: [references/transfer.md](./references/transfer.md)
+- **x402 Payment Module**: [references/x402.md](./references/x402.md) — tool `dex_tx_x402_fetch` (MCP description in English); supports exact + upto, EVM Permit2 prerequisites for upto
 - **DApp Module**: [references/dapp.md](./references/dapp.md)
 - **CLI Implementation**: [references/cli.md](./references/cli.md)
 - **Change Log**: [CHANGELOG.md](./CHANGELOG.md)

@@ -109,6 +109,7 @@
 
 **Prompt Examples**:
 - "Sell high 0.1 BTC, target price 65000, 7-day term"
+- "Sell high 0.1 BTC, target price 65000, 7-day term"
 - "Sell high 0.5 ETH with target price 4000"
 - "Place a sell-high dual with BTC"
 

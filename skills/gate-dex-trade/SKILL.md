@@ -1,19 +1,59 @@
 ---
 name: gate-dex-trade
-version: "2026.3.18-1"
-updated: "2026-03-18"
+version: "2026.3.24-1"
+updated: "2026-03-24"
 description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transactions that MODIFY blockchain state: swap, buy, sell, exchange, convert tokens, cross-chain bridge. Every operation here results in an on-chain transaction requiring signing. This skill EXECUTES trades — it does not provide read-only data lookups or manage wallet accounts."
 ---
 
 # Gate DEX Trade
 
+
 > **Pure Routing Layer** — Swap EXECUTION only. Every operation produces an on-chain transaction. All specifications in `references/`.
+
+## General Rules
+
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 
 **Trigger Scenarios**: Use when the user wants to **execute a token exchange** that modifies blockchain state:
 - Swap: "swap ETH for USDT", "exchange 100 USDC to DAI", "convert my BNB"
 - Buy/Sell: "buy ETH", "sell my USDT", "purchase SOL"
 - Cross-chain: "bridge ETH from Arbitrum to Base", "cross-chain swap"
 - Swap quote: "how much USDT will I get for 1 ETH" (with intent to trade)
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate-Dex | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- dex_chain_config
+- dex_tx_quote
+
+**Execution Operations (Write)**
+
+- dex_tx_swap
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
+
+### Installation Check
+- Required: Gate-Dex
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only (this workspace)
 
@@ -26,19 +66,6 @@ description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transac
 - "check my swap history" → `gate-dex-wallet` (account query)
 - "transfer ETH to 0xABC..." → `gate-dex-wallet` (direct transfer, not swap)
 - "approve contract" (outside swap context) → `gate-dex-wallet` (DApp interaction)
-
----
-
-## Auto-Update (Session Start Only)
-
-On session start (not during interactions), check for updates once:
-
-1. Read this file's frontmatter `version` and `updated` fields.
-2. Fetch remote SKILL.md from `https://raw.githubusercontent.com/gateio/web3_wallet_skill/master/skills/gate-dex-trade/SKILL.md`.
-3. Compare: update if remote version > local version, or same version but remote `updated` date is newer.
-4. On update: fetch and overwrite all skill files (`SKILL.md`, `README.md`, `CHANGELOG.md`, `install.sh`, `references/mcp.md`, `references/openapi.md`).
-5. On failure: silently continue — never block user interactions.
-6. Skip if: already checked this session, or skill was installed < 24h ago.
 
 ---
 
@@ -117,22 +144,10 @@ For uncommon chains: MCP calls `dex_chain_config`, OpenAPI calls `trade.swap.cha
 
 ---
 
-## Cross-Skill Collaboration
-
-| Source | Scenario | Routing |
-|--------|----------|---------|
-| `gate-dex-wallet` | Exchange tokens after viewing balance | Carry context, follow routing flow |
-| `gate-dex-market` | Buy token after viewing market data | Carry token info, follow routing flow |
-| `gate-dex-wallet/references/transfer.md` | Exchange remaining tokens after transfer | Carry chain/token context |
-
----
-
 ## Security Rules
 
-1. **Mode selection transparency**: Clearly inform users of the current mode and reasons
-2. **Authentication isolation**: MCP uses `mcp_token`, OpenAPI uses AK/SK — never mix
-3. **Three-step confirmation gateway**: Trading pair confirmation → quote display → signature authorization — cannot be skipped
-4. **Balance pre-check**: Mandatory verification of asset and Gas token sufficiency before trading
-5. **Risk warnings**: Forced warning for exchange value difference > 5%, high slippage (> 5%) MEV attack warnings
-6. **No OpenAPI fallback** when MCP fails (this project)
-7. **No repeated guidance**: MCP setup guide displayed at most once per session
+1. **Three-step confirmation gateway**: Trading pair confirmation → quote display → signature authorization — cannot be skipped
+2. **Balance pre-check**: Mandatory verification of asset and Gas token sufficiency before trading
+3. **Risk warnings**: Forced warning for exchange value difference > 5%, high slippage (> 5%) MEV attack warnings
+4. **Authentication & credentials**: Follow §3 of [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md); MCP uses `mcp_token`, OpenAPI uses AK/SK — never mix
+5. **No OpenAPI fallback** when MCP fails (this project)

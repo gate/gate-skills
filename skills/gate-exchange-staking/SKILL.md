@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-staking
-version: "2026.3.16-1"
-updated: "2026-03-16"
+version: "2026.3.23-1"
+updated: "2026-03-26"
 description: "The on-chain staking (earn) function of Gate Exchange. Use this skill to query staking positions, rewards, products, order history, or to perform stake, redeem, or mint (mint = immediate stake) via swap. Trigger phrases include: staking, stake, redeem, mint, unstake, earn, staking rewards, staking positions, earning records, staking history, available coins, stake USDT, redeem BTC."
 ---
 
@@ -9,12 +9,46 @@ description: "The on-chain staking (earn) function of Gate Exchange. Use this sk
 
 ## General Rules
 
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 
-This skill is the single entry for Gate Exchange staking (on-chain earn). It supports **five modules**: positions, rewards, products, order history, and **stake/redeem (swap)**. User intent is routed to the matching reference and MCP tool.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_earn_asset_list
+- cex_earn_award_list
+- cex_earn_find_coin
+- cex_earn_order_list
+
+**Execution Operations (Write)**
+
+- cex_earn_swap_staking_coin
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Earn:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Module overview
 
@@ -73,6 +107,7 @@ When **staking**, **redeeming**, or **minting** GUSD (or any product whose `curr
 - **Require the user to choose a coin.** Only **USDT** and **USDC** are supported.
 - Prompt: e.g. "This product accepts USDT or USDC. Which do you want to use: USDT or USDC?"
 - **Pass the user’s choice as the `coin` parameter** to the swap (or mint) tool. Do not call the tool until the user has selected one of the two.
+
 
 ### Positions: status field
 
@@ -141,6 +176,17 @@ When **viewing staking positions** (position/balance/holdings queries), **ignore
 After each query, output a short standardized result consistent with the reference (e.g. positions summary, reward summary, product table, or order list). Use the exact response fields from the API (see references) so the user sees correct field names and values.
 
 ## Safety rules
+
+### User confirmation requirement (Mandatory)
+
+**NEVER call `cex_earn_swap_staking_coin` without explicit user confirmation.** Without user confirmation, only read/query operations are allowed.
+
+Before every stake, redeem, or mint execution:
+1. Show an **Action Draft** summarizing: operation type (stake/redeem/mint), product (pid + protocolName), coin, amount, side, and key risk note (e.g. lock period, exchange rate).
+2. Wait for explicit user confirmation (e.g. "Confirm", "Yes", "Go ahead").
+3. Only after receiving confirmation in the immediately previous user turn, call `cex_earn_swap_staking_coin`.
+4. If parameters change after confirmation (amount, pid, coin), invalidate the old confirmation and re-confirm.
+5. If confirmation is ambiguous, stale, or from a different context, do NOT execute — request fresh confirmation.
 
 ### Stake, redeem, and mint
 

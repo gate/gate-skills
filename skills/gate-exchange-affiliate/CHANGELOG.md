@@ -1,5 +1,19 @@
 # Changelog
 
+## [2026.3.25-1] - 2026-03-25
+
+### Changed
+
+- **SKILL.md**: Shortened frontmatter `description`; moved UTC+8 / time-window rules into **Important Notice → Query time and timezone (UTC+8)**; **Safety Rules** now references that section instead of duplicating conversion details.
+
+## [2026.3.24-1] - 2026-03-24
+
+### Added
+- `README.md`: Overview, core capabilities, MCP tool table, architecture layout, authentication note.
+
+### Changed
+- `SKILL.md`: General Rules — MCP tool allowlist bullet (aligned with `gate-exchange-crossex` template).
+
 ## [2026.3.18-2] - 2026-03-18
 
 ### Added

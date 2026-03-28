@@ -58,8 +58,13 @@ Query staking/redemption order history and reward distribution records.
 
 1. **Parse parameters**: Extract `coin`, `pid`, `type` (0=stake, 1=redeem), `page` from user query.
 2. **Call tool**: Call `cex_earn_order_list` with `status="finished"` (required) and optional filters.
+<<<<<<< HEAD
+3. **Key data to extract**: From response object: `page`, `pageSize`, `pageCount`, `totalCount`. From each `list` item: `pid`, `coin`, `amount`, `exchange_amount`, `type`, `createStamp`, `redeem_stamp`, `status`, `fee`.
+4. **Format response**: Show as table or list; convert timestamps to dates; map type 0=Stake, 1=Redeem. **Dynamic-rate products** (exchangeRate ≠ 1 from `cex_earn_find_coin` for same pid): for **Stake** (type=0) show **exchange_amount** (what the user received); for **Redeem** (type=1) show **amount** (what the user received). When exchangeRate = 1, show amount for both.
+=======
 3. **Key data to extract**: From response object: `page`, `pageSize`, `pageCount`, `totalCount`. From each `list` item: `pid`, `coin`, `amount`, `exchange_amount`, `type`, `status`, `fee`. Do not display `createStamp`, `redeem_stamp` or any timestamp formatting.
 4. **Format response**: Show as table or list; map type 0=Stake, 1=Redeem. **Do not display or format timestamp fields** (omit createStamp, redeem_stamp from output; see SKILL.md). **Dynamic-rate products** (exchangeRate ≠ 1 from `cex_earn_find_coin` for same pid): for **Stake** (type=0) show **exchange_amount** (what the user received); for **Redeem** (type=1) show **amount** (what the user received). When exchangeRate = 1, show amount for both.
+>>>>>>> master
 
 ## Report Template
 

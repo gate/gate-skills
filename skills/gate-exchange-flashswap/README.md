@@ -31,7 +31,7 @@ skills/gate-exchange-flashswap/
 **Workflow**:
 
 1. Identify user intent (swap mode or query type)
-2. For swaps: Preview → Show quote to user → Confirm → Create order
+2. For swaps: Pre-validate amount → Preview quote → Show to user → Confirm → Create order
 3. For queries: Call the corresponding query tool and format results
 
 ## Usage
@@ -44,7 +44,34 @@ Trigger phrase examples:
 - "Query my flash swap orders"
 - "Check flash swap order 122136 details"
 
-## Dependencies
+## MCP Tools
 
-- MCP Service: `user-g-dev-ex`
-- Authentication: All swap and order operations require Gate API authentication
+| Tool | Type | Auth Required | Description |
+|------|------|---------------|-------------|
+| `cex_fc_preview_fc_order_v1` | Preview | Yes | One-to-one swap quote preview |
+| `cex_fc_create_fc_order_v1` | Create | Yes | One-to-one swap order creation (requires `quote_id`) |
+| `cex_fc_preview_fc_multi_currency_one_to_many_order` | Preview | Yes | One-to-many swap quote preview |
+| `cex_fc_create_fc_multi_currency_one_to_many_order` | Create | Yes | One-to-many swap order creation |
+| `cex_fc_preview_fc_multi_currency_many_to_one_order` | Preview | Yes | Many-to-one swap quote preview |
+| `cex_fc_create_fc_multi_currency_many_to_one_order` | Create | Yes | Many-to-one swap order creation |
+| `cex_fc_list_fc_currency_pairs` | Query | No | List supported flash swap pairs and limits |
+| `cex_fc_list_fc_orders` | Query | Yes | Query flash swap order history |
+| `cex_fc_get_fc_order` | Query | Yes | Query single flash swap order by ID |
+
+## Safety & Compliance
+
+- **Preview before execution**: Every swap goes through a preview step first; the user must confirm the quote before order creation
+- **One-click mode**: Users can explicitly request "direct" or "one-click" swap, which counts as pre-authorized confirmation
+- **No fabricated results**: If any API call returns an error, the skill reports the actual error and never fabricates success responses, order IDs, or quote IDs
+- **Amount validation**: Swap amounts are validated against pair min/max limits before previewing
+- **Sensitive data**: API keys and authentication tokens are never exposed in responses
+- **Amounts displayed as-is**: No rounding or modification of amounts from API responses
+
+## Authentication
+
+This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

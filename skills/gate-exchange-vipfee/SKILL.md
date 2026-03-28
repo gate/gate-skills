@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-vipfee
-version: "2026.3.11-2"
-updated: "2026-03-11"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: "Query Gate VIP tier and trading fee rates. Use this skill whenever the user asks about their VIP level, trading fee rates, spot fees, or futures/contract fees on Gate. Trigger phrases include 'VIP level', 'trading fee', 'fee rate', 'spot fee', 'futures fee'."
 ---
 
@@ -9,12 +9,40 @@ description: "Query Gate VIP tier and trading fee rates. Use this skill whenever
 
 ## General Rules
 
-Read and follow the shared runtime rules before proceeding:
-→ [exchange-runtime-rules.md](../exchange-runtime-rules.md)
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
+  exist in the MCP server.
 
 ---
 
-Query the user's Gate VIP tier and trading fee rates, including spot and futures fee information.
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_account_get_account_detail
+- cex_wallet_get_wallet_fee
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Account:Read, Wallet:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Quick Start
 

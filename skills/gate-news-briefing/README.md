@@ -26,3 +26,8 @@ An AI Agent skill that aggregates **recent news and today's hot topics** from Ga
 - **Input**: User message asking for general news/hot topics, or coin-specific news (coin parameter).
 - **Tools** (parallel): `news_events_get_latest_events`, `news_feed_search_news`, `news_feed_get_social_sentiment`. General vs Coin-Specific mode params — see SKILL.md.
 - **Output**: Major Events, Trending News (by category), Social Sentiment, Worth Watching; or Coin-Specific template. De-duplicate event/news; "No data" if a tool returns empty. **De-duplication & Ranking**, **Error Handling**, **Cross-Skill**, **Safety** (source attribution, no fabrication) — see SKILL.md.
+
+## Source
+
+- **Repository**: [github.com/gate/gate-skills](https://github.com/gate/gate-skills)
+- **Publisher**: [Gate.com](https://www.gate.com)

@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-crossex
-version: "2026.3.19-2"
-updated: "2026-03-19"
+version: "2026.3.23-1"
+updated: "2026-03-23"
 description: 'Use this skill for Gate CrossEx cross-exchange operations: order placement, transfer, convert, and order/position/history queries across Gate, Binance, OKX and Bybit. Trigger phrases include "buy spot", "transfer", "convert", "query positions", "order history".'
 ---
 
@@ -12,10 +12,73 @@ order management, position query, and history query. User intents are routed to 
 
 ## General Rules
 
-- Read and follow the shared runtime rules before
-  proceeding: → [references/runtime-rules.md](references/runtime-rules.md)
+⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
+Do NOT select or call any tool until all rules are read. These rules have the highest priority.
+→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
+
+
+---
+
+## MCP Dependencies
+
+### Required MCP Servers
+| MCP Server | Status |
+|------------|--------|
+| Gate (main) | ✅ Required |
+
+### MCP Tools Used
+
+**Query Operations (Read-only)**
+
+- cex_crx_get_crx_account
+- cex_crx_get_crx_fee
+- cex_crx_get_crx_interest_rate
+- cex_crx_get_crx_margin_positions_leverage
+- cex_crx_get_crx_order
+- cex_crx_get_crx_positions_leverage
+- cex_crx_list_crx_account_book
+- cex_crx_list_crx_adl_rank
+- cex_crx_list_crx_coin_discount_rate
+- cex_crx_list_crx_history_margin_interests
+- cex_crx_list_crx_history_margin_positions
+- cex_crx_list_crx_history_orders
+- cex_crx_list_crx_history_positions
+- cex_crx_list_crx_history_trades
+- cex_crx_list_crx_margin_positions
+- cex_crx_list_crx_open_orders
+- cex_crx_list_crx_positions
+- cex_crx_list_crx_rule_risk_limits
+- cex_crx_list_crx_rule_symbols
+- cex_crx_list_crx_transfer_coins
+- cex_crx_list_crx_transfers
+
+**Execution Operations (Write)**
+
+- cex_crx_cancel_crx_order
+- cex_crx_close_crx_position
+- cex_crx_create_crx_convert_order
+- cex_crx_create_crx_convert_quote
+- cex_crx_create_crx_order
+- cex_crx_create_crx_transfer
+- cex_crx_update_crx_account
+- cex_crx_update_crx_margin_positions_leverage
+- cex_crx_update_crx_order
+- cex_crx_update_crx_positions_leverage
+
+### Authentication
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Crx:Write
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+
+### Installation Check
+- Required: Gate (main)
+- Install: Run installer skill for your IDE
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Module Overview
 

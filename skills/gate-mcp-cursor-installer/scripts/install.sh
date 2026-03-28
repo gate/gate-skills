@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-# Gate CEX One-Click Installer: MCP (main/dex/info/news selectable) + all gate-skills
-# Usage: install.sh [--mcp main] [--mcp dex] ... [--no-skills]  Installs all MCPs when no --mcp is passed
-# DEX MCP uses fixed x-api-key: MCP_AK_8W2N7Q
+# Gate Cursor One-Click Installer: MCP + all gate-skills
+# Usage: install.sh [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]
+#   main / cex-public / cex-exchange: see gate-mcp README (Local vs Remote CEX)
+# Installs all MCPs when no --mcp is passed. DEX fixed x-api-key: MCP_AK_8W2N7Q
 
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 GATE_SKILLS_REPO="https://github.com/gate/gate-skills.git"
 GATE_SKILLS_BRANCH="${GATE_SKILLS_BRANCH:-master}"
@@ -23,17 +26,20 @@ fi
 
 # Default: install all MCPs, install skills
 MCP_MAIN=0
+MCP_CEX_PUBLIC=0
+MCP_CEX_EXCHANGE=0
 MCP_DEX=0
 MCP_INFO=0
 MCP_NEWS=0
 INSTALL_SKILLS=1
 
 usage() {
-  echo "Usage: $0 [--mcp main|dex|info|news] ... [--no-skills]"
+  echo "Usage: $0 [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]"
   echo "  Installs all MCPs when no --mcp is passed; pass multiple --mcp to install only specified ones."
   echo "  --no-skills  Install MCP only, do not clone gate-skills."
   echo "Examples: $0"
   echo "          $0 --mcp main --mcp dex"
+  echo "          $0 --mcp cex-public --mcp cex-exchange"
   exit 0
 }
 
@@ -42,11 +48,13 @@ while [[ $# -gt 0 ]]; do
     --mcp)
       shift
       case "$1" in
-        main)   MCP_MAIN=1 ;;
-        dex)    MCP_DEX=1 ;;
-        info)   MCP_INFO=1 ;;
-        news)   MCP_NEWS=1 ;;
-        *)      echo "Unknown MCP: $1 (available: main, dex, info, news)" >&2; exit 1 ;;
+        main)         MCP_MAIN=1 ;;
+        cex-public)   MCP_CEX_PUBLIC=1 ;;
+        cex-exchange) MCP_CEX_EXCHANGE=1 ;;
+        dex)          MCP_DEX=1 ;;
+        info)         MCP_INFO=1 ;;
+        news)         MCP_NEWS=1 ;;
+        *)            echo "Unknown MCP: $1 (available: main, cex-public, cex-exchange, dex, info, news)" >&2; exit 1 ;;
       esac
       shift
       ;;
@@ -57,8 +65,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 # If no --mcp specified, select all
-if [[ $MCP_MAIN -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
+if [[ $MCP_MAIN -eq 0 && $MCP_CEX_PUBLIC -eq 0 && $MCP_CEX_EXCHANGE -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
   MCP_MAIN=1
+  MCP_CEX_PUBLIC=1
+  MCP_CEX_EXCHANGE=1
   MCP_DEX=1
   MCP_INFO=1
   MCP_NEWS=1
@@ -103,67 +113,41 @@ if [[ $MCP_MAIN -eq 1 ]]; then
   fi
 fi
 
-# DEX MCP fixed x-api-key
-GATE_API_KEY="MCP_AK_8W2N7Q"
-
 # ---------- 1. Merge and write mcp.json ----------
 mkdir -p "$(dirname "$MCP_JSON")"
 
-# Build mcpServers fragment to add (Bash 3 compatible)
+# MCP fragments live under scripts/mcp-fragments/cursor/*.json (readable multi-line JSON)
 # main: prefer global gate-mcp (avoids npx ESM path resolution failures with @modelcontextprotocol/sdk)
-# dex: url + x-api-key header + Authorization Bearer token
-# info/news: url + streamable-http
+GATE_MAIN_CMD=""
+FRAG_DIR="$SCRIPT_DIR/mcp-fragments/cursor"
+FRAGS=()
 if [[ $MCP_MAIN -eq 1 ]] && command -v gate-mcp &>/dev/null; then
   GATE_MAIN_CMD="gate-mcp"
-  GATE_MAIN_ARGS="[]"
+  FRAGS+=("$FRAG_DIR/gate-main-gate-mcp.json")
 elif [[ $MCP_MAIN -eq 1 ]]; then
   GATE_MAIN_CMD="npx"
-  GATE_MAIN_ARGS="[\"-y\",\"gate-mcp\"]"
+  FRAGS+=("$FRAG_DIR/gate-main-npx.json")
 fi
-ADD_JSON="{"
-first=1
-if [[ $MCP_MAIN -eq 1 ]]; then
-  [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  if [[ -n "$USER_GATE_API_KEY" ]]; then
-    ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS},\"env\":{\"GATE_API_KEY\":\"${USER_GATE_API_KEY}\",\"GATE_API_SECRET\":\"${USER_GATE_API_SECRET}\"}}"
-  else
-    ADD_JSON="${ADD_JSON}\"Gate\":{\"command\":\"${GATE_MAIN_CMD}\",\"args\":${GATE_MAIN_ARGS},\"env\":{\"GATE_API_KEY\":\"your-api-key\",\"GATE_API_SECRET\":\"your-api-secret\"}}"
-  fi
-  first=0
-fi
-if [[ $MCP_DEX -eq 1 ]]; then
-  [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate-Dex\":{\"url\":\"https://api.gatemcp.ai/mcp/dex\",\"transport\":\"streamable-http\",\"headers\":{\"x-api-key\":\"${GATE_API_KEY}\",\"Authorization\":\"Bearer \${GATE_MCP_TOKEN}\"}}"
-  first=0
-fi
-if [[ $MCP_INFO -eq 1 ]]; then
-  [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate-Info\":{\"url\":\"https://api.gatemcp.ai/mcp/info\",\"transport\":\"streamable-http\"}"
-  first=0
-fi
-if [[ $MCP_NEWS -eq 1 ]]; then
-  [[ $first -eq 0 ]] && ADD_JSON="${ADD_JSON},"
-  ADD_JSON="${ADD_JSON}\"Gate-News\":{\"url\":\"https://api.gatemcp.ai/mcp/news\",\"transport\":\"streamable-http\"}"
-  first=0
-fi
-ADD_JSON="${ADD_JSON}}"
+[[ $MCP_CEX_PUBLIC -eq 1 ]]   && FRAGS+=("$FRAG_DIR/gate-cex-pub.json")
+[[ $MCP_CEX_EXCHANGE -eq 1 ]] && FRAGS+=("$FRAG_DIR/gate-cex-ex.json")
+[[ $MCP_DEX -eq 1 ]]          && FRAGS+=("$FRAG_DIR/gate-dex.json")
+[[ $MCP_INFO -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-info.json")
+[[ $MCP_NEWS -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-news.json")
+
+MERGE_JS="$SCRIPT_DIR/merge-mcp-config.js"
 
 if command -v node &>/dev/null; then
   EXISTING="{}"
   [[ -f "$MCP_JSON" ]] && EXISTING=$(cat "$MCP_JSON")
   TMP_JSON=$(mktemp)
   echo "$EXISTING" > "$TMP_JSON"
-  node -e "
-    const fs = require('fs');
-    const existingPath = process.argv[1];
-    const addJson = process.argv[2];
-    const outPath = process.argv[3];
-    const existing = JSON.parse(fs.readFileSync(existingPath, 'utf8'));
-    const add = JSON.parse(addJson);
-    existing.mcpServers = existing.mcpServers || {};
-    Object.assign(existing.mcpServers, add);
-    fs.writeFileSync(outPath, JSON.stringify(existing, null, 2));
-  " "$TMP_JSON" "$ADD_JSON" "$MCP_JSON"
+  unset GATE_USER_API_KEY GATE_USER_API_SECRET 2>/dev/null || true
+  if [[ -n "$USER_GATE_API_KEY" ]]; then
+    export GATE_USER_API_KEY="$USER_GATE_API_KEY"
+    export GATE_USER_API_SECRET="$USER_GATE_API_SECRET"
+  fi
+  node "$MERGE_JS" "$TMP_JSON" "$MCP_JSON" "${FRAGS[@]}"
+  unset GATE_USER_API_KEY GATE_USER_API_SECRET 2>/dev/null || true
   rm -f "$TMP_JSON"
   echo "MCP config written to: $MCP_JSON"
   if [[ $MCP_MAIN -eq 1 && "$GATE_MAIN_CMD" == "npx" ]]; then
@@ -173,8 +157,12 @@ if command -v node &>/dev/null; then
     echo "Then re-run this script, or manually change the Gate command in mcp.json to gate-mcp with args []."
   fi
 else
-  echo "Node.js not found. Please manually merge the following into the mcpServers section of $MCP_JSON:"
-  echo "  $ADD_JSON"
+  echo "Node.js not found. Install Node.js to merge MCP config, or manually copy the following JSON fragments into mcpServers in $MCP_JSON:"
+  for f in "${FRAGS[@]}"; do
+    echo ""
+    echo "  # $f"
+    sed 's/^/  /' "$f"
+  done
 fi
 
 # ---------- 2. Install all gate-skills (optional) ----------
@@ -220,6 +208,13 @@ if [[ $MCP_MAIN -eq 1 && -z "$USER_GATE_API_KEY" ]]; then
   echo "    https://www.gate.com/myaccount/profile/api-key/manage"
   echo "  After creation, add GATE_API_KEY and GATE_API_SECRET to the Gate env field in $MCP_JSON:"
   echo "    \"Gate\": { ..., \"env\": { \"GATE_API_KEY\": \"your-key\", \"GATE_API_SECRET\": \"your-secret\" } }"
+fi
+
+if [[ $MCP_CEX_EXCHANGE -eq 1 ]]; then
+  echo ""
+  echo "gate-cex-ex (OAuth2): Complete Gate login when Cursor prompts on first connect."
+  echo "  Docs: https://github.com/gate/gate-mcp"
+  echo ""
 fi
 
 if [[ $MCP_DEX -eq 1 ]]; then
