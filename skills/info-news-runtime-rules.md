@@ -25,10 +25,10 @@ https://github.com/gate/gate-skills
 
 Before using MCP-dependent capabilities, check whether the required Gate MCP Servers are installed.
 
-| MCP Server                   | Purpose                                                                           |
-| ---------------------------- | --------------------------------------------------------------------------------- |
-| gate-info (Gate Info for AI) | Coin info, market snapshots, technical analysis, on-chain data, compliance checks |
-| gate-news (Gate News for AI) | News search, social sentiment, exchange announcements, event tracking             |
+| MCP Server                   | Purpose                                                                                                                                           |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| gate-info (Gate Info for AI) | Coin info, market snapshots, technical analysis, on-chain data, DeFi platform metrics, macro economic indicators, compliance checks               |
+| gate-news (Gate News for AI) | News search, social sentiment, community / X sentiment, exchange announcements, event tracking                                                      |
 
 - If not installed, guide the user to one-click install:
   https://github.com/gate/gate-skills/tree/master/skills
@@ -92,24 +92,27 @@ When user intent exceeds the current Skill's scope, proactively route to the app
 - Briefly explain the routing reason to the user.
 - Carry over key context parameters (coin symbol, address, etc.) — do not ask the user to repeat.
 
-### Skills Landscape (alignment priority)
+### Skills Landscape
 
-Canonical **gate-info-skills** / **gate-news-skills** L1 scope, in rollout order. Per-skill update scripts and **Trigger update** in SKILL.md align to this list first. **`gate-info-research`** is out of scope until a separate rollout.
+Reference list of **gate-info-skills** / **gate-news-skills** L1 scope. **Row order is not prescriptive** (no rollout or routing priority implied). Per-skill update scripts and **Trigger update** in SKILL.md should stay consistent with this landscape when syncing. **`gate-info-research`** is out of scope until a separate rollout.
 
-**Note — `gate-info-tokenonchain`:** Multiple L1 skills route here, but **`skills/gate-info-tokenonchain/` is not yet in the gate-skills repo**. When added, use the same layout as other L1 skills: `info-news-runtime-rules.md` + `scripts/update-skill.*` + **Trigger update**.
+**Note — extended Info/News L1 skills:** `gate-info-defianalysis`, `gate-info-macroimpact`, `gate-info-tokenonchain`, and `gate-news-communityscan` share the same runtime as other `gate-info-*` / `gate-news-*` skills. Use the same layout: `info-news-runtime-rules.md` first, optional `scripts/update-skill.*`, and **Trigger update** in SKILL.md. Official `https://github.com/gate/gate-skills` rollout may lag this repository; keep this landscape aligned when syncing.
 
-| Package          | Skill                    | Coverage                            |
-| ---------------- | ------------------------ | ----------------------------------- |
-| gate-info-skills | gate-info-coinanalysis   | Single-coin comprehensive analysis  |
-|                  | gate-info-marketoverview | Market-wide overview                |
-|                  | gate-info-coincompare    | Multi-coin comparison               |
-|                  | gate-info-trendanalysis  | Trend and technical analysis        |
-|                  | gate-info-addresstracker | On-chain address tracking           |
-|                  | gate-info-tokenonchain   | Token on-chain data                 |
-|                  | gate-info-riskcheck      | Contract security / risk assessment |
-| gate-news-skills | gate-news-briefing       | News briefing                       |
-|                  | gate-news-eventexplain   | Event attribution and explanation   |
-|                  | gate-news-listing        | Exchange listing updates            |
+| Package          | Skill                      | Coverage                               |
+| ---------------- | -------------------------- | -------------------------------------- |
+| gate-info-skills | gate-info-addresstracker   | On-chain address tracking              |
+|                  | gate-info-coinanalysis     | Single-coin comprehensive analysis     |
+|                  | gate-info-coincompare      | Multi-coin comparison                  |
+|                  | gate-info-defianalysis     | DeFi TVL / platform / ecosystem        |
+|                  | gate-info-macroimpact      | Macro indicators vs crypto linkage     |
+|                  | gate-info-marketoverview   | Market-wide overview                   |
+|                  | gate-info-riskcheck        | Contract security / risk assessment    |
+|                  | gate-info-tokenonchain     | Token on-chain data                    |
+|                  | gate-info-trendanalysis    | Trend and technical analysis           |
+| gate-news-skills | gate-news-briefing         | News briefing                          |
+|                  | gate-news-communityscan    | Community / X sentiment and discussion |
+|                  | gate-news-eventexplain     | Event attribution and explanation      |
+|                  | gate-news-listing          | Exchange listing updates               |
 
 ### Routing Degradation
 
