@@ -42,10 +42,14 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
+| [gate-info-defianalysis](#-gate-info-defianalysis) | DeFi ecosystem: TVL rankings, protocol metrics, yield/APY, stablecoins, bridges, exchange reserves, liquidation heatmaps (Gate-Info; read-only) | `2026.3.30-6` | ✅ Active |
+| [gate-info-macroimpact](#-gate-info-macroimpact) | Macro ↔ crypto: economic calendar, indicators, related news, and market snapshot linkage (Gate-Info + Gate-News; read-only) | `2026.3.30-6` | ✅ Active |
 | [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.25-1` | ✅ Active |
 | [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.25-1` | ✅ Active |
+| [gate-info-tokenonchain](#-gate-info-tokenonchain) | Token on-chain: holder distribution, activity, large transfers (Smart Money not in this version; Gate-Info; read-only) | `2026.3.30-5` | ✅ Active |
 | [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.25-1` | ✅ Active |
 | [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.25-1` | ✅ Active |
+| [gate-news-communityscan](#-gate-news-communityscan) | Community / X sentiment: discussion scan + quantitative social sentiment (UGC beyond X when available; Gate-News; read-only) | `2026.3.30-5` | ✅ Active |
 | [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.25-1` | ✅ Active |
 | [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.25-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
@@ -480,6 +484,49 @@ Trend and technical analysis. Fetches K-line data, indicator history, multi-time
 
 ---
 
+## 🏗️ gate-info-defianalysis
+
+> **Path**: `skills/gate-info-defianalysis/`
+
+DeFi ecosystem analysis via Gate-Info MCP. Routes by intent to overview, single-protocol detail, yield pools, stablecoins, bridges, exchange reserves, or liquidation heatmaps; progressive loading where applicable. Read-only.
+
+**Example Prompts**:
+- `DeFi overview and top protocols by TVL`
+- `Uniswap TVL and volume`
+- `Best USDC lending APY`
+- `Binance BTC reserves`
+- `BTC liquidation heatmap`
+
+---
+
+## 🗓️ gate-info-macroimpact
+
+> **Path**: `skills/gate-info-macroimpact/`
+
+Macro-driven crypto analysis via Gate-Info and Gate-News MCP: economic calendar, macro indicator or summary, related news, and correlated coin market snapshot in parallel. Read-only.
+
+**Example Prompts**:
+- `How does CPI affect BTC?`
+- `Any macro data today?`
+- `Fed meeting impact on crypto`
+- `Latest NFP and risk assets`
+
+---
+
+## ⛓️ gate-info-tokenonchain
+
+> **Path**: `skills/gate-info-tokenonchain/`
+
+Token-level on-chain analysis (holders, activity, large transfers) via Gate-Info MCP. Smart Money / `smart_money` scope not available in this version — use holders, activity, transfers only. Read-only.
+
+**Example Prompts**:
+- `ETH holder distribution`
+- `On-chain activity for SOL`
+- `Large transfers for BTC`
+- `Full on-chain picture for ARB`
+
+---
+
 ## 📰 gate-news-briefing
 
 > **Path**: `skills/gate-news-briefing/`
@@ -491,6 +538,20 @@ Crypto news briefing. Fetches major events, trending news, and social sentiment 
 - `Today's crypto highlights`
 - `Any new updates in the market?`
 - `Give me the latest crypto news`
+
+---
+
+## 🗣️ gate-news-communityscan
+
+> **Path**: `skills/gate-news-communityscan/`
+
+Community and social sentiment with **X/Twitter** as the primary surface via Gate-News MCP. Combines X discussion search and quantitative social sentiment. When multi-platform UGC is unavailable, label output **X/Twitter only**. Read-only.
+
+**Example Prompts**:
+- `What does the community think about ETH?`
+- `Twitter sentiment on Bitcoin`
+- `What are people saying about the ETF?`
+- `KOL takes on SOL today`
 
 ---
 
@@ -962,11 +1023,15 @@ gate-github-skills/
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill
+    ├── gate-info-defianalysis/         # DeFi TVL, platforms, yield, bridges, reserves, liquidation skill
     ├── gate-info-liveroomlocation/     # Live stream & replay listing skill
+    ├── gate-info-macroimpact/          # Macro calendar, indicators, news + market linkage skill
     ├── gate-info-marketoverview/       # Market overview skill
     ├── gate-info-riskcheck/            # Token risk assessment skill
+    ├── gate-info-tokenonchain/         # Token on-chain holders, activity, transfers skill
     ├── gate-info-trendanalysis/        # Trend & technical analysis skill
     ├── gate-news-briefing/             # News briefing skill
+    ├── gate-news-communityscan/       # Community / X sentiment skill
     ├── gate-news-eventexplain/         # Event explanation skill
     ├── gate-news-listing/              # Listing/delisting tracker skill
     ├── gate-mcp-cursor-installer/      # Cursor MCP installer skill
@@ -1021,4 +1086,3 @@ We welcome contributions! To add a new skill:
 ## Disclaimer
 
 Gate Skills is an informational tool only. All outputs are provided on an "as is" and "as available" basis, without representation or warranty of any kind. It does not constitute investment, financial, trading, or any other form of advice, nor does it represent a recommendation to buy, sell, or hold any assets. Digital asset prices are subject to high market risk and price volatility. You are solely responsible for your investment decisions. Past performance is not a reliable predictor of future performance. Please consult an independent financial adviser prior to making any investment.
-
