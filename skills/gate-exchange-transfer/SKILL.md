@@ -17,8 +17,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 Execute same-UID internal transfers between Gate trading accounts: **spot**, **isolated margin**, **perpetual**, **delivery**, and **options**. Single execution endpoint: `POST /wallet/transfers` (MCP: `cex_wallet_create_transfer`).
 
-**Scope (Phase 1)**  
-- Supported: internal transfer only (same UID, between account types above).  
+**Scope (Phase 1)**
+- Supported: internal transfer only (same UID, between account types above).
 - Not supported: main-to-sub, sub-to-main, sub-to-sub. See `references/scenarios.md` for future scenario coverage.
 
 ---
@@ -52,10 +52,17 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's transfer workflow.
+
+- `SKILL.md` keeps transfer intent routing and account-type mapping.
+- `references/mcp.md` is the authoritative MCP execution layer for transfer pre-check, confirmation gate, execution, and ledger verification.
 
 ## Preconditions
 
@@ -78,8 +85,8 @@ Every internal transfer is fully specified by four elements. The assistant must 
 | **Currency** | `currency` | Always | USDT, BTC, etc. (platform-supported). Missing → auto-complete by target (case2). |
 | **Amount** | `amount` | Always | String, > 0, up to 8 decimals. Missing → ask user (case8). |
 
-**Conditional params**  
-- **margin**: `currency_pair` required (e.g. `BTC_USDT`) when `from` or `to` is `margin`.  
+**Conditional params**
+- **margin**: `currency_pair` required (e.g. `BTC_USDT`) when `from` or `to` is `margin`.
 - **futures / delivery**: `settle` required (`usdt` \| `btc`) when `from` or `to` is `futures` or `delivery`.
 
 ---
@@ -122,23 +129,23 @@ Every internal transfer is fully specified by four elements. The assistant must 
 
 Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wait for explicit confirmation in the **immediately following** user turn.
 
-**Draft contents**  
-- `from` (account name)  
-- `to` (account name)  
-- `currency`  
-- `amount`  
+**Draft contents**
+- `from` (account name)
+- `to` (account name)
+- `currency`
+- `amount`
 - If applicable: `settle` (for futures/delivery), `currency_pair` (for margin)
 
-**Confirmation rule**  
-- Treat confirmation as **single-use**. If user changes amount, currency, or direction, show a new draft and re-confirm.  
+**Confirmation rule**
+- Treat confirmation as **single-use**. If user changes amount, currency, or direction, show a new draft and re-confirm.
 - If user does not clearly confirm (e.g. "Confirm", "Yes", "Proceed"), do **not** execute (case10).
 
 ---
 
 ## Transfer Result Report (After successful API call)
 
-- Confirm success: e.g. "Transfer successful. {amount} {currency} has arrived in your {to account name}."  
-- Optionally suggest next step by destination: Spot → spot trading; USDT perpetual → USDT-margined perpetual; etc.  
+- Confirm success: e.g. "Transfer successful. {amount} {currency} has arrived in your {to account name}."
+- Optionally suggest next step by destination: Spot → spot trading; USDT perpetual → USDT-margined perpetual; etc.
 - Mention transfer history: e.g. transfer/historyV2 or equivalent MCP tool.
 
 ---
@@ -147,15 +154,15 @@ Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wai
 
 ### case1: All four elements present
 
-**Trigger**  
+**Trigger**
 "Transfer 100 USDT from my spot account to perpetual futures account" / "Transfer 1000 USDT from spot to USDT-margined futures" / "Transfer 0.5 BTC from coin-margined to spot"
 
-**Steps**  
-1. Resolve `from`, `to`, `currency`, `amount`; add `settle` or `currency_pair` if needed.  
-2. Pre-check: fetch source balance; if balance < amount → case4.  
-3. Output **Transfer Draft**.  
-4. Wait for explicit confirmation.  
-5. Call `cex_wallet_create_transfer`.  
+**Steps**
+1. Resolve `from`, `to`, `currency`, `amount`; add `settle` or `currency_pair` if needed.
+2. Pre-check: fetch source balance; if balance < amount → case4.
+3. Output **Transfer Draft**.
+4. Wait for explicit confirmation.
+5. Call `cex_wallet_create_transfer`.
 6. Output **Transfer Result Report** (case3).
 
 **Request mapping**
@@ -173,10 +180,10 @@ Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wai
 
 ### case2: Currency missing, auto-complete
 
-**Trigger**  
+**Trigger**
 "Transfer 100 to my USDT-margined account" / "Transfer 500 to futures" / "Transfer 1000 to perpetual"
 
-**Logic**  
+**Logic**
 Set `currency` by target account:
 
 | Target account | Default currency |
@@ -188,120 +195,120 @@ Set `currency` by target account:
 | Options | USDT |
 | Spot / margin | Infer from context or ask |
 
-**Steps**  
+**Steps**
 Same as case1 after `currency` is set.
 
-**Output (draft)**  
+**Output (draft)**
 "Detected transfer of {amount} to {to account name}. Based on account type, default currency is {currency}. Please confirm."
 
 ---
 
 ### case3: Transfer completed (API success)
 
-**Trigger**  
+**Trigger**
 User confirmed; `cex_wallet_create_transfer` returned success.
 
-**Output**  
-- "Transfer successful. {amount} {currency} has arrived in your {to account name}."  
-- Optional: product suggestion by destination (spot / USDT perpetual / BTC perpetual / delivery / margin / TradFi / options).  
+**Output**
+- "Transfer successful. {amount} {currency} has arrived in your {to account name}."
+- Optional: product suggestion by destination (spot / USDT perpetual / BTC perpetual / delivery / margin / TradFi / options).
 - "Transfer history: transfer/historyV2" (or equivalent).
 
 ---
 
 ### case4: Insufficient balance
 
-**Trigger**  
+**Trigger**
 Pre-check: source available balance < transfer amount.
 
-**Action**  
+**Action**
 Do **not** call transfer API.
 
-**Output**  
+**Output**
 "Your {from account name} has insufficient balance (available: {available} {currency}). Please adjust the amount or deposit first."
 
 ---
 
 ### case5: Missing from/to or ambiguous intent
 
-**Trigger**  
+**Trigger**
 "Contract is about to be liquidated, transfer some funds for margin" / "Top up my futures margin" / "How do I adjust account funds"
 
-**Logic**  
-- If missing ≥ 2 of from, to, currency, amount: show **missing-info card** and ask user to provide.  
-- Defaults when only one side is clear:  
-  - Unified/trading account advanced mode: default from = Trading account, to = BTC perpetual.  
-  - Classic: default from = Spot, to = USDT perpetual.  
+**Logic**
+- If missing ≥ 2 of from, to, currency, amount: show **missing-info card** and ask user to provide.
+- Defaults when only one side is clear:
+  - Unified/trading account advanced mode: default from = Trading account, to = BTC perpetual.
+  - Classic: default from = Spot, to = USDT perpetual.
 - Do **not** call API until four elements are clear.
 
-**Output**  
+**Output**
 "I can help with margin top-up. Please specify: from account, to account, and currency (and amount if you know it)."
 
 ---
 
 ### case6: Account mode conflict
 
-**Trigger**  
+**Trigger**
 User in **trading account advanced mode** asks to transfer to USDT perpetual. In this mode, direct transfer to USDT perpetual may be disallowed (path not available).
 
-**Output**  
+**Output**
 "You are in trading account mode; direct transfer to USDT perpetual is not available. You can transfer to BTC perpetual (coin-margined) instead, or adjust account mode on the web."
 
 ---
 
 ### case7: Currency vs To account mismatch
 
-**Trigger**  
+**Trigger**
 "Transfer some USDT to my BTC perpetual account"
 
-**Logic**  
-BTC perpetual settles in BTC; USDT is inconsistent.  
-- **Option A**: Correct to BTC amount (if user intent allows).  
-- **Option B**: Explain that BTC perpetual uses BTC; suggest transferring BTC or using USDT perpetual for USDT.  
+**Logic**
+BTC perpetual settles in BTC; USDT is inconsistent.
+- **Option A**: Correct to BTC amount (if user intent allows).
+- **Option B**: Explain that BTC perpetual uses BTC; suggest transferring BTC or using USDT perpetual for USDT.
 - If user confirms a corrected draft (e.g. spot → BTC perpetual with BTC), proceed as case1.
 
-**Output**  
+**Output**
 "BTC perpetual uses BTC settlement. I've corrected the transfer to use BTC (or: please specify amount in BTC). Please confirm." Or: "For USDT, use USDT perpetual account instead."
 
 ---
 
 ### case8: Amount missing
 
-**Trigger**  
+**Trigger**
 "Transfer USDT from spot to futures" / "Move my USDT to perpetual" (no amount).
 
-**Action**  
+**Action**
 Ask: "How much {currency} do you want to transfer from {from} to {to}?" After user provides amount, resolve currency if still missing (case2), then proceed to case1.
 
 ---
 
 ### case9: User cancels or declines
 
-**Trigger**  
+**Trigger**
 After Transfer Draft, user says "No" / "Cancel" / "Don't do it" / "Never mind".
 
-**Action**  
+**Action**
 Do **not** call API. Acknowledge: "Transfer cancelled. No changes made."
 
 ---
 
 ### case10: Confirmation ambiguous or stale
 
-**Trigger**  
+**Trigger**
 After draft, user replies with something other than clear confirmation (e.g. new question, different amount, or vague "ok" in a long thread).
 
-**Action**  
+**Action**
 Do **not** execute. Re-present the Transfer Draft and say: "To execute this transfer, please confirm explicitly (e.g. 'Confirm' or 'Yes')."
 
 ---
 
 ### case11: Rate limit or service error
 
-**Trigger**  
+**Trigger**
 API returns `TOO_MANY_REQUESTS` or server/network error.
 
-**Action**  
-Do not retry automatically in the same turn.  
-**Output**  
+**Action**
+Do not retry automatically in the same turn.
+**Output**
 "Request failed (rate limit / service error). Please try again later or use the web app to transfer."
 
 ---
@@ -386,11 +393,11 @@ REST: Delivery GET /delivery/{settle}/account_book?type=dnw; Perpetual GET /futu
 
 ## Execution Rules (Summary)
 
-1. **Single endpoint**: Internal transfer only via `POST /wallet/transfers` (`cex_wallet_create_transfer`). No main-sub in Phase 1.  
-2. **Always show Transfer Draft** with from, to, currency, amount (and settle/currency_pair if needed).  
-3. **Require explicit confirmation** in the next user turn; single-use; re-confirm if params change.  
-4. **Pre-check balance** before calling API; on insufficient balance, follow case4 and do not call.  
-5. **Conditional params**: `currency_pair` for margin; `settle` for futures/delivery.  
-6. **Missing currency**: case2 default table. **Missing amount**: case8 ask.  
-7. **Account mode / currency mismatch**: case6 and case7; resolve or correct before executing.  
+1. **Single endpoint**: Internal transfer only via `POST /wallet/transfers` (`cex_wallet_create_transfer`). No main-sub in Phase 1.
+2. **Always show Transfer Draft** with from, to, currency, amount (and settle/currency_pair if needed).
+3. **Require explicit confirmation** in the next user turn; single-use; re-confirm if params change.
+4. **Pre-check balance** before calling API; on insufficient balance, follow case4 and do not call.
+5. **Conditional params**: `currency_pair` for margin; `settle` for futures/delivery.
+6. **Missing currency**: case2 default table. **Missing amount**: case8 ask.
+7. **Account mode / currency mismatch**: case6 and case7; resolve or correct before executing.
 8. **On cancel or ambiguous confirm**: case9/case10; do not execute.

@@ -1,0 +1,10 @@
+{
+  "Gate-Dex": {
+    "url": "https://api.gatemcp.ai/mcp/dex",
+    "transport": "streamable-http",
+    "headers": {
+      "x-api-key": "MCP_AK_8W2N7Q",
+      "Authorization": "Bearer ${GATE_MCP_TOKEN}"
+    }
+  }
+}

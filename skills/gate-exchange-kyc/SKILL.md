@@ -26,15 +26,22 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | Gate (main) | ✅ Required |
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- API Key Required: Conditional. Providing the KYC portal link does not require API key; if runtime supports user-state queries, login/auth may be required for those queries.
 
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's KYC portal guidance workflow.
+
+- `SKILL.md` keeps routing, trigger phrases, and product semantics.
+- `references/mcp.md` is the authoritative MCP/runtime execution layer, including detection, fallback, and safety boundaries.
 
 ## Workflow
 

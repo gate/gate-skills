@@ -2,7 +2,7 @@
 name: gate-info-research
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Market Research Copilot — an L2 composite skill that orchestrates 12 read-only MCP tools across Gate-Info and Gate-News to produce structured market briefs, single-coin deep dives, multi-coin comparisons, trend analyses, event attribution, and risk checks. Use this skill whenever the user wants to understand the market, research a coin, compare tokens, check risk, or get a daily briefing, or whenever a research query spans multiple analysis dimensions (e.g. fundamentals + technicals + news + risk). Trigger phrases include: market brief, analyze, research, compare coins, risk check, why pumping, why dumping, daily brief, sentiment, technical analysis, fundamentals, worth buying, trend, overview, report."
+description: "Market Research Copilot (read-only, Info+News): market briefs, coin research, multi-coin comparisons, trend/TA, event attribution, and risk checks. Use for research questions or any query spanning multiple dimensions (fundamentals + technicals + news + risk), or when the user wants a daily briefing / why pumping-dumping explanation."
 ---
 
 # Market Research Copilot
@@ -53,10 +53,17 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate-Info
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's research-copilot workflow.
+
+- `SKILL.md` keeps routing logic, signal design, and report semantics.
+- `references/mcp.md` is the authoritative MCP orchestration layer for signal-to-tool execution, parallel strategy, and fallback policy.
 
 ## Domain Knowledge
 

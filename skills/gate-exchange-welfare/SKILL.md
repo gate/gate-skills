@@ -40,10 +40,17 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's welfare workflow.
+
+- `SKILL.md` keeps user-type routing, task-display semantics, and policy constraints.
+- `references/mcp.md` is the authoritative MCP execution layer for identity gate, task query sequence, and fallback handling.
 
 ## Overview
 
@@ -151,7 +158,7 @@ Based on the real task data returned from Step 2, output to users in the followi
 
 **Data mapping rules**:
 - Task title: Use `task_name` field
-- Task description: Use `task_desc` field  
+- Task description: Use `task_desc` field
 - Reward amount: Use `reward_num` field
 - Reward unit: Use `reward_unit` field
 - Completion status: Use `status` field (1=Pending, 2=Completed)
