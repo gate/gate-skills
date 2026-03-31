@@ -41,10 +41,17 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's coupon-query workflow.
+
+- `SKILL.md` keeps coupon semantics, mapping rules, and rendering policy.
+- `references/mcp.md` is the authoritative MCP execution layer for list/detail query behavior and degradation-safe output.
 
 ## Domain Knowledge
 
@@ -168,4 +175,3 @@ Classify the user intent and route to the matching reference document:
 - All operations in this skill are **read-only** (query only, no writes).
 - Never request or expose user API secrets in the conversation.
 - Do not infer or guess coupon IDs — always obtain them from the list API first.
-

@@ -2,7 +2,7 @@
 name: gate-exchange-flashswap
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: Gate Flash Swap Skill for querying supported pairs, previewing quotes, and executing one-to-one, one-to-many, and many-to-one flash swap orders. Use this skill whenever you need to flash swap, convert, or exchange cryptocurrencies, preview swap quotes, check flash swap pairs, or view flash swap order history. Trigger phrases include "flash swap", "convert", "swap BTC to USDT", "buy BTC ETH SOL", "sell multiple coins", "flash swap order history", or any request involving cryptocurrency conversion.
+description: "Gate Flash Swap: list supported pairs, preview quotes, execute flash-swap conversions, and query swap orders/history. Use when the user asks to convert/exchange coins via Flash Swap (not spot/futures trading)."
 ---
 
 # Gate Flash Swap
@@ -49,10 +49,17 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - Cursor: `gate-mcp-cursorinstaller`
+  - Codex: `gate-mcp-codexinstaller`
+  - Claude: `gate-mcp-claudeinstaller`
+  - OpenClaw: `gate-mcp-openclawinstaller`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's flashswap workflow.
+
+- `SKILL.md` keeps routing and scenario boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for preview/create sequencing, confirmation gates, and degraded handling.
 
 ## Trigger Conditions
 
