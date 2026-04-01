@@ -1,6 +1,29 @@
-# Changelog — gate-news-communityscan
+# Changelog
 
 **Note:** Changes are consolidated as one initial entry for now; versioned entries will be used after official release.
+
+---
+
+## [2026.4.1-2] - 2026-04-01
+
+### Added
+
+- **README.md**: Human-readable overview (capabilities, routing, architecture), runtime prerequisites for `update-skill` (Bash / PowerShell, sandbox permissions), outbound documentation URLs aligned with **General Rules** / `info-news-runtime-rules.md`, data flow & privacy, age & eligibility, marketplace manifest note, pointer to `references/scenarios.md`.
+- **references/scenarios.md**: Verification scenarios (happy path, partial tool failure, cross-skill routing) consistent with routing tables and execution workflow in `SKILL.md`.
+
+### Changed
+
+- **SKILL.md — Safety Rules**: Added items 7–8 only — age & eligibility (18+); data flow (host agent + read-only **Gate-News** MCP tools listed in `SKILL.md`, plus documented skill-update URLs). No change to sub-scenarios, tool names, or routing semantics.
+
+---
+
+## [2026.4.1-1] - 2026-04-01
+
+### Changed
+
+- **info-news-runtime-rules.md**: Align version-check UX — do not surface technical failure details to end users; forbid auto-download of `update-skill.sh` / `update-skill.ps1` (manual copy from gate/gate-skills allowed); success paths (`update_available` / strict exit 3) still require per-skill confirmation before `apply`.
+- **SKILL.md — Trigger update**: Document ClawHub packages may omit `update-skill.ps1`; agent rules for Bash vs PowerShell vs WSL/Git Bash vs silent skip; use the same shell family for Steps 1–2; do not run `apply` / `revoke-pending` when Step 1 is skipped; dual-arg `DEST` / `name` order with script auto-swap when only one path contains `SKILL.md`.
+- **scripts/update-skill.sh**, **scripts/update-skill.ps1**: Strict `check` (`GATE_SKILL_CHECK_STRICT=1`, exit 3, `GATE_SKILL_CONFIRM_TOKEN`, `revoke-pending`); expanded default install-root resolution (Cursor, Codex, OpenClaw, `.agents`, Antigravity).
 
 ---
 

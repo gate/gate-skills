@@ -1,62 +1,52 @@
 # gate-info-defianalysis — Scenarios & Prompt Examples
 
-## Scenario 1: DeFi overview / TVL ranking
+## Scenario 1: DeFi overview and TVL ranking
 
-**Context**: User wants aggregate DeFi market view and top protocols.
-
-**Prompt Examples**:
-- "DeFi overview"
-- "Top DeFi protocols by TVL"
-- "What's total DeFi TVL"
-
-**Expected Behavior**:
-1. Route to **Sub-scenario A**: parallel `info_platformmetrics_get_defi_overview` (e.g. `category="all"`) and `info_platformmetrics_search_platforms` (e.g. `sort_by=tvl`, `limit=10`).
-2. Output **Template A** per SKILL.md; note data gaps with "Data temporarily unavailable" if a tool fails.
-
-## Scenario 2: Single protocol deep-dive
-
-**Context**: User names one protocol (Uniswap, Aave, etc.).
+**Context**: User wants a broad DeFi snapshot and top protocols by TVL.
 
 **Prompt Examples**:
-- "Uniswap TVL and volume"
-- "Aave full metrics"
+- "Give me a DeFi overview"
+- "Top DeFi protocols by TVL this week"
+- "DeFi TVL ranking"
 
 **Expected Behavior**:
-1. **Sub-scenario B**: parallel `info_platformmetrics_get_platform_info`, `info_platformmetrics_get_platform_history`, and optionally `info_coin_get_coin_info` for the native token symbol.
-2. Output **Template B**; competitive analysis from LLM only on MCP data.
+1. Execute Sub-scenario A: call `info_platformmetrics_get_defi_overview` with `category="all"` and `info_platformmetrics_search_platforms` with `sort_by="tvl", limit=10` in parallel.
+2. Fill **Template A: DeFi Overview** in `SKILL.md` (market summary + platform table).
+3. Call only MCP tools listed in `SKILL.md`.
 
-## Scenario 3: Yield / stablecoins / bridges
+## Scenario 2: Single platform deep-dive
 
-**Context**: User asks for yield pools, stablecoin stats, or bridge volume.
+**Context**: User asks for detailed metrics on a named protocol.
 
 **Prompt Examples**:
-- "Best USDC lending APY"
-- "Stablecoin market cap ranking"
-- "Top bridges by volume"
+- "What is Uniswap TVL and trading volume?"
+- "Show me Aave full metrics and history"
 
 **Expected Behavior**:
-1. Map to **Sub-scenario C, D, or E**; call only the tools for that scenario. Use **progressive loading** for bridges/stablecoins: list first; user follow-up for chain-level detail.
-2. Apply SKILL.md report guidance for templates C–E.
+1. Execute Sub-scenario B: parallel `info_platformmetrics_get_platform_info` (`platform_name`, `scope="full"`), `info_platformmetrics_get_platform_history` (`metrics` include tvl/volume), and `info_coin_get_coin_info` for the native token symbol when applicable.
+2. Produce the platform deep-dive sections per **Report Template** in `SKILL.md`.
+3. If history is empty, note limitations; do not invent values.
 
-## Scenario 4: Exchange reserves / liquidation heatmap
+## Scenario 3: Partial tool failure (degradation)
 
-**Context**: User asks for exchange on-chain reserves or liquidation density.
+**Context**: One platform-metrics call fails while others succeed.
 
 **Prompt Examples**:
-- "Binance BTC reserves"
-- "BTC liquidation heatmap"
+- "Compound metrics" (assume `get_platform_history` errors)
 
 **Expected Behavior**:
-1. **Sub-scenario F or G** with extracted `exchange`, `asset`, or `symbol` per SKILL.md.
-2. Reserve and liquidation disclaimers from **Safety Rules** must appear where relevant.
+1. Per **Error Handling** in `SKILL.md`: skip the failed section; label "Data temporarily unavailable" for that dimension.
+2. Continue with successful tool outputs (e.g. still show `get_platform_info` if it succeeded).
+3. Do not fabricate historical series or TVL numbers.
 
-## Scenario 5: Route away — coin fundamentals only
+## Scenario 4: Route to single-coin fundamentals
 
-**Context**: User wants a full coin thesis without DeFi/platform focus.
+**Context**: User wants coin-only analysis without DeFi protocol focus.
 
 **Prompt Examples**:
-- "Analyze SOL"
-- "Is ETH worth buying"
+- "Analyze SOL fundamentals only"
+- "Is ETH a good long-term hold?" (fundamentals-only framing)
 
 **Expected Behavior**:
-1. Route to **`gate-info-coinanalysis`** per Routing Rules; do not run DeFi platform tools for this intent.
+1. Route to `gate-info-coinanalysis` per **Routing Rules**; do not run DeFi sub-scenarios A–G.
+2. Do not call `info_platformmetrics_*` for this intent unless the user explicitly asks DeFi/protocol questions in the same turn after clarification.
