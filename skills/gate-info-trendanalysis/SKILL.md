@@ -2,7 +2,7 @@
 name: gate-info-trendanalysis
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Trend and technical analysis. Use this skill ONLY when the user's query is exclusively about technical indicators or trend analysis for one coin with no other analysis dimensions. Trigger phrases: technical analysis, K-line, RSI, MACD, trend, support, resistance. If the query ALSO mentions fundamentals, risk, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
+description: "Single-coin technical and trend analysis skill. Use when the query is exclusively about indicators or chart structure for one asset. Triggers on 'technical analysis', 'RSI', 'MACD', 'support resistance', 'K-line'. Do NOT use if the query also asks for fundamentals, risk, or news — use gate-info-research."
 ---
 
 # gate-info-trendanalysis
@@ -126,6 +126,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's trend-analysis workflow.
+
+- `SKILL.md` keeps intent routing and report structure.
+- `references/mcp.md` is the authoritative MCP execution layer for timeframe-aware data retrieval, indicator handling, and degraded confidence rules.
 
 ## Routing Rules
 

@@ -2,7 +2,7 @@
 name: gate-info-addresstracker
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Address tracker and analysis. Use this skill whenever the user provides an on-chain address or asks to track or query an address. Trigger phrases include: track this address, who owns this address, fund flow, check address. MCP tools: info_onchain_get_address_info, info_onchain_get_address_transactions, info_onchain_trace_fund_flow."
+description: "On-chain address tracker skill. Use when the user gives an address or asks to trace flows and history (not token contract safety). Triggers on 'track this address', 'fund flow', 'who owns this wallet'. Do NOT use for 'is this token a scam' contract checks — use gate-info-riskcheck."
 ---
 
 # gate-info-addresstracker
@@ -126,6 +126,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's address-tracking workflow.
+
+- `SKILL.md` keeps intent routing, domain semantics, and report structure.
+- `references/mcp.md` is the authoritative MCP execution layer for staged calls, thresholds, and fallback behavior.
 
 ## Routing Rules
 

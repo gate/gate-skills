@@ -2,7 +2,7 @@
 name: gate-exchange-assets-manager
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Gate account and asset manager L2 skill. Use this skill whenever the user asks to check total assets across all accounts, view margin and liquidation risk, review SimpleEarn or staking earnings snapshots, query affiliate commissions, or execute unified-account borrowing, collateral, and leverage settings. Trigger phrases include 'total assets', 'margin check', 'liquidation risk', 'earn interest', 'staking rewards', 'affiliate commissions', 'borrow USDT', 'add margin', 'set collateral', or any request that combines multi-account asset overview with risk control actions."
+description: "Gate multi-account asset manager L2 skill. Use when the user asks to check total assets combined with margin/liquidation risk or earnings snapshots. Triggers on 'total assets', 'margin check', 'liquidation risk', 'earn interest', 'staking rewards', 'affiliate commissions', 'borrow USDT', 'add margin', 'set collateral'."
 ---
 
 # Gate Account and Asset Manager
@@ -106,6 +106,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute module routing in this skill.
+
+- `SKILL.md` keeps orchestration/routing logic across account domains.
+- `references/mcp.md` is the authoritative MCP execution layer for module aggregation, partial degradation strategy, and unified mutation safeguards.
 
 ## Sub-Modules
 

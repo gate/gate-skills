@@ -2,7 +2,7 @@
 name: gate-info-coincompare
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Coin comparison. Use this skill whenever the user asks to compare two or more coins. Trigger phrases include: compare, versus, vs, which is better, difference. MCP tools: info_marketsnapshot_get_market_snapshot, info_coin_get_coin_info per coin (or batch/search when available)."
+description: "Multi-coin comparison skill. Use when the user asks to compare two or more tokens side by side only (no full research bundle). Triggers on 'compare', 'versus', 'vs', 'which is better'. Do NOT use if the user wants a full multi-dimension report — use gate-info-research."
 ---
 
 # gate-info-coincompare
@@ -128,6 +128,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's multi-coin comparison workflow.
+
+- `SKILL.md` keeps comparison intent routing and output policy.
+- `references/mcp.md` is the authoritative MCP execution layer for batch snapshot logic, per-coin fallback, and safe comparative synthesis.
 
 ## Routing Rules
 

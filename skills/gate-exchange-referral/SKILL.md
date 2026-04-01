@@ -2,7 +2,7 @@
 name: gate-exchange-referral
 version: "2026.3.26-1"
 updated: "2026-03-26"
-description: "Gate invite friends activity recommendation and rule interpretation skill. Use this skill whenever the user asks about referral programs, invitation rewards, how to invite friends, earn-together events, coupon assistance, super commission, referral links, or any request related to Gate's invite-a-friend campaigns. Trigger phrases include 'invite friends', 'referral', 'invitation reward', 'earn together', 'coupon', 'commission', 'rebate', 'referral link', 'invite reward', 'referral bonus', 'earn with friends', 'passive income from referrals'."
+description: "Gate invite-friends and referral campaign skill. Use when the user asks about invitation rewards, referral links, or earn-together rules. Triggers on 'invite friends', 'referral reward', 'referral link', 'earn together'."
 ---
 
 # Gate Invite Friends Activity Recommendation & Rule Interpretation
@@ -26,7 +26,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | Gate (main) | ✅ Required |
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- API Key Required: May be required, depending on runtime and whether account-specific referral data is needed
+- Note: The main workflow in this skill is read-only guidance and rule interpretation. Account-scoped rebate or referral-detail queries may require authenticated Exchange MCP access in some deployments.
 
 ### Installation Check
 - Required: Gate (main)
@@ -35,6 +36,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's recommendation/interpretation flow.
+
+- `SKILL.md` keeps referral policy logic and decision tables.
+- `references/mcp.md` is the authoritative MCP execution layer for capability boundaries, fallback behavior, and output constraints.
 
 ## Domain Knowledge
 

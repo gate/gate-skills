@@ -2,7 +2,7 @@
 name: gate-news-eventexplain
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Event attribution and explanation. Use this skill ONLY when the user's query is exclusively about the reason behind a price move with no other analysis dimensions. Trigger phrases: why did X crash, what just happened, why is it pumping, what caused. If the query ALSO mentions fundamentals, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
+description: "Price-move event attribution skill. Use when the user's query is exclusively about why a coin moved (no other analysis dimensions). Triggers on 'why did it crash', 'what just happened', 'why pumping', 'what caused the move'. Do NOT use if the query also asks for fundamentals, risk, technicals, or news breadth — use gate-info-research."
 ---
 
 # gate-news-eventexplain
@@ -127,6 +127,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's event-explanation workflow.
+
+- `SKILL.md` keeps event-causality routing and report policy.
+- `references/mcp.md` is the authoritative MCP execution layer for cross-source retrieval, confidence labeling, and degraded explanation handling.
 
 ## Routing Rules
 

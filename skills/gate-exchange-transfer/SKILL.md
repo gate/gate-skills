@@ -2,7 +2,7 @@
 name: gate-exchange-transfer
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate Exchange same-UID internal transfer skill. Use when user says 'transfer', 'move funds', 'spot to futures', 'USDT-margined', 'perpetual', 'margin'. Phase 1: internal transfer only (no main-sub). Execution requires explicit user confirmation and source balance pre-check."
+description: "Gate Exchange same-UID internal transfer skill. Use when the user asks to move funds between their own Gate accounts. Triggers on 'transfer funds', 'move USDT to futures', 'internal transfer'."
 ---
 
 # Gate Exchange Transfer (Internal Transfer)
@@ -56,6 +56,13 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's transfer workflow.
+
+- `SKILL.md` keeps transfer intent routing and account-type mapping.
+- `references/mcp.md` is the authoritative MCP execution layer for transfer pre-check, confirmation gate, execution, and ledger verification.
 
 ## Preconditions
 

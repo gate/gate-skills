@@ -2,7 +2,7 @@
 name: gate-exchange-coupon
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "The coupon management function of Gate Exchange: query available coupons, check coupon details, view usage rules, and trace coupon source. Use this skill whenever the user asks about their coupons, vouchers, or bonus cards on Gate Exchange. Trigger phrases include 'my coupons', 'do I have any coupons', 'coupon list', 'check my voucher', 'coupon details', 'when does my coupon expire', 'coupon rules', 'how did I get this coupon', 'coupon source'."
+description: "Gate coupon and voucher query skill. Use when the user asks about coupon balance, rules, expiry, or source. Triggers on 'my coupons', 'coupon details', 'voucher rules', 'coupon expires'."
 ---
 
 # Gate Coupon Assistant
@@ -45,6 +45,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's coupon-query workflow.
+
+- `SKILL.md` keeps coupon semantics, mapping rules, and rendering policy.
+- `references/mcp.md` is the authoritative MCP execution layer for list/detail query behavior and degradation-safe output.
 
 ## Domain Knowledge
 
@@ -168,4 +175,3 @@ Classify the user intent and route to the matching reference document:
 - All operations in this skill are **read-only** (query only, no writes).
 - Never request or expose user API secrets in the conversation.
 - Do not infer or guess coupon IDs — always obtain them from the list API first.
-
