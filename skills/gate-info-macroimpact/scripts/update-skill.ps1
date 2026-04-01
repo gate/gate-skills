@@ -48,6 +48,7 @@ function Show-Usage {
   Write-Host '       update-skill.ps1 revoke-pending <NAME> # clear strict apply token'
   Write-Host '  Single-arg DEST: %USERPROFILE%\.cursor|\.codex|\.openclaw|\.agents|... \skills\<NAME> if SKILL.md exists (same order as update-skill.sh), else script dir (scripts\..).'
   Write-Host '  Legacy: update-skill.ps1 run <DEST> <NAME>  # explicit DEST still supported'
+  Write-Host '  Two-arg: canonical order is DEST (skill root) then NAME; reversed order is fixed when only one path has SKILL.md.'
   exit 1
 }
 
@@ -146,6 +147,22 @@ function Normalize-Dest([string]$Path) {
     return [System.IO.Path]::GetFullPath($Path)
   }
   return [System.IO.Path]::GetFullPath((Join-Path (Get-Location).Path $Path))
+}
+
+# Two-arg check/run/apply/revoke expect DEST then NAME; swap when only the path arg has SKILL.md (same as update-skill.sh).
+function Resolve-DestTwoArg {
+  param([string]$Raw1, [string]$Raw2)
+  $a1 = Normalize-Dest $Raw1
+  $a2 = Normalize-Dest $Raw2
+  $sk1 = Join-Path $a1 'SKILL.md'
+  $sk2 = Join-Path $a2 'SKILL.md'
+  if (Test-Path -LiteralPath $sk1) {
+    return [PSCustomObject]@{ Dest = $a1; Name = $Raw2 }
+  }
+  if (Test-Path -LiteralPath $sk2) {
+    return [PSCustomObject]@{ Dest = $a2; Name = $Raw1 }
+  }
+  return [PSCustomObject]@{ Dest = $a1; Name = $Raw2 }
 }
 
 function Get-FallbackTmpDir {
@@ -375,7 +392,13 @@ function Invoke-Apply {
 function Invoke-Check {
   param([string]$Dest = '', [string]$Name)
 
-  if ([string]::IsNullOrWhiteSpace($Dest)) { $Dest = Resolve-DestSingleArg -Name $Name }
+  if (-not [string]::IsNullOrWhiteSpace($Dest) -and -not [string]::IsNullOrWhiteSpace($Name)) {
+    $pair = Resolve-DestTwoArg -Raw1 $Dest -Raw2 $Name
+    $Dest = $pair.Dest
+    $Name = $pair.Name
+  } elseif ([string]::IsNullOrWhiteSpace($Dest)) {
+    $Dest = Resolve-DestSingleArg -Name $Name
+  }
   $Dest = Normalize-Dest $Dest
   $localMd = Join-Path $Dest 'SKILL.md'
 
@@ -462,7 +485,13 @@ function Invoke-Check {
 function Invoke-Run {
   param([string]$Dest = '', [string]$Name)
 
-  if ([string]::IsNullOrWhiteSpace($Dest)) { $Dest = Resolve-DestSingleArg -Name $Name }
+  if (-not [string]::IsNullOrWhiteSpace($Dest) -and -not [string]::IsNullOrWhiteSpace($Name)) {
+    $pair = Resolve-DestTwoArg -Raw1 $Dest -Raw2 $Name
+    $Dest = $pair.Dest
+    $Name = $pair.Name
+  } elseif ([string]::IsNullOrWhiteSpace($Dest)) {
+    $Dest = Resolve-DestSingleArg -Name $Name
+  }
   $Dest = Normalize-Dest $Dest
   $localMd = Join-Path $Dest 'SKILL.md'
 
@@ -539,8 +568,9 @@ if ($argsList.Count -eq 1 -and $argsList[0] -notin @('run','check','apply','revo
 }
 
 # Legacy 2-arg: <DEST> <NAME> → run
-if ($argsList.Count -eq 2 -and $argsList[0] -notin @('run','check','apply')) {
-  Invoke-Run -Dest $argsList[0] -Name $argsList[1]
+if ($argsList.Count -eq 2 -and $argsList[0] -notin @('run','check','apply','revoke-pending')) {
+  $leg = Resolve-DestTwoArg -Raw1 $argsList[0] -Raw2 $argsList[1]
+  Invoke-Run -Dest $leg.Dest -Name $leg.Name
 }
 
 if ($argsList.Count -lt 2) { Show-Usage }
@@ -563,7 +593,13 @@ switch ($cmd.ToLowerInvariant()) {
   'check' { Invoke-Check -Dest $destArg -Name $nameArg; exit $LASTEXITCODE }
   'apply' {
     Log-Step 'apply: force download and overwrite'
-    if ([string]::IsNullOrWhiteSpace($destArg)) { $destArg = Resolve-DestSingleArg -Name $nameArg }
+    if (-not [string]::IsNullOrWhiteSpace($destArg) -and -not [string]::IsNullOrWhiteSpace($nameArg)) {
+      $ap = Resolve-DestTwoArg -Raw1 $destArg -Raw2 $nameArg
+      $destArg = $ap.Dest
+      $nameArg = $ap.Name
+    } elseif ([string]::IsNullOrWhiteSpace($destArg)) {
+      $destArg = Resolve-DestSingleArg -Name $nameArg
+    }
     $destArg = Normalize-Dest $destArg
     Log-Dim "DEST=$destArg  NAME=$nameArg"
     try {
@@ -577,7 +613,13 @@ switch ($cmd.ToLowerInvariant()) {
     }
   }
   'revoke-pending' {
-    if ([string]::IsNullOrWhiteSpace($destArg)) { $destArg = Resolve-DestSingleArg -Name $nameArg }
+    if (-not [string]::IsNullOrWhiteSpace($destArg) -and -not [string]::IsNullOrWhiteSpace($nameArg)) {
+      $rp = Resolve-DestTwoArg -Raw1 $destArg -Raw2 $nameArg
+      $destArg = $rp.Dest
+      $nameArg = $rp.Name
+    } elseif ([string]::IsNullOrWhiteSpace($destArg)) {
+      $destArg = Resolve-DestSingleArg -Name $nameArg
+    }
     $destArg = Normalize-Dest $destArg
     Remove-ApplyToken $destArg
     Log-Ok "revoke-pending: cleared apply token — DEST=$destArg"

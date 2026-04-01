@@ -1,7 +1,7 @@
 ---
 name: gate-info-defianalysis
-version: "2026.3.30-6"
-updated: "2026-03-30"
+version: "2026.4.1-2"
+updated: "2026-04-01"
 description: "DeFi ecosystem analysis via Gate-Info MCP. Use this skill whenever the user wants TVL rankings, protocol metrics, yield/APY, stablecoins, bridges, exchange reserves, or liquidation heatmaps. Trigger phrases include Uniswap TVL, DeFi ranking, USDC yield, bridge volume, exchange BTC reserves, liquidation density. Route coin-only fundamentals to gate-info-coinanalysis. Sub-scenario tools: info_platformmetrics_* family and info_coin_get_coin_info (exact tool names per scenario in SKILL.md)."
 ---
 
@@ -20,7 +20,9 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Trigger Scenarios**: User asks about DeFi protocols, TVL, yield rates, stablecoins, cross-chain bridges, exchange reserves, liquidation distribution, etc.
 
-**Per-skill updates:** This directory includes `scripts/update-skill.sh` and `scripts/update-skill.ps1`. Policy: [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) §1. The **Trigger update** steps below apply in addition to [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md); when scripts are present, use this flow for version checks before execution.
+**Per-skill updates:** This directory includes `scripts/update-skill.sh` and may include `scripts/update-skill.ps1`. **ClawHub** packages uploaded to the marketplace often omit `update-skill.ps1` (upload-page restriction); **GitHub / Bitbucket** source trees keep both. Policy: [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) §1. The **Trigger update** steps below apply in addition to [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md); when scripts are present, use this flow for version checks before execution.
+
+**Update check — user visibility:** Technical failures during version check (missing script, sandbox, network, non-zero exit, no parseable `Result=` line) must **not** be explained to the user; continue with Execution per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md). Only **successful** `check` / `apply` outcomes may be summarized (including **`update_available`** / strict **exit 3**, which is still a **success path** that requires user confirmation before `apply`). **Do not** auto-download `update-skill.*` from the network. **Static reference** if `.ps1` is missing: canonical scripts live in [gate/gate-skills](https://github.com/gate/gate-skills) under `skills/<name>/scripts/` (same `<name>` as frontmatter).
 
 ---
 
@@ -33,6 +35,12 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Step 1 — Check
 
 **Install root:** `check` / `apply` read **`$DEST/SKILL.md`**. Typical **`$SKILL_ROOT`**: **`$HOME/.cursor/skills/<name>/`**, **`$HOME/.codex/skills/<name>/`**, **`$HOME/.openclaw/skills/<name>/`**, **`$HOME/.agents/skills/<name>/`**, **`$HOME/.gemini/antigravity/skills/<name>/`**. Single-arg: the script resolves **`DEST`** in that order when **`SKILL.md`** exists; otherwise **`DEST`** is `scripts/../`. Workspace-only trees need two-arg **`check`** / **`apply`** with explicit **`DEST`**.
+
+**Agent selection rules** (run **at most one** of the fenced examples below; choose by OS and files under `$SKILL_ROOT/scripts/`):
+- **macOS / Linux / WSL / Git Bash:** If `update-skill.sh` exists → use **only** the **Bash** example.
+- **Windows (native PowerShell):** If `update-skill.ps1` exists → use **only** the **PowerShell** example.
+- **Windows without `.ps1`** (typical ClawHub install): If only `update-skill.sh` exists → try **WSL** or **Git Bash** (`bash`) using the **same command shape** as the Bash example. If bash is unavailable or execution fails → **skip Step 1** silently (no script stderr or “version check failed” message to the user); proceed to Execution.
+- **Neither script exists:** Skip Step 1 silently; proceed to Execution. Do **not** invent `GATE_SKILL_CONFIRM_TOKEN` or run `apply` / `revoke-pending`.
 
 **Bash** (blocking — no auto; example Cursor):
 
@@ -47,11 +55,13 @@ $env:GATE_SKILL_CHECK_STRICT = '1'
 powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-info-defianalysis\scripts\update-skill.ps1" check "gate-info-defianalysis"
 ```
 
-**Result semantics:** `skipped` = no action. `update_available` = remote newer; **with blocking flow, do not apply until the user agrees**. `check_failed` = could not compare — proceed with current version per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
+**Result semantics:** `skipped` = no action. `update_available` = remote newer; **with blocking flow, do not apply until the user agrees**. `check_failed` = could not compare — proceed with current version per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md); **do not** surface technical check failure details to the user.
 
-**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=…`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
+**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=...`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
 
 ### Step 2 — Confirm or Reject (blocking)
+
+**Runtime:** Use the **same** shell family for Step 2 as for Step 1 (Bash vs PowerShell). If Step 1 was **skipped**, do **not** run `apply` or `revoke-pending`.
 
 **If `update_available`:**
 
@@ -94,7 +104,8 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 ### Parameters
 
 - **name**: Frontmatter `name` above; must match `skills/<name>/` on gate-skills.
-- **Invoke**: Use **`$SKILL_ROOT/scripts/update-skill.sh`** (or `.ps1`) where **`$SKILL_ROOT/SKILL.md`** is this skill — e.g. **`~/.cursor/skills/<name>`**, **`~/.codex/skills/<name>`**, **`~/.openclaw/skills/<name>`**, **`~/.agents/skills/<name>`**, **`~/.gemini/antigravity/skills/<name>`**; do not treat **`~/.cursor`** (or any host root without **`skills/<name>/SKILL.md`**) as the install. With one arg, the script resolves **`$SKILL_ROOT`** in that order before falling back to the script’s directory; workspace installs need **explicit `DEST`**.
+- **Invoke**: Use **`$SKILL_ROOT/scripts/update-skill.sh`** (or `.ps1`) where **`$SKILL_ROOT/SKILL.md`** is this skill — e.g. **`~/.cursor/skills/<name>`**, **`~/.codex/skills/<name>`**, **`~/.openclaw/skills/<name>`**, **`~/.agents/skills/<name>`**, **`~/.gemini/antigravity/skills/<name>`**; do not treat **`~/.cursor`** (or any host root without **`skills/<name>/SKILL.md`**) as the install. With one arg, the script resolves **`$SKILL_ROOT`** in that order before falling back to the script’s directory; workspace installs need **explicit `DEST`**. **Two-arg `check` / `apply` / `revoke-pending`:** canonical order is **absolute `DEST` (skill root) first**, then **`name`**; **`update-skill.sh` / `update-skill.ps1` auto-swap** when only one normalized path contains `SKILL.md` (e.g. agent passes `name` then path).
+- **ClawHub vs full tree:** Installs without `update-skill.ps1` may copy it from [gate/gate-skills](https://github.com/gate/gate-skills) under `skills/<name>/scripts/` (**manual** only; agents must **not** auto-download).
 
 **Do not** dump raw script logs into the user-facing reply except when debugging. On **`check` exit 3** (strict), do not run Execution until Step 2 is resolved. On **`check_failed`** or **`apply` failure**, still run Execution when appropriate per runtime rules.
 
@@ -305,7 +316,7 @@ For Bridges and Stablecoins, use a list-first, detail-on-demand pattern:
 | Condition | Assessment / next step |
 |-----------|-------------------------|
 | Generic DeFi market, TVL leaderboard, or “top protocols” | Sub-scenario A (Overview) |
-| User names a specific protocol (Uniswap, Aave, …) | Sub-scenario B (Platform detail) |
+| User names a specific protocol (Uniswap, Aave, ...) | Sub-scenario B (Platform detail) |
 | Yield, APY, lending, “where to earn” | Sub-scenario C (Yield pools) |
 | Stablecoins, peg, circulation, ranking | Sub-scenario D; use progressive loading per Step 4 |
 | Bridges, cross-chain TVL, bridge volume | Sub-scenario E; list-first, detail on follow-up |
@@ -350,3 +361,5 @@ For Bridges and Stablecoins, use a list-first, detail-on-demand pattern:
 4. **Reserve disclaimers**: Exchange reserve data is on-chain observable but may not reflect total assets.
 5. **Liquidation data**: Liquidation heatmaps show estimated levels, not guaranteed triggers.
 6. **Data transparency**: Label data source, update frequency, and known limitations.
+7. **Age & eligibility**: Intended for users **aged 18 or above** with **full civil capacity** in their jurisdiction.
+8. **Data flow**: The host agent processes user prompts; this skill directs **read-only** **Gate-Info** MCP tools listed above. The LLM formats answers from tool results. Aside from those MCP calls and the documented skill-update flow (GitHub URLs in **General Rules** and `info-news-runtime-rules.md`), this skill does not invoke additional third-party data services.

@@ -52,7 +52,7 @@ Aligned with [gate-mcp](https://github.com/gate/gate-mcp) documentation:
 
 | Mode | What it is | Auth | Typical use |
 |------|------------|------|----------------|
-| **Local CEX** | stdio `npx -y gate-mcp` (npm package **gate-mcp**) | Optional `GATE_API_KEY` / `GATE_API_SECRET` (public-only works without keys; set `GATE_READONLY=true` for read-only) | Full local tool surface; tool names use abbreviations (`fx`, `dc`, …) — see gate-mcp **gate-local-mcp-tools** doc |
+| **Local CEX** | stdio `npx -y gate-mcp` (npm package **gate-mcp**) | Optional `GATE_API_KEY` / `GATE_API_SECRET` (public-only works without keys; set `GATE_READONLY=true` for read-only) | Full local tool surface; tool names use abbreviations (`fx`, `dc`, ...) — see gate-mcp **gate-local-mcp-tools** doc |
 | **Remote CEX — Public** | `https://api.gatemcp.ai/mcp` | **None** | Public market data only (~58 tools, `cex_*` names) |
 | **Remote CEX — Exchange** | `https://api.gatemcp.ai/mcp/exchange` | **Gate OAuth2** (browser login) | Private trading & account (~400+ tools); **does not** duplicate the full public market-data set — use **Public** remote or Local for market queries as needed |
 

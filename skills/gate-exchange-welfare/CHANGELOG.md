@@ -1,4 +1,4 @@
-# Changelog — gate-exchange-welfare
+# Changelog
 
 **Note:** Changes are consolidated as one initial entry for now; versioned entries will be used after official release.
 

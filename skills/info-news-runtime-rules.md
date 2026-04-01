@@ -16,7 +16,8 @@ https://github.com/gate/gate-skills
   - **Cursor / Agent:** After notifying the user, **end this assistant turn** before `apply` — strict `check` **exit 3** only aborts that shell step; **`apply`** in a **later** turn after the user agrees (or **`revoke-pending`** if they decline).
 - **Optional — auto mode (CI / unattended only):** **`GATE_SKILL_UPDATE_MODE=auto`** on **`check`** or **`run`** applies immediately when the remote is newer — **no** user step; **incompatible** with blocking verification.
 - If `skipped` (versions match) or `check_failed` (network, missing tools, etc.): proceed directly to execution.
-- If update check fails or GitHub is unreachable, disclose the limitation and proceed with the current version. Never block execution due to update failure.
+- **Technical failures during the version check** (script missing, sandbox denial, unreachable GitHub, non-zero exit, no parseable `Result=`, etc.): **do not** surface failure details or “version check failed” messaging to the user; proceed with the current installed version. **Never** block execution due to update failure. (**Success paths** — including **`update_available`** with strict **`exit 3`** — still require the user-facing confirmation flow in each skill’s **Trigger update** before `apply`.)
+- **Do not** auto-download `update-skill.sh` / `update-skill.ps1` into the user’s install; manual copy from [gate/gate-skills](https://github.com/gate/gate-skills) is allowed. (ClawHub packages may omit `.ps1`; see per-skill **SKILL.md** **Trigger update**.)
 - Update pulls the entire skill directory from the remote repo (git clone → ZIP → tar.gz fallback), writes to a temp location first, and only overwrites after verification. Original files are preserved on failure.
 
 ---

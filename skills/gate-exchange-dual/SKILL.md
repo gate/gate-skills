@@ -111,7 +111,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Interest-guaranteed, not principal-protected**: Principal + interest are always received, but the settlement currency may change due to price movement.
 - The closer the target price is to the current price, the higher the APY, but also the higher the probability of currency conversion.
 - Once placed, dual investment orders cannot be cancelled. Settlement is automatic at delivery time.
-- **Order type derivation**: `cex_earn_list_dual_orders` has NO `type` field. Derive from `invest_currency`: crypto (BTC, ETH…) → Sell High (Call); stablecoin (USDT) → Buy Low (Put). Filter by coin using `invest_currency` or `exercise_currency` — there is NO `instrument_name`.
+- **Order type derivation**: `cex_earn_list_dual_orders` has NO `type` field. Derive from `invest_currency`: crypto (BTC, ETH...) → Sell High (Call); stablecoin (USDT) → Buy Low (Put). Filter by coin using `invest_currency` or `exercise_currency` — there is NO `instrument_name`.
 - **Order status values**: `INIT` (Pending), `PROCESSING` (In Position), `SETTLEMENT_SUCCESS` (Settled), `SETTLEMENT_PROCESSING` (Settling), `CANCELED` (Canceled), `FAILED` (Failed), `REFUND_SUCCESS` / `REFUND_PROCESSING` / `REFUND_FAILED` → display as "Early Redemption", never "Refund". Early-redeemed orders have zero yield.
 
 ### Settlement Rules (Gate Examples)

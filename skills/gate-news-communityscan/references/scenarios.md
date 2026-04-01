@@ -2,55 +2,49 @@
 
 ## Scenario 1: Community opinion on a coin
 
-**Context**: User wants social/community take on a specific asset.
+**Context**: User wants social/community takes on a specific asset.
 
 **Prompt Examples**:
-- "What does the community think about ETH"
-- "X sentiment on SOL"
+- "What does the community think about ETH?"
+- "Twitter sentiment on SOL today"
 
 **Expected Behavior**:
-1. Parallel `news_feed_search_x` (query from coin/topic) and `news_feed_get_social_sentiment` (with `coin` when specified).
-2. Output SKILL.md template; label **Platforms: X/Twitter only**.
+1. Parallel `news_feed_search_x` with query from coin/topic and `news_feed_get_social_sentiment` with `coin` when applicable.
+2. Produce **Community Sentiment Scan** report with X/Twitter discussion + sentiment metrics.
+3. Label coverage **X/Twitter only** per **Known Limitations**.
 
-## Scenario 2: General market social mood
+## Scenario 2: General social sentiment
 
-**Context**: No single coin — broad social scan.
+**Context**: User asks for broad market social mood without naming one coin.
 
 **Prompt Examples**:
-- "What are people saying on crypto Twitter"
-- "Overall market sentiment on X"
+- "Overall crypto social sentiment"
+- "Is the crowd bullish or bearish?"
 
 **Expected Behavior**:
-1. Build a general query; call both tools; synthesize narratives + metrics.
-2. If sentiment tool lacks coin, still deliver X discussion section.
+1. Build `query` from topic or general market terms; call both tools in parallel per `SKILL.md`.
+2. If `coin` is absent, still run `news_feed_search_x`; use sentiment tool parameters as supported by MCP for general scans.
+3. Note limitations if sentiment tool requires a specific coin.
 
-## Scenario 3: One tool empty or fails
+## Scenario 3: Reddit / Discord / UGC request
 
-**Context**: Partial API failure.
+**Context**: User asks for non-X platforms.
 
 **Prompt Examples**:
-- "Community thoughts on BTC" (X search fails)
+- "Reddit discussion on this coin"
+- "What is Discord saying about the ETF?"
 
 **Expected Behavior**:
-1. Per **Error Handling**: sentiment-only or X-only section; note which part is unavailable; do not fabricate KOL quotes.
+1. State that **UGC** (Reddit/Discord/Telegram) is **not** available; output remains **X/Twitter only** (`SKILL.md` **Known Limitations**).
+2. Optionally still run X/Twitter tools with an adjusted query if helpful; do not claim Reddit/Discord data.
 
-## Scenario 4: User asks for Reddit / Discord
+## Scenario 4: Route to general news
 
-**Context**: UGC platforms not supported.
+**Context**: User wants headlines, not community sentiment framing.
 
 **Prompt Examples**:
-- "Reddit discussion on this token"
+- "Any crypto news today?"
+- "Latest headlines on Bitcoin"
 
 **Expected Behavior**:
-1. State UGC search is **not** online; offer X/Twitter-only scan or route to `gate-news-briefing` for general news.
-
-## Scenario 5: Route away
-
-**Context**: User wants headlines or full coin research, not social-only.
-
-**Prompt Examples**:
-- "Latest crypto news" → `gate-news-briefing`
-- "Full analysis of BTC" → `gate-info-coinanalysis` or `gate-info-research` if multi-dimension
-
-**Expected Behavior**:
-1. Apply SKILL.md **Routing Rules** before executing this skill.
+1. Route to `gate-news-briefing` per **Routing Rules**; do not treat as community scan unless the user asks for social/community/Twitter angle.

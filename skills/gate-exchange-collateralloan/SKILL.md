@@ -176,9 +176,9 @@ Please confirm to proceed.
 
 | Case | User Intent | Signal Keywords | Action |
 |------|-------------|-----------------|--------|
-| 1 | Create current loan | "current loan", "pledge … borrow … (current)" | See `references/scenarios.md` Scenario 1 |
-| 2 | Create fixed loan | "fixed loan", "borrow … for 7/30 days" | See `references/scenarios.md` Scenario 2 |
-| 3 | Repay | "repay", "repay order …" | See `references/scenarios.md` Scenario 3 |
+| 1 | Create current loan | "current loan", "pledge ... borrow ... (current)" | See `references/scenarios.md` Scenario 1 |
+| 2 | Create fixed loan | "fixed loan", "borrow ... for 7/30 days" | See `references/scenarios.md` Scenario 2 |
+| 3 | Repay | "repay", "repay order ..." | See `references/scenarios.md` Scenario 3 |
 | 4 | Add collateral | "add collateral", "add margin" | See `references/scenarios.md` Scenario 4 |
 | 5 | Redeem collateral | "redeem collateral", "reduce margin" | See `references/scenarios.md` Scenario 5 |
 | 6 | List orders / order detail | "loan orders", "order detail", "my orders" | `cex_mcl_list_multi_collateral_orders` / `cex_mcl_get_multi_collateral_order_detail` — **never include any time/date fields** in the user-facing reply (see Presentation below) |

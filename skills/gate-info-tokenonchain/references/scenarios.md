@@ -1,57 +1,51 @@
 # gate-info-tokenonchain — Scenarios & Prompt Examples
 
-## Scenario 1: Full token on-chain overview
+## Scenario 1: Holder distribution
 
-**Context**: User asks for general on-chain picture of a token.
-
-**Prompt Examples**:
-- "ETH on-chain analysis"
-- "SOL on-chain data"
-
-**Expected Behavior**:
-1. Set `scope` to include `holders`, `activity`, and `transfers` as appropriate; call in parallel `info_onchain_get_token_onchain` and `info_coin_get_coin_info`.
-2. Output SKILL.md report with all requested sections; state **Smart Money not available** if user asks.
-
-## Scenario 2: Holders or concentration only
-
-**Context**: User focuses on distribution.
+**Context**: User asks about concentration or top holders for a token.
 
 **Prompt Examples**:
-- "Top ETH holders"
-- "Is BTC supply concentrated"
+- "ETH holder distribution"
+- "Who holds most BTC on-chain?"
 
 **Expected Behavior**:
-1. `scope=holders` (plus `info_coin_get_coin_info` in parallel).
-2. Apply **Decision Logic** for concentration thresholds; no price predictions.
+1. Set `scope` to include `holders`; pass `symbol`, optional `chain`, `time_range` per `SKILL.md`.
+2. Parallel: `info_onchain_get_token_onchain`, `info_coin_get_coin_info` (`scope="basic"`).
+3. Fill holder section of **Report Template**; shorten addresses for privacy.
 
-## Scenario 3: Large transfers / whale flow
+## Scenario 2: Full on-chain overview (multi-scope)
 
-**Context**: User asks about big moves.
+**Context**: User wants a broad on-chain picture for one token.
 
 **Prompt Examples**:
-- "Large SOL transfers today"
-- "Unusual whale movements for BTC"
+- "Full on-chain analysis for SOL"
+- "ETH on-chain activity and large transfers"
 
 **Expected Behavior**:
-1. `scope=transfers` with sensible `time_range`; parallel coin info.
-2. Label exchange addresses as best-effort per **Safety Rules**.
+1. Use `scope` combining `holders`, `activity`, and `transfers` as appropriate.
+2. Parallel on-chain + coin info calls per **Execution Workflow**.
+3. Include health-score style synthesis only from returned data; no price targets.
 
-## Scenario 4: Smart Money requested (unsupported)
+## Scenario 3: Smart Money not available
 
-**Context**: User asks for smart money or `scope=smart_money`.
+**Context**: User asks for smart-money or unavailable scope.
 
 **Prompt Examples**:
-- "What is smart money buying on ETH"
+- "Smart money flows for ETH"
+- "Track smart money on this token"
 
 **Expected Behavior**:
-1. Inform user that Smart Money is **not** in this skill version; offer holders / activity / transfers only. Do not invent smart-money data.
+1. State clearly that **Smart Money** is not available in this skill version (`SKILL.md` **Known Limitations**).
+2. Offer `holders`, `activity`, or `transfers` only; do not approximate smart-money data.
+3. If user agrees, run allowed scopes only.
 
-## Scenario 5: Address vs token — route away
+## Scenario 4: Route to address tracker
 
-**Context**: User pastes an address.
+**Context**: User gives a specific wallet address to track.
 
 **Prompt Examples**:
-- "Track 0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045"
+- "Track this address 0x1234..."
+- "What is this wallet doing?"
 
 **Expected Behavior**:
-1. Route to **`gate-info-addresstracker`**; do not use `info_onchain_get_token_onchain` as a substitute for address tracking.
+1. Route to `gate-info-addresstracker` per **Routing Rules**; do not use `info_onchain_get_token_onchain` as a substitute for address-level tracking unless `SKILL.md` explicitly allows that tool for the same intent (it does not for single-address follow).
