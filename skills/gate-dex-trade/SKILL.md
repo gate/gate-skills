@@ -2,7 +2,7 @@
 name: gate-dex-trade
 version: "2026.3.24-1"
 updated: "2026-03-24"
-description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transactions that MODIFY blockchain state: swap, buy, sell, exchange, convert tokens, cross-chain bridge. Every operation here results in an on-chain transaction requiring signing. This skill EXECUTES trades — it does not provide read-only data lookups or manage wallet accounts."
+description: "Gate DEX on-chain swap and trade execution skill. Use when the user asks to swap, buy, or sell on-chain with a signed transaction. Triggers on 'DEX swap', 'swap tokens on chain', 'bridge tokens'. Do NOT use for price-only queries or wallet setup — use gate-dex-market or gate-dex-wallet."
 ---
 
 # Gate DEX Trade
@@ -44,8 +44,9 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - dex_tx_swap
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Dex:Read
+- API Key Required: No for default MCP mode
+- OAuth `mcp_token` Required: Yes for MCP swap operations
+- Note: In this workspace the default path is MCP mode, which uses Gate DEX wallet OAuth and `mcp_token`, not a CEX-style API key. OpenAPI mode is separate and only applies when the user explicitly requests OpenAPI / AK-SK usage.
 
 ### Installation Check
 - Required: Gate-Dex

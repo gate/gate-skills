@@ -2,7 +2,7 @@
 name: gate-mcp-openclaw-installer
 version: "2026.3.25-2"
 updated: "2026-03-25"
-description: One-click installer for Gate.com MCP servers via mcporter — Local CEX, Remote CEX public/exchange, Dex, Info, News. Use when installing or managing Gate MCP with OpenClaw.
+description: "Gate MCP one-click installer for OpenClaw (mcporter). Use when the user asks to install or configure Gate MCP servers with OpenClaw. Triggers on 'install Gate MCP', 'OpenClaw Gate', 'mcporter Gate'."
 ---
 
 # Gate MCP (OpenClaw / mcporter)
@@ -38,6 +38,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this installer workflow.
+
+- `SKILL.md` keeps mode descriptions, quick-start semantics, and product guidance.
+- `references/mcp.md` is the authoritative execution layer for mcporter install sequencing, auth gates, and fallback policy.
 
 ## Quick Start
 

@@ -2,7 +2,7 @@
 name: gate-exchange-launchpool
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "The LaunchPool staking and airdrop function of Gate Exchange. Use this skill whenever you need to browse LaunchPool projects, stake tokens, redeem staked assets, query pledge records, or check airdrop reward history. Trigger phrases include: LaunchPool, launch pool, staking event, airdrop, pledge, redeem, LaunchPool rewards, LaunchPool projects."
+description: "Gate LaunchPool staking and airdrop skill. Use when the user asks to browse LaunchPool, stake or redeem, or check airdrop rewards. Triggers on 'LaunchPool', 'launch pool airdrop', 'pledge redeem', 'LaunchPool rewards'."
 ---
 
 # Gate LaunchPool Suite
@@ -49,6 +49,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's LaunchPool workflow.
+
+- `SKILL.md` keeps routing and product semantics.
+- `references/mcp.md` is the authoritative MCP execution layer for project/record queries, stake-redeem confirmation gates, and result verification.
 
 ## Module overview
 

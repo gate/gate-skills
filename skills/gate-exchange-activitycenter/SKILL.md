@@ -2,7 +2,7 @@
 name: gate-exchange-activitycenter
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Activity center for platform campaigns. Use this skill whenever the user asks about platform activities, activity recommendations, or my activities. Trigger phrases include: recommend activities, what activities, airdrop activities, trading competition, VIP activities, my activities. MCP tools: cex_activity_list_activity_types, cex_activity_list_activities, cex_activity_get_my_activity_entry."
+description: "Gate platform activity and campaign hub skill. Use when the user asks about trading competitions, airdrops, or their enrolled activities. Triggers on 'recommend activities', 'trading competition', 'my activities', 'airdrop campaign'."
 ---
 
 # gate-exchange-activitycenter
@@ -50,6 +50,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's activity-center workflow.
+
+- `SKILL.md` keeps routing and recommendation logic.
+- `references/mcp.md` is the authoritative MCP execution layer for entry/list/type queries, filter handling, and degraded output behavior.
 
 ## Routing Rules
 

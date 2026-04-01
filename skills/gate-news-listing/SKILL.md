@@ -2,7 +2,7 @@
 name: gate-news-listing
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Exchange listing tracker. Use this skill whenever the user asks about exchange listing, delisting, or maintenance announcements. Trigger phrases include: any new coins listed recently, what did Binance list, new listings, delisted. MCP tools: news_feed_get_exchange_announcements, info_coin_get_coin_info, info_marketsnapshot_get_market_snapshot."
+description: "Exchange listing and delisting tracker. Use when the user asks about new listings, delistings, or exchange maintenance announcements. Triggers on 'new listings', 'what did Binance list', 'delisted', 'listing news'. Do NOT use for multi-dimension coin research — use gate-info-research."
 ---
 
 # gate-news-listing
@@ -126,6 +126,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's listing-radar workflow.
+
+- `SKILL.md` keeps routing and report standards.
+- `references/mcp.md` is the authoritative MCP execution layer for announcement retrieval, enrichment, and degradation-safe output.
 
 ## Routing Rules
 

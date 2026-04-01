@@ -2,7 +2,7 @@
 name: gate-exchange-welfare
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate Exchange welfare center new user task skill with MCP tools integration. Use this skill whenever user asks about welfare benefits, new user rewards, how to claim rewards, or available tasks. Trigger phrases include: what welfare, how to claim rewards, new user benefits, new user tasks, what tasks can I do, claim reward. CRITICAL: Must use real MCP data, never provide fake reward information. All documentation in English."
+description: "Gate welfare center and new-user task skill. Use when the user asks about welfare rewards, tasks, or how to claim benefits. Triggers on 'welfare center', 'new user tasks', 'claim reward'. Must use real MCP data only."
 ---
 
 # Gate Exchange Welfare Center
@@ -44,6 +44,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's welfare workflow.
+
+- `SKILL.md` keeps user-type routing, task-display semantics, and policy constraints.
+- `references/mcp.md` is the authoritative MCP execution layer for identity gate, task query sequence, and fallback handling.
 
 ## Overview
 

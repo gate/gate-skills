@@ -2,7 +2,7 @@
 name: gate-mcp-claude-installer
 version: "2026.3.25-2"
 updated: "2026-03-25"
-description: One-click installer for Gate MCP and all Gate Skills in Claude Code (Claude CLI). Installs Local CEX (stdio), Remote CEX public/exchange, Dex/Info/News (selectable), and all gate-skills. Default installs all MCPs + all skills.
+description: "Gate MCP and Gate skills installer for Claude Code (CLI). Use when the user asks to install Gate tools in Claude Code. Triggers on 'install Gate MCP Claude', 'Gate skills Claude Code', 'Claude CLI Gate'."
 ---
 
 # Gate One-Click Installer (Claude Code: MCP + Skills)
@@ -38,6 +38,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this installer workflow.
+
+- `SKILL.md` keeps product scope, install behavior, and user-facing guidance.
+- `references/mcp.md` is the authoritative execution layer for environment checks, config merge rules, and failure rollback guidance.
 
 ## CEX MCP modes (read before configuring)
 

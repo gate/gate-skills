@@ -1,8 +1,8 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.30-1"
-updated: "2026-03-30"
-description: "Use this skill whenever users ask about partner affiliate data, commissions, applications, or aggregated summaries. `transaction_history` and `commission_history` enforce a hard 30-day maximum per request (segment longer ranges up to 180 days); `cex_rebate_get_partner_agent_data_aggregated` supports up to 180 days in one request (do not split when ≤180 days). Trigger phrases include 'my affiliate data', 'my rebate', 'query my rebate', 'commission records', 'rebate history', 'commission', 'partner earnings', 'apply for affiliate', 'am I eligible', 'my application status', 'aggregated data', 'total summary', 'overall statistics'."
+version: "2026.3.25-1"
+updated: "2026-03-25"
+description: "Gate partner affiliate data and application skill. Use when the user asks about partner commissions, referral volume, or applying for the affiliate program. Triggers on 'my affiliate data', 'partner earnings', 'apply for affiliate', 'commission'."
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -36,12 +36,11 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - cex_rebate_partner_commissions_history
 - cex_rebate_partner_sub_list
 - cex_rebate_partner_transaction_history
-- cex_rebate_get_partner_agent_data_aggregated
 
 ### Authentication
 - API Key Required: Yes (see skill doc/runtime MCP deployment)
 - Permissions: Rebate:Read
-- Get API Key: https://www.gate.com/myaccount/profile/api-key/manage
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
 
 ### Installation Check
 - Required: Gate (main)
@@ -51,14 +50,20 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
 
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's affiliate workflow.
+
+- `SKILL.md` keeps routing and reporting policy.
+- `references/mcp.md` is the authoritative MCP execution layer for eligibility/application/commission query flow and degraded handling.
+
 ## Important Notice
 
 - **Role**: This skill uses Partner APIs only. The term "affiliate" in user queries refers to Partner role.
-- **Time limit (list APIs) — mandatory**: `transaction_history` and `commission_history` each accept **at most 30 days of data per request** (`from`/`to` Unix window). **Never** send a single list API call spanning **more than 30 days**. For user windows **>30 days and ≤180 days**, issue **multiple** list calls with **non-overlapping 30-day segments** (or shorter last segment), then merge. This **30-day cap is unchanged** by the aggregated endpoint; it applies only to these two list endpoints.
-- **Time limit (aggregated summary)**: `cex_rebate_get_partner_agent_data_aggregated` / `GET /rebate/partner/data/aggregated` supports **up to 180 days in one request** (set `start_date` / `end_date` in UTC+8). If the user’s range is **≤180 days**, use **a single aggregated call** — **do not** split into multiple aggregated queries.
+- **Time Limit**: API supports maximum 30 days per request. For queries >30 days (up to 180 days), agent must split into multiple 30-day segments.
 - **Authentication**: Requires `X-Gate-User-Id` header with partner privileges.
 - **CRITICAL - user_id Parameter**: In both `commission_history` and `transaction_history` APIs, the `user_id` parameter filters by "trader/trading user" NOT "commission receiver". Only use this parameter when explicitly querying a specific trader's contribution. For general commission queries, DO NOT use user_id parameter.
-- **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations. For **rebate/commission summary** questions, prefer the **aggregated** endpoint (`rebate_amount`) instead of summing `commission_history` rows unless the user explicitly needs record-level data.
+- **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations.
 
 ### Query time and timezone (UTC+8)
 
@@ -68,42 +73,21 @@ All query windows use the user's **current calendar date** in **UTC+8**. For rel
 
 | API Endpoint | Description | Time Limit |
 |--------------|-------------|------------|
-| `GET /rebate/partner/transaction_history` | Get referred users' trading records | **Hard max 30 days** per `from`/`to`; never widen a single call beyond 30 days |
-| `GET /rebate/partner/commission_history` | Get referred users' commission records | **Hard max 30 days** per `from`/`to`; never widen a single call beyond 30 days |
+| `GET /rebate/partner/transaction_history` | Get referred users' trading records | ≤30 days per request |
+| `GET /rebate/partner/commission_history` | Get referred users' commission records | ≤30 days per request |
 | `GET /rebate/partner/sub_list` | Get subordinate list (for customer count) | No time parameter |
 | `GET /rebate/partner/eligibility` | Check if user is eligible to apply for partner | No time parameter |
 | `GET /rebate/partner/applications/recent` | Get user's recent partner application record (last 30 days) | No time parameter |
-| `GET /rebate/partner/data/aggregated` | Get aggregated partner data summary | Optional `start_date`/`end_date` (UTC+8); default last 7 days if omitted; **≤180 days per single request — never split** multiple aggregated calls for one query when the window is ≤180 days |
 
 **Note**: Agency APIs (`/rebate/agency/*`) are deprecated and not used in this skill.
 
-### Rebate / commission intent routing (aggregated vs `commission_history`)
-
-Use this routing whenever the user mentions rebate or commission in Chinese or English:
-
-| User intent (examples) | Preferred API | MCP tool (when configured) |
-|------------------------|---------------|----------------------------|
-| **Summary or total** — how much rebate/commission overall, "my rebate", "query my rebate", "how much did I earn", rebate for a period without asking for line items | `GET /rebate/partner/data/aggregated` | `cex_rebate_get_partner_agent_data_aggregated` |
-| **Records or history** — commission/rebate **records**, **history**, **list**, **ledger**, line-by-line entries, per-trade commission detail, export-style detail | `GET /rebate/partner/commission_history` | `cex_rebate_partner_commissions_history` |
-
-**Rules**:
-1. If the user asks for **totals or a dashboard-style answer** for their own rebate/commission, classify as **`aggregated_summary`** and call the aggregated endpoint **once** with `start_date`/`end_date` in UTC+8 for the full window (**up to 180 days** — **no** multi-call splitting when ≤180 days; otherwise use API default last 7 days). **Do not** use `user_id` unless they explicitly name a **trader** UID.
-2. If the user asks for **records**, **history**, **list**, or **each** commission/rebate entry, classify as **`commission_records`** (or `metric_specific` with metric `commission` + list intent) and call **`commission_history`** with Unix `from`/`to`, pagination as needed. **Do not** use `user_id` for "my commission records"—only when filtering by a specific **trader**.
-3. If both are asked (e.g. "total and the list"), return aggregated totals first, then offer or fetch `commission_history` for detail.
-
 ## ⚠️ CRITICAL API USAGE WARNINGS
-
-### 30-day maximum per request (`transaction_history` / `commission_history` only)
-
-- Each **`cex_rebate_partner_transaction_history`** / **`GET /rebate/partner/transaction_history`** call and each **`cex_rebate_partner_commissions_history`** / **`GET /rebate/partner/commission_history`** call **must** use a `from`–`to` range covering **≤30 days** of history. **Violating this is invalid** regardless of aggregated API behavior.
-- For ranges longer than 30 days (up to 180 days total for partner history), **keep** segmenting into **30-day (or shorter) chunks** per call. Do **not** replace this with one 60- or 90-day list call.
-- The **180-day single-call** rule applies **only** to **`cex_rebate_get_partner_agent_data_aggregated`** / **`GET /rebate/partner/data/aggregated`**, not to list APIs.
 
 ### user_id Parameter Clarification
 - **NEVER use `user_id` parameter for general commission queries**
 - The `user_id` parameter in both `commission_history` and `transaction_history` APIs filters by **TRADER/TRADING USER**, not commission receiver
 - Only use `user_id` when explicitly querying a specific trader's contribution (e.g., "UID 123456's trading volume")
-- For queries like "my commission", "my earnings", "my rebate" (summary intent) — **DO NOT use user_id**; prefer **`aggregated_summary`** for totals. For **record-list** intent, call **`commission_history`** without `user_id` unless a trader UID is given
+- For queries like "my commission", "my earnings", "my rebate" - **DO NOT use user_id parameter**
 
 ### Data Aggregation Rules
 - **DO NOT simply sum all values from API response lists**
@@ -116,7 +100,6 @@ Use this routing whenever the user mentions rebate or commission in Chinese or E
 
 ## Safety Rules
 
-- **List APIs (`transaction_history`, `commission_history`)**: **Always** enforce the **30-day maximum per request**. Never stretch one list call past 30 days; use segmented calls for longer windows (see **30-day maximum per request** above).
 - **Query times (UTC+8)**: Follow **Important Notice → Query time and timezone (UTC+8)** for relative ranges, day boundaries, and Unix conversion. Never use future timestamps; `to` must be ≤ current Unix time; reject user-specified future dates.
 - **user_id usage**: Use the `user_id` parameter only when the user explicitly asks about a specific trader's contribution (e.g. "UID 123456's volume"). Do not use `user_id` for "my commission" or "my earnings"—those are the partner's own totals across all referred users.
 - **Data scope**: Query only data for the authenticated partner. Do not attempt to access other partners' data or to infer data outside the API responses.
@@ -125,16 +108,16 @@ Use this routing whenever the user mentions rebate or commission in Chinese or E
 
 ## Core Metrics
 
-1. **Commission / rebate amount (summary)**: Prefer **`rebate_amount`** from `GET /rebate/partner/data/aggregated` when the user wants totals ("my rebate", "how much commission"). Use **`commission_history`** only when they need line-item records or when aggregated is unsuitable.
-2. **Trading Volume**: Total trading amount from `transaction_history` or `trade_volume` from aggregated when using the summary endpoint
-3. **Net Fees**: From `transaction_history` or `net_fee` from aggregated when using the summary endpoint
-4. **Customer Count**: From `sub_list` or `customer_count` from aggregated when using the summary endpoint
-5. **Trading Users**: Unique user count from `transaction_history`, or `trading_user_count` from aggregated when `business_type=0`
+1. **Commission Amount**: Total rebate earnings from `commission_history`
+2. **Trading Volume**: Total trading amount from `transaction_history`
+3. **Net Fees**: Total fees collected from `transaction_history`
+4. **Customer Count**: Total subordinates from `sub_list`
+5. **Trading Users**: Unique user count from `transaction_history`
 
 ## Domain Knowledge
 
 - **Partner (affiliate)**: In this skill, "affiliate" and "partner" refer to the same role: a user who refers others to trade on Gate Exchange and earns rebate (commission) from referred users' trading activity. Only Partner APIs are used; Agency APIs are deprecated.
-- **Commission (rebate)**: Commission is the rebate paid to the partner from trading fees generated by referred users. **Summary totals** are served by the aggregated endpoint (`rebate_amount`). **Per-entry detail** comes from `commission_history`. See **Rebate / commission intent routing** to choose the correct API.
+- **Commission (rebate)**: Commission is the rebate paid to the partner from trading fees generated by referred users. It is reported per transaction or per period via commission history. Amounts may be in different assets (e.g. USDT); aggregation must follow business rules and asset handling.
 - **Trading volume and net fees**: These come from referred users' trading activity (spot, futures, etc.). Transaction history returns per-trade records; volume and fees must be aggregated with proper logic—do not naively sum list fields.
 - **Subordinates**: Users referred by the partner. The subordinate list returns them with types: Sub-agent (1), Indirect customer (2), Direct customer (3). Customer count is the total number of subordinates; trading users is the count of unique users with trading activity in the requested period.
 - **Eligibility**: Whether the current user can apply for the partner program. Checked via the eligibility API; the response includes `eligible` and, when not eligible, `block_reasons` and `block_reason_codes` (e.g. sub_account, already_agent, kyc_incomplete).
@@ -143,80 +126,61 @@ Use this routing whenever the user mentions rebate or commission in Chinese or E
 ## Workflow
 ### Step 1: Parse User Query
 
-Call `N/A` (local parsing; no MCP) with:
-- Latest user message and any clarified entities (time phrases, trader UID, metric intent)
+Identify the query type and extract parameters.
 
 Key data to extract:
-- `query_type`: overview | time_specific | metric_specific | user_specific | team_report | application | application_eligibility | application_status | aggregated_summary | commission_records
-- `rebate_routing`: `aggregated_summary` | `commission_records` | unset — set from **Rebate / commission intent routing** when the user mentions rebate or commission
+- `query_type`: overview | time_specific | metric_specific | user_specific | team_report | application | application_eligibility | application_status
 - `time_range`: default 7 days or user-specified period
-- `metric`: commission | volume | fees | customers | trading_users (if metric-specific); for commission, distinguish **summary** (→ aggregated) vs **records** (→ commission_history)
+- `metric`: commission | volume | fees | customers | trading_users (if metric-specific)
 - `user_id`: specific user ID (if user-specific query)
-- `business_type`: business type filter for aggregated queries (0=all, 1=spot, 2=futures, etc.)
 
 ### Step 2: Validate Time Range
 
-Call `N/A` (local validation; no MCP) with:
-- `query_type`, `time_range`, and planned endpoints from Step 1
+Check if the requested time range is valid and determine if splitting is needed.
 
 Key data to extract:
-- `needs_splitting`: boolean — **true** only when the plan uses **`transaction_history`** and/or **`commission_history`** (e.g. overview, team report, `commission_records`) and the window is **>30 days** and **≤180 days**. **false** for **`aggregated_summary`** when the window is **≤180 days** (one aggregated call covers the full range).
-- `segments`: array of time segments — **only** for list APIs when `needs_splitting` is true; **not** used for a single aggregated request ≤180 days.
-- `error`: string if time range **>180 days** (applies to partner data queries overall)
+- `needs_splitting`: boolean (true if >30 days)
+- `segments`: array of time segments if splitting needed
+- `error`: string if time range >180 days
 
 ### Step 3: Call Partner APIs
 
-Call `cex_rebate_partner_transaction_history` with:
-- `from`, `to` (Unix seconds, **≤30 days** per request), optional `currency_pair`, optional `user_id` (trader only when user-specific). Omit when `query_type` does not need trading list data.
+Based on query type, call the appropriate Partner APIs.
 
-Call `cex_rebate_partner_commissions_history` with:
-- `from`, `to` (Unix seconds, **≤30 days** per request), optional `currency`, optional `user_id` (trader only). Omit when `query_type` does not need commission list data.
-
-Call `cex_rebate_partner_sub_list` with:
-- Optional `user_id` filter, `limit`, `offset`. Omit when subordinate list is not needed.
-
-Call `cex_rebate_get_partner_eligibility` with:
-- No parameters (authenticated context). Use for `application_eligibility` or optional pre-application checks.
-
-Call `cex_rebate_get_partner_application_recent` with:
-- No parameters (authenticated context). Use for `application_status`.
-
-Call `cex_rebate_get_partner_agent_data_aggregated` with:
-- Optional `start_date`, `end_date` (UTC+8 `yyyy-mm-dd hh:ii:ss`, **up to 180 days** in **one** call when range ≤180 days), optional `business_type`. Use for `aggregated_summary` / rebate-commission **summary** intent; **do not** split multiple aggregated calls for the same request when ≤180 days.
-
-When MCP is unavailable, use the equivalent `GET /rebate/partner/*` paths from **API Parameter Reference**.
+When MCP is configured with Gate rebate tools, call the corresponding MCP tools by name (e.g. Call `cex_rebate_partner_transaction_history`, Call `cex_rebate_partner_commissions_history`, Call `cex_rebate_partner_sub_list`, Call `cex_rebate_get_partner_eligibility`, Call `cex_rebate_get_partner_application_recent`) with the parameters described in API Parameter Reference. When MCP is not available, use the API paths below.
 
 **CRITICAL REMINDER**: 
 - DO NOT use `user_id` parameter unless explicitly querying a specific trader's contribution
 - The `user_id` in API responses represents the TRADER, not the commission receiver
 - For "my commission" queries, omit the user_id parameter entirely
 
-**Routing (which calls apply)**:
-- **Overview / time-specific (list path)**: `transaction_history` + `commission_history` per segment (≤30 days each) + `sub_list` as needed.
-- **Aggregated summary** (including **my rebate / commission total**): `cex_rebate_get_partner_agent_data_aggregated` **once** for full window ≤180 days; no list merge for that endpoint.
-- **Commission records**: `cex_rebate_partner_commissions_history` only, **≤30 days** per call, segment longer ranges; paginate when `total > limit`.
-- **Metric-specific**: Only the tool(s) required; commission **summary** → aggregated tool; commission **records** → `commission_history` only.
-- **User-specific**: Same list tools with `user_id` = **trader**.
-- **Application**: `cex_rebate_get_partner_eligibility` and/or `cex_rebate_get_partner_application_recent` per Judgment Logic.
+For overview or time-specific queries:
+- Call `/rebate/partner/transaction_history` with time parameters (NO user_id)
+- Call `/rebate/partner/commission_history` with time parameters (NO user_id)
+- Call `/rebate/partner/sub_list` for customer count
+
+For metric-specific queries:
+- Call only the required API(s) based on the metric (NO user_id unless specified)
+
+For user-specific queries:
+- Call APIs with `user_id` parameter (this shows that specific trader's contribution)
+
+For application-related queries:
+- "Can I apply?" / "Am I eligible?" → Call `GET /rebate/partner/eligibility` (returns eligible, block_reasons, block_reason_codes)
+- "My application status" / "Recent application" / "Application result" → Call `GET /rebate/partner/applications/recent` (returns last 30 days application record with audit_status, apply_msg, etc.)
+- Generic "how to apply" → Optionally call eligibility first, then return application steps and portal link
 
 Key data to extract:
 - `transactions`: array of trading records
 - `commissions`: array of commission records
 - `subordinates`: array of team members
-- `aggregated_data`: pre-calculated summary data from aggregated API
 - `total_count`: total records for pagination
 - `eligibility`: { eligible, block_reasons, block_reason_codes } (for application_eligibility)
 - `application_recent`: application record or empty (for application_status)
 
 ### Step 4: Handle Pagination
 
-Call `cex_rebate_partner_transaction_history` with:
-- Same `from`/`to` as the current segment (still **≤30 days**), increasing `offset` in steps of `limit` until all rows are retrieved when `total > limit`.
-
-Call `cex_rebate_partner_commissions_history` with:
-- Same `from`/`to` as the current segment (still **≤30 days**), increasing `offset` in steps of `limit` until all rows are retrieved when `total > limit`.
-
-If aggregated-only or list `total <= limit` on the first page, call `N/A` (skip extra list fetches).
+If `total > limit`, implement pagination to retrieve all data.
 
 Key data to extract:
 - `all_data`: complete dataset after pagination
@@ -224,10 +188,7 @@ Key data to extract:
 
 ### Step 5: Aggregate Data
 
-Call `N/A` (local computation; no MCP) with:
-- Raw responses from Step 3–4; `query_type`; whether the primary source was **`cex_rebate_get_partner_agent_data_aggregated`**
-
-**IMPORTANT**: If the answer came from **`cex_rebate_get_partner_agent_data_aggregated`**, use the API’s numeric/string fields (`rebate_amount`, `trade_volume`, etc.) directly — **do not** re-split the date range or merge multiple aggregated responses when the user window is ≤180 days.
+Calculate the requested metrics from the raw API responses.
 
 **IMPORTANT**: Use custom aggregation logic based on business rules. DO NOT simply sum all values.
 - Consider data relationships and business logic
@@ -243,12 +204,7 @@ Key data to extract:
 
 ### Step 6: Format Response
 
-Call `N/A` (local formatting; no MCP) with:
-- Final metrics and metadata from Step 5; **Report Template** and **Usage Scenarios** for the active `query_type`
-
-Key data to extract:
-- `final_reply_markdown`: user-facing answer
-- `citations_or_links`: dashboard / portal URLs if applicable
+Generate the appropriate response based on query type using the templates.
 
 ## Judgment Logic Summary
 
@@ -259,17 +215,12 @@ Key data to extract:
 | Query type = metric_specific | ✅ | Call only required API(s) for the metric |
 | Query type = user_specific | ✅ | Add user_id filter to API calls (NOTE: user_id = trader, not receiver) |
 | Query type = team_report | ✅ | Call all APIs, generate comprehensive report |
-| Query type = aggregated_summary | ✅ | **Single** call to `cex_rebate_get_partner_agent_data_aggregated` / GET aggregated; full window up to **180 days** in UTC+8; **no splitting** if ≤180 days |
-| Aggregated window >180 days | ❌ | Return error — aggregated supports at most 180 days per request |
-| Query type = commission_records | ✅ | Call `commission_history` only; **≤30 days per call**; segment if needed; paginate; NO user_id unless trader-specific |
-| User wants **my rebate / commission total** (summary, no line items) | ✅ | `aggregated_summary` — `cex_rebate_get_partner_agent_data_aggregated` / GET aggregated |
-| User wants **commission or rebate records / history / list** | ✅ | `commission_records` — `cex_rebate_partner_commissions_history` / GET commission_history (**30-day max per call**) |
 | Query type = application | ✅ | Return application guidance; optionally call eligibility or applications/recent when user asks "can I apply?" or "my application status?" |
 | Query type = application_eligibility | ✅ | Call GET /rebate/partner/eligibility, return eligible status and block_reasons |
 | Query type = application_status | ✅ | Call GET /rebate/partner/applications/recent, return recent application record and audit_status |
-| List APIs (`transaction_history` / `commission_history`) — range ≤30 days | ✅ | Single API call per list endpoint |
-| List APIs — range >30 days and ≤180 days | ✅ | Split into **30-day segments** per list endpoint |
-| List APIs or aggregated — range >180 days | ❌ | Return error "Only supports queries within last 180 days" |
+| Time range ≤30 days | ✅ | Single API call per endpoint |
+| Time range >30 days and ≤180 days | ✅ | Split into multiple 30-day segments |
+| Time range >180 days | ❌ | Return error "Only supports queries within last 180 days" |
 | Relative time description (e.g., "last 7 days") | ✅ | Calculate from current UTC+8 date, convert to 00:00:00-23:59:59 UTC+8, then to Unix timestamps |
 | User specifies future date | ❌ | Reject query - only historical data available |
 | `to` parameter > current timestamp | ❌ | Reject query - adjust to current time or earlier |
@@ -278,10 +229,8 @@ Key data to extract:
 | Total > limit in response | ✅ | Implement pagination |
 | User_id not in sub_list | ❌ | Return "User not in referral network" |
 | Invalid UID format | ❌ | Return format error message |
-| User asks for "my commission" (summary) | ✅ | Prefer aggregated API; DO NOT use user_id |
-| User asks for "my commission" **records** / history / list | ✅ | commission_history; DO NOT use user_id unless trader UID given |
+| User asks for "my commission" | ✅ | DO NOT use user_id parameter - query all commissions |
 | User specifies trader UID | ✅ | Use user_id parameter to filter by that trader |
-| User asks for "aggregated data" or "total summary" | ✅ | Use aggregated API for faster response |
 
 ## Report Template
 
@@ -346,9 +295,9 @@ For detailed data, visit the affiliate dashboard: {dashboard_url}
 
 **Time Handling**:
 - All times are calculated based on user's system current date in UTC+8 timezone
-- Convert date ranges to UTC+8 00:00:00 (start) and 23:59:59 (end), then to Unix timestamps (list APIs) or pass UTC+8 strings to aggregated (see API reference)
-- **If the answer uses only `aggregated_summary`**: **one** aggregated call for the full range **≤180 days** — **no** multi-segment splitting
-- **If the answer uses `transaction_history` / `commission_history` (or overview with those)**: If ≤30 days: single call per list endpoint; if >30 days and ≤180 days: split list calls into 30-day segments
+- Convert date ranges to UTC+8 00:00:00 (start) and 23:59:59 (end), then to Unix timestamps
+- If ≤30 days: Single API call
+- If >30 days and ≤180 days: Split into multiple 30-day segments
 - If >180 days: Return error "Only supports queries within last 180 days"
 
 **Agent Splitting Logic** (for >30 days):
@@ -373,14 +322,11 @@ Your affiliate data for {time_range}:
 ### Case 3: Metric-Specific Query
 
 **Triggers**: 
-- **Commission / rebate — summary (route to aggregated)**: "my rebate", "query my rebate", "how much rebate", "how much commission", "my rebate income", "commission earnings" when the user wants a **total or overview**, not a line-item list
-- **Commission / rebate — records (route to commission_history)**: "commission records", "rebate records", "commission history", "rebate history", "list my commissions", "commission ledger", "line by line commission", "each commission entry"
-- Volume: "team trading volume", "total volume" (or use aggregated `trade_volume` if already answering a summary query)
+- Commission: "my rebate income", "commission earnings", "how much commission"
+- Volume: "team trading volume", "total volume"
 - Fees: "net fees collected", "fee contribution"
 - Customers: "customer count", "team size", "how many referrals"
 - Trading Users: "active traders", "how many users trading"
-
-**Routing**: Apply **Rebate / commission intent routing** before choosing tools. Summary → `cex_rebate_get_partner_agent_data_aggregated`. Records → `cex_rebate_partner_commissions_history` with pagination.
 
 **Output Template**:
 ```
@@ -441,41 +387,7 @@ UID {user_id} contribution (last 7 days):
 2. ...
 ```
 
-### Case 6: Aggregated Data Summary
-
-**Triggers**: "aggregated data", "total summary", "overall statistics", "summary report", "aggregate my data", "total earnings summary", "my rebate", "query my rebate", "how much is my rebate", "rebate overview", "commission total" (when **not** asking for record list)
-
-**Process**:
-1. Call `cex_rebate_get_partner_agent_data_aggregated` (or `GET /rebate/partner/data/aggregated`) **once** with:
-   - `start_date` and `end_date`: Full window in UTC+8 (`"yyyy-mm-dd hh:ii:ss"`), **up to 180 days** — **do not** issue multiple aggregated calls for ranges ≤180 days
-   - `business_type`: Filter by business type (0=all, 1=spot, 2=futures, etc.)
-2. Get pre-calculated aggregated metrics without segment merging
-3. Format response with business type and time range information
-
-**Parameters**:
-- Optional: `start_date`, `end_date` (defaults to last 7 days if not specified; max span **180 days** per request)
-- Optional: `business_type` (defaults to 0=all)
-
-**Output Template**:
-```
-=== Aggregated Partner Data Summary ===
-
-📊 Business Type: {business_type_desc}
-🕐 Time Range: {time_range_desc}
-
-💰 Financial Summary
-- Rebate Amount: {rebate_amount} USDT
-- Trading Volume: {trade_volume} USDT
-- Net Fees: {net_fee} USDT
-
-👥 User Statistics
-- Customer Count: {customer_count}
-{trading_user_count ? `- Trading Users: ${trading_user_count}` : ''}
-
-Note: Trading user count is only available when querying all business types.
-```
-
-### Case 7: Affiliate Application Guidance
+### Case 6: Affiliate Application Guidance
 
 **Triggers**: "apply for affiliate", "become a partner", "join affiliate program", "can I apply?", "am I eligible?", "my application status", "recent application", "application result"
 
@@ -563,8 +475,6 @@ Please use your main account.
 
 ### transaction_history
 ```
-Constraint: Each request **must** use a `from`/`to` window of **≤30 days** (API limit). Segment longer ranges into multiple calls.
-
 Parameters:
 - currency_pair: string (optional) - e.g., "BTC_USDT"
 - user_id: integer (optional) - IMPORTANT: This is the TRADER's ID, not commission receiver
@@ -585,8 +495,6 @@ Response: {
 
 ### commission_history
 ```
-Constraint: Each request **must** use a `from`/`to` window of **≤30 days** (API limit). Segment longer ranges into multiple calls.
-
 Parameters:
 - currency: string (optional) - e.g., "USDT"
 - user_id: integer (optional) - IMPORTANT: This is the TRADER's ID who generated the commission
@@ -649,34 +557,6 @@ Response: {
 audit_status: 0=Pending, 1=Approved, 2=Rejected
 ```
 
-### data/aggregated
-```
-GET /rebate/partner/data/aggregated
-Time window: Up to **180 days** inclusive between `start_date` and `end_date` (UTC+8). Use **one request** for the entire window when ≤180 days — **do not** split into multiple aggregated calls.
-
-Parameters:
-- start_date: string (optional) - format: "yyyy-mm-dd hh:ii:ss" (UTC+8)
-- end_date: string (optional) - format: "yyyy-mm-dd hh:ii:ss" (UTC+8)
-- business_type: integer (optional, default 0) - business type filter
-  0=All, 1=Spot, 2=Futures, 3=Alpha, 4=Web3, 5=Perps(DEX), 
-  6=Exchange All, 7=Web3 All, 8=TradFi
-
-Response: {
-  code: 0,
-  message: "success",
-  data: {
-    rebate_amount: string,      // Commission amount with up to 6 decimals
-    trade_volume: string,       // Trading volume with up to 6 decimals
-    net_fee: string,           // Net fees with up to 6 decimals
-    customer_count: integer,    // Total customer count
-    trading_user_count: integer|null,  // Only available when business_type=0
-    time_range_desc: string,    // e.g., "2024-01-01 ~ 2024-01-07"
-    business_type: integer,
-    business_type_desc: string  // e.g., "All", "Spot", "Futures"
-  }
-}
-```
-
 ## Pagination Strategy
 
 For complete data retrieval when total > limit:
@@ -723,8 +603,7 @@ while True:
     - from: 2026-03-09 00:00:00 UTC+8 → Unix timestamp
     - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
 
-- **List APIs** (`transaction_history`, `commission_history`): maximum **30 days** per request; split into segments if the window is longer (up to 180 days total).
-- **Aggregated** (`cex_rebate_get_partner_agent_data_aggregated`): maximum **180 days** in **one** request; **no** splitting when the user range is ≤180 days.
+- Maximum 30 days per API request, split if needed
 
 ## Amount Formatting
 
@@ -759,19 +638,3 @@ while True:
 6. **Application**
    - Query: "How to become an affiliate?"
    - Expected: Application guidance without API calls
-
-7. **Aggregated Summary**
-   - Query: "Show me my aggregated data for last month"
-   - Expected: **Single** call to `cex_rebate_get_partner_agent_data_aggregated` with full UTC+8 range (≤180 days); **no** multi-segment splitting
-
-8. **Aggregated — long window (≤180 days)**
-   - Query: "Aggregated partner summary for the last 90 days"
-   - Expected: **One** aggregated call covering all 90 days; do not split into three 30-day aggregated requests
-
-9. **My rebate / commission total (summary)**
-   - Query: "Query my rebate" / "How much rebate did I get this week?"
-   - Expected: Classify as `aggregated_summary`; call `cex_rebate_get_partner_agent_data_aggregated` (or GET aggregated); present `rebate_amount`; no `user_id`
-
-10. **Commission / rebate records (line items)**
-   - Query: "Show my commission records" / "Rebate history for last 7 days"
-   - Expected: Classify as `commission_records`; call `cex_rebate_partner_commissions_history` with `from`/`to`; paginate; no `user_id` unless a trader UID is specified

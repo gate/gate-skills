@@ -2,7 +2,7 @@
 name: gate-news-briefing
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "News briefing. Use this skill ONLY when the user's query is exclusively about recent news or headlines with no other analysis dimensions. Trigger phrases: what happened recently, today's highlights, crypto news, any new updates. If the query ALSO mentions coin analysis, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
+description: "Headlines and news briefing skill. Use when the user's query is exclusively about recent crypto news (no other analysis dimensions). Triggers on 'what happened today', 'crypto headlines', 'any news', 'recent updates'. Do NOT use if the query also asks for coin deep-dive, risk, or technicals — use gate-info-research."
 ---
 
 # gate-news-briefing
@@ -125,6 +125,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's briefing workflow.
+
+- `SKILL.md` keeps routing/de-dup/report standards for news briefing.
+- `references/mcp.md` is the authoritative MCP execution layer for parallel retrieval, degradation handling, and output safety constraints.
 
 ## Routing Rules
 

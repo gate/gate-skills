@@ -2,7 +2,7 @@
 name: gate-dex-wallet
 version: "2026.3.27-1"
 updated: "2026-03-27"
-description: "Gate DEX wallet account management. Handles authentication (Google OAuth and Gate OAuth), token balance queries, wallet address retrieval, transaction and swap history, token transfers, on-chain withdraw to Gate Exchange (deposit address, UID binding, min-deposit), x402 payment (HTTP 402 Payment Required with EVM exact/upto and Solana exact/upto schemes), DApp wallet-connect and contract interactions, and CLI tooling. Use when the user wants to manage their on-chain wallet identity or assets — not for market data lookups or token swap execution."
+description: "Gate DEX wallet and on-chain account skill. Use when the user asks to sign in, check balances, transfer, withdraw to Gate CEX, wallet-connect, or x402 pay. Triggers on 'DEX wallet', 'wallet balance', 'withdraw to exchange'. Do NOT use for swap execution or read-only prices — use gate-dex-trade or gate-dex-market."
 ---
 
 # Gate DEX Wallet
@@ -14,6 +14,14 @@ description: "Gate DEX wallet account management. Handles authentication (Google
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md) as the authoritative MCP execution specification for this skill.
+
+- `SKILL.md` is the routing layer (intent classification and module dispatch).
+- `references/mcp.md` defines MCP detection, auth handling, tool contracts, SOP, confirmation gates, and degraded behavior.
+- Sub-module docs under `references/` remain domain playbooks (`auth.md`, `asset-query.md`, `transfer.md`, `withdraw.md`, `x402.md`, `dapp.md`, `cli.md`).
 
 ## Applicable Scenarios
 
@@ -45,6 +53,12 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 
 ---
 
+## Authentication
+
+- API Key Required: No
+- OAuth `mcp_token` Required: Yes for wallet/account/session operations
+- Note: This skill uses Gate DEX wallet authentication (Google OAuth or Gate OAuth) and then calls MCP tools with `mcp_token`. Do not describe this as a CEX API-key flow.
+
 ## Module Routing
 
 Route to the corresponding sub-module based on user intent:
@@ -65,7 +79,7 @@ Route to the corresponding sub-module based on user intent:
 
 Before the first MCP tool call in a session, perform one connection probe:
 
-1. **Discover**: Scan configured MCP servers for tools `dex_wallet_get_token_list`, `dex_tx_quote`, and `dex_tx_swap`.
+1. **Discover**: Scan configured MCP servers for tools `dex_wallet_get_token_list`, `dex_tx_transfer_preview`, and `dex_tx_send_raw_transaction`.
 2. **Identify**: Accept flexible server names (gate-wallet, gate-dex, dex, wallet, user-gate-wallet, or any custom name).
 3. **Verify**: `CallMcpTool(server="<id>", toolName="dex_chain_config", arguments={chain: "eth"})`.
 

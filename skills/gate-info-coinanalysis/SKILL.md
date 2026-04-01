@@ -2,7 +2,7 @@
 name: gate-info-coinanalysis
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Single-coin comprehensive analysis. Use this skill ONLY when the user asks to analyze one coin with no additional explicit dimension (e.g., no separate risk check, no separate trend-only request). Trigger phrases: analyze SOL, how is BTC, is ETH worth buying. If the query ALSO mentions security/risk, event attribution, multi-coin comparison, or any other analysis dimension beyond single-coin comprehensive, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
+description: "Single-coin comprehensive analysis skill. Use when the user asks about one coin without splitting into separate risk, news-only, or trend-only tasks. Triggers on 'analyze SOL', 'how is BTC', 'is ETH worth buying'. Do NOT use if the query adds explicit risk, multi-coin compare, or event-only why-moved — use gate-info-research."
 ---
 
 # gate-info-coinanalysis
@@ -128,6 +128,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's single-coin analysis workflow.
+
+- `SKILL.md` keeps intent gating and final report policy.
+- `references/mcp.md` is the authoritative MCP execution layer for parallel feed collection, synthesis order, and degraded handling.
 
 ## Routing Rules
 

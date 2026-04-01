@@ -2,7 +2,7 @@
 name: gate-exchange-collateralloan
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: Query and manage Gate multi-collateral loan. Use this skill whenever the user asks about collateral loan, current loan, fixed loan, repay, add collateral, or redeem collateral. Trigger phrases include "collateral loan", "current loan", "fixed loan", "repay", "add collateral", "redeem collateral", or equivalent in other languages.
+description: "Gate multi-collateral loan management skill. Use when the user asks to borrow crypto against collateral or manage existing loans. Triggers on 'collateral loan', 'current loan', 'fixed loan', 'repay', 'add collateral', 'redeem collateral'."
 ---
 
 # Gate Exchange Multi-Collateral Loan Skill
@@ -56,6 +56,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's collateral-loan workflow.
+
+- `SKILL.md` keeps routing and product constraints.
+- `references/mcp.md` is the authoritative MCP execution layer for quota/LTV pre-checks, confirmation gates, and post-action verification.
 
 ## Trigger Conditions
 

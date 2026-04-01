@@ -2,12 +2,7 @@
 name: gate-exchange-pay
 version: "2026.3.27-2"
 updated: "2026-03-27"
-description: >-
-  Use this skill whenever the user wants to pay with Gate Pay, complete a Gate Pay payment, or charge
-  a Gate Pay account for merchant orders in pay-first flows (such as HTTP 402 scenarios). This skill
-  handles Gate Pay payment execution via Exchange MCP by calling cex_pay_create_ai_order_pay. The user
-  must have completed Gate payment authorization before execution. Trigger phrases include "pay with
-  Gate Pay", "Gate Pay payment", "charge Gate Pay", "complete payment", "pay for this order".
+description: "Gate Pay payment execution skill. Use when the user asks to pay with Gate Pay, complete a merchant charge, or satisfy pay-first flows (e.g. HTTP 402). Triggers on 'Gate Pay', 'complete payment', 'pay for order'. Requires prior Gate payment authorization."
 ---
 
 # gate-exchange-pay — Gate Pay payment
@@ -73,7 +68,19 @@ Gate Pay is Gate's digital asset payment solution that enables users to pay for 
 |-----------|---------|------|
 | `cex_pay_create_ai_order_pay` | Debit the user's Gate Pay payment account for a merchant order | Write |
 
+### Authentication
+- API Key Required: Yes
+- Additional Authorization Required: Yes, Gate Pay payment authorization must already be completed
+- Note: This skill executes a private payment action through authenticated Exchange MCP tooling. Payment authorization is required in addition to the runtime's API-key-backed execution capability.
+
 **Note**: If there is no order-status query tool available and the user only asks whether they paid, explain the limitation; do not charge again as a substitute for querying.
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's Gate Pay charge workflow.
+
+- `SKILL.md` keeps payment intent routing, product boundaries, and user-facing policy.
+- `references/mcp.md` is the authoritative MCP execution layer for charge inputs, confirmation gates, and failure fallback.
 
 ## Workflow
 
