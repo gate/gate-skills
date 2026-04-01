@@ -2,7 +2,7 @@
 name: gate-exchange-futures
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate Exchange USDT perpetual futures: open/close position, cancel/amend order, take profit, stop loss, conditional open. Use this skill whenever the user wants to trade USDT perpetual futures on Gate. Trigger phrases include open, close, cancel, amend, take profit, stop loss, TP/SL, conditional order, price trigger, when price reaches."
+description: "Gate Exchange USDT perpetual futures trading skill. Use when the user wants to trade contracts, open/close perpetual positions, or manage futures leverage. Triggers on 'open long', 'close short', 'USDT perpetual', 'futures TP/SL'."
 ---
 
 # Gate Futures Trading Suite
@@ -68,6 +68,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute module-specific routes in this `SKILL.md`.
+
+- `SKILL.md` keeps routing logic (Open/Close/Cancel/Amend/TP-SL/Conditional/Manage).
+- `references/mcp.md` is the authoritative MCP execution layer for tool contracts, mode switching safeguards, confirmation gates, and degraded handling.
 
 ## Module overview
 

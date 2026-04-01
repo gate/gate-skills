@@ -2,7 +2,7 @@
 name: gate-exchange-staking
 version: "2026.3.23-1"
 updated: "2026-03-26"
-description: "The on-chain staking (earn) function of Gate Exchange. Use this skill to query staking positions, rewards, products, order history, or to perform stake, redeem, or mint (mint = immediate stake) via swap. Trigger phrases include: staking, stake, redeem, mint, unstake, earn, staking rewards, staking positions, earning records, staking history, available coins, stake USDT, redeem BTC."
+description: "Gate on-chain staking skill. Use when the user asks to stake POS coins, mint, or redeem staked assets. Triggers on 'staking', 'stake ETH', 'redeem staking', 'staking rewards'."
 ---
 
 # Gate Staking Query Suite
@@ -49,6 +49,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's staking workflow.
+
+- `SKILL.md` keeps staking intent routing and scenario boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for query/action separation, confirmation gates, and result verification.
 
 ## Module overview
 

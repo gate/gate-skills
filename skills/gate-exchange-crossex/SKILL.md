@@ -2,7 +2,7 @@
 name: gate-exchange-crossex
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: 'Use this skill for Gate CrossEx cross-exchange operations: order placement, transfer, convert, and order/position/history queries across Gate, Binance, OKX and Bybit. Trigger phrases include "buy spot", "transfer", "convert", "query positions", "order history".'
+description: "Gate CrossEx cross-exchange skill. Use when the user asks to trade or query positions across Gate, Binance, OKX, and Bybit simultaneously. Triggers on 'cross exchange', 'Binance order', 'OKX position'."
 ---
 
 # Gate CrossEx Trading Suite
@@ -79,6 +79,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's CrossEx workflow.
+
+- `SKILL.md` keeps route dispatch and feature boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for query/mutation sequencing, confirmation gates, and risk-aware updates.
 
 ## Module Overview
 

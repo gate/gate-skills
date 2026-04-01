@@ -2,7 +2,7 @@
 name: gate-exchange-simpleearn
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: Query Gate Simple Earn flexible (Uni) and fixed-term workflows, including product lists, positions, interest, subscribe, redeem, and change-min-rate intents. Use this skill whenever the user asks about Simple Earn, Uni, fixed-term, subscribe, redeem, positions, interest, or top APY. Trigger phrases include "Simple Earn", "Uni", "flexible earn", "fixed-term", "subscribe", "redeem", "positions", "interest", "top APY", or equivalent.
+description: "Gate Simple Earn management skill. Use when the user asks about flexible or fixed-term savings products. Triggers on 'Simple Earn', 'flexible earn', 'subscribe to earn', 'redeem interest', 'top APY'."
 ---
 
 # Gate Exchange Simple Earn Skill
@@ -57,6 +57,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's Simple Earn workflow.
+
+- `SKILL.md` keeps routing and business constraints.
+- `references/mcp.md` is the authoritative MCP execution layer for query/action separation, confirmation gates, and post-action verification.
 
 ## Trigger Conditions
 

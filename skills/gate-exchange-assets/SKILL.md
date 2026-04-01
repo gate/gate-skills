@@ -2,7 +2,7 @@
 name: gate-exchange-assets
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Gate Exchange asset and balance query skill covering TradFi, spot, futures, margin, options, finance, and Alpha. Use when user asks to check total assets, account balance, specific currency holdings, or sub-account assets across those lines. Trigger phrases: 'how much do I have', 'total assets', 'TradFi', 'account balance', 'how many BTC', 'spot balance', 'futures account', 'margin account', 'options account', 'finance account', 'Alpha account', 'TradFi account'. Read-only, no trading."
+description: "Gate multi-account asset and balance query skill. Use when the user asks to check total assets, account balance, or specific coin holdings across all accounts. Triggers on 'total assets', 'my balance', 'how many BTC do I have'. Read-only."
 ---
 
 # Gate Exchange Assets Assistant
@@ -54,6 +54,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's assets-query workflow.
+
+- `SKILL.md` keeps intent routing and rendering rules.
+- `references/mcp.md` is the authoritative MCP execution layer for multi-account data collection, normalization, and degraded output handling.
 
 ## Domain Knowledge
 

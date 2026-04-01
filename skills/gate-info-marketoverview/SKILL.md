@@ -2,7 +2,7 @@
 name: gate-info-marketoverview
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Market overview. Use this skill ONLY when the user's query is exclusively about overall market conditions with no specific coin analysis. Trigger phrases: how is the market, market overview, what is happening in crypto. If the query ALSO mentions a specific coin to analyze, risk to check, technicals to review, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
+description: "Broad crypto market overview skill. Use when the query is exclusively about overall market conditions, not a specific coin deep-dive. Triggers on 'how is the market', 'market overview', 'crypto today'. Do NOT use if the user also wants single-coin analysis, risk, or technicals — use gate-info-research."
 ---
 
 # gate-info-marketoverview
@@ -128,6 +128,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's market-overview workflow.
+
+- `SKILL.md` keeps routing and report composition rules.
+- `references/mcp.md` is the authoritative MCP execution layer for parallel data collection, partial-degradation handling, and safe synthesis.
 
 ## Routing Rules
 

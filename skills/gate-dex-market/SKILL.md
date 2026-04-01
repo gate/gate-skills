@@ -2,7 +2,7 @@
 name: gate-dex-market
 version: "2026.3.24-1"
 updated: "2026-03-24"
-description: "Gate DEX READ-ONLY market data lookup skill. For data queries that NEVER execute on-chain transactions: check token prices, view K-line charts, browse token rankings, discover new tokens, analyze holders, run security audits, view trading volume and liquidity. This skill only READS data — it never buys, sells, swaps, transfers, or modifies wallet state."
+description: "Gate DEX read-only market data skill. Use when the user asks for prices, K-lines, rankings, holders, or liquidity without signing a tx. Triggers on 'DEX price', 'token K-line', 'holder analysis'. Do NOT use for swaps or wallet auth — use gate-dex-trade or gate-dex-wallet."
 ---
 
 # Gate DEX Market
@@ -37,12 +37,17 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Query Operations (Read-only)**
 
-- dex_chain_config
+- dex_market_get_kline
+- dex_token_get_coin_info
+- dex_token_ranking
+- dex_token_get_risk_info
+- dex_token_list_swap_tokens
+- dex_token_list_cross_chain_bridge_tokens
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Dex:Read
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- API Key Required: No for MCP market queries
+- OAuth `mcp_token` Required: No for MCP market queries
+- Note: This skill is read-only. In MCP mode, market-data tools can be called without authentication. OpenAPI mode has its own credential model and is only used when the user explicitly requests it.
 
 ### Installation Check
 - Required: Gate-Dex
@@ -120,7 +125,7 @@ Explicit user request only. Load files progressively:
 ## Supported Chains
 
 Actual supported chains are determined by runtime API/Resource returns:
-- **MCP Mode**: via `dex_chain_config` tool
+- **MCP Mode**: determined by MCP tool responses for the given `chain` argument
 - **OpenAPI Mode**: chain parameter in request
 
 Common chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol.

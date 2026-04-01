@@ -2,7 +2,7 @@
 name: gate-info-liveroomlocation
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: The live and replay listing function of Gate Exchange. Use this skill whenever the user asks to find live streams or replays by business type (tag), coin, sort (hottest/newest), or count. Trigger phrases include "最热直播", "live room list", "行情分析直播间", "给我5个SOL相关直播", "latest replays", "tag coin live replay", or any request involving live room location, replay list, or tag/coin/sort filter.
+description: "Gate live stream and replay listing skill. Use when the user asks to find live rooms or replays by tag, coin, or sort. Triggers on 'live room list', '最热直播', 'replay list', 'SOL live stream'."
 ---
 
 # Gate Info Liveroom Location — Live & Replay Listing
@@ -35,6 +35,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's live/replay listing workflow.
+
+- `SKILL.md` keeps intent mapping, product behavior, and response semantics.
+- `references/mcp.md` is the authoritative MCP execution layer for parameter extraction, single-endpoint calls, and degradation handling.
 
 ## Workflow
 

@@ -2,7 +2,7 @@
 name: gate-exchange-kyc
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: Guides users to the Gate KYC portal to complete identity verification. Use this skill whenever the user asks to do KYC, verify identity, find the verification page, or why they cannot withdraw. Trigger phrases include "complete KYC", "verify my identity", "where to do verification", "why can't I withdraw".
+description: "Gate KYC portal routing skill. Use when the user asks to verify identity, complete KYC, or fix withdrawal blocks. Triggers on 'complete KYC', 'verify identity', 'why can't I withdraw'."
 ---
 
 # KYC Portal Skill
@@ -26,7 +26,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | Gate (main) | ✅ Required |
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- API Key Required: Conditional. Providing the KYC portal link does not require API key; if runtime supports user-state queries, login/auth may be required for those queries.
 
 ### Installation Check
 - Required: Gate (main)
@@ -35,6 +35,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's KYC portal guidance workflow.
+
+- `SKILL.md` keeps routing, trigger phrases, and product semantics.
+- `references/mcp.md` is the authoritative MCP/runtime execution layer, including detection, fallback, and safety boundaries.
 
 ## Workflow
 

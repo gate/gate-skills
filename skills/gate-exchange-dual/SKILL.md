@@ -2,7 +2,7 @@
 name: gate-exchange-dual
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: The dual investment function of Gate Exchange — query products, simulate settlements, place orders, and manage positions. Use this skill whenever the user asks about dual investment, dual currency, target price settlement simulation, placing dual orders, or checking dual investment positions. Trigger phrases include "dual investment", "dual currency", "target price", "exercise price", "dual orders", "dual balance", "shuang-bi", "sell-high", "buy-low", "place dual order", "subscribe dual", or any request involving dual investment product queries, order placement, or checking dual investment balance.
+description: "Gate dual investment skill. Use when the user asks about dual currency products, target price settlement, or placing dual orders. Triggers on 'dual investment', 'dual currency', 'target price', 'exercise price', 'dual orders', 'dual balance', 'sell-high', 'buy-low', 'place dual order', 'subscribe dual'."
 ---
 
 # Gate Exchange Dual Investment Skill
@@ -48,6 +48,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's dual-investment workflow.
+
+- `SKILL.md` keeps routing and product semantics.
+- `references/mcp.md` is the authoritative MCP execution layer for plan lookup, confirmation-gated placement, and order verification.
 
 ## Prerequisites
 

@@ -2,7 +2,7 @@
 name: gate-exchange-tradfi
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate TradFi (traditional finance) skill using MCP tools prefixed with cex_tradfi. Use this skill whenever the user asks to query or trade TradFi on Gate: query order list, order history, positions, category/symbol list, ticker, kline, user assets, MT5 account; or place order, amend order, cancel order, modify position, close position. Trigger phrases include 'TradFi orders', 'order history', 'positions', 'place order', 'amend order', 'cancel order', 'modify position', 'close position', 'symbol list', 'ticker', 'kline', 'my assets', 'MT5 account'. Do not use for fund transfer."
+description: "Gate TradFi (traditional finance) skill. Use when the user asks to query or trade traditional finance assets like forex or commodities on Gate. Triggers on 'TradFi orders', 'MT5 account', 'TradFi positions'. Do NOT use for fund transfer."
 ---
 
 # Gate TradFi Suite
@@ -61,6 +61,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's TradFi workflow.
+
+- `SKILL.md` keeps routing and domain constraints.
+- `references/mcp.md` is the authoritative MCP execution layer for query/mutation separation, confirmation gates, and post-action verification.
 
 ## Sub-Modules
 
@@ -195,4 +202,3 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 **Trading** — After each place/amend/cancel/modify/close:
 - **Parameters used**: List or table of the parameters sent to the MCP (e.g. symbol, side, size, price, order_id).
 - **Result**: Success (e.g. order id, status) or error (code/message). Suggest next step if error.
-

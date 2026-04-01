@@ -2,7 +2,7 @@
 name: gate-exchange-subaccount
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: Manage sub-accounts on Gate Exchange including querying status, listing, creating, locking, and unlocking sub-accounts. Use this skill whenever the user asks about sub-account management, sub-account status, creating sub-accounts, locking or unlocking sub-accounts. Trigger phrases include "sub-account", "subaccount", "sub account status", "create sub-account", "lock sub-account", "unlock sub-account", "list sub-accounts", "my sub-accounts", or any request involving sub-account queries or management operations.
+description: "Gate Exchange sub-account management skill. Use when the user asks to manage, create, lock, unlock, or list their sub-accounts. Triggers on 'sub-account status', 'create sub-account', 'lock sub-account', 'my sub-accounts'."
 ---
 
 # Gate Exchange Sub-Account Skill
@@ -50,6 +50,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's sub-account workflow.
+
+- `SKILL.md` keeps intent routing and permission boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for create/lock/unlock confirmation gates and status verification.
 
 ## Prerequisites
 

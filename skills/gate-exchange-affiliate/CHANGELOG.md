@@ -1,31 +1,5 @@
 # Changelog
 
-## [2026.3.30-1] - 2026-03-30
-
-### Added
-
-- **Partner data aggregated API**: `GET /rebate/partner/data/aggregated` — server-side totals for rebate amount, trade volume, net fee, customer count, and optional `trading_user_count` (only when `business_type=0`). Query params: `start_date`, `end_date` (UTC+8 `yyyy-mm-dd hh:ii:ss`, optional; default last 7 days), `business_type` (0–8).
-- **MCP Dependencies**: `cex_rebate_get_partner_agent_data_aggregated` under Query Operations.
-- **Workflow / Judgment Logic**: query type `aggregated_summary`; route summary-style intents to the aggregated endpoint.
-- **Usage Scenarios**: Case 6 — Aggregated Data Summary (triggers: aggregated data, total summary, overall statistics, summary report); affiliate application guidance renumbered to Case 7.
-- **API Parameter Reference**: `data/aggregated` schema and business type enum.
-- **Validation**: golden query for aggregated summary.
-
-### Changed
-
-- **SKILL.md** frontmatter: version `2026.3.30-1`; `description` includes **Use this skill whenever** and aggregated-summary **Trigger phrases**; API key link uses `gate.com`.
-- **Available APIs** table: row for `GET /rebate/partner/data/aggregated` with optional UTC+8 dates and default last 7 days.
-- **Step 3**: call `cex_rebate_get_partner_agent_data_aggregated` when MCP is configured; branch for aggregated summary queries.
-- **README.md**: `### Core Capabilities` under **Overview** (skill-validator); REST note mentions `GET /rebate/partner/data/aggregated`.
-- **references/scenarios.md**: Scenario 13 — aggregated summary query.
-- **MCP tool name**: aggregated summary tool documented as `cex_rebate_get_partner_agent_data_aggregated` (replaces `cex_rebate_partner_data_aggregated`).
-- **SKILL.md**: **Rebate / commission intent routing** — summary intents (e.g. 'my rebate', 'query my rebate') → aggregated; record/history/list intents → `commission_history`; new `commission_records` query type and golden queries; Case 3 / Case 6 triggers updated.
-- **references/scenarios.md**: Scenario 13 prompt examples expanded; Scenario 14 — commission / rebate records.
-- **SKILL.md** / **README.md** / **scenarios.md**: `cex_rebate_get_partner_agent_data_aggregated` supports **up to 180 days in one call**; **no** multi-request splitting for aggregated when range ≤180 days (list APIs still use 30-day segments).
-- **SKILL.md** / **README.md**: Re-emphasize **`transaction_history` / `commission_history` hard 30-day max per request**; new **CRITICAL** subsection and API reference constraints; distinct from aggregated 180-day rule.
-- **references/scenarios.md**: Scenario 13 — explicit **single aggregated call** for ranges ≤180 days; Scenario 14 — explicit **no >30-day** single `commission_history` request.
-- **SKILL.md**: **Workflow** steps 1–6 aligned with skill-validator block pattern (`Call ... with:` + `Key data to extract:`); Step 3 lists each MCP tool and parameters.
-
 ## [2026.3.25-1] - 2026-03-25
 
 ### Changed

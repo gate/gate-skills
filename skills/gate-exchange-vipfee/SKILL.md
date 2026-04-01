@@ -2,7 +2,7 @@
 name: gate-exchange-vipfee
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Query Gate VIP tier and trading fee rates. Use this skill whenever the user asks about their VIP level, trading fee rates, spot fees, or futures/contract fees on Gate. Trigger phrases include 'VIP level', 'trading fee', 'fee rate', 'spot fee', 'futures fee'."
+description: "Gate VIP tier and trading fee query skill. Use when the user asks about their fee rates or VIP level. Triggers on 'VIP level', 'trading fee', 'fee rate', 'spot fee', 'futures fee'."
 ---
 
 # Gate VIP & Fee Query Assistant
@@ -43,6 +43,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's VIP/fee query workflow.
+
+- `SKILL.md` keeps intent routing and rendering rules.
+- `references/mcp.md` is the authoritative MCP execution layer for account/fee data retrieval and safe output behavior.
 
 ## Quick Start
 

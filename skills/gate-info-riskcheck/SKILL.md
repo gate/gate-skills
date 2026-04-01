@@ -2,7 +2,7 @@
 name: gate-info-riskcheck
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Token and address risk assessment. Use this skill ONLY when the user's query is exclusively about token/contract/address security with no other analysis dimensions. Trigger phrases: is this token safe, check contract risk, is this address safe, honeypot, rug. If the query ALSO mentions fundamentals, technicals, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report. Address risk mode (is this address safe) is exclusive to this skill and must NOT be routed to gate-info-research."
+description: "Token, contract, and address risk skill. Use when the query is exclusively about safety of a token or on-chain address. Triggers on 'is this token safe', 'honeypot', 'rug risk', 'is this address safe'. Do NOT use for combined research briefs — use gate-info-research. Address-safety checks stay on this skill, not gate-info-research."
 ---
 
 # gate-info-riskcheck
@@ -126,6 +126,13 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's mode routing.
+
+- `SKILL.md` keeps intent gating (single-dimension risk vs multi-dimension routing) and report policy.
+- `references/mcp.md` is the authoritative MCP execution layer for tool contracts, parallel calls, degradation behavior, and safety wording.
 
 ## Routing Rules
 

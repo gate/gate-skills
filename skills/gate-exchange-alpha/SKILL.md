@@ -2,7 +2,7 @@
 name: gate-exchange-alpha
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate Alpha token discovery, market viewing, trading, account, and order management skill. Use this skill whenever the user asks to browse Alpha tokens, check Alpha market tickers, buy or sell Alpha tokens, view Alpha holdings, check transaction history, or manage Alpha orders. Trigger phrases include 'alpha tokens', 'alpha market', 'alpha holdings', 'alpha portfolio', 'buy alpha', 'sell alpha', 'alpha order', 'alpha history', or any request involving Gate Alpha operations."
+description: "Gate Alpha token market skill. Use when the user specifically asks to browse, trade, or check Alpha market tokens. Triggers on 'alpha tokens', 'alpha market', 'buy alpha', 'alpha history'."
 ---
 
 # Gate Alpha Assistant
@@ -55,6 +55,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
   - Codex: `gate-mcp-codex-installer`
   - Claude: `gate-mcp-claude-installer`
   - OpenClaw: `gate-mcp-openclaw-installer`
+
+## MCP Mode
+
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute module routing in this skill.
+
+- `SKILL.md` keeps module dispatch and business boundaries.
+- `references/mcp.md` is the authoritative MCP execution layer for quote->confirm->place order flow and post-order verification.
 
 ## Module Overview
 
