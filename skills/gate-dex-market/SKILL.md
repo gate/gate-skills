@@ -14,8 +14,6 @@ description: "Gate DEX READ-ONLY market data lookup skill. For data queries that
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
 
 **Trigger Scenarios**: Use when the user wants to **look up or analyze** market data without executing any transaction:
 - Price lookup: "what is the price of ETH", "check SOL price", "price of 0x1234..."
@@ -39,25 +37,20 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Query Operations (Read-only)**
 
-- dex_market_get_kline
-- dex_token_get_coin_info
-- dex_token_ranking
-- dex_token_get_risk_info
-- dex_token_list_swap_tokens
-- dex_token_list_cross_chain_bridge_tokens
+- dex_chain_config
 
 ### Authentication
-- API Key Required: No for MCP market queries
-- OAuth `mcp_token` Required: No for MCP market queries
-- Note: This skill is read-only. In MCP mode, market-data tools can be called without authentication. OpenAPI mode has its own credential model and is only used when the user explicitly requests it.
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
+- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
 
 ### Installation Check
 - Required: Gate-Dex
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursorinstaller`
-  - Codex: `gate-mcp-codexinstaller`
-  - Claude: `gate-mcp-claudeinstaller`
-  - OpenClaw: `gate-mcp-openclawinstaller`
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only
 
@@ -127,7 +120,7 @@ Explicit user request only. Load files progressively:
 ## Supported Chains
 
 Actual supported chains are determined by runtime API/Resource returns:
-- **MCP Mode**: determined by MCP tool responses for the given `chain` argument
+- **MCP Mode**: via `dex_chain_config` tool
 - **OpenAPI Mode**: chain parameter in request
 
 Common chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol.

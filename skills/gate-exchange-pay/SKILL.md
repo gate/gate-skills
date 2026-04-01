@@ -73,19 +73,7 @@ Gate Pay is Gate's digital asset payment solution that enables users to pay for 
 |-----------|---------|------|
 | `cex_pay_create_ai_order_pay` | Debit the user's Gate Pay payment account for a merchant order | Write |
 
-### Authentication
-- API Key Required: Yes
-- Additional Authorization Required: Yes, Gate Pay payment authorization must already be completed
-- Note: This skill executes a private payment action through authenticated Exchange MCP tooling. Payment authorization is required in addition to the runtime's API-key-backed execution capability.
-
 **Note**: If there is no order-status query tool available and the user only asks whether they paid, explain the limitation; do not charge again as a substitute for querying.
-
-## MCP Mode
-
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's Gate Pay charge workflow.
-
-- `SKILL.md` keeps payment intent routing, product boundaries, and user-facing policy.
-- `references/mcp.md` is the authoritative MCP execution layer for charge inputs, confirmation gates, and failure fallback.
 
 ## Workflow
 
@@ -230,7 +218,7 @@ Reviewer-oriented scenario templates (happy path, errors, localization, and safe
 
 ## Data Privacy & Collection
 
-This skill processes user payment data through the Gate MCP. All data is transmitted directly to the Gate API for payment execution.
+This skill processes user payment data through the Gate MCP. All data is transmitted directly to the Gate API for payment execution. 
 
 **Data handling statement**:
 - **Data collection**: This skill collects order information (order ID, amount, currency) and user payment authorization credentials as required for payment execution

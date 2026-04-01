@@ -123,17 +123,10 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 ### Installation Check
 - Required: Gate-News
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursorinstaller`
-  - Codex: `gate-mcp-codexinstaller`
-  - Claude: `gate-mcp-claudeinstaller`
-  - OpenClaw: `gate-mcp-openclawinstaller`
-
-## MCP Mode
-
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's event-explanation workflow.
-
-- `SKILL.md` keeps event-causality routing and report policy.
-- `references/mcp.md` is the authoritative MCP execution layer for cross-source retrieval, confidence labeling, and degraded explanation handling.
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Routing Rules
 

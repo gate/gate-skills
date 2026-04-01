@@ -15,8 +15,6 @@ description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transac
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
 
 **Trigger Scenarios**: Use when the user wants to **execute a token exchange** that modifies blockchain state:
 - Swap: "swap ETH for USDT", "exchange 100 USDC to DAI", "convert my BNB"
@@ -46,17 +44,16 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - dex_tx_swap
 
 ### Authentication
-- API Key Required: No for default MCP mode
-- OAuth `mcp_token` Required: Yes for MCP swap operations
-- Note: In this workspace the default path is MCP mode, which uses Gate DEX wallet OAuth and `mcp_token`, not a CEX-style API key. OpenAPI mode is separate and only applies when the user explicitly requests OpenAPI / AK-SK usage.
+- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Permissions: Dex:Read
 
 ### Installation Check
 - Required: Gate-Dex
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursorinstaller`
-  - Codex: `gate-mcp-codexinstaller`
-  - Claude: `gate-mcp-claudeinstaller`
-  - OpenClaw: `gate-mcp-openclawinstaller`
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only (this workspace)
 

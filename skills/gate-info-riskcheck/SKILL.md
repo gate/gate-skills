@@ -2,7 +2,7 @@
 name: gate-info-riskcheck
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Token/contract/address security risk check (honeypot/rug/etc). Use ONLY when the user asks purely about security risk; if they also want fundamentals/TA/news/sentiment, route to gate-info-research. Address-risk mode is exclusive to this skill."
+description: "Token and address risk assessment. Use this skill ONLY when the user's query is exclusively about token/contract/address security with no other analysis dimensions. Trigger phrases: is this token safe, check contract risk, is this address safe, honeypot, rug. If the query ALSO mentions fundamentals, technicals, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report. Address risk mode (is this address safe) is exclusive to this skill and must NOT be routed to gate-info-research."
 ---
 
 # gate-info-riskcheck
@@ -122,17 +122,10 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 ### Installation Check
 - Required: Gate-Info
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursorinstaller`
-  - Codex: `gate-mcp-codexinstaller`
-  - Claude: `gate-mcp-claudeinstaller`
-  - OpenClaw: `gate-mcp-openclawinstaller`
-
-## MCP Mode
-
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's mode routing.
-
-- `SKILL.md` keeps intent gating (single-dimension risk vs multi-dimension routing) and report policy.
-- `references/mcp.md` is the authoritative MCP execution layer for tool contracts, parallel calls, degradation behavior, and safety wording.
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Routing Rules
 

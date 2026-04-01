@@ -39,17 +39,10 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursorinstaller`
-  - Codex: `gate-mcp-codexinstaller`
-  - Claude: `gate-mcp-claudeinstaller`
-  - OpenClaw: `gate-mcp-openclawinstaller`
-
-## MCP Mode
-
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's VIP/fee query workflow.
-
-- `SKILL.md` keeps intent routing and rendering rules.
-- `references/mcp.md` is the authoritative MCP execution layer for account/fee data retrieval and safe output behavior.
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Quick Start
 
