@@ -18,7 +18,7 @@
 
 ## [2026.3.12-1] - 2026-03-12
 
-- Replaced REST API endpoints with Gate gate-mcp tool names: `cex_wallet_get_total_balance`, `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_delivery_list_delivery_accounts`, `cex_options_list_options_account`, `cex_margin_list_margin_accounts`, `cex_tradfi_query_user_assets`, `cex_earn_list_dual_balance`/`cex_earn_list_dual_orders`/`cex_earn_list_structured_orders`, `cex_spot_list_spot_account_book`.
+- Replaced REST API endpoints with Gate gate-mcp tool names: `cex_wallet_get_total_balance`, `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_dc_list_dc_accounts`, `cex_options_list_options_account`, `cex_margin_list_margin_accounts`, `cex_tradfi_query_user_assets`, `cex_earn_list_dual_balance`/`cex_earn_list_dual_orders`/`cex_earn_list_structured_orders`, `cex_spot_list_spot_account_book`.
 - Added comprehensive cases from asset query skills (external) PDF specification.
 - **Case 1**: Total asset query (GET /wallet/total_balance) with account/coin distribution, TradFi/payment isolation.
 - **Case 2**: Specific currency query (concurrent multi-account aggregation).

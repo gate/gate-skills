@@ -5,7 +5,7 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 | Purpose | MCP tool | Auth |
 |---------|----------|------|
 | Create current/fixed loan | **cex_mcl_create_multi_collateral** (`order` JSON) | Yes |
-| Repay | **cex_mcl_repay_multi_collateral_loan** (`repay_loan` JSON) | Yes |
+| Repay | **cex_mcl_repay_mcl** (`repay_loan` JSON) | Yes |
 | Add / redeem collateral | **cex_mcl_operate_multi_collateral** (`collateral_adjust` JSON) | Yes |
 | List orders | **cex_mcl_list_multi_collateral_orders** | Yes |
 | Order detail | **cex_mcl_get_multi_collateral_order_detail** | Yes |
@@ -72,12 +72,12 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Order 123456 repay 1000 USDT"
 
 **Expected Behavior**:
-1. Parse order_id and amount (or full). Show draft; on confirm call `cex_mcl_repay_multi_collateral_loan` with **`repay_loan`** JSON (order_id, repay_items).
+1. Parse order_id and amount (or full). Show draft; on confirm call `cex_mcl_repay_mcl` with **`repay_loan`** JSON (order_id, repay_items).
 2. Success/failure user messages.
 
-**Tester**: User Prompt: `Order 123456 repay 1000 USDT` | **cex_mcl_repay_multi_collateral_loan**
+**Tester**: User Prompt: `Order 123456 repay 1000 USDT` | **cex_mcl_repay_mcl**
 
-**MCP**: **cex_mcl_repay_multi_collateral_loan**
+**MCP**: **cex_mcl_repay_mcl**
 
 ---
 

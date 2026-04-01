@@ -80,7 +80,7 @@ Response shape aligns with a single order from the list API (borrow/collateral b
 
 ---
 
-## 5. cex_mcl_repay_multi_collateral_loan
+## 5. cex_mcl_repay_mcl
 
 **Auth**: Yes
 
@@ -204,7 +204,7 @@ Current (flexible) borrow rates for listed currencies.
 | cex_mcl_create_multi_collateral | Yes | New current/fixed loan (`order` JSON) |
 | cex_mcl_list_multi_collateral_orders | Yes | List orders |
 | cex_mcl_get_multi_collateral_order_detail | Yes | One order |
-| cex_mcl_repay_multi_collateral_loan | Yes | Repay (`repay_loan` JSON) |
+| cex_mcl_repay_mcl | Yes | Repay (`repay_loan` JSON) |
 | cex_mcl_operate_multi_collateral | Yes | Add/redeem collateral (`collateral_adjust` JSON) |
 | cex_mcl_list_multi_repay_records | Yes | Repay history |
 | cex_mcl_list_multi_collateral_records | Yes | Collateral history |

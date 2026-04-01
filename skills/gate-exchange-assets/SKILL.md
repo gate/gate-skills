@@ -29,7 +29,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Query Operations (Read-only)**
 
-- cex_delivery_list_delivery_accounts
+- cex_dc_list_dc_accounts
 - cex_earn_list_dual_balance
 - cex_earn_list_dual_orders
 - cex_earn_list_structured_orders
@@ -72,7 +72,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | `cex_spot_get_spot_accounts` | Spot balance (filter by currency) | currency, available, locked |
 | `cex_unified_get_unified_accounts` | Unified account (single/cross/portfolio margin) | balances, unified_account_total, margin_mode |
 | `cex_fx_get_fx_accounts` | Perpetual (settle=usdt or btc) | total, unrealised_pnl, available, point, bonus |
-| `cex_delivery_list_delivery_accounts` | Delivery (settle=usdt) | total, unrealised_pnl, available |
+| `cex_dc_list_dc_accounts` | Delivery (settle=usdt) | total, unrealised_pnl, available |
 | `cex_options_list_options_account` | Options | total_value, unrealised_pnl, available |
 | `cex_margin_list_margin_accounts` | Isolated margin | currency_pair, mmr, base/quote (available/locked/borrowed/interest) |
 | `cex_tradfi_query_user_assets` | TradFi assets | USDx balance, margin |
@@ -114,7 +114,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 | Case | Trigger Phrases | MCP Tool | Output |
 |------|-----------------|----------|--------|
-| 2 | "How many BTC do I have", "How many USDT do I have" | Concurrent: `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_delivery_list_delivery_accounts`, `cex_margin_list_margin_accounts`, `cex_earn_list_dual_balance`, etc. | Total {COIN} held, distribution by account |
+| 2 | "How many BTC do I have", "How many USDT do I have" | Concurrent: `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_dc_list_dc_accounts`, `cex_margin_list_margin_accounts`, `cex_earn_list_dual_balance`, etc. | Total {COIN} held, distribution by account |
 
 ### III. Specific Account + Currency (Case 3)
 
@@ -127,7 +127,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | Case | Account | Trigger Phrases | MCP Tool |
 |------|---------|-----------------|----------|
 | 4 | Spot | "What's in my spot account", "Show my spot account assets" | `cex_spot_get_spot_accounts` or `cex_unified_get_unified_accounts` |
-| 5 | Futures | "How much in futures account", "USDT perpetual", "BTC perpetual", "Delivery" | `cex_fx_get_fx_accounts` settle=usdt/btc, `cex_delivery_list_delivery_accounts` |
+| 5 | Futures | "How much in futures account", "USDT perpetual", "BTC perpetual", "Delivery" | `cex_fx_get_fx_accounts` settle=usdt/btc, `cex_dc_list_dc_accounts` |
 | 6 | Trading (Unified) | "How much in trading account", "How much in unified account" | `cex_unified_get_unified_accounts` |
 | 7 | Options | "How much in options account", "Show my options assets" | `cex_options_list_options_account` or `cex_unified_get_unified_accounts` |
 | 8 | Finance | "How much in finance account", "Show my finance account assets" | `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders` |

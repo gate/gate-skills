@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.4.1-1] - 2026-04-01
+
+### Fixed
+
+- Repay MCP tool name in docs aligned with **`gateapi-mcp-service`** registration: **`cex_mcl_repay_mcl`** (updated SKILL.md, README, `references/mcl-mcp-tools.md`, `references/mcp.md`, `references/scenarios.md`, VALIDATION_REPORT.md).
+
 ## [2026.3.18-3] - 2026-03-18
 
 ### Changed
@@ -17,7 +23,7 @@
 ### Changed
 
 - **MCP-only reference**: Removed REST/API mapping doc. Added **`references/mcl-mcp-tools.md`** (MCP tool arguments and JSON payloads only). Deleted **`references/mcl-api.md`**.
-- **SKILL.md / README / scenarios**: All pointers updated to `mcl-mcp-tools.md`; removed Method/Path columns. Aligned tool names with Gate MCP: **`cex_mcl_repay_multi_collateral_loan`**, **`order`** / **`repay_loan`** / **`collateral_adjust`** JSON parameters; list orders uses **`order_type`** / **`sort`** per MCP (not REST-only `status`).
+- **SKILL.md / README / scenarios**: All pointers updated to `mcl-mcp-tools.md`; removed Method/Path columns. Aligned tool names with Gate MCP: **`cex_mcl_repay_mcl`**, **`order`** / **`repay_loan`** / **`collateral_adjust`** JSON parameters; list orders uses **`order_type`** / **`sort`** per MCP (not REST-only `status`).
 - **Frontmatter**: `description` includes **Use this skill whenever** and **Trigger phrases include** (skill-validator).
 
 ## [2026.3.16-1] - 2026-03-16

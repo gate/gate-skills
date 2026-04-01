@@ -41,7 +41,7 @@ No mandatory MCP resources.
 - `cex_spot_list_spot_account_book`
 - `cex_margin_list_margin_accounts`
 - `cex_fx_get_fx_accounts`
-- `cex_delivery_list_delivery_accounts`
+- `cex_dc_list_dc_accounts`
 - `cex_options_list_options_account`
 - `cex_unified_get_unified_accounts`
 - `cex_earn_list_dual_balance`

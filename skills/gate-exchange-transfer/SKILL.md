@@ -34,8 +34,8 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
 
 **Query Operations (Read-only)**
 
-- cex_delivery_list_delivery_account_book
-- cex_fx_list_futures_account_book
+- cex_dc_list_dc_account_book
+- cex_fx_list_fx_account_book
 - cex_margin_list_margin_account_book
 - cex_options_list_options_account_book
 - cex_spot_list_spot_account_book
@@ -372,8 +372,8 @@ After a transfer, user may ask for history. By account type:
 | Account | Query tool (if MCP provides) | Notes |
 |---------|------------------------------|--------|
 | Spot | `cex_spot_list_spot_account_book` | currency, time, limit |
-| Perpetual | `cex_fx_list_futures_account_book` | settle, type=dnw |
-| Delivery | `cex_delivery_list_delivery_account_book` | settle, type=dnw |
+| Perpetual | `cex_fx_list_fx_account_book` | settle, type=dnw |
+| Delivery | `cex_dc_list_dc_account_book` | settle, type=dnw |
 | Margin | `cex_margin_list_margin_account_book` | currency_pair, time, limit |
 | Options | `cex_options_list_options_account_book` | per MCP docs |
 
