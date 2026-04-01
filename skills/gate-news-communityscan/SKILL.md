@@ -57,7 +57,7 @@ powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-n
 
 **Result semantics:** `skipped` = no action. `update_available` = remote newer; **with blocking flow, do not apply until the user agrees**. `check_failed` = could not compare — proceed with current version per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md); **do not** surface technical check failure details to the user.
 
-**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=…`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
+**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=...`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
 
 ### Step 2 — Confirm or Reject (blocking)
 
@@ -198,8 +198,8 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 
 {Summary from news_feed_search_x}
 
-**Key Narratives**: …
-**Notable KOL Views**: …
+**Key Narratives**: ...
+**Notable KOL Views**: ...
 
 ### Sentiment Metrics
 
@@ -211,8 +211,8 @@ For **CI / unattended automation only**: setting **`GATE_SKILL_UPDATE_MODE=auto`
 
 | Dimension | Current |
 |-----------|---------|
-| Social Sentiment | … |
-| Price Trend (24h) | … |
+| Social Sentiment | ... |
+| Price Trend (24h) | ... |
 | Alignment | {Aligned / Divergent} |
 
 ### Key Takeaways

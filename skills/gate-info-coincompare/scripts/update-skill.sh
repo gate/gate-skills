@@ -104,6 +104,7 @@ usage() {
   echo "       $0 revoke-pending <NAME> # clear strict apply token (user declined)"
   echo "  Single-arg DEST: ~/.cursor/skills/<NAME>, ~/.codex/skills/<NAME>, ~/.openclaw/skills/<NAME>, ~/.agents/skills/<NAME>, ~/.gemini/antigravity/skills/<NAME> if SKILL.md exists (in that order), else script dir (scripts/../)."
   echo "  Legacy: $0 run <DEST> <NAME>  # explicit DEST still supported"
+  echo "  Two-arg: canonical order is DEST (skill root) then NAME; reversed order is fixed when only one path has SKILL.md."
   exit 1
 }
 
@@ -151,6 +152,23 @@ normalize_dest() {
       printf '%s\n' "$abs"
       ;;
   esac
+}
+
+# Two-arg check/run/apply/revoke expect DEST then NAME. If agents pass NAME then DEST,
+# detect via SKILL.md under normalized paths and swap.
+resolve_dest_two_arg() {
+  local a1 a2
+  a1=$(normalize_dest "$1")
+  a2=$(normalize_dest "$2")
+  if [ -f "$a1/SKILL.md" ]; then
+    printf '%s\n%s\n' "$a1" "$2"
+    return 0
+  fi
+  if [ -f "$a2/SKILL.md" ]; then
+    printf '%s\n%s\n' "$a2" "$1"
+    return 0
+  fi
+  printf '%s\n%s\n' "$a1" "$2"
 }
 
 choose_tmp_base() {
@@ -375,7 +393,10 @@ do_apply() {
 cmd_check() {
   local DEST NAME
   if [ $# -eq 2 ]; then
-    DEST=$(normalize_dest "$1"); NAME="$2"
+    exec 3< <(resolve_dest_two_arg "$1" "$2")
+    IFS= read -r DEST <&3
+    IFS= read -r NAME <&3
+    exec 3<&-
   else
     NAME="${1:?}"
     DEST=$(resolve_dest_single_arg "$NAME")
@@ -466,7 +487,10 @@ cmd_check() {
 cmd_run() {
   local DEST NAME
   if [ $# -eq 2 ]; then
-    DEST=$(normalize_dest "$1"); NAME="$2"
+    exec 3< <(resolve_dest_two_arg "$1" "$2")
+    IFS= read -r DEST <&3
+    IFS= read -r NAME <&3
+    exec 3<&-
   else
     NAME="${1:?}"
     DEST=$(resolve_dest_single_arg "$NAME")
@@ -531,8 +555,13 @@ cmd_run() {
 
 main() {
   # Legacy 2-arg: <DEST> <NAME> → run
-  if [ $# -eq 2 ] && [[ "${1:-}" != run && "${1:-}" != check && "${1:-}" != apply ]]; then
-    cmd_run "$1" "$2"
+  if [ $# -eq 2 ] && [[ "${1:-}" != run && "${1:-}" != check && "${1:-}" != apply && "${1:-}" != revoke-pending ]]; then
+    local __leg_d __leg_n
+    exec 3< <(resolve_dest_two_arg "$1" "$2")
+    IFS= read -r __leg_d <&3
+    IFS= read -r __leg_n <&3
+    exec 3<&-
+    cmd_run "$__leg_d" "$__leg_n"
     return $?
   fi
   # 1-arg (no subcommand): <NAME> → run with auto DEST
@@ -556,7 +585,10 @@ main() {
       [ $# -ge 1 ] || usage
       local DEST NAME
       if [ $# -eq 2 ]; then
-        DEST=$(normalize_dest "$1"); NAME="$2"
+        exec 3< <(resolve_dest_two_arg "$1" "$2")
+        IFS= read -r DEST <&3
+        IFS= read -r NAME <&3
+        exec 3<&-
       else
         NAME="${1:?}"
         DEST=$(resolve_dest_single_arg "$NAME")
@@ -571,7 +603,10 @@ main() {
       [ $# -ge 1 ] || usage
       local rn_DEST rn_NAME
       if [ $# -eq 2 ]; then
-        rn_DEST=$(normalize_dest "$1"); rn_NAME="$2"
+        exec 3< <(resolve_dest_two_arg "$1" "$2")
+        IFS= read -r rn_DEST <&3
+        IFS= read -r rn_NAME <&3
+        exec 3<&-
       else
         rn_NAME="${1:?}"
         rn_DEST=$(resolve_dest_single_arg "$rn_NAME")

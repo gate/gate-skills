@@ -57,7 +57,7 @@ powershell -ExecutionPolicy Bypass -File "$env:USERPROFILE\.cursor\skills\gate-i
 
 **Result semantics:** `skipped` = no action. `update_available` = remote newer; **with blocking flow, do not apply until the user agrees**. `check_failed` = could not compare — proceed with current version per [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md); **do not** surface technical check failure details to the user.
 
-**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=…`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
+**Agent parse (stdout):** `GATE_SKILL_UPDATE_AGENT_ACTION=...`. **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`** → Step 2 before Execution. **`CONTINUE_SKILL_EXECUTION`** → no block from the check script.
 
 ### Step 2 — Confirm or Reject (blocking)
 
@@ -316,7 +316,7 @@ For Bridges and Stablecoins, use a list-first, detail-on-demand pattern:
 | Condition | Assessment / next step |
 |-----------|-------------------------|
 | Generic DeFi market, TVL leaderboard, or “top protocols” | Sub-scenario A (Overview) |
-| User names a specific protocol (Uniswap, Aave, …) | Sub-scenario B (Platform detail) |
+| User names a specific protocol (Uniswap, Aave, ...) | Sub-scenario B (Platform detail) |
 | Yield, APY, lending, “where to earn” | Sub-scenario C (Yield pools) |
 | Stablecoins, peg, circulation, ranking | Sub-scenario D; use progressive loading per Step 4 |
 | Bridges, cross-chain TVL, bridge volume | Sub-scenario E; list-first, detail on follow-up |
