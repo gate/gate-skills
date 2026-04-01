@@ -1,6 +1,0 @@
-{
-  "gate-cex-ex": {
-    "type": "http",
-    "url": "https://api.gatemcp.ai/mcp/exchange"
-  }
-}

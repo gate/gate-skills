@@ -1,6 +1,0 @@
-{
-  "gate-cex-pub": {
-    "type": "http",
-    "url": "https://api.gatemcp.ai/mcp"
-  }
-}

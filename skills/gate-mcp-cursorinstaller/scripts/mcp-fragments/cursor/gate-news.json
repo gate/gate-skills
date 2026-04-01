@@ -1,6 +1,0 @@
-{
-  "Gate-News": {
-    "url": "https://api.gatemcp.ai/mcp/news",
-    "transport": "streamable-http"
-  }
-}
