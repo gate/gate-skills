@@ -58,7 +58,7 @@ No mandatory MCP Resource in futures skill.
 | `cex_fx_get_fx_dual_position` | `settle`, `contract` | dual-side position detail | invalid in single mode |
 | `cex_fx_list_fx_orders` | `settle`, filters | open/finished orders | filter mismatch |
 | `cex_fx_get_fx_order` | `settle`, `order_id` | order detail/state | id not found |
-| `cex_fx_list_fx_price_triggered_orders` | `settle`, status | trigger order list | none found |
+| `cex_fx_list_price_triggered_orders` | `settle`, status | trigger order list | none found |
 | `cex_fx_get_fx_price_triggered_order` | `settle`, `order_id` | trigger order detail | id invalid |
 
 ### 5.2 Write Tools

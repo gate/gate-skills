@@ -10,7 +10,7 @@ AI Agent skill for **multi-collateral loan** on Gate: create current or fixed-te
 |------------|-------------|---------|
 | **Create current loan** | `cex_mcl_create_multi_collateral` with `order` JSON (current) | "Pledge 100 USDT, borrow 7000 DOGE (current)" |
 | **Create fixed loan** | Fix rate from `cex_mcl_get_multi_collateral_fix_rate`, then create with `order` JSON | "Pledge 0.01 BTC, borrow 100 USDT for 7 days" |
-| **Repay** | `cex_mcl_repay_multi_collateral_loan` (`repay_loan` JSON) | "Repay order 123456 in full" |
+| **Repay** | `cex_mcl_repay_mcl` (`repay_loan` JSON) | "Repay order 123456 in full" |
 | **Add collateral** | `cex_mcl_operate_multi_collateral` (append) | "Order 123456 add collateral 100 USDT" |
 | **Redeem collateral** | `cex_mcl_operate_multi_collateral` (redeem) | "Order 123456 redeem 100 USDT collateral" |
 | **List / detail** | `cex_mcl_list_multi_collateral_orders`, `cex_mcl_get_multi_collateral_order_detail` | "My collateral loan orders" |
@@ -32,7 +32,7 @@ User Query → gate-exchange-collateralloan Skill → Gate MCP (cex_mcl_*) → P
 | `cex_mcl_create_multi_collateral` | Yes | New loan (`order` JSON) |
 | `cex_mcl_list_multi_collateral_orders` | Yes | List |
 | `cex_mcl_get_multi_collateral_order_detail` | Yes | Detail |
-| `cex_mcl_repay_multi_collateral_loan` | Yes | Repay (`repay_loan` JSON) |
+| `cex_mcl_repay_mcl` | Yes | Repay (`repay_loan` JSON) |
 | `cex_mcl_operate_multi_collateral` | Yes | Add/redeem (`collateral_adjust` JSON) |
 | `cex_mcl_list_multi_repay_records` | Yes | Repay history |
 | `cex_mcl_list_multi_collateral_records` | Yes | Collateral history |

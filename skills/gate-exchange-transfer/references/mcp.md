@@ -44,8 +44,8 @@ No mandatory MCP resources.
 |---|---|
 | `cex_spot_list_spot_account_book` | spot ledger verification |
 | `cex_margin_list_margin_account_book` | margin ledger verification |
-| `cex_fx_list_futures_account_book` | futures ledger verification |
-| `cex_delivery_list_delivery_account_book` | delivery ledger verification |
+| `cex_fx_list_fx_account_book` | futures ledger verification |
+| `cex_dc_list_dc_account_book` | delivery ledger verification |
 | `cex_options_list_options_account_book` | options ledger verification |
 
 ### 5.2 Write tool

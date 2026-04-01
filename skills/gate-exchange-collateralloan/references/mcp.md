@@ -51,7 +51,7 @@ No mandatory MCP resources.
 
 ### Write tools
 - `cex_mcl_create_multi_collateral`
-- `cex_mcl_repay_multi_collateral_loan`
+- `cex_mcl_repay_mcl`
 
 ## 6. Execution SOP (Non-Skippable)
 

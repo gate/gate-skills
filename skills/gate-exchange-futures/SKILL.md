@@ -39,7 +39,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - cex_fx_get_fx_tickers
 - cex_fx_list_fx_orders
 - cex_fx_list_fx_positions
-- cex_fx_list_fx_price_triggered_orders
+- cex_fx_list_price_triggered_orders
 
 **Execution Operations (Write)**
 
@@ -219,7 +219,7 @@ Read `references/conditional.md` for full logic. Key points:
 #### Module G: Manage Triggered Orders
 
 Read `references/manage.md` for full logic. Supports:
-- **List**: `cex_fx_list_fx_price_triggered_orders`
+- **List**: `cex_fx_list_price_triggered_orders`
 - **Get detail**: `cex_fx_get_fx_price_triggered_order`
 - **Cancel single**: `cex_fx_cancel_fx_price_triggered_order`
 - **Cancel all**: `cex_fx_cancel_fx_price_triggered_order_list`

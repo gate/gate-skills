@@ -19,4 +19,4 @@
 ## Docs change (this release)
 
 - **REST/API mapping removed**; replaced by **`references/mcl-mcp-tools.md`** (MCP-only).
-- Repay tool documented as **`cex_mcl_repay_multi_collateral_loan`**; create/operate use wrapper JSON keys **`order`**, **`repay_loan`**, **`collateral_adjust`** per MCP.
+- Repay tool documented as **`cex_mcl_repay_mcl`**; create/operate use wrapper JSON keys **`order`**, **`repay_loan`**, **`collateral_adjust`** per MCP.

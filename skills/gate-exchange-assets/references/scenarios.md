@@ -115,7 +115,7 @@ Spot ${details.spot.amount} | Futures ${details.futures.amount} | Delivery ${det
 - `cex_unified_get_unified_accounts` currency={COIN} — Unified (spot + USDT perpetual + options)
 - `cex_fx_get_fx_accounts` settle=usdt — USDT perpetual (non-unified)
 - `cex_fx_get_fx_accounts` settle=btc — BTC perpetual (when querying BTC)
-- `cex_delivery_list_delivery_accounts` settle=usdt — Delivery
+- `cex_dc_list_dc_accounts` settle=usdt — Delivery
 - `cex_margin_list_margin_accounts` — Isolated margin
 - `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders`, etc.
 
@@ -230,7 +230,7 @@ Your spot account total valuation is ≈ ${total_val} USDT
 **MCP Tools**:
 - USDT perpetual: `cex_fx_get_fx_accounts` settle=usdt
 - BTC perpetual: `cex_fx_get_fx_accounts` settle=btc
-- Delivery: `cex_delivery_list_delivery_accounts` settle=usdt
+- Delivery: `cex_dc_list_dc_accounts` settle=usdt
 - Unified advanced (with USDT perpetual): `cex_unified_get_unified_accounts`
 
 **Field mapping**:
@@ -261,7 +261,7 @@ Wallet: ${total} | Unrealised PnL: ${unrealised_pnl} | Available: ${available}
 - **Query "perpetual"**: Query and show BOTH USDT perpetual and BTC perpetual
 
 **Expected behavior**:
-1. Call `cex_fx_get_fx_accounts` or `cex_delivery_list_delivery_accounts` as needed
+1. Call `cex_fx_get_fx_accounts` or `cex_dc_list_dc_accounts` as needed
 2. Handle unified vs non-unified mode
 3. Output structured report with field mapping
 
