@@ -1,10 +1,10 @@
 ---
-
-## title: Gate Skills Intent Disambiguation Rules
-
+title: Gate Skills Intent Disambiguation Rules
 version: v1.0.0
 last_updated: 2026-03-26
-scope: gate-mcp / CEX × DEX × Info × News
+scope: "gate-mcp / CEX × DEX × Info × News"
+---
+
 # Intent Disambiguation Rules
 
 > Shared routing rules for all Gate Skills (CEX / DEX / Info / News).
