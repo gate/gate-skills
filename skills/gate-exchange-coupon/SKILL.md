@@ -3,6 +3,14 @@ name: gate-exchange-coupon
 version: "2026.3.23-1"
 updated: "2026-03-23"
 description: "Gate coupon and voucher query skill. Use when the user asks about coupon balance, rules, expiry, or source. Triggers on 'my coupons', 'coupon details', 'voucher rules', 'coupon expires'."
+required_credentials:
+  - gate_api_key
+  - gate_api_secret
+required_env_vars:
+  - GATE_API_KEY
+  - GATE_API_SECRET
+required_permissions:
+  - Coupon:Read
 ---
 
 # Gate Coupon Assistant
@@ -34,9 +42,11 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - cex_coupon_list_user_coupons
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- API Key Required: Yes
 - Permissions: Coupon:Read
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
+- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
 
 ### Installation Check
 - Required: Gate (main)

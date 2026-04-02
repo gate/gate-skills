@@ -8,12 +8,9 @@ Built by Gate. Built for the crypto community.
 
 ### One-Click Installation
 
-Get started in seconds with our installer skills:
+Get started in seconds with our unified installer skill:
 
-- **Cursor Users**: Use `gate-mcp-cursor-installer` — installs all Gate MCP servers + skills with a single command
-- **OpenClaw Users**: Use `gate-mcp-openclaw-installer` — complete Gate MCP setup with interactive selection
-- **Claude Code (Claude CLI) Users**: Use `gate-mcp-claude-installer` — one-click install all Gate MCP + Gate Skills
-- **Codex Users**: Use `gate-mcp-codex-installer` — one-click install all Gate MCP + Gate Skills
+- **All Platforms (Cursor / Claude Code / Codex / OpenClaw)**: Use `gate-mcp-installer` — one-click install all Gate MCP servers + Skills for your environment
 
 **Quick Start**: Just say to your AI assistant:
 
@@ -39,7 +36,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.25-1` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-auto-invest](#-gate-exchange-auto-invest) | Gate Earn fast auto-invest (DCA): create/update/stop/top-up plans; coins, min amount, records, plan detail; spot & Simple Earn balance context | `2026.3.24-9` | ✅ Active |
+| [gate-exchange-autoinvest](#-gate-exchange-autoinvest) | Gate Earn fast auto-invest (DCA): create/update/stop/top-up plans; coins, min amount, records, plan detail; spot & Simple Earn balance context | `2026.4.2-3` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
@@ -55,11 +52,9 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.25-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
-| [gate-mcp-claude-installer](#-gate-mcp-claude-installer) | One-click installer for Gate MCP and Skills for Claude Code (Claude CLI) | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-codex-installer](#-gate-mcp-codex-installer) | One-click installer for Gate MCP and Skills for Codex | `2026.3.11-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
-| [gate-mcp-cursor-installer](#-gate-mcp-cursor-installer) | One-click installer for Gate MCP and Skills for Cursor | `2026.3.10-1` | ✅ Active |
-| [gate-mcp-openclaw-installer](#-gate-mcp-openclaw-installer) | Complete Gate MCP server installer for OpenClaw | `2026.3.10-1` | ✅ Active |
+| [gate-exchange-pay](#-gate-exchange-pay) | Gate Pay payment execution: complete merchant charges, pay-first flows, and output receipts | `2026.3.27-2` | ✅ Active |
+| [gate-mcp-installer](#-gate-mcp-installer) | One-click installer for Gate MCP servers and Skills for Cursor, Claude Code, Codex, and OpenClaw | `2026.4.1-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
 | [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | End-to-end trading copilot: market judgment, risk control, order drafting, execution, and post-trade management | `2026.3.14-3` | ✅ Active |
@@ -299,9 +294,9 @@ Staking (earn) query on Gate: positions, rewards, product discovery, and order h
 
 ---
 
-## 📗 gate-exchange-auto-invest
+## 📗 gate-exchange-autoinvest
 
-> **Path**: `skills/gate-exchange-auto-invest/`
+> **Path**: `skills/gate-exchange-autoinvest/`
 
 Gate Exchange Earn **fast auto-invest (极速定投 / DCA)**: plan lifecycle, queries, and balance checks via **named MCP tools** (see `SKILL.md` → **MCP tools**); **11** earn auto-invest tools plus supporting `cex_spot_get_spot_accounts` and `cex_earn_list_user_uni_lends`. This skill does not document REST paths.
 
@@ -597,58 +592,16 @@ Exchange listing/delisting tracker. Fetches exchange announcements for new listi
 
 ---
 
-## 🛠️ gate-mcp-cursor-installer
+## 🛠️ gate-mcp-installer
 
-> **Path**: `skills/gate-mcp-cursor-installer/`
+> **Path**: `skills/gate-mcp-installer/`
 
-One-click installer for Gate MCP servers and Skills specifically tailored for Cursor.
-
-**Quick Start**:
-```bash
-bash scripts/install.sh
-```
-
----
-
-## 🛠️ gate-mcp-openclaw-installer
-
-> **Path**: `skills/gate-mcp-openclaw-installer/`
-
-Complete Gate MCP server installer for OpenClaw. Supports spot/futures trading, wallet, market info, and news servers.
-
-**Quick Start**:
-```bash
-./scripts/install.sh
-```
-
----
-
-## 🛠️ gate-mcp-claude-installer
-
-> **Path**: `skills/gate-mcp-claude-installer/`
-
-One-click installer for **Claude Code (Claude CLI)**: all Gate MCP servers + all Gate Skills.
+Unified one-click installer for Gate MCP servers and Skills. Supports Cursor, Claude Code, Codex, and OpenClaw/mcporter.
 
 **Quick Start**:
 ```bash
 # From repo root
-bash skills/gate-mcp-claude-installer/scripts/install.sh
-```
-
-Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to install selected MCPs.
-
----
-
-## 🛠️ gate-mcp-codex-installer
-
-> **Path**: `skills/gate-mcp-codex-installer/`
-
-One-click installer for **Codex**: all Gate MCP servers + all Gate Skills.
-
-**Quick Start**:
-```bash
-# From repo root
-bash skills/gate-mcp-codex-installer/scripts/install.sh
+bash skills/gate-mcp-installer/scripts/install.sh
 ```
 
 Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to install selected MCPs.
@@ -764,6 +717,19 @@ Platform activity center: campaign types, hot recommendations, activity lists, a
 
 ---
 
+## 💳 gate-exchange-pay
+
+> **Path**: `skills/gate-exchange-pay/`
+
+Gate Pay payment execution skill. Complete merchant charges, satisfy pay-first flows (e.g. HTTP 402), and output receipts via Gate Pay. Requires prior Gate payment authorization.
+
+**Example Prompts**:
+- `Pay with Gate Pay`
+- `Complete payment for this order`
+- `Pay for order using Gate Pay`
+
+---
+
 ## Getting Started
 
 ### Prerequisites
@@ -773,15 +739,11 @@ Platform activity center: campaign types, hot recommendations, activity lists, a
 
 ### Setup
 
-Choose the installer skill based on your environment:
-
-#### For Cursor Users
-
-Use the `gate-mcp-cursor-installer` skill to install Gate MCP and Skills with one click:
+Use the unified `gate-mcp-installer` skill. It auto-detects your environment (Cursor, Claude Code, Codex, or OpenClaw):
 
 ```bash
-# Run the install script
-bash skills/gate-mcp-cursor-installer/scripts/install.sh
+# From repo root
+bash skills/gate-mcp-installer/scripts/install.sh
 ```
 
 Or simply ask the AI assistant:
@@ -789,39 +751,7 @@ Or simply ask the AI assistant:
 Help me install Gate MCP
 ```
 
-#### For OpenClaw Users
-
-Use the `gate-mcp-openclaw-installer` skill:
-
-```bash
-# Install all Gate MCP servers (default)
-./skills/gate-mcp-openclaw-installer/scripts/install.sh
-
-# Selective installation
-./skills/gate-mcp-openclaw-installer/scripts/install.sh --select
-```
-
-#### For Claude Code (Claude CLI) Users
-
-Use `gate-mcp-claude-installer` to install all Gate MCP and Gate Skills:
-
-```bash
-# From repo root
-bash skills/gate-mcp-claude-installer/scripts/install.sh
-```
-
-MCP only: `bash skills/gate-mcp-claude-installer/scripts/install.sh --no-skills`
-
-#### For Codex Users
-
-Use `gate-mcp-codex-installer` to install all Gate MCP and Gate Skills:
-
-```bash
-# From repo root
-bash skills/gate-mcp-codex-installer/scripts/install.sh
-```
-
-MCP only: `bash skills/gate-mcp-codex-installer/scripts/install.sh --no-skills`
+MCP only: `bash skills/gate-mcp-installer/scripts/install.sh --no-skills`
 
 ### Start Using Skills
 
@@ -1025,8 +955,9 @@ gate-github-skills/
     ├── gate-exchange-flashswap/        # Flash Swap query: pairs, limits, history
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
+    ├── gate-exchange-pay/              # Gate Pay payment execution skill
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
-    ├── gate-exchange-auto-invest/      # Earn fast auto-invest (DCA): plans, records, spot & Uni context
+    ├── gate-exchange-autoinvest/       # Earn fast auto-invest (DCA): plans, records, spot & Uni context
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
     ├── gate-exchange-subaccount/       # Sub-account management: list, create, lock/unlock
@@ -1049,10 +980,7 @@ gate-github-skills/
     ├── gate-news-communityscan/       # Community / X sentiment skill
     ├── gate-news-eventexplain/         # Event explanation skill
     ├── gate-news-listing/              # Listing/delisting tracker skill
-    ├── gate-mcp-cursor-installer/      # Cursor MCP installer skill
-    ├── gate-mcp-openclaw-installer/    # OpenClaw MCP installer skill
-    ├── gate-mcp-claude-installer/      # Claude Code (Claude CLI) MCP + Skills installer
-    └── gate-mcp-codex-installer/       # Codex MCP + Skills installer
+    └── gate-mcp-installer/             # Unified MCP + Skills installer (Cursor, Claude Code, Codex, OpenClaw)
 ```
 
 ---

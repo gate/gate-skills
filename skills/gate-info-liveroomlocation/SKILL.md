@@ -3,6 +3,9 @@ name: gate-info-liveroomlocation
 version: "2026.3.23-1"
 updated: "2026-03-23"
 description: "Gate live stream and replay listing skill. Use when the user asks to find live rooms or replays by tag, coin, or sort. Triggers on 'live room list', '最热直播', 'replay list', 'SOL live stream'."
+required_credentials: []
+required_env_vars: []
+required_permissions: []
 ---
 
 # Gate Info Liveroom Location — Live & Replay Listing
@@ -27,6 +30,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Authentication
 - API Key Required: No
+- Credentials Source: None; this skill uses read-only Gate Info / Gate News MCP access only.
 
 ### Installation Check
 - Required: Gate-Info

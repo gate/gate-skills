@@ -10,15 +10,13 @@
 Before execution, check whether a newer version of the current skill exists in the official Gate Skills repository:
 https://github.com/gate/gate-skills
 
-- If the skill directory contains `scripts/update-skill.sh` (or `scripts/update-skill.ps1` on Windows), run the **`check`** subcommand first **without** **`GATE_SKILL_UPDATE_MODE=auto`** for the normal **blocking** flow: the script **only compares**; when `update_available`, each skill’s **SKILL.md** instructs the agent to **ask the user** before **`apply`** (see **blocking update confirmation** in the independent-script test report). **`run`** performs check + apply in one go — **not** for that blocking flow in chat.
-- Version check fetches the remote SKILL.md head via GitHub Raw URL: `https://raw.githubusercontent.com/gate/gate-skills/master/skills/{skill_name}/SKILL.md`
-- **Strict `check` (recommended for agents):** **`GATE_SKILL_CHECK_STRICT=1`** on **`check`**: when `update_available`, the process **exits 3** (`GATE_SKILL_CHECK_EXIT=3`) and prints **`BLOCK_UNTIL_USER_CONFIRMS_UPDATE`**. **Two-step gate:** strict `check` prints **`GATE_SKILL_CONFIRM_TOKEN`** and writes **`.gate-skill-apply-token`**. **`apply`** / **`run`** (without auto) **refuse** (exit **2**) until **`GATE_SKILL_CONFIRM_TOKEN`** matches. User declines → **`revoke-pending <name>`**. Non-strict `check` does **not** create a token.
-  - **Cursor / Agent:** After notifying the user, **end this assistant turn** before `apply` — strict `check` **exit 3** only aborts that shell step; **`apply`** in a **later** turn after the user agrees (or **`revoke-pending`** if they decline).
-- **Optional — auto mode (CI / unattended only):** **`GATE_SKILL_UPDATE_MODE=auto`** on **`check`** or **`run`** applies immediately when the remote is newer — **no** user step; **incompatible** with blocking verification.
-- If `skipped` (versions match) or `check_failed` (network, missing tools, etc.): proceed directly to execution.
-- **Technical failures during the version check** (script missing, sandbox denial, unreachable GitHub, non-zero exit, no parseable `Result=`, etc.): **do not** surface failure details or “version check failed” messaging to the user; proceed with the current installed version. **Never** block execution due to update failure. (**Success paths** — including **`update_available`** with strict **`exit 3`** — still require the user-facing confirmation flow in each skill’s **Trigger update** before `apply`.)
-- **Do not** auto-download `update-skill.sh` / `update-skill.ps1` into the user’s install; manual copy from [gate/gate-skills](https://github.com/gate/gate-skills) is allowed. (ClawHub packages may omit `.ps1`; see per-skill **SKILL.md** **Trigger update**.)
-- Update pulls the entire skill directory from the remote repo (git clone → ZIP → tar.gz fallback), writes to a temp location first, and only overwrites after verification. Original files are preserved on failure.
+- If the skill directory contains `scripts/update-skill.sh` (or `scripts/update-skill.ps1` on Windows), you may run the `check` subcommand to compare the local skill with the official repo.
+- Version checks fetch the remote `SKILL.md` head via GitHub Raw URL: `https://raw.githubusercontent.com/gate/gate-skills/master/skills/{skill_name}/SKILL.md`
+- In interactive sessions, `check` is optional maintenance. If it reports `update_available`, ask the user before running `apply`.
+- Never auto-apply updates in chat or agent-driven interactive flows.
+- If `check` cannot run or returns `check_failed`, continue with the currently installed version. Explain update-check details only when the user explicitly asks.
+- Do not auto-download replacement updater scripts during the session. If local updater files are missing, direct users to the official repo for manual repair.
+- Applying an update writes only inside the current skill directory under the local skills install root. It must not modify unrelated local directories.
 
 ---
 
