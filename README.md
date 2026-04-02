@@ -39,6 +39,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.25-1` | ✅ Active |
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
+| [gate-exchange-auto-invest](#-gate-exchange-auto-invest) | Gate Earn fast auto-invest (DCA): create/update/stop/top-up plans; coins, min amount, records, plan detail; spot & Simple Earn balance context | `2026.3.24-9` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
@@ -295,6 +296,19 @@ Staking (earn) query on Gate: positions, rewards, product discovery, and order h
 - `What are my staking rewards?`
 - `Find BTC staking products`
 - `Show staking history`
+
+---
+
+## 📗 gate-exchange-auto-invest
+
+> **Path**: `skills/gate-exchange-auto-invest/`
+
+Gate Exchange Earn **fast auto-invest (极速定投 / DCA)**: plan lifecycle, queries, and balance checks via **named MCP tools** (see `SKILL.md` → **MCP tools**); **11** earn auto-invest tools plus supporting `cex_spot_get_spot_accounts` and `cex_earn_list_user_uni_lends`. This skill does not document REST paths.
+
+**Example Prompts**:
+- `Create a weekly 100 USDT DCA into BTC`
+- `Stop my ETH auto-invest plan`
+- `Minimum amount for USDT auto-invest?`
 
 ---
 
@@ -1012,6 +1026,7 @@ gate-github-skills/
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
+    ├── gate-exchange-auto-invest/      # Earn fast auto-invest (DCA): plans, records, spot & Uni context
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
     ├── gate-exchange-subaccount/       # Sub-account management: list, create, lock/unlock
