@@ -1,0 +1,6 @@
+{
+  "Gate-News": {
+    "type": "http",
+    "url": "https://api.gatemcp.ai/mcp/news"
+  }
+}

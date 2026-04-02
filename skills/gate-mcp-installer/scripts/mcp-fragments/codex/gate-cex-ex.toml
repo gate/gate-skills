@@ -1,0 +1,3 @@
+
+[mcp_servers.gate-cex-ex]
+url = "https://api.gatemcp.ai/mcp/exchange"
