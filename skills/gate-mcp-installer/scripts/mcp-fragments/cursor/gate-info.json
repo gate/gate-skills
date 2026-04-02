@@ -1,0 +1,6 @@
+{
+  "Gate-Info": {
+    "url": "https://api.gatemcp.ai/mcp/info",
+    "transport": "streamable-http"
+  }
+}
