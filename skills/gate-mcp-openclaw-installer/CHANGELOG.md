@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.4.1-0] - 2026-04-01
+
+### Deprecated
+
+- **Superseded by `gate-mcp-installer`.** Use `skills/gate-mcp-installer/scripts/install.sh --platform openclaw` (add `--select` for interactive single-server install).
+
 ## [2026.3.25-2] - 2026-03-25
 
 ### Changed

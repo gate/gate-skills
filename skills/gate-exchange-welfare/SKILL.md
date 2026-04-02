@@ -3,6 +3,14 @@ name: gate-exchange-welfare
 version: "2026.3.23-1"
 updated: "2026-03-23"
 description: "Gate welfare center and new-user task skill. Use when the user asks about welfare rewards, tasks, or how to claim benefits. Triggers on 'welfare center', 'new user tasks', 'claim reward'. Must use real MCP data only."
+required_credentials:
+  - gate_api_key
+  - gate_api_secret
+required_env_vars:
+  - GATE_API_KEY
+  - GATE_API_SECRET
+required_permissions:
+  - Welfare:Read
 ---
 
 # Gate Exchange Welfare Center
@@ -33,9 +41,11 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - cex_welfare_get_user_identity
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
+- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- API Key Required: Yes
 - Permissions: Welfare:Read
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
+- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
 
 ### Installation Check
 - Required: Gate (main)
