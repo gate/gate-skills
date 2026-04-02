@@ -2,7 +2,7 @@
 name: gate-mcp-cursor-installer
 version: "2026.3.25-2"
 updated: "2026-03-25"
-description: "Gate MCP and Gate skills installer for Cursor. Use when the user asks to set up Gate trading or research tools in Cursor. Triggers on 'install Gate MCP Cursor', 'Gate skills Cursor', 'setup Gate in Cursor'."
+description: "Installs and configures Gate MCP servers (main, CEX, DEX, Info, News) and Gate skills into Cursor IDE by writing mcp.json, merging with existing config, and verifying connectivity. Use when the user asks to set up Gate trading or research tools in Cursor. Triggers on 'install Gate MCP Cursor', 'Gate skills Cursor', 'setup Gate in Cursor'."
 ---
 
 # Gate One-Click Installer (Cursor: MCP + Skills)
@@ -12,102 +12,117 @@ description: "Gate MCP and Gate skills installer for Cursor. Use when the user a
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
-
+- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they exist in the MCP server.
 
 ---
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-| Gate-Dex | ✅ Required |
-| Gate-Info | ✅ Required |
-| Gate-News | ✅ Required |
-
-### Authentication
-- API Key Required: No
-
-### Installation Check
-- Required: Gate (main), Gate-Dex, Gate-Info, Gate-News
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## MCP Mode
 
 **Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this installer workflow.
 
-- `SKILL.md` keeps product scope, install behavior, and user-facing guidance.
+- `SKILL.md` defines product scope, install behavior, and user-facing guidance.
 - `references/mcp.md` is the authoritative execution layer for preflight checks, config merge policy, and install verification.
-
-## CEX MCP modes
-
-See [gate-mcp](https://github.com/gate/gate-mcp): **Local** = stdio `npx -y gate-mcp` (API keys); **Remote Public** = `https://api.gatemcp.ai/mcp` (no auth); **Remote Exchange** = `https://api.gatemcp.ai/mcp/exchange` (Gate OAuth2). Tool naming differs between Local (abbrev) and Remote (`cex_*`); use each server's `tools/list`.
 
 ## Resources
 
-| Type | Name | Endpoint / Config |
-|------|------|-------------------|
-| MCP | **Gate** (`main`) | `command: npx`, `args: ["-y", "gate-mcp"]`, optional `env` |
-| MCP | **gate-cex-pub** (`cex-public`) | `url` + `transport: streamable-http` only (no headers) |
-| MCP | **gate-cex-ex** (`cex-exchange`) | `url` + `transport: streamable-http` only; OAuth2 when prompted |
-| MCP | **Gate-Dex** (`dex`) | `url`, `transport: streamable-http`, x-api-key + Bearer |
-| MCP | **Gate-Info** (`info`) | `url`, `transport: streamable-http` |
-| MCP | **Gate-News** (`news`) | `url`, `transport: streamable-http` |
-| Skills | gate-skills | https://github.com/gate/gate-skills (installs all under `skills/`) |
+The agent installs the following MCP servers into Cursor. All servers default to install unless the user selects a subset.
+
+| Name | Key | Transport | Config Summary |
+|------|-----|-----------|----------------|
+| **Gate** | `main` | stdio | `command: npx`, `args: ["-y", "gate-mcp"]`, optional `env` for API keys |
+| **gate-cex-pub** | `cex-public` | streamable-http | `url` only (no auth headers) |
+| **gate-cex-ex** | `cex-exchange` | streamable-http | `url` only; Gate OAuth2 on first connect |
+| **Gate-Dex** | `dex` | streamable-http | `url` + `headers` (x-api-key `MCP_AK_8W2N7Q`, Bearer) |
+| **Gate-Info** | `info` | streamable-http | `url` only |
+| **Gate-News** | `news` | streamable-http | `url` only |
+| **gate-skills** | — | git clone | https://github.com/gate/gate-skills → `~/.cursor/skills/` |
+
+For CEX MCP mode details (Local vs Remote Public vs Remote Exchange, tool naming differences), see [gate-mcp](https://github.com/gate/gate-mcp).
 
 ## Behavior Rules
 
-1. **Default**: When the user does not specify which MCPs to install, install **all MCPs** (`main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news`) + **all gate-skills**.
-2. **Selectable MCPs**: Users can choose to install only specific MCPs; follow the user's selection.
-3. **Skills**: Unless `--no-skills` is passed, always install **all** skills from the gate-skills repository's **skills/** directory.
+1. **Default scope**: Install **all** MCP servers listed above + **all** gate-skills.
+2. **Selectable**: The user may request only specific servers; install only those requested.
+3. **Skills toggle**: Unless `--no-skills` is passed, always install all skills from the gate-skills repository.
 
-## Installation Steps
+## Installation Workflow
 
-### 1. Confirm User Selection (MCPs)
+### Step 1 — Confirm Scope
 
-- If the user does not specify which MCPs → install all: `main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news`.
-- If the user specifies "only install xxx" → install only the specified MCPs.
+- Ask the user which MCP servers to install. If unspecified, install all six servers plus skills.
+- Confirm the target config path: `~/.cursor/mcp.json` (Windows: `%APPDATA%\Cursor\mcp.json`).
 
-### 2. Write Cursor MCP Config
+### Step 2 — Write Cursor MCP Config
 
-- Config file: `~/.cursor/mcp.json` (Windows: `%APPDATA%\Cursor\mcp.json`).
-- If it already exists, **merge** into the existing `mcpServers`; do not overwrite other MCPs.
-- Config details:
-  - **Gate (main)**: `command` / `args` / optional `env`
-  - **gate-cex-pub / gate-cex-ex**: `url` + `transport: streamable-http` only (no headers)
-  - **Gate-Dex**: `url` + `transport` + `headers` for x-api-key and Bearer
-  - **Gate-Info / Gate-News**: `url` + `transport: streamable-http`
+Run the installer script or merge manually. The resulting `mcp.json` should look like this (all servers selected):
 
-### 3. Install gate-skills (all)
+```jsonc
+{
+  "mcpServers": {
+    "gate": {
+      "command": "npx",
+      "args": ["-y", "gate-mcp"],
+      "env": { "GATE_API_KEY": "", "GATE_API_SECRET": "" }
+    },
+    "gate-cex-pub": {
+      "url": "https://api.gatemcp.ai/mcp",
+      "transport": "streamable-http"
+    },
+    "gate-cex-ex": {
+      "url": "https://api.gatemcp.ai/mcp/exchange",
+      "transport": "streamable-http"
+    },
+    "gate-dex": {
+      "url": "<dex-endpoint>",
+      "transport": "streamable-http",
+      "headers": { "x-api-key": "MCP_AK_8W2N7Q", "Authorization": "Bearer <token>" }
+    },
+    "gate-info": {
+      "url": "<info-endpoint>",
+      "transport": "streamable-http"
+    },
+    "gate-news": {
+      "url": "<news-endpoint>",
+      "transport": "streamable-http"
+    }
+  }
+}
+```
 
-- Pull all subdirectories under **skills/** from https://github.com/gate/gate-skills and copy them to `~/.cursor/skills/` (or the corresponding directory for the current environment).
-- Add `--no-skills` when using the script to install MCP only without skills.
+- If `mcp.json` already exists, **merge** new entries into existing `mcpServers`; never overwrite unrelated servers.
+- If JSON parse fails on the existing file, abort and report the error to the user.
 
-### 4. Post-Installation Prompt
+### Step 3 — Install gate-skills
 
-- Inform the user of the installed MCP list and "all gate-skills have been installed" (unless --no-skills was used).
-- Prompt to restart Cursor.
-- **Local API Key**: For **Gate (main)** → https://www.gate.com/myaccount/profile/api-key/manage
-- **gate-cex-ex**: Complete **Gate OAuth2** when Cursor prompts on first connect.
-- **Gate-Dex**: Wallet + OAuth guidance as in [gate-mcp](https://github.com/gate/gate-mcp) (https://web3.gate.com/).
+- Clone or copy all subdirectories under `skills/` from the gate-skills repo into `~/.cursor/skills/`.
+- Skip this step if `--no-skills` was passed.
+
+### Step 4 — Verify Installation
+
+1. **Config validity**: Re-read `mcp.json` and confirm it is valid JSON with the expected `mcpServers` entries.
+2. **Skills presence**: Confirm skill directories exist under `~/.cursor/skills/` (unless `--no-skills`).
+3. If any check fails, report the specific failure and suggest manual remediation.
+
+### Step 5 — Post-Install Guidance
+
+Report the installed servers and skills, then provide next steps:
+
+- **Restart Cursor** to activate MCP connections.
+- **Gate (main) API key**: Generate at https://www.gate.com/myaccount/profile/api-key/manage and set in `env`.
+- **gate-cex-ex**: Complete Gate OAuth2 when Cursor prompts on first connect.
+- **Gate-Dex**: Complete wallet + OAuth setup via https://web3.gate.com/.
 
 ## Script
 
-Use the **scripts/install.sh** in this skill directory for one-click installation.
+Use `scripts/install.sh` for one-click installation:
 
-- Usage:  
-  `./scripts/install.sh [--mcp main|cex-public|cex-exchange|dex|info|news] ... [--no-skills]`  
-  Installs all MCPs when no `--mcp` is passed; pass multiple `--mcp` to install only specified ones; `--no-skills` installs MCP only.
-- The DEX x-api-key is fixed as `MCP_AK_8W2N7Q` and written to mcp.json.
+```bash
+# Install all MCPs + skills (default)
+bash scripts/install.sh
 
-After downloading this skill from GitHub, run from the repository root:  
-`bash scripts/install.sh`  
-Or (MCP only):  
-`bash scripts/install.sh --no-skills`
+# Install specific MCPs only
+bash scripts/install.sh --mcp main --mcp dex
+
+# Install MCPs without skills
+bash scripts/install.sh --no-skills
+```

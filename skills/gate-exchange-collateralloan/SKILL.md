@@ -2,7 +2,7 @@
 name: gate-exchange-collateralloan
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate multi-collateral loan management skill. Use when the user asks to borrow crypto against collateral or manage existing loans. Triggers on 'collateral loan', 'current loan', 'fixed loan', 'repay', 'add collateral', 'redeem collateral'."
+description: "Gate multi-collateral loan management skill. Use when the user asks to borrow crypto against collateral, create current or fixed-term loans, repay outstanding loans, add or redeem collateral, view loan orders and details, or check LTV thresholds and interest rates. Triggers on 'collateral loan', 'current loan', 'fixed loan', 'repay', 'add collateral', 'redeem collateral'."
 ---
 
 # Gate Exchange Multi-Collateral Loan Skill
@@ -24,25 +24,6 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | MCP Server | Status |
 |------------|--------|
 | Gate (main) | ✅ Required |
-
-### MCP Tools Used
-
-**Query Operations (Read-only)**
-
-- cex_mcl_get_multi_collateral_current_rate
-- cex_mcl_get_multi_collateral_fix_rate
-- cex_mcl_get_multi_collateral_ltv
-- cex_mcl_get_multi_collateral_order_detail
-- cex_mcl_list_multi_collateral_orders
-- cex_mcl_list_multi_collateral_records
-- cex_mcl_list_multi_repay_records
-- cex_mcl_list_user_currency_quota
-- cex_mcl_operate_multi_collateral
-
-**Execution Operations (Write)**
-
-- cex_mcl_create_multi_collateral
-- cex_mcl_repay_mcl
 
 ### Authentication
 - API Key Required: Yes (see skill doc/runtime MCP deployment)
@@ -107,30 +88,61 @@ Key data to extract:
 If current loan:
 1) Build draft (collateral list + borrow currency/amount).
 2) Ask for confirmation.
-3) Call `cex_mcl_create_multi_collateral` with **`order`**: JSON string (borrow_currency, borrow_amount, collateral_currencies, order_type: current).
+3) Call `cex_mcl_create_multi_collateral` with **`order`** JSON string:
+```json
+{
+  "borrow_currency": "USDT",
+  "borrow_amount": "1000",
+  "collateral_currencies": [{"currency": "BTC", "amount": "0.05"}],
+  "order_type": "current"
+}
+```
 
 If fixed loan:
-1) Call `cex_mcl_get_multi_collateral_fix_rate` (returns a **list**); **filter by borrow_currency**; take `rate_7d` or `rate_30d` as **fixed_rate** (hourly rate; pass through unchanged, do not convert or relabel as annual/daily).
+1) Call `cex_mcl_get_multi_collateral_fix_rate` (returns a **list**); **filter by borrow_currency**; take `rate_7d` or `rate_30d` as **fixed_rate** (hourly rate; pass through unchanged, do not convert or relabel as annual/daily). If no row matches, stop and inform the user that fixed rate is unavailable.
 2) Build draft with fixed_type and fixed_rate (describe to user as hourly rate if showing).
 3) Ask for confirmation.
-4) Call `cex_mcl_create_multi_collateral` with **`order`**: JSON including order_type: fixed, fixed_type `7d`/`30d`, fixed_rate.
+4) Call `cex_mcl_create_multi_collateral` with **`order`** JSON string:
+```json
+{
+  "borrow_currency": "USDT",
+  "borrow_amount": "1000",
+  "collateral_currencies": [{"currency": "ETH", "amount": "1.5"}],
+  "order_type": "fixed",
+  "fixed_type": "7d",
+  "fixed_rate": "0.0001"
+}
+```
+Note: `fixed_type` must be `7d` or `30d` (lowercase). `fixed_rate` is the hourly rate from the fix_rate tool — pass as-is.
 
 ### Step 4: Repay
 
-Build draft, ask confirmation, then call `cex_mcl_repay_mcl` with:
-- **`repay_loan`**: JSON string with `order_id` and `repay_items` [{ currency, amount, repaid_all }]
+Build draft, ask confirmation, then call `cex_mcl_repay_mcl` with **`repay_loan`** JSON string:
+```json
+{
+  "order_id": "12345",
+  "repay_items": [{"currency": "USDT", "amount": "500", "repaid_all": false}]
+}
+```
 
 ### Step 5: Add or redeem collateral
 
-Build draft, ask confirmation, then call `cex_mcl_operate_multi_collateral` with:
-- **`collateral_adjust`**: JSON string with `order_id`, `type` (`append` | `redeem`), `collaterals` [{ currency, amount }]
+Build draft, ask confirmation, then call `cex_mcl_operate_multi_collateral` with **`collateral_adjust`** JSON string:
+```json
+{
+  "order_id": "12345",
+  "type": "append",
+  "collaterals": [{"currency": "BTC", "amount": "0.01"}]
+}
+```
+Use `type: "redeem"` to withdraw collateral instead.
 
-## Judgment Logic Summary
+### Step 6: Post-execution verification
 
-- Determine case by keywords and required inputs (loan create / repay / add / redeem / list).
-- Fixed loan requires fix_rate lookup; if not available, stop and inform user.
-- All write operations must be confirmed before calling MCP.
-- Auth failure (401/403) prompts API key configuration.
+After any write operation (create loan, repay, adjust collateral), call the corresponding read tool to confirm success:
+- After loan creation: call `cex_mcl_get_multi_collateral_order_detail` with the returned `order_id` to verify the loan was created with correct parameters.
+- After repay: call `cex_mcl_get_multi_collateral_order_detail` to confirm the updated principal/interest.
+- After collateral adjustment: call `cex_mcl_get_multi_collateral_order_detail` to verify the updated collateral amounts and LTV.
 
 ## Report Template
 
@@ -184,48 +196,19 @@ Please confirm to proceed.
 | 6 | List orders / order detail | "loan orders", "order detail", "my orders" | `cex_mcl_list_multi_collateral_orders` / `cex_mcl_get_multi_collateral_order_detail` — **never include any time/date fields** in the user-facing reply (see Presentation below) |
 | 7 | Auth failure (401/403) | MCP returns 401/403 | Do not expose keys; prompt user to configure Gate CEX API Key (multi-collateral loan). |
 
-## Execution
-
-1. Identify user intent from the Routing Rules table above.
-2. For Cases 1–5: Read the corresponding scenario in `references/scenarios.md` and follow the Workflow (show order draft, then call MCP only after user confirmation).
-3. For Case 6: Call list or detail tool as needed; no confirmation required for read-only. **Never show** borrow_time, maturity, due date, operate_time, create_time, repay_time, Unix timestamps, or any other time-related fields in the reply—even if the user asks for dates/times; suggest checking the Gate app or web for timing details.
-4. For Case 7: Do not expose API keys or raw errors; prompt the user to set up Gate CEX API Key with multi-collateral loan permission in MCP.
-5. If the user's intent is ambiguous (e.g. missing order_id, currency, or amount), ask a clarifying question before routing.
-
 ## Domain Knowledge
 
-### Core Concepts
-
-- **Current loan**: Flexible loan. Create via `cex_mcl_create_multi_collateral` with `order` JSON: `order_type: current`.
-- **Fixed loan**: 7-day/30-day. `order` JSON must include `order_type: fixed`, **`fixed_type`**: `7d` or `30d` (lowercase), **`fixed_rate`**: **hourly interest rate** from `cex_mcl_get_multi_collateral_fix_rate` (use `rate_7d` or `rate_30d` for that borrow_currency; pass as-is, do not describe as annual or daily rate). Missing fixed fields may yield INVALID_PARAM_VALUE.
-- **Repay**: `cex_mcl_repay_mcl` with `repay_loan` JSON.
-- **Add collateral**: `cex_mcl_operate_multi_collateral`, `collateral_adjust` with `type: append`.
-- **Redeem collateral**: same tool, `type: redeem`.
-- **LTV**: `cex_mcl_get_multi_collateral_ltv` — init_ltv, alert_ltv, liquidate_ltv.
-
-### Create Loan Flow (Case 1 & 2)
-
-1. Parse collateral, borrow currency/amount; fixed: 7 days → **7d**, 30 days → **30d**.
-2. **Current**: Optionally `cex_mcl_list_user_currency_quota` or current rate tools. On confirm: `cex_mcl_create_multi_collateral` with `order` JSON.
-3. **Fixed**: `cex_mcl_get_multi_collateral_fix_rate`; filter list by borrow_currency; on empty or no row, stop with user message; else set **fixed_rate** = rate_7d or rate_30d (**hourly rate**; pass as-is into order JSON; do not describe as annual or daily). On confirm: `order` JSON with fixed fields.
-
-### Repay Flow (Case 3)
-
-1. Parse order_id and repay amount (or full).
-2. Show draft; on confirm: `cex_mcl_repay_mcl` with `repay_loan` JSON.
-
-### Add / Redeem Collateral Flow (Case 4 & 5)
-
-1. Parse order_id and collateral amount/currency.
-2. Show draft; on confirm: `cex_mcl_operate_multi_collateral` with `collateral_adjust` JSON.
+- **Current loan**: Flexible-term loan with `order_type: current`.
+- **Fixed loan**: 7-day or 30-day term. Requires `fixed_type` (`7d`/`30d` lowercase) and `fixed_rate` (hourly rate from fix_rate tool, passed as-is — never describe as annual or daily). Missing fixed fields yield INVALID_PARAM_VALUE.
+- **LTV thresholds**: Retrieved via `cex_mcl_get_multi_collateral_ltv` — includes init_ltv, alert_ltv, and liquidate_ltv.
 
 ### Presentation — order list / order detail (Case 6)
 
-When the user asks to view **my collateral loan orders** or order detail:
+When displaying loan orders or order detail:
 
-- **No time fields**: Do not output any time or date information—omit every timestamp-style field from MCP (e.g. `borrow_time`, maturity, due time, `operate_time`, `create_time`, `repay_time`, calendar dates, Unix seconds as dates). Do not paraphrase relative timing (e.g. "expires in 3 days") computed from those fields.
-- **Allowed in reply**: `order_id`, `status`, borrow side (currency, principal/interest left), collateral side (currency, amount), current LTV if present, fixed_type `7d`/`30d` as **term label only** (no calendar dates).
-- **If the user asks specifically for dates/maturity**: Reply that timing is not shown here and they should open Gate (app/web) for full order schedule—still do not paste API time fields into chat.
+- **No time fields**: Omit every timestamp-style field from MCP responses (`borrow_time`, maturity, `operate_time`, `create_time`, `repay_time`, Unix timestamps, calendar dates). Do not compute relative timing (e.g. "expires in 3 days").
+- **Allowed in reply**: `order_id`, `status`, borrow side (currency, principal/interest left), collateral side (currency, amount), current LTV if present, `fixed_type` as term label only.
+- **If the user asks for dates/maturity**: Reply that timing is not shown here and suggest checking the Gate app or web for the full order schedule.
 
 ## Safety Rules
 
