@@ -104,20 +104,14 @@ install_cursor() {
             existing_config=$(cat "$config_file")
         fi
         echo "$existing_config" | jq '.mcpServers["gate-dex"] = {
-          "url": "https://api.gatemcp.ai/mcp/dex",
-          "headers": {
-            "Authorization": "Bearer <your_mcp_token>"
-          }
+          "url": "https://api.gatemcp.ai/mcp/dex"
         }' > "$config_file"
     else
         cat > "$config_file" << 'EOF'
 {
   "mcpServers": {
     "gate-dex": {
-      "url": "https://api.gatemcp.ai/mcp/dex",
-      "headers": {
-        "Authorization": "Bearer <your_mcp_token>"
-      }
+      "url": "https://api.gatemcp.ai/mcp/dex"
     }
   }
 }
@@ -154,20 +148,16 @@ install_claude() {
   "mcpServers": {
     "gate-dex": {
       "type": "http",
-      "url": "https://api.gatemcp.ai/mcp/dex",
-      "headers": {
-        "Authorization": "Bearer <your_mcp_token>"
-      }
+      "url": "https://api.gatemcp.ai/mcp/dex"
     }
   }
 }
 EOF
         echo -e "${GREEN}  ✓${NC} .mcp.json configuration created"
     fi
-    
-    # Create routing file
-    cat > CLAUDE.md << 'EOF'
-# Gate DEX Wallet Skills
+
+    # Create or update routing file (do not overwrite existing content)
+    local routing_content='# Gate DEX Wallet Skills
 
 When users request the following operations, read the corresponding SKILL.md file and strictly follow its process:
 
@@ -177,9 +167,20 @@ When users request the following operations, read the corresponding SKILL.md fil
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
 - 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`
-EOF
-    echo -e "${GREEN}  ✓${NC} CLAUDE.md routing file created"
+- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`'
+
+    if [ -f "CLAUDE.md" ]; then
+        if grep -q "gate-dex-wallet" "CLAUDE.md"; then
+            echo -e "${GREEN}  ✓${NC} CLAUDE.md already contains Gate DEX routing"
+        else
+            echo "" >> CLAUDE.md
+            echo "$routing_content" >> CLAUDE.md
+            echo -e "${GREEN}  ✓${NC} CLAUDE.md updated (appended Gate DEX routing)"
+        fi
+    else
+        echo "$routing_content" > CLAUDE.md
+        echo -e "${GREEN}  ✓${NC} CLAUDE.md routing file created"
+    fi
 }
 
 # Install for Codex CLI
@@ -192,22 +193,22 @@ install_codex() {
     else
         local config_file="$HOME/.codex/config.toml"
         mkdir -p "$(dirname "$config_file")"
-        
-        cat >> "$config_file" << 'EOF'
+
+        if [ -f "$config_file" ] && grep -q '\[mcp\.gate-dex\]' "$config_file"; then
+            echo -e "${GREEN}  ✓${NC} gate-dex already configured in $config_file"
+        else
+            cat >> "$config_file" << 'EOF'
 
 [mcp.gate-dex]
 transport = "http"
 url = "https://api.gatemcp.ai/mcp/dex"
-
-[mcp.gate-dex.headers]
-Authorization = "Bearer <your_mcp_token>"
 EOF
-        echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated"
+            echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated"
+        fi
     fi
-    
-    # Create AGENTS.md (same as CLAUDE.md)
-    cat > AGENTS.md << 'EOF'
-# Gate DEX Wallet Skills
+
+    # Create or update AGENTS.md (do not overwrite existing content)
+    local agents_content='# Gate DEX Wallet Skills
 
 When users request the following operations, read the corresponding SKILL.md file and strictly follow its process:
 
@@ -217,9 +218,20 @@ When users request the following operations, read the corresponding SKILL.md fil
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
 - 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`
-EOF
-    echo -e "${GREEN}  ✓${NC} AGENTS.md routing file created"
+- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`'
+
+    if [ -f "AGENTS.md" ]; then
+        if grep -q "gate-dex-wallet" "AGENTS.md"; then
+            echo -e "${GREEN}  ✓${NC} AGENTS.md already contains Gate DEX routing"
+        else
+            echo "" >> AGENTS.md
+            echo "$agents_content" >> AGENTS.md
+            echo -e "${GREEN}  ✓${NC} AGENTS.md updated (appended Gate DEX routing)"
+        fi
+    else
+        echo "$agents_content" > AGENTS.md
+        echo -e "${GREEN}  ✓${NC} AGENTS.md routing file created"
+    fi
 }
 
 # Install for OpenClaw
@@ -231,12 +243,7 @@ install_openclaw() {
         return 0
     fi
     
-    echo "  Need to configure MCP Server authentication"
-    read -p "  Enter MCP API Key [leave empty for default]: " user_key
-    user_key=${user_key:-"MCP_AK_8W2N7Q"}
-    
-    if mcporter config add gate-dex --url "https://api.gatemcp.ai/mcp/dex" \
-       --header "Authorization:Bearer <your_mcp_token>" 2>/dev/null; then
+    if mcporter config add gate-dex --url "https://api.gatemcp.ai/mcp/dex" 2>/dev/null; then
         echo -e "${GREEN}  ✓${NC} gate-dex MCP server configured successfully"
     else
         echo -e "${RED}  ✗${NC} Configuration failed, please check manually"

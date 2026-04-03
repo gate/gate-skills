@@ -1,13 +1,13 @@
 ---
 name: gate-dex-trade-mcp
-version: "2026.3.12-1"
-updated: "2026-03-12"
-description: "Gate Wallet Swap/DEX trading. Get quotes, execute Swap. Use when users want to 'swap USDT to ETH', 'swap', 'exchange tokens', 'buy tokens', 'sell tokens'. Includes mandatory three-step confirmation gate. Supports EVM multi-chain + Solana, supports cross-chain Swap."
+version: "2026.4.2-1"
+updated: "2026-04-02"
+description: "Gate Wallet Swap/DEX trading. Get quotes, run staged swap with local check-in CLI, and track status. Use when users want to 'swap USDT to ETH', 'swap', 'exchange tokens', 'buy tokens', 'sell tokens'. Includes mandatory three-step confirmation gate. Supports EVM multi-chain + Solana, supports cross-chain Swap."
 ---
 
 # Gate Wallet Swap Skill
 
-> Swap/DEX Domain — Quote retrieval, slippage control, route display, Swap execution (One-shot), status tracking, includes mandatory three-step confirmation gateway. 3 MCP tools + 2 cross-Skill calls + 1 MCP Resource.
+> Swap/DEX Domain — Quote retrieval, slippage control, route display, staged swap execution, local check-in CLI, status tracking, includes mandatory three-step confirmation gateway.
 
 **Trigger Scenarios**: When users mention "swap", "exchange", "buy", "sell", "convert", "swap X for Y", "cross-chain", or when other Skills guide users to execute token swaps.
 
@@ -50,7 +50,7 @@ Complete authentication and return here to continue.
 
 ### `swap://supported_chains` — List of Swap-supported chains
 
-**Must** read this Resource before calling `dex_tx_quote` or `dex_tx_swap` to verify if chain_id supports Swap and determine address grouping (EVM vs Solana).
+**Must** read this Resource before calling `dex_tx_swap_quote` or any staged swap signing tool to verify if chain_id supports Swap and determine address grouping (EVM vs Solana).
 
 ```
 FetchMcpResource(server="gate-dex", uri="swap://supported_chains")
@@ -100,7 +100,7 @@ Agent behavior: Extract input token (sell token) balance and chain native token 
 
 ### 2. `dex_wallet_get_addresses` (Cross-Skill Call) — Get chain-specific wallet addresses
 
-Both `dex_tx_quote` and `dex_tx_swap` **require** `user_wallet` parameter, must call this tool first to get user wallet addresses on different chain types. This tool belongs to `gate-dex-wallet` domain, called cross-Skill here.
+Both `dex_tx_swap_quote` and `dex_tx_swap_prepare` **require** `user_wallet` parameter, must call this tool first to get user wallet addresses on different chain types. This tool belongs to `gate-dex-wallet` domain, called cross-Skill here.
 
 | Field | Description |
 |-------|-------------|
@@ -141,13 +141,13 @@ Agent behavior:
 
 ---
 
-### 3. `dex_tx_quote` — Get Swap Quote
+### 3. `dex_tx_swap_quote` — Get Swap Quote
 
 Get Swap quote from input token to output token, including exchange rate, slippage, route path, estimated Gas and other key information. **Must before calling: ①User confirmed slippage (through AskQuestion selection or explicitly specified in message); ②Read `swap://supported_chains` Resource to verify chain support; ③Call `dex_wallet_get_addresses` to get wallet addresses. Do not call this tool without slippage confirmation.**
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `dex_tx_quote` |
+| **Tool Name** | `dex_tx_swap_quote` |
 | **Parameters** | `{ chain_id_in: number, chain_id_out: number, token_in: string, token_out: string, amount: string, slippage: number, user_wallet: string, native_in: number, native_out: number, mcp_token: string, to_wallet?: string }` |
 | **Return Value** | Quote information, including estimated output amount, route paths (`routes`), Gas fees, price impact, etc. When `routes[].need_approved` value is 2, it indicates token authorization is needed |
 
@@ -204,7 +204,7 @@ Call example (same-chain Swap: USDT→ETH on ETH):
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="dex_tx_quote",
+  toolName="dex_tx_swap_quote",
   arguments={
     chain_id_in: 1,
     chain_id_out: 1,
@@ -225,7 +225,7 @@ Call example (cross-chain Swap: ETH→Solana SOL):
 ```
 CallMcpTool(
   server="gate-dex",
-  toolName="dex_tx_quote",
+  toolName="dex_tx_swap_quote",
   arguments={
     chain_id_in: 1,
     chain_id_out: 501,
@@ -248,7 +248,7 @@ Agent behavior:
 3. Check `need_approved`: when value is 2, inform user token authorization is needed with emphasis
 4. **Must not execute Swap directly**, must wait for user confirmation
 
-#### `dex_tx_quote` Return Value Key Field Mapping
+#### `dex_tx_swap_quote` Return Value Key Field Mapping
 
 | Field Path | Type | Description | Display Purpose |
 |------------|------|-------------|-----------------|
@@ -299,115 +299,113 @@ This value difference includes all comprehensive costs (DEX fees, bridge fees, s
 
 ---
 
-### 4. `dex_tx_swap` — Execute Swap (One-shot)
+### 4. Staged Swap Execution Tools
 
-One-shot Swap: Quote→Build→Sign→Submit completed in single call. Eliminates multiple round-trip delays (solves Solana blockhash expiration issue). Internal maximum 3 retries.
+Staged swap splits execution into quote, prepare, check-in preview, local `tx-checkin` binary, sign, and submit. This avoids server-side hidden check-in logic and keeps Solana signable payload generation late in the flow.
 
-**Only call after completing three-step confirmation SOP (see operation flow below).**
+#### 4.1 `dex_tx_swap_prepare`
+
+Create the short-lived staged swap session after user confirms quote.
 
 | Field | Description |
 |-------|-------------|
-| **Tool Name** | `dex_tx_swap` |
-| **Parameters** | `{ chain_id_in: number, chain_id_out: number, token_in: string, token_out: string, amount: string, slippage: number, user_wallet: string, native_in: number, native_out: number, account_id: string, mcp_token: string, to_wallet?: string }` |
+| **Tool Name** | `dex_tx_swap_prepare` |
+| **Parameters** | Same as `dex_tx_swap_quote` plus `account_id` and optional `to_wallet`, `mcp_token` |
 
-#### Success Return Value
-
-| Field | Type | Description |
-|-------|------|-------------|
-| `tx_hash` | string | On-chain transaction hash |
-| `tx_order_id` | string | Internal order ID for `dex_tx_swap_detail` polling |
-| `amount_in` | string | Actual input amount (human-readable) |
-| `amount_out` | string | Estimated output amount (human-readable) |
-| `from_token` | string | Input token symbol |
-| `to_token` | string | Output token symbol |
-| `slippage` | number | Slippage used (decimal) |
-| `route_path` | string[] | List of DEX names in route |
-| `need_approved` | boolean | Whether ERC20 authorization was executed |
-| `status` | string | Fixed as `"submitted"` |
-| `message` | string | `"Transaction submitted. Poll dex_tx_swap_detail with tx_order_id every 5s."` |
-
-#### Failure Return Value (all 3 retries failed)
+Return highlights:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `status` | string | Fixed as `"failed"` |
-| `message` | string | `"Swap failed after 3 attempts"` |
-| `attempts` | array | Details array for each attempt, each item contains `attempt` (sequence number), `error` (error message) |
+| `swap_session_id` | string | Session ID used by all later staged calls |
+| `need_approved` | boolean | Whether approve signing is required before swap signing |
+| `status` | string | Fixed as `"prepared"` |
+| `message` | string | Next-step hint. Solana note says fresh signable tx is generated in `dex_tx_swap_sign_swap` |
 
-Parameter descriptions:
+#### 4.2 `dex_tx_swap_checkin_preview`
 
-| Parameter | Required | Description |
-|-----------|----------|-------------|
-| `chain_id_in` | Yes | Source chain ID |
-| `chain_id_out` | Yes | Target chain ID. Same as `chain_id_in` for same-chain Swap |
-| `token_in` | Yes | Input token contract address, native token `"-"` |
-| `token_out` | Yes | Output token contract address, native token `"-"` |
-| `amount` | Yes | Human-readable amount (e.g., `"0.01"`) |
-| `slippage` | Yes | Slippage, decimal ratio (`0.01`=1%, `0.03`=3%) |
-| `user_wallet` | Yes | Source chain wallet address |
-| `native_in` | Yes | **⚠️ Same rules as dex_tx_quote** — see "native_in / native_out judgment rules" above |
-| `native_out` | Yes | **⚠️ Same rules as dex_tx_quote** — see "native_in / native_out judgment rules" above |
-| `account_id` | Yes | User account ID (UUID) |
-| `mcp_token` | Yes | Authentication token |
-| `to_wallet` | Required for cross-chain | Target chain receiving address (needed when crossing different address groups) |
+Expose only the minimal stage-specific fields required by the local `tx-checkin` binary.
 
-Call example:
+| Field | Description |
+|-------|-------------|
+| **Tool Name** | `dex_tx_swap_checkin_preview` |
+| **Parameters** | `{ swap_session_id: string, stage: "approve" \| "swap", mcp_token: string }` |
 
+Return highlights:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `mcp_token` | string | Current session token passed directly as the `Authorization` header value |
+| `chain` | string | Chain name for check-in request |
+| `chain_category` | string | Value to send directly to the check-in API |
+| `user_wallet` | string | Wallet address for the local `tx-checkin` binary |
+| `checkin_path` | string | Usually `/api/v1/tx/checkin` |
+| `checkin_message` | string | Canonical tx-bundle string for the local `tx-checkin` binary |
+
+#### 4.3 Local check-in CLI
+
+After `dex_tx_swap_checkin_preview`, the agent must run the local prebuilt `swap-checkin` binary with the preview payload serialized as a JSON string.
+
+Environment selection rules:
+- macOS (`darwin`, including Apple Silicon and Intel Mac) → use `swap-checkin-mac`
+- Linux (`linux`) → use `swap-checkin-linux`
+- Windows (`windows`, amd64) → use `swap-checkin-win.exe`
+- Do not use `go run`; call the matching prebuilt binary directly
+
+```bash
+# macOS
+../tools/tx-checkin/swap-checkin-mac --preview-json '<preview-json>'
+# Linux (same flags)
+../tools/tx-checkin/swap-checkin-linux --preview-json '<preview-json>'
 ```
-CallMcpTool(
-  server="gate-dex",
-  toolName="dex_tx_swap",
-  arguments={
-    chain_id_in: 1,
-    chain_id_out: 1,
-    token_in: "0xdAC17F958D2ee523a2206206994597C13D831ec7",
-    token_out: "-",
-    amount: "100",
-    slippage: 0.03,
-    user_wallet: "0x1234567890abcdef1234567890abcdef12345678",
-    native_in: 0,
-    native_out: 1,
-    account_id: "acc_12345",
-    mcp_token: "<mcp_token>"
-  }
-)
+
+```powershell
+# Windows (PowerShell; run from repo root or use a full path to swap-checkin-win.exe)
+..\tools\tx-checkin\swap-checkin-win.exe --preview-json '<preview-json>'
 ```
 
-Return example (success):
+The binary prints the full check-in HTTP response body. Example:
 
-| Field | Example Value |
-|-------|---------------|
-| `tx_hash` | `0xa1b2c3d4e5f6...7890` |
-| `tx_order_id` | `order_abc123` |
-| `amount_in` | `100` |
-| `amount_out` | `0.052` |
-| `from_token` | `USDT` |
-| `to_token` | `ETH` |
-| `slippage` | `0.03` |
-| `route_path` | `["PANCAKE_V2"]` |
-| `need_approved` | `false` |
-| `status` | `submitted` |
-| `message` | `Transaction submitted. Poll dex_tx_swap_detail with tx_order_id every 5s.` |
+```json
+{"code":0,"msg":"success","data":{"checkin_token":"checkin_tok_xxx","need_otp":false}}
+```
 
-Return example (failure):
+Then extract `data.checkin_token` from that response. Use one token per stage:
 
-| Field | Example Value |
-|-------|---------------|
-| `status` | `failed` |
-| `message` | `Swap failed after 3 attempts` |
-| `attempts[0].error` | `insufficient balance` |
-| `attempts[1].error` | `quote failed: liquidity too low` |
-| `attempts[2].error` | `quote failed: liquidity too low` |
+- approve stage uses approve `checkin_token`
+- swap stage uses swap `checkin_token`
 
-Agent behavior:
-- Success (`status == "submitted"`) → Show user `tx_hash`, `from_token`/`to_token`, `amount_in`/`amount_out`, attach block explorer link, then poll `dex_tx_swap_detail` with `tx_order_id`
-- Failure (`status == "failed"`) → Show `message` and each `attempts[].error`, do not auto-retry, suggest user re-get quote
+#### 4.4 `dex_tx_swap_sign_approve`
+
+Only for EVM sessions with `need_approved=true`.
+
+| Field | Description |
+|-------|-------------|
+| **Tool Name** | `dex_tx_swap_sign_approve` |
+| **Parameters** | `{ swap_session_id: string, checkin_token: string, mcp_token: string }` |
+
+#### 4.5 `dex_tx_swap_sign_swap`
+
+Sign the main swap transaction. For Solana, this step generates a fresh signable payload immediately before signing.
+
+| Field | Description |
+|-------|-------------|
+| **Tool Name** | `dex_tx_swap_sign_swap` |
+| **Parameters** | `{ swap_session_id: string, checkin_token: string, mcp_token: string }` |
+
+#### 4.6 `dex_tx_swap_submit`
+
+Submit the staged swap after the required sign steps finish.
+
+| Field | Description |
+|-------|-------------|
+| **Tool Name** | `dex_tx_swap_submit` |
+| **Parameters** | `{ swap_session_id: string, mcp_token: string }` |
 
 ---
 
 ### 5. `dex_tx_swap_detail` — Query Swap Status
 
-Query execution result and detailed information of submitted Swap transaction. Use `tx_order_id` returned by `dex_tx_swap` to query.
+Query execution result and detailed information of submitted Swap transaction. Use `tx_order_id` returned by `dex_tx_swap_submit` to query.
 
 | Field | Description |
 |-------|-------------|
@@ -419,7 +417,7 @@ Parameter descriptions:
 
 | Parameter | Required | Description |
 |-----------|----------|-------------|
-| `tx_order_id` | Yes | `tx_order_id` returned by `dex_tx_swap` |
+| `tx_order_id` | Yes | `tx_order_id` returned by `dex_tx_swap_submit` |
 | `mcp_token` | Yes | Authentication token |
 
 Return value key fields:
@@ -462,7 +460,7 @@ Return value `status` meanings:
 
 | status | Meaning | Next Action |
 |--------|---------|-------------|
-| `pending` | Transaction pending confirmation | Poll every 5 seconds, maximum 3 minutes; if timeout, guide user to check via `dex_tx_history_list` |
+| `pending` | Transaction pending confirmation | Poll every 5 seconds, maximum 3 minutes; if timeout, guide user to check via `dex_tx_swap_history_list` |
 | `success` | Swap completed successfully | Show final result to user |
 | `failed` | Swap failed | Show failure reason, suggest re-getting quote |
 
@@ -481,7 +479,7 @@ Return value `status` meanings:
 
 Common chain_ids can be used directly, only need to call `dex_chain_config` query for uncommon chains.
 
-**Before calling `dex_tx_quote` / `dex_tx_swap`, must first read `swap://supported_chains` Resource to confirm chain supports Swap.**
+**Before calling `dex_tx_swap_quote` / `dex_tx_swap_prepare`, must first read `swap://supported_chains` Resource to confirm chain supports Swap.**
 
 ## Token Address Resolution
 
@@ -514,12 +512,16 @@ Complete Swap flow calls following tools in sequence, forming strict linear pipe
 2.  dex_wallet_get_token_list                             ← Cross-Skill: Check balance (input token + Gas token) + resolve token addresses
 3.  dex_wallet_get_addresses                              ← Cross-Skill: Get chain-specific wallet addresses (user_wallet / to_wallet)
 4.  [Agent balance validation: input token balance >= amount]  ← Agent internal logic, not MCP call
-5.  [Agent display trading pair confirmation Table, wait user confirmation]  ← dex_tx_swap SOP Step 1 (mandatory gate)
-6.  dex_tx_quote                                          ← Get quote (estimated output, route, Gas, price impact)
-7.  [Agent display quote details + check need_approved]  ← dex_tx_swap SOP Step 2 (mandatory gate)
-8.  [Agent signature authorization confirmation, wait user confirmation]  ← dex_tx_swap SOP Step 3 (mandatory gate)
-9.  dex_tx_swap                                           ← One-shot execution (Quote→Build→Sign→Submit)
-10. dex_tx_swap_detail (by tx_order_id, poll every 5s)    ← Query Swap execution result (optional, poll as needed)
+5.  [Agent display trading pair confirmation Table, wait user confirmation]  ← staged swap SOP Step 1 (mandatory gate)
+6.  dex_tx_swap_quote                                     ← Get quote (estimated output, route, Gas, price impact)
+7.  [Agent display quote details + check need_approved]  ← staged swap SOP Step 2 (mandatory gate)
+8.  [Agent signature authorization confirmation, wait user confirmation]  ← staged swap SOP Step 3 (mandatory gate)
+9.  dex_tx_swap_prepare                                   ← Create staged swap session
+10. dex_tx_swap_checkin_preview                           ← Get approve/swap stage check-in input
+11. local `swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` binary ← Produce stage-specific checkin_token
+12. dex_tx_swap_sign_approve / dex_tx_swap_sign_swap      ← Sign staged approve/swap
+13. dex_tx_swap_submit                                    ← Submit signed staged swap
+14. dex_tx_swap_detail (by tx_order_id, poll every 5s)    ← Query Swap execution result (optional, poll as needed)
 ```
 
 ## Skill Routing
@@ -529,7 +531,7 @@ Based on user intent after Swap completion, guide to corresponding Skill:
 | User Intent | Routing Target |
 |-------------|----------------|
 | View updated balance | `gate-dex-wallet` |
-| View Swap transaction history | `gate-dex-wallet` (`dex_tx_history_list`) |
+| View Swap transaction history | `gate-dex-wallet` (`dex_tx_swap_history_list`) |
 | Continue Swap other tokens | Stay in this Skill |
 | Transfer newly swapped tokens | `gate-dex-wallet/references/transfer.md` |
 | View token market / K-line | `gate-dex-market` |
@@ -658,7 +660,7 @@ Step 7: SOP Step 1 — Confirm trading pair (mandatory gate)
   ↓ User confirmed
 
 Step 8: SOP Step 2 — Get quote and display (mandatory gate, cannot skip)
-  Call dex_tx_quote({
+  Call dex_tx_swap_quote({
     chain_id_in, chain_id_out, token_in, token_out, amount, slippage,
     user_wallet, native_in, native_out, mcp_token, to_wallet?
   })
@@ -716,15 +718,31 @@ Step 10: SOP Step 3 — Signature authorization confirmation (mandatory gate)
   User selects cancel → Abort Swap, show cancellation prompt
   User selects modify → Return to Step 7 re-display trading pair Table and re-get quote
 
-Step 11: Execute Swap (One-shot)
-  Call dex_tx_swap({
+Step 11: Create staged swap session
+  Call dex_tx_swap_prepare({
     chain_id_in, chain_id_out, token_in, token_out, amount, slippage,
     user_wallet, native_in, native_out, account_id, mcp_token, to_wallet?
   })
+  Get swap_session_id and need_approved
+  ↓
+
+Step 12: Run stage-specific check-in + signing
+  If need_approved == true:
+    a) Call dex_tx_swap_checkin_preview({ swap_session_id, stage: "approve", mcp_token })
+    b) Run local check-in binary under `tools/tx-checkin/` (`swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` per OS) with `--preview-json '<preview-json>'`
+    c) Read approve checkin_token from response.body.data.checkin_token
+    d) Call dex_tx_swap_sign_approve({ swap_session_id, checkin_token, mcp_token })
+
+  Then always:
+    a) Call dex_tx_swap_checkin_preview({ swap_session_id, stage: "swap", mcp_token })
+    b) Run local binary again with the swap preview to get swap checkin_token
+    c) Read swap checkin_token from response.body.data.checkin_token
+    d) Call dex_tx_swap_sign_swap({ swap_session_id, checkin_token, mcp_token })
+    e) Call dex_tx_swap_submit({ swap_session_id, mcp_token })
   Get tx_hash and tx_order_id
   ↓
 
-Step 12: Query Swap result (as needed)
+Step 13: Query Swap result (as needed)
   Call dex_tx_swap_detail({ tx_order_id, mcp_token })
   Poll every 5 seconds, maximum 3 minutes (about 36 times), until final state:
   - status == "pending" → Inform user transaction pending confirmation, continue polling
@@ -732,10 +750,10 @@ Step 12: Query Swap result (as needed)
   - status == "failed" → Show failure information
   - Over 3 minutes still "pending" → Stop polling, inform user:
     "Current transaction still processing, please check result later via transaction list."
-    Guide user to call dex_tx_history_list({ account_id, mcp_token }) to view Swap transaction history
+    Guide user to call dex_tx_swap_history_list({ account_id, mcp_token }) to view Swap transaction history
   ↓
 
-Step 13: Display result + follow-up suggestions
+Step 14: Display result + follow-up suggestions
 
   ────────────────────────────
   ✅ Swap executed successfully!
@@ -763,7 +781,7 @@ Step 1: Record new slippage value
   Convert to decimal ratio (1% → 0.01)
   ↓
 Step 2: Re-get quote
-  Re-call dex_tx_quote with new slippage (other parameters unchanged)
+  Re-call dex_tx_swap_quote with new slippage (other parameters unchanged)
   ↓
 Step 3: Re-display quote details
   Show updated quote information (new minimum output amount will change)
@@ -816,13 +834,13 @@ Step 2: Get wallet addresses
   ↓
 
 Step 3: Follow same process as Flow A from Step 6 onwards
-  Set chain_id_in != chain_id_out in dex_tx_quote and dex_tx_swap
+  Set chain_id_in != chain_id_out in dex_tx_swap_quote and dex_tx_swap_prepare
   And pass to_wallet parameter
 ```
 
 ## Swap Confirmation Templates
 
-**Must complete three-step confirmation SOP before `dex_tx_swap` execution, each step is mandatory gate that cannot be skipped.**
+**Must complete three-step confirmation SOP before staged swap signing starts; each step is mandatory gate that cannot be skipped.**
 
 ### Interaction Strategy
 
@@ -873,7 +891,7 @@ AskQuestion({
 
 ### SOP Step 2: Quote Details Display
 
-After calling `dex_tx_quote`, must display quote summary in table format. Same template for same-chain/cross-chain, automatically adapts display items based on return data.
+After calling `dex_tx_swap_quote`, must display quote summary in table format. Same template for same-chain/cross-chain, automatically adapts display items based on return data.
 
 #### Universal Quote Template
 
@@ -1019,7 +1037,7 @@ AskQuestion({
 
 | User Selection | Handling |
 |----------------|----------|
-| `confirm` | Execute `dex_tx_swap` |
+| `confirm` | Execute staged swap flow (`prepare` → `checkin_preview` → local check-in CLI → `sign` → `submit`) |
 | `modify` | Return to SOP Step 1 re-display trading pair Table and re-get quote |
 | `cancel` | Abort Swap, show cancellation prompt |
 
@@ -1037,7 +1055,7 @@ This means actual execution price may deviate significantly from quote. Unless y
 
 ## Slippage Reference
 
-Pass to `dex_tx_quote` / `dex_tx_swap` as **decimal ratio** (e.g., `0.03` = 3%). Default: `0.03`. If user specifies slippage, use directly without asking.
+Pass to `dex_tx_swap_quote` / `dex_tx_swap_prepare` as **decimal ratio** (e.g., `0.03` = 3%). Default: `0.03`. If user specifies slippage, use directly without asking.
 
 | Range | Decimal | Scenarios |
 |-------|---------|-----------|
@@ -1058,13 +1076,13 @@ Pass to `dex_tx_quote` / `dex_tx_swap` as **decimal ratio** (e.g., `0.03` = 3%).
 | Input token balance insufficient | Abort Swap, show current balance vs required amount difference, suggest reducing amount or deposit first |
 | Gas token balance insufficient | Abort Swap, show Gas token insufficient info, suggest getting Gas token first |
 | Token symbol cannot resolve to contract address | Prompt user confirm token name or provide contract address, suggest using `gate-dex-market` query |
-| `dex_tx_quote` failed | Show error info (possible reasons: token pair doesn't exist, insufficient liquidity, network congestion). Suggest changing token pair or retry later |
+| `dex_tx_swap_quote` failed | Show error info (possible reasons: token pair doesn't exist, insufficient liquidity, network congestion). Suggest changing token pair or retry later |
 | Swap value difference > 5% | **Key warning** user, show USD value comparison and difference, suggest reducing transaction volume or batch execution. Can still continue after user insists |
 | Slippage > 5% (i.e., > 0.05) | Warn user high slippage risk and MEV attack risk, suggest reducing. Can still continue after user insists |
 | Gas fee percentage of Swap amount > 10% | Prompt user Gas cost is high, suggest increasing Swap amount or waiting for network idle |
-| `dex_tx_swap` failed | Show failure reason (like balance change, slippage exceeded, network issues). Don't auto-retry, suggest re-getting quote |
+| staged sign / submit failed | Show failure reason (like balance change, slippage exceeded, invalid checkin_token, network issues). Don't auto-retry, suggest re-getting quote and rebuilding the staged flow |
 | `dex_tx_swap_detail` returns `failed` after Swap | Show failure reason, suggest re-getting quote to execute Swap. Token balance may be unchanged |
-| `dex_tx_swap_detail` continues `pending` after Swap | Poll maximum 3 minutes; after timeout stop polling, inform user transaction still processing, guide to check result via `dex_tx_history_list` |
+| `dex_tx_swap_detail` continues `pending` after Swap | Poll maximum 3 minutes; after timeout stop polling, inform user transaction still processing, guide to check result via `dex_tx_swap_history_list` |
 | Input and output tokens are same | Refuse execution, prompt input and output tokens cannot be same |
 | Input amount is 0 or negative | Refuse execution, prompt enter valid positive amount |
 | Cannot find specified token pair on target chain | Prompt this chain doesn't support this token pair Swap, suggest trying on other chains |
@@ -1081,9 +1099,9 @@ Pass to `dex_tx_quote` / `dex_tx_swap` as **decimal ratio** (e.g., `0.03` = 3%).
 4. **Authentication URL Correct Display**: When MCP returns login authorization URL, display complete clickable link directly, don't add extra decorations (quotes, brackets, etc.), don't escape URL content, ensure users can directly copy and click.
 5. **Multiple Authentication Method Support**: Support Google OAuth and Gate OAuth login, users can choose either method.
 6. **Balance Validation Mandatory**: **Must** validate input token balance and Gas token balance before Swap, **prohibit** Swap execution when balance insufficient.
-7. **Three-step Confirmation SOP Mandatory**: **Must** complete three-step confirmation (trading pair confirmation → quote display → signature authorization confirmation) before executing `dex_tx_swap`, cannot skip, simplify or auto-confirm any step.
+7. **Three-step Confirmation SOP Mandatory**: **Must** complete three-step confirmation (trading pair confirmation → quote display → signature authorization confirmation) before executing staged swap signing, cannot skip, simplify or auto-confirm any step.
 8. **Swap Value Difference and Slippage Risk Prompt**: When swap value difference > 5% **must** prominently warn user (show USD value comparison); when slippage > 5% (0.05) **must** warn high slippage risk and MEV attack risk.
-9. **Don't Auto-retry Failed Transactions**: After `dex_tx_swap` execution failure, clearly show error info to user, don't auto-retry in background. Suggest re-getting quote.
+9. **Don't Auto-retry Failed Transactions**: After staged swap sign/submit failure, clearly show error info to user, don't auto-retry in background. Suggest re-getting quote.
 10. **Prohibit Operations When MCP Server Not Configured or Unreachable**: Abort all subsequent steps when Step 0 connection detection fails.
 11. **Transparent MCP Server Errors**: Show all MCP Server returned error messages to users truthfully, don't hide or tamper.
 12. **MEV Risk Awareness**: Transactions may be subject to MEV/sandwich attacks under high slippage settings. Remind users of this risk when setting high slippage.

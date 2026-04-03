@@ -4,20 +4,59 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [2026.3.27-1] - 2026-03-27
-
-### Added
-
-- **Withdraw module** ([references/withdraw.md](./references/withdraw.md)): New sub-module for on-chain withdraw to Gate Exchange
-  - Trigger: "withdraw to Gate", "cash out to exchange", "send funds to deposit address", "move coins from wallet to Gate", "bind Gate UID"
-  - Covers deposit address resolution, UID binding/rebinding, min-deposit check, and on-chain transfer execution
+## Unreleased
 
 ### Changed
 
-- **SKILL.md routing**: Added `references/withdraw.md` entry for "withdraw to Gate Exchange" intent (distinct from arbitrary transfer)
-- **SKILL.md description**: Updated frontmatter description to include on-chain withdraw capability
-- **SKILL.md**: Removed redundant MCP Dependencies section (covered by `gate-runtime-rules.md`)
-- **SKILL.md Applicable Scenarios**: Added on-chain withdraw to Gate Exchange scenario
+- **tools/tx-checkin**: Fixed gateway base URL to **`https://webapi.w3-api.com/api/web/v1/web3-gv-api`** (check-in POST: **`.../api/v1/tx/checkin`**). Prebuilt binaries in **`tools/tx-checkin/bin/`** rebuilt.
+- **tools/tx-checkin**: Optional **`TX_CHECKIN_GATEWAY_BASE`** env (automation/CI only; not user-facing in skill docs) overrides the gateway URL prefix.
+- **references/cli.md**: version `2026.4.3-1`; tx-checkin integrated as mandatory step in On-Chain Operation Flow (preview → confirm → tx-checkin → execute); `send`, `swap`, `openapi-swap` commands annotated with tx-checkin requirement; new "tx-checkin Binary for CLI Operations" section with step-by-step flows; Security Rules updated (rule 3: terminal tx-checkin before signing); Common Pitfall #24 added; Capability Boundaries updated with signing prerequisite note
+- **install.sh**: Removed misleading placeholder Bearer token from Cursor and Codex MCP configs (OAuth login populates at runtime); Claude Code install now appends to existing CLAUDE.md instead of overwriting; Codex config.toml checks for existing gate-dex entry before appending; AGENTS.md uses same append-not-overwrite logic; OpenClaw removed hardcoded default API key and unused key prompt
+- **install_cli.sh**: OpenAPI credential input now escaped via `jq` (with `sed` fallback) to prevent JSON injection from special characters in API keys
+
+## [2026.3.31-2] - 2026-03-31
+
+### Added
+
+- **references/tx-checkin.md**: New mandatory terminal tx check-in module — documents CLI usage (`-tx-bundle-file`, `-message`, `-intent-file`, `-body-file`), `txBundle` preview field flow, `checkin_token` session binding, OTP handling, and credential auto-discovery from `~/.cursor/mcp.json`
+- **tools/tx-checkin/**: Pre-built `tx-checkin` binary (Go); gateway URL fixed to `https://test-api.web3gate.io/api/app/v1/web3-gv-api`
+
+### Changed
+
+- **SKILL.md**: version `2026.3.31-2`; description updated to mention mandatory tx-checkin; new "Signing gate — terminal tx-checkin (mandatory)" section; routing table transfer row adds tx-checkin; new any-signing routing row added; DApp row adds tx-checkin; Follow-up routing adds tx-checkin row
+- **references/transfer.md**: version `2026.3.31-2`; `dex_tx_transfer_preview` return fields updated (`unsigned_tx_hex`, `txBundle`); tool call chain adds step 6 tx-checkin; Flow A Step 9 tx-checkin mandatory before sign; all happy-path examples and batch flow updated
+- **references/withdraw.md**: version `2026.3.31-1`; tool call chain adds step 12 tx-checkin; Flow A adds Step 10 mandatory tx-checkin; `dex_wallet_sign_transaction` table entry updated; Flow B step references updated to 3-12; relationship-to-modules line adds tx-checkin.md
+- **references/dapp.md**: version `2026.3.31-1`; description updated; "Signing prerequisite" block added after prerequisites; `dex_wallet_sign_message` and `dex_wallet_sign_transaction` descriptions updated; Flow B Step 4, Flow C Step 9, Flow D Step 5, Flow E Step 6 all add mandatory tx-checkin; confirmation template note and security rule 4 updated
+- **references/x402.md**: version `2026.3.31-1`; signing/check-in note added to Prerequisites section for `dex_tx_x402_fetch` internal-signing flows
+
+---
+
+## [2026.3.26-1] - 2026-03-26
+
+### Changed
+
+- **gate-runtime-rules.md** and **gate-skills-disambiguation.md**: Removed per-skill duplicate copies from `gate-dex-wallet/`; SKILL.md updated to reference shared root-level files via GitHub URL
+- **gate-skills-disambiguation.md**: Simplified domain definition table; consolidated signal word routing; added DEX withdraw-to-exchange / UID binding routing entries; Scenario 9 (DEX withdraw-to-exchange) added; Scenario 13 updated with UID binding trigger and confirmation prompt; Scenario 14 updated with ETH2 staking note; updated link references from GitHub URLs to relative paths
+
+---
+
+## [2026.3.25-1] - 2026-03-25
+
+### Added
+
+- **references/withdraw.md**: New on-chain withdraw module — exchange binding (`dex_wallet_get_wallet_type`, `dex_wallet_get_bindings`, `dex_wallet_bind_exchange_uid`, `dex_wallet_replace_binding`, `dex_wallet_google_gate_bind_start`), deposit-address resolution with min-deposit enforcement (`dex_withdraw_deposit_address`), mandatory destination disambiguation (Flow 0), Flow A (withdraw to Gate Exchange), Flow B (withdraw to custom address)
+
+### Changed
+
+- **SKILL.md**: version `2026.3.25-1`; withdraw module added to routing table and Applicable Scenarios; link format updated to `references/` subdirectory style
+- **references/withdraw.md**: Added destination switch flow (Flow 0) for disambiguation before execution; removed Chinese text from field descriptions
+- **All `references/*.md` frontmatter**: Normalized from nested `metadata: {version, updated}` or `## name:` heading syntax to top-level `version` / `updated` YAML fields; description converted from multi-line `>` blocks to single-line quoted strings
+
+### Fixed
+
+- **gate-skills-disambiguation.md**: Relative path reference for `gate-runtime-rules.md` link updated
+
+---
 
 ## [2026.3.24-1] - 2026-03-24
 

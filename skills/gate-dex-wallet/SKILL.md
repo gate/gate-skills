@@ -1,8 +1,8 @@
 ---
 name: gate-dex-wallet
-version: "2026.3.27-1"
-updated: "2026-03-27"
-description: "Gate DEX wallet and on-chain account skill. Use when the user asks to sign in, check balances, transfer, withdraw to Gate CEX, wallet-connect, or x402 pay. Triggers on 'DEX wallet', 'wallet balance', 'withdraw to exchange'. Do NOT use for swap execution or read-only prices — use gate-dex-trade or gate-dex-market."
+version: "2026.4.3-2"
+updated: "2026-04-03"
+description: "Gate DEX wallet account management. Handles authentication (Google OAuth and Gate OAuth), token balance queries, wallet address retrieval, transaction and swap history, token transfers, on-chain withdraw to Gate Exchange (deposit address, UID binding, min-deposit), x402 payment (HTTP 402 Payment Required with EVM exact/upto and Solana exact/upto schemes; terminal tx-checkin before dex_tx_x402_fetch per references/x402.md), DApp wallet-connect and contract interactions, and CLI tooling. Signing MCP calls require mandatory terminal tx-checkin (prebuilt **`tools/tx-checkin/bin/`** — users do not compile) per references/tx-checkin.md. Use when the user wants to manage their on-chain wallet identity or assets — not for market data lookups or token swap execution."
 ---
 
 # Gate DEX Wallet
@@ -15,13 +15,15 @@ description: "Gate DEX wallet and on-chain account skill. Use when the user asks
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
 
-## MCP Mode
+## Signing gate — terminal tx-checkin (mandatory)
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md) as the authoritative MCP execution specification for this skill.
+Before **any** MCP call to `dex_wallet_sign_transaction`, `dex_wallet_sign_message`, or **`dex_tx_x402_fetch`**:
 
-- `SKILL.md` is the routing layer (intent classification and module dispatch).
-- `references/mcp.md` defines MCP detection, auth handling, tool contracts, SOP, confirmation gates, and degraded behavior.
-- Sub-module docs under `references/` remain domain playbooks (`auth.md`, `asset-query.md`, `transfer.md`, `withdraw.md`, `x402.md`, `dapp.md`, `cli.md`).
+1. User must pass the existing confirmation gates (preview / message text / payment intent) for that operation.
+2. Agent **MUST** run the terminal **`tx-checkin`** flow in [references/tx-checkin.md](./references/tx-checkin.md) and treat success as a **hard prerequisite**. Do not skip because a prior operation did not require it or no error was returned. Use the **prebuilt** check-in binaries under **`tools/tx-checkin/bin/`** — **end users do not compile** (`go build` / `go run` not required). Resolve the CLI from this skill’s **`skill_root`**: **Linux → `tx-checkin-linux-amd64`**, **macOS → `tx-checkin-darwin-universal`**, **Windows → `tx-checkin-windows-amd64.exe`** — **users need not set `TX_CHECKIN`** (optional override only); see [references/tx-checkin.md](./references/tx-checkin.md).
+3. After **`dex_tx_transfer_preview`**, check-in **must** use the preview field **`txBundle`** only: write that string to a file and run **`tx-checkin -tx-bundle-file`** — **do not** assemble txbundle JSON from `unsigned_tx_hex` or other fields (see [references/tx-checkin.md](./references/tx-checkin.md)).
+4. **x402 (`dex_tx_x402_fetch`)**: **Always** complete terminal check-in **before** the first `dex_tx_x402_fetch` call in that payment flow. **Do not** call `dex_tx_x402_fetch` first to probe 402 or “see if GV needs check-in.” After successful check-in, pass **`checkin_token`** from stdout JSON into `dex_tx_x402_fetch` when the tool exposes that parameter; use **`-intent` / `-message`** (or documented body) for check-in per [references/x402.md](./references/x402.md) and [references/tx-checkin.md](./references/tx-checkin.md).
+5. Other single-step MCP tools that sign internally: same terminal check-in **immediately before** the tool when the gateway requires it; follow backend docs for `checkin_token` / intent payload.
 
 ## Applicable Scenarios
 
@@ -30,9 +32,9 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 - Authenticate or manage sessions (login via Google or Gate OAuth, logout)
 - Query token balances, total portfolio value, or wallet addresses
 - View transaction history or past swap records
-- Transfer or send tokens to an address (single or batch)
+- Transfer or send tokens to an address (single or batch); **mandatory terminal tx-checkin** before any signing ([references/tx-checkin.md](./references/tx-checkin.md))
 - Withdraw or cash out **on-chain** to their Gate Exchange account (deposit address resolved for their UID; not CEX-internal balance moves from this skill)
-- Pay for HTTP 402 resources via x402 protocol (EVM exact/upto, Solana exact/upto)
+- Pay for HTTP 402 resources via x402 protocol (EVM exact/upto, Solana exact/upto); **terminal tx-checkin before** `dex_tx_x402_fetch` ([references/x402.md](./references/x402.md), [references/tx-checkin.md](./references/tx-checkin.md))
 - Interact with DApps (connect wallet, sign messages, approve tokens, call contracts)
 - Use the gate-wallet CLI tool for any of the above
 - Detect or configure MCP Server connectivity
@@ -53,12 +55,6 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 
 ---
 
-## Authentication
-
-- API Key Required: No
-- OAuth `mcp_token` Required: Yes for wallet/account/session operations
-- Note: This skill uses Gate DEX wallet authentication (Google OAuth or Gate OAuth) and then calls MCP tools with `mcp_token`. Do not describe this as a CEX API-key flow.
-
 ## Module Routing
 
 Route to the corresponding sub-module based on user intent:
@@ -68,9 +64,10 @@ Route to the corresponding sub-module based on user intent:
 | Login, logout, sign in, sign out, token expired, session expired, OAuth, Google login, Gate login, authenticate, re-login, switch account, "I can't access my wallet", "not logged in" | [references/auth.md](./references/auth.md) |
 | Check balance, total assets, portfolio value, wallet address, my address, how much do I have, show my tokens, tx history, transaction history, swap history, past transactions, "what do I own", "how many ETH", "list my coins", "show holdings" | [references/asset-query.md](./references/asset-query.md) |
 | Withdraw to Gate Exchange, cash out to my Gate account, send funds to the exchange deposit address, move coins from wallet to Gate (on-chain deposit), bind or rebind Gate UID for withdraw | [references/withdraw.md](./references/withdraw.md) |
-| Transfer, send tokens, send to address, batch transfer, "send 1 ETH to 0x...", "transfer USDT", "move tokens", "pay someone", "send crypto to a friend" (arbitrary or known on-chain address — not exchange deposit resolution) | [references/transfer.md](./references/transfer.md) |
-| 402 payment, x402 pay, payment required, pay for API, pay for URL, "fetch and pay", "call this URL and pay", "paid endpoint", "pay for access", "HTTP 402", Permit2 payment, upto payment | [references/x402.md](./references/x402.md) |
-| DApp connect, connect wallet, sign message, approve, revoke approval, contract call, EIP-712, Permit, personal_sign, "interact with Uniswap", "add liquidity", "stake on Lido", "mint NFT", "sign for DApp login", authorize contract | [references/dapp.md](./references/dapp.md) |
+| Transfer, send tokens, send to address, batch transfer, "send 1 ETH to 0x...", "transfer USDT", "move tokens", "pay someone", "send crypto to a friend" (arbitrary or known on-chain address — not exchange deposit resolution) | [references/transfer.md](./references/transfer.md) + [references/tx-checkin.md](./references/tx-checkin.md) before sign |
+| Any signing: before `dex_wallet_sign_transaction` / `dex_wallet_sign_message`; checkin_token; "run check-in"; terminal tx-checkin | [references/tx-checkin.md](./references/tx-checkin.md) (read **before** signing) |
+| 402 payment, x402 pay, payment required, pay for API, pay for URL, "fetch and pay", "call this URL and pay", "paid endpoint", "pay for access", "HTTP 402", Permit2 payment, upto payment | [references/tx-checkin.md](./references/tx-checkin.md) **then** [references/x402.md](./references/x402.md) (check-in before `dex_tx_x402_fetch`) |
+| DApp connect, connect wallet, sign message, approve, revoke approval, contract call, EIP-712, Permit, personal_sign, "interact with Uniswap", "add liquidity", "stake on Lido", "mint NFT", "sign for DApp login", authorize contract | [references/dapp.md](./references/dapp.md) + [references/tx-checkin.md](./references/tx-checkin.md) before every sign |
 | gate-wallet CLI, command line, terminal, openapi-swap, hybrid swap, "use CLI", "run command", "gate-wallet balance", script automation, npm gate-wallet | [references/cli.md](./references/cli.md) |
 
 ---
@@ -79,7 +76,7 @@ Route to the corresponding sub-module based on user intent:
 
 Before the first MCP tool call in a session, perform one connection probe:
 
-1. **Discover**: Scan configured MCP servers for tools `dex_wallet_get_token_list`, `dex_tx_transfer_preview`, and `dex_tx_send_raw_transaction`.
+1. **Discover**: Scan configured MCP servers for tools `dex_wallet_get_token_list`, `dex_tx_quote`, and `dex_tx_swap`.
 2. **Identify**: Accept flexible server names (gate-wallet, gate-dex, dex, wallet, user-gate-wallet, or any custom name).
 3. **Verify**: `CallMcpTool(server="<id>", toolName="dex_chain_config", arguments={chain: "eth"})`.
 
@@ -133,8 +130,9 @@ After completing an operation, **proactively suggest 2-4 relevant next actions**
 | Transfer or send tokens to an arbitrary on-chain address | [references/transfer.md](./references/transfer.md) |
 | Withdraw or cash out on-chain to Gate Exchange | [references/withdraw.md](./references/withdraw.md) |
 | Swap, exchange, buy, sell, convert tokens on DEX | `gate-dex-trade` |
-| Pay for a 402 resource, x402 payment | [references/x402.md](./references/x402.md) |
+| Pay for a 402 resource, x402 payment | [references/tx-checkin.md](./references/tx-checkin.md) then [references/x402.md](./references/x402.md) |
 | Interact with a DApp, connect wallet, sign, approve | [references/dapp.md](./references/dapp.md) |
+| Mandatory tx-checkin in terminal before any signing, checkin_token | [references/tx-checkin.md](./references/tx-checkin.md) |
 | Login, re-login, fix expired auth, switch account | [references/auth.md](./references/auth.md) |
 | Use CLI commands, gate-wallet terminal operations | [references/cli.md](./references/cli.md) |
 | Check balance, view assets, transaction history | [references/asset-query.md](./references/asset-query.md) |
