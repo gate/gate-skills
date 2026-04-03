@@ -41,7 +41,7 @@
 
 ### Added
 
-- Added the first public release of `gate-exchange-trading-copilot`.
+- Added the first public release of `gate-exchange-trading`.
 - Included the formal skill package:
   - `SKILL.md`
   - `README.md`

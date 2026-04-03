@@ -1,11 +1,11 @@
 ---
-name: gate-exchange-trading-copilot-mcp
+name: gate-exchange-trading-mcp
 version: "2026.3.30-1"
 updated: "2026-03-30"
-description: "MCP orchestration specification for composite trading copilot workflows across info, news, spot, and futures execution layers."
+description: "MCP orchestration specification for composite trading workflows across info, news, spot, and futures execution layers."
 ---
 
-# Gate Trading Copilot MCP Specification
+# Gate Trading MCP Specification
 
 ## 1. Scope and Trigger Boundaries
 

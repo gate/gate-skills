@@ -57,7 +57,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-mcp-installer](#-gate-mcp-installer) | One-click installer for Gate MCP servers and Skills for Cursor, Claude Code, Codex, and OpenClaw | `2026.4.1-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | End-to-end trading copilot: market judgment, risk control, order drafting, execution, and post-trade management | `2026.3.14-3` | ✅ Active |
+| [gate-exchange-trading](#-gate-exchange-trading) | End-to-end trading: market judgment, risk control, order drafting, execution, and post-trade management | `2026.3.14-3` | ✅ Active |
 | [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account holdings query | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-coupon](#-gate-exchange-coupon) | Gate coupon/voucher management: list, detail, usage rules, and acquisition source query | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: orders, positions, and history across Gate, Binance, OKX | `2026.3.12-1` | ✅ Active |
@@ -123,11 +123,11 @@ USDT perpetual futures trading on Gate Exchange. Supports four operations: open 
 
 ---
 
-## 🤖 gate-exchange-trading-copilot
+## 🤖 gate-exchange-trading
 
-> **Path**: `skills/gate-exchange-trading-copilot/`
+> **Path**: `skills/gate-exchange-trading/`
 
-End-to-end cryptocurrency trading copilot for Gate Exchange. Completes the full trading loop in one skill: market judgment → risk control → order drafting → explicit confirmation → execution → post-trade management. Works with both spot and futures.
+End-to-end cryptocurrency trading for Gate Exchange. Completes the full trading loop in one skill: market judgment → risk control → order drafting → explicit confirmation → execution → post-trade management. Works with both spot and futures.
 
 **Example Prompts**:
 - `Analyze BTC before placing an order`
@@ -962,7 +962,7 @@ gate-github-skills/
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
     ├── gate-exchange-subaccount/       # Sub-account management: list, create, lock/unlock
     ├── gate-exchange-tradfi/           # TradFi query: orders, positions, market, assets, MT5 (read-only)
-    ├── gate-exchange-trading-copilot/  # End-to-end trading copilot (judgment → execution)
+    ├── gate-exchange-trading/          # End-to-end trading (judgment → execution)
     ├── gate-exchange-transfer/         # Internal transfer between trading accounts
     ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
     ├── gate-exchange-vipfee/           # VIP tier & trading fee rate query

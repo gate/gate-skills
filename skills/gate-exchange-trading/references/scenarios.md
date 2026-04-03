@@ -1,4 +1,4 @@
-# Gate Exchange Trading Copilot — Scenarios & Prompt Examples
+# Gate Exchange Trading — Scenarios & Prompt Examples
 
 ## Scenario 1: Spot Buy Decision And Draft
 **Context**: The user wants a single cryptocurrency trading skill on Gate Exchange to judge whether BTC is worth buying now and then prepare a spot draft.

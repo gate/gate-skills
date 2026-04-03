@@ -1,6 +1,6 @@
 # Runtime Dependencies
 
-This file defines the minimum runtime dependencies for `gate-exchange-trading-copilot`.
+This file defines the minimum runtime dependencies for `gate-exchange-trading`.
 
 ## 1. Required MCP Surfaces
 

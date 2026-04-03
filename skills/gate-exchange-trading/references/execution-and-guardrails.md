@@ -1,6 +1,6 @@
 # Execution And Guardrails
 
-This file defines the execution-layer rules for the trading copilot.
+This file defines the execution-layer rules for the trading skill.
 
 ---
 

@@ -1,11 +1,11 @@
 ---
-name: gate-exchange-trading-copilot
+name: gate-exchange-trading
 version: "2026.3.23-1"
 updated: "2026-03-23"
-description: "Gate Trading Copilot L2. Use when the user wants to execute complex trades, margin borrowing, or query positions and open orders. Triggers on 'market buy', 'margin borrow', 'TradFi', 'Alpha', or spot-plus-futures combos. Requires Action Draft."
+description: "Gate Trading L2. Use when the user wants to execute complex trades, margin borrowing, or query positions and open orders. Triggers on 'market buy', 'margin borrow', 'TradFi', 'Alpha', or spot-plus-futures combos. Requires Action Draft."
 ---
 
-# Gate Exchange Trading Copilot
+# Gate Exchange Trading
 
 This is an **L2 composite skill** for users who want a single skill to complete the full trading loop:
 
@@ -36,7 +36,7 @@ Do not make `news_events_*` a required dependency in scenario design, because it
 
 ## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's copilot workflow.
+**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's trading workflow.
 
 - `SKILL.md` keeps composite routing, trade lifecycle policy, and guardrails.
 - `references/mcp.md` is the authoritative MCP orchestration layer for cross-domain tool sequencing, execution gates, and degradation.

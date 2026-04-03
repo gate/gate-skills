@@ -57,7 +57,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-mcp-installer](#-gate-mcp-installer) | 全平台一键安装 Gate MCP 与 Skills（Cursor、Claude Code、Codex、OpenClaw） | `2026.4.1-1` | ✅ Active |
 | [gate-exchange-spot](#-gate-exchange-spot) | Gate 现货交易：买卖下单、订单管理、账户查询、资产兑换 | `2026.3.10-1` | ✅ Active |
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX 综合钱包：身份认证、资产查询、转账执行、DApp 交互 | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-trading-copilot](#-gate-exchange-trading-copilot) | 端到端交易 Copilot：行情判断、风控、下单、执行与交易后管理 | `2026.3.14-3` | ✅ Active |
+| [gate-exchange-trading](#-gate-exchange-trading) | 端到端交易：行情判断、风控、下单、执行与交易后管理 | `2026.3.14-3` | ✅ Active |
 | [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha 代币发现、行情查看与账户持仓查询 | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-coupon](#-gate-exchange-coupon) | Gate 优惠券/券码管理：列表、详情、使用规则、来源追溯 | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx 跨所交易：订单、持仓与历史查询（Gate、Binance、OKX） | `2026.3.12-1` | ✅ Active |
@@ -123,11 +123,11 @@ Gate 交易所 USDT 永续合约交易，支持四类操作：开仓、平仓、
 
 ---
 
-## 🤖 gate-exchange-trading-copilot
+## 🤖 gate-exchange-trading
 
-> **路径**: `skills/gate-exchange-trading-copilot/`
+> **路径**: `skills/gate-exchange-trading/`
 
-Gate 交易所端到端交易 Copilot。在一个 skill 中完成完整交易闭环：行情判断 → 风险评估 → 订单草案 → 用户确认 → 执行下单 → 交易后管理。同时支持现货和合约。
+Gate 交易所端到端交易。在一个 skill 中完成完整交易闭环：行情判断 → 风险评估 → 订单草案 → 用户确认 → 执行下单 → 交易后管理。同时支持现货和合约。
 
 **示例提示词**：
 - `分析 BTC 后下单`
@@ -962,7 +962,7 @@ gate-github-skills/
     ├── gate-exchange-autoinvest/       # Earn 极速定投（DCA）：计划、记录、现货与 Uni 上下文
     ├── gate-exchange-subaccount/       # 子账户管理：列表、创建、锁定/解锁
     ├── gate-exchange-tradfi/           # TradFi 查询：订单、持仓、行情、资产、MT5（只读）
-    ├── gate-exchange-trading-copilot/  # 端到端交易 Copilot（判断 → 执行）
+    ├── gate-exchange-trading/          # 端到端交易（判断 → 执行）
     ├── gate-exchange-transfer/         # 内部划转（账户间转移资金）
     ├── gate-exchange-unified/          # 统一账户：借还、杠杆、抵押币
     ├── gate-exchange-vipfee/           # VIP 等级与手续费率查询
