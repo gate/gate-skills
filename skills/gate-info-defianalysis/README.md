@@ -29,7 +29,7 @@ An AI Agent skill for **DeFi ecosystem analysis** via **Gate-Info MCP**. It rout
 - **Input**: Optional `platform_name`, `symbol`, `chain`, `exchange` extracted per SKILL.md.
 - **Tools** (only as listed in SKILL.md): `info_platformmetrics_get_defi_overview`, `info_platformmetrics_search_platforms`, `info_platformmetrics_get_platform_info`, `info_platformmetrics_get_platform_history`, `info_platformmetrics_get_yield_pools`, `info_platformmetrics_get_stablecoin_info`, `info_platformmetrics_get_bridge_metrics`, `info_platformmetrics_get_exchange_reserves`, `info_platformmetrics_get_liquidation_heatmap`, `info_coin_get_coin_info`.
 - **Flow**: Intent → sub-scenario (A–G) → parallel MCP calls → LLM aggregation; bridges/stablecoins use list-first, detail-on-demand. **Report templates**, **Decision Logic**, **Error Handling**, **Cross-Skill Routing**, **Safety Rules** — see `SKILL.md`.
-- **MCP**: Gate-Info required. **API key**: not required per SKILL.md. Install via IDE installer skills (`gate-mcp-cursor-installer`, etc.).
+- **MCP**: Gate-Info required. **API key**: not required per SKILL.md. Install via `gate-mcp-installer`.
 - **Skill updates**: `scripts/update-skill.sh` / `update-skill.ps1` compare local vs remote; blocking `check` / user confirm / `apply` per `SKILL.md` and `info-news-runtime-rules.md`. Host needs **Bash** (macOS/Linux/WSL/Git Bash) or **PowerShell** (Windows) when running scripts.
 - **Verification scenarios**: `references/scenarios.md` (happy path, degradation, routing).
 
