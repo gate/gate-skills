@@ -33,10 +33,7 @@ Market tape analysis covering thirteen scenarios, such as liquidity, momentum, l
 ### Installation Check
 - Required: Gate (main)
 - Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+  - 统一安装: `gate-mcp-installer`
 
 ## MCP Mode
 
