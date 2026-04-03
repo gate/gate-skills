@@ -61,7 +61,10 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ### Installation Check
 - Required: Gate-Info, Gate-News
 - Install: Run installer skill for your IDE
-  - 统一安装: `gate-mcp-installer`
+  - Cursor: `gate-mcp-cursor-installer`
+  - Codex: `gate-mcp-codex-installer`
+  - Claude: `gate-mcp-claude-installer`
+  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Routing Rules
 

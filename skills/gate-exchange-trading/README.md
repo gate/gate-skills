@@ -1,4 +1,4 @@
-# Gate Exchange Trading Copilot
+# Gate Exchange Trading
 
 ## Overview
 
@@ -93,7 +93,7 @@ If confirmation is missing, stale, ambiguous, or the parameters changed:
 ## Architecture
 
 ```text
-gate-exchange-trading-copilot/
+gate-exchange-trading/
 ├── SKILL.md
 ├── README.md
 ├── CHANGELOG.md
