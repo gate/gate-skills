@@ -1,8 +1,8 @@
 ---
 name: gate-dex-trade
-version: "2026.3.24-1"
-updated: "2026-03-24"
-description: "Gate DEX on-chain swap and trade execution skill. Use when the user asks to swap, buy, or sell on-chain with a signed transaction. Triggers on 'DEX swap', 'swap tokens on chain', 'bridge tokens'. Do NOT use for price-only queries or wallet setup — use gate-dex-market or gate-dex-wallet."
+version: "2026.4.2-1"
+updated: "2026-04-02"
+description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transactions that MODIFY blockchain state: swap, buy, sell, exchange, convert tokens, cross-chain bridge. Every operation here results in an on-chain transaction requiring signing. This skill EXECUTES trades — it does not provide read-only data lookups or manage wallet accounts."
 ---
 
 # Gate DEX Trade
@@ -21,40 +21,6 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - Buy/Sell: "buy ETH", "sell my USDT", "purchase SOL"
 - Cross-chain: "bridge ETH from Arbitrum to Base", "cross-chain swap"
 - Swap quote: "how much USDT will I get for 1 ETH" (with intent to trade)
-
-
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate-Dex | ✅ Required |
-
-### MCP Tools Used
-
-**Query Operations (Read-only)**
-
-- dex_chain_config
-- dex_tx_quote
-
-**Execution Operations (Write)**
-
-- dex_tx_swap
-
-### Authentication
-- API Key Required: No for default MCP mode
-- OAuth `mcp_token` Required: Yes for MCP swap operations
-- Note: In this workspace the default path is MCP mode, which uses Gate DEX wallet OAuth and `mcp_token`, not a CEX-style API key. OpenAPI mode is separate and only applies when the user explicitly requests OpenAPI / AK-SK usage.
-
-### Installation Check
-- Required: Gate-Dex
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only (this workspace)
 
@@ -85,7 +51,7 @@ Step 2: Is this a cross-chain swap?
   └─ Same-chain / uncertain → Step 3
   ↓
 Step 3: Gate Wallet MCP Server Discovery & Detection
-  a) Scan configured MCP Server list for Servers providing both `dex_tx_quote` and `dex_tx_swap` tools
+  a) Scan configured MCP Server list for Servers providing `dex_tx_swap_quote`, `dex_tx_swap_prepare`, and staged swap signing tools
   b) If found → Record server identifier, verify with:
      CallMcpTool(server="<identifier>", toolName="dex_chain_config", arguments={chain: "ETH"})
      ├─ Success → MCP mode
@@ -103,7 +69,7 @@ Step 4: MCP unavailable → setup guide only ([`references/setup.md`](./referenc
 
 **Read and strictly follow** [`references/mcp.md`](./references/mcp.md), execute according to its complete workflow.
 
-Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (dex_tx_quote / dex_tx_swap / dex_tx_swap_detail), token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
+Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (`dex_tx_swap_quote` / `dex_tx_swap_prepare` / `dex_tx_swap_checkin_preview` / staged sign-submit / `dex_tx_swap_detail`), local prebuilt `swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` (Windows amd64) binary execution, token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
 
 ### OpenAPI Mode (Progressive Loading)
 

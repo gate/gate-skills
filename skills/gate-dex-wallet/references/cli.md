@@ -1,8 +1,8 @@
 ---
 name: gate-dex-cli
-version: "2026.3.25-1"
-updated: "2026-03-25"
-description: "Gate Wallet CLI command-line tool. Dual-channel support: MCP (OAuth custodial signing) and OpenAPI (AK/SK self-custodial signing). Use when the user mentions gate-wallet, CLI, command line, openapi-swap, hybrid swap, or script automation. Covers authentication, asset queries, transfers, swap, market data, and approvals."
+version: "2026.4.3-1"
+updated: "2026-04-03"
+description: "Gate Wallet CLI command-line tool. Dual-channel support: MCP (OAuth custodial signing) and OpenAPI (AK/SK self-custodial signing). Signing commands (send, swap, openapi-swap) require mandatory terminal tx-checkin before execution per tx-checkin.md. Use when the user mentions gate-wallet, CLI, command line, openapi-swap, hybrid swap, or script automation. Covers authentication, asset queries, transfers, swap, market data, and approvals."
 ---
 
 # Gate DEX CLI
@@ -23,6 +23,7 @@ Use when the user mentions `gate-wallet`, CLI, command line, `openapi-swap`, hyb
 
 - Supports: All wallet operations via command line (auth, balance, transfer, swap, approve, market data, chain/RPC)
 - Dual channels: MCP (OAuth + custodial signing) and OpenAPI (AK/SK + self-custody signing)
+- **Signing prerequisite**: All signing CLI commands (`send`, `swap`, `openapi-swap`) require terminal tx-checkin immediately before execution — see [tx-checkin.md](./tx-checkin.md). The CLI does NOT handle tx-checkin internally; the agent must run the prebuilt `tx-checkin` binary separately.
 - Does **not** support: Direct DApp contract interactions (-> [dapp.md](./dapp.md)), x402 payment (-> [x402.md](./x402.md))
 
 **Prerequisites**: Node.js >= 18. MCP Server available (see parent SKILL.md).
@@ -173,6 +174,8 @@ Level 3 requires reading `mcp_token` from `~/.gate-wallet/auth.json` and manuall
 | `tx-detail <hash>` | Transaction details |
 | `tx-history [--page <n>] [--limit <n>]` | Transaction history |
 
+> **tx-checkin required**: Before running `send`, the agent MUST complete terminal tx-checkin per [tx-checkin.md](./tx-checkin.md). Run `transfer` (preview-only) first to get the `txBundle` field, write it to a file, then run `tx-checkin -tx-bundle-file <path>`. Only after successful check-in proceed with `send`.
+
 ### Token Approval
 
 Via MCP tool `dex_tx_approve_preview`:
@@ -195,6 +198,8 @@ Via MCP tool `dex_tx_approve_preview`:
 | `swap-history` | Swap/bridge history |
 
 **Agent MUST always pass `-y` for `openapi-swap`** — without it the command hangs at the confirmation prompt.
+
+> **tx-checkin required**: Before running `swap` or `openapi-swap`, the agent MUST complete terminal tx-checkin per [tx-checkin.md](./tx-checkin.md). Use `quote` first for user confirmation, then run `tx-checkin -message "<swap intent>" -wallet <addr> -chain <chain> -chain-category <cat>`. Only after successful check-in proceed with `swap` or `openapi-swap -y`.
 
 ### Market Data
 
@@ -257,20 +262,42 @@ The command handles the entire flow automatically:
 2. Always pass `-y` to avoid hanging.
 3. ERC20 approve is handled automatically by the CLI.
 4. Show quote to user in chat first, get confirmation, then run with `-y`.
+5. **tx-checkin before execution**: Run terminal tx-checkin per [tx-checkin.md](./tx-checkin.md) immediately before running `openapi-swap`. The CLI does not handle check-in internally.
 
 ---
 
 ## On-Chain Operation Flow
 
-All fund-moving operations follow: **preview -> confirm -> execute**.
+All fund-moving operations follow: **preview -> confirm -> tx-checkin -> execute**.
 
 1. **Pre-check**: `address` for correct chain address -> `balance`/`tokens` for sufficient funds
 2. **Preview**: `transfer` (transfer) / `dex_tx_approve_preview` (approval) / `quote` (swap)
 3. **User confirmation**: Display details, wait for explicit approval
-4. **Sign + broadcast**: `send`/`swap`/`openapi-swap` one-shot commands
-5. **Verify**: `tx-detail <hash>` / `swap-detail <order_id>`
+4. **Terminal tx-checkin** (MANDATORY): Run the prebuilt `tx-checkin` binary per [tx-checkin.md](./tx-checkin.md) immediately before signing. CLI `send`/`swap`/`openapi-swap` do NOT handle tx-checkin internally — the agent must run it separately. For transfers: use preview `txBundle` -> `tx-checkin -tx-bundle-file`. For swaps: use `tx-checkin -message` with swap intent.
+5. **Sign + broadcast**: `send`/`swap`/`openapi-swap` one-shot commands (only after successful check-in)
+6. **Verify**: `tx-detail <hash>` / `swap-detail <order_id>`
 
-**NEVER execute signing without user confirmation.**
+**NEVER execute signing without user confirmation and successful tx-checkin.**
+
+---
+
+## tx-checkin Binary for CLI Operations
+
+When using CLI commands that involve signing (`send`, `swap`, `openapi-swap`), the agent must run the prebuilt `tx-checkin` binary before executing the command. The binary is located at `{skill_root}/tools/tx-checkin/bin/` — see [tx-checkin.md](./tx-checkin.md) for OS-specific paths and usage.
+
+**CLI flow for `send` (transfer)**:
+1. `gate-wallet transfer --chain <c> --to <addr> --amount <n>` (preview only, returns `txBundle`)
+2. Write `txBundle` string to a temp file
+3. `tx-checkin -tx-bundle-file <path> -wallet <addr> -chain <chain> -chain-category <cat>`
+4. On success -> `gate-wallet send --chain <c> --to <addr> --amount <n>`
+
+**CLI flow for `swap` / `openapi-swap`**:
+1. `gate-wallet quote --from-chain <id> --to-chain <id> --from <token> --to <token> --amount <n>` (get quote)
+2. Display quote to user, wait for confirmation
+3. `tx-checkin -message "<swap intent description>" -wallet <addr> -chain <chain> -chain-category <cat>`
+4. On success -> `gate-wallet swap ...` or `gate-wallet openapi-swap ... -y`
+
+> Resolve the binary from `skill_root`: Linux → `tx-checkin-linux-amd64`, macOS → `tx-checkin-darwin-universal`, Windows → `tx-checkin-windows-amd64.exe`. Users need not set `TX_CHECKIN` (optional override only).
 
 ---
 
@@ -341,6 +368,7 @@ Use `token-info` or `swap-tokens --search <symbol>` to look up other token addre
 21. **Agent must always pass `-y`**: Non-interactive shell; without `-y`, `openapi-swap` hangs forever.
 22. **Ethereum mainnet swap minimum**: Very small amounts may cause `execution reverted`. Recommend >= 0.001 ETH.
 23. **`token` param required for display**: In `dex_tx_transfer_preview`, pass `token` to get the correct display label; omitting it defaults to USDT.
+24. **tx-checkin before CLI signing**: `send`, `swap`, and `openapi-swap` do NOT run tx-checkin internally. The agent must run the `tx-checkin` binary from `tools/tx-checkin/bin/` before these commands, per [tx-checkin.md](./tx-checkin.md).
 
 ---
 
@@ -392,7 +420,8 @@ You can also:
 
 1. **Confirm before fund operations**: `send`/`swap`/`approve` involve real funds. Always confirm target, amount, token, and chain with user.
 2. **Preview before execute**: Transfer -> `transfer` preview, Swap -> `quote`, Approval -> `dex_tx_approve_preview`.
-3. **Approval safety**: Prefer exact-amount over unlimited; only approve trusted contracts.
-4. **Risk audit**: Run `token-risk` before trading unfamiliar tokens.
-5. **Credential safety**: `~/.gate-wallet/` stores credentials in user home. Never commit to Git.
-6. **Server-side signing**: Users never expose private keys, but must trust Gate custodial service.
+3. **Terminal tx-checkin before signing**: All signing operations (`send`, `swap`, `openapi-swap`) require successful terminal tx-checkin immediately before execution per [tx-checkin.md](./tx-checkin.md). Do not skip because a previous operation succeeded without it.
+4. **Approval safety**: Prefer exact-amount over unlimited; only approve trusted contracts.
+5. **Risk audit**: Run `token-risk` before trading unfamiliar tokens.
+6. **Credential safety**: `~/.gate-wallet/` stores credentials in user home. Never commit to Git.
+7. **Server-side signing**: Users never expose private keys, but must trust Gate custodial service.

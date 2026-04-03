@@ -114,12 +114,14 @@ configure_openapi() {
     fi
 
     mkdir -p "$config_dir"
-    cat > "$config_file" << EOF
-{
-  "api_key": "$api_key",
-  "secret_key": "$secret_key"
-}
-EOF
+    if command -v jq &> /dev/null; then
+        jq -n --arg ak "$api_key" --arg sk "$secret_key" \
+            '{"api_key": $ak, "secret_key": $sk}' > "$config_file"
+    else
+        printf '{\n  "api_key": "%s",\n  "secret_key": "%s"\n}\n' \
+            "$(printf '%s' "$api_key" | sed 's/["\\/]/\\&/g')" \
+            "$(printf '%s' "$secret_key" | sed 's/["\\/]/\\&/g')" > "$config_file"
+    fi
     chmod 600 "$config_file"
     echo -e "${GREEN}  ✓${NC} OpenAPI configuration saved: $config_file"
 }

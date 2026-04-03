@@ -1,13 +1,13 @@
 ---
 name: gate-dex-transfer
-version: "2026.3.25-1"
-updated: "2026-03-25"
-description: "Gate Wallet transfer execution module. Builds transactions, signs, and broadcasts. Use when the user wants to send tokens to an address, including single and batch transfers. Includes mandatory balance verification and user confirmation gate. Supports EVM multi-chain and Solana native/token transfers."
+version: "2026.3.31-2"
+updated: "2026-03-31"
+description: "Gate Wallet transfer execution module. Builds transactions, signs, and broadcasts. Use when the user wants to send tokens to an address, including single and batch transfers. Includes mandatory balance verification, user confirmation gate, and terminal tx-checkin before signing. Supports EVM multi-chain and Solana native/token transfers."
 ---
 
 # Gate DEX Transfer
 
-> Transfer module — gas estimation, transaction preview, balance verification, signing, and broadcasting. Includes mandatory user confirmation gates. 4 MCP tools + 1 cross-skill call.
+> Transfer module — gas estimation, transaction preview, balance verification, **terminal tx-checkin before signing**, signing, and broadcasting. Includes mandatory user confirmation gates. 4 MCP tools + 1 cross-skill call.
 
 ## Applicable Scenarios
 
@@ -35,7 +35,7 @@ Use when the user wants to:
 | `dex_wallet_get_token_list` | Balance verification (cross-skill) | `account_id`, `chain`, `mcp_token` |
 | `dex_tx_gas` | Estimate gas fee | `chain`, `from_address`, `to_address`, `value?`, `data?`, `mcp_token` |
 | `dex_tx_transfer_preview` | Build unsigned tx + confirmation message | `chain`, `from_address`, `to_address`, `token_address`, `amount`, `account_id`, `mcp_token` |
-| `dex_wallet_sign_transaction` | Server-side signing (user must confirm first) | `raw_tx`, `chain`, `account_id`, `mcp_token` |
+| `dex_wallet_sign_transaction` | Server-side signing (**after** user confirm **and** terminal [tx-checkin.md](./tx-checkin.md)) | `raw_tx`, `chain`, `account_id`, `mcp_token` |
 | `dex_tx_send_raw_transaction` | Broadcast signed tx | `signed_tx`, `chain`, `mcp_token` |
 
 ### Tool Details
@@ -68,17 +68,17 @@ Builds an unsigned transaction and returns a confirmation summary including serv
 
 | Field | Description |
 |-------|-------------|
-| **Parameters** | `{ chain, from_address, to_address, token_address, amount, account_id, mcp_token }` |
-| **Returns** | `{ raw_tx, confirm_message, estimated_gas, nonce }` |
+| **Parameters** | `{ chain, from_address, to_address, token_address, amount, account_id, mcp_token }` (see live MCP schema for exact names such as `from` / `to` / `token_contract` / `token_mint`) |
+| **Returns** | `unsigned_tx_hex` (use as `raw_tx` for signing), **`txBundle`** (string: exact check-in `message` for terminal [tx-checkin.md](./tx-checkin.md)), `key_info`, `confirm_message`, etc. |
 
 - `token_address`: Use `"native"` for native tokens.
 - `amount`: Human-readable format (e.g., `"1.5"`, not wei).
 
-**CRITICAL**: After receiving `raw_tx`, do **not** sign directly. Display the confirmation summary and wait for explicit user confirmation.
+**CRITICAL**: After preview, do **not** sign until the user explicitly confirms. For terminal check-in, **only** use the preview field **`txBundle`** with `tx-checkin -tx-bundle-file` (see [tx-checkin.md](./tx-checkin.md)). **Do not** build txbundle JSON from `unsigned_tx_hex` or other fields. Call `dex_wallet_sign_transaction` with **`raw_tx` = `unsigned_tx_hex`** after successful check-in.
 
 #### `dex_wallet_sign_transaction` — Server-side Signing
 
-Signs an unsigned transaction using server-side custodial keys. **Only call after explicit user confirmation.**
+Signs an unsigned transaction using server-side custodial keys. **Only call after explicit user confirmation and after successful terminal tx-checkin** ([tx-checkin.md](./tx-checkin.md)).
 
 | Field | Description |
 |-------|-------------|
@@ -107,8 +107,9 @@ Complete transfer flow in strict linear sequence:
 3. [Agent balance validation]                <- Internal logic, not an MCP call
 4. dex_tx_transfer_preview                   <- Build unsigned tx + confirmation info
 5. [Display confirmation, wait for user]     <- MANDATORY gate, not an MCP call
-6. dex_wallet_sign_transaction               <- Sign after user confirms
-7. dex_tx_send_raw_transaction               <- Broadcast on-chain
+6. [Terminal tx-checkin]                     <- MANDATORY: preview **txBundle** -> `-tx-bundle-file` per [tx-checkin.md](./tx-checkin.md), not an MCP call
+7. dex_wallet_sign_transaction               <- Sign only after steps 5–6 succeed
+8. dex_tx_send_raw_transaction               <- Broadcast on-chain
 ```
 
 ---
@@ -153,13 +154,17 @@ Step 8: Display confirmation (MANDATORY GATE)
   - "cancel"  -> abort, display cancellation notice
   - modification request -> return to Step 2
   |
-Step 9: Sign transaction
-  Call dex_wallet_sign_transaction({ raw_tx, chain, account_id, mcp_token })
+Step 9: Terminal tx-checkin (MANDATORY)
+  Run [tx-checkin.md](./tx-checkin.md): persist preview **`txBundle`** to a file (e.g. `jq -r '.txBundle' preview.json > bundle.txt` if the preview JSON is saved), then **`tx-checkin -tx-bundle-file bundle.txt`** with `-wallet`, `-chain`, `-chain-category` from the same preview / `key_info`. **Do not** hand-assemble txbundle.
+  On failure -> abort; do not sign.
   |
-Step 10: Broadcast
+Step 10: Sign transaction
+  Call dex_wallet_sign_transaction({ raw_tx: **unsigned_tx_hex** from the same preview, chain, account_id, mcp_token })
+  |
+Step 11: Broadcast
   Call dex_tx_send_raw_transaction({ signed_tx, chain, mcp_token }) -> get hash_id
   |
-Step 11: Display result + proactive suggestions
+Step 12: Display result + proactive suggestions
   Show tx hash, block explorer link, and post-transfer suggestions (see Post-Transfer Suggestions)
 ```
 
@@ -176,9 +181,9 @@ Step 3-8: Per transfer (sequential)
   "skip"    -> Skip this transfer, continue to next
   "cancel all" -> Abort remaining transfers
 
-Step 9-10: Sign + broadcast confirmed transfers only
+Step 9: Terminal tx-checkin (MANDATORY) per transfer: each transfer’s preview **txBundle** -> `-tx-bundle-file`, then sign (`unsigned_tx_hex`) + broadcast confirmed transfers only
 
-Step 11: Summary table + proactive suggestions
+Step 10: Summary table + proactive suggestions
   | # | To | Amount | Status | Hash |
   |---|-----|--------|--------|------|
   | 1 | 0xDEF...5678 | 100 USDT | ✅ Success | 0xa1b2... |
@@ -272,8 +277,9 @@ Agent:
 4. Validate: 0.5 + gas <= ETH balance.
 5. Call `dex_tx_transfer_preview` -> display confirmation template.
 6. User replies "confirm".
-7. Call `dex_wallet_sign_transaction` -> call `dex_tx_send_raw_transaction`.
-8. Display tx hash + etherscan link + post-transfer suggestions.
+7. Run terminal [tx-checkin.md](./tx-checkin.md) with preview **`txBundle`** -> `-tx-bundle-file` -> success required.
+8. Call `dex_wallet_sign_transaction` with **`unsigned_tx_hex`** -> call `dex_tx_send_raw_transaction`.
+9. Display tx hash + etherscan link + post-transfer suggestions.
 
 **Example 2 (Happy Path): ERC20 transfer with full details**
 User: "Send 100 USDT to 0xABC...1234 on Ethereum"
@@ -283,8 +289,9 @@ Agent:
 3. Call `dex_tx_gas` -> estimate gas.
 4. Call `dex_tx_transfer_preview` -> display ERC20 confirmation template.
 5. User replies "confirm".
-6. Call `dex_wallet_sign_transaction` -> call `dex_tx_send_raw_transaction`.
-7. Display tx hash + explorer link + post-transfer suggestions.
+6. Run terminal [tx-checkin.md](./tx-checkin.md) with preview **`txBundle`** -> `-tx-bundle-file` -> success required.
+7. Call `dex_wallet_sign_transaction` with **`unsigned_tx_hex`** -> call `dex_tx_send_raw_transaction`.
+8. Display tx hash + explorer link + post-transfer suggestions.
 
 **Example 3 (Happy Path): Solana native transfer**
 User: "Send 2 SOL to BTYz...bfxE"
@@ -292,7 +299,7 @@ Agent:
 1. Verify auth -> get Solana wallet address.
 2. Call `dex_wallet_get_token_list({ chain: "sol" })` -> verify SOL balance >= 2 + gas.
 3. Call `dex_tx_transfer_preview({ chain: "sol", token_address: "native", amount: "2", ... })`.
-4. Display confirmation. On confirm -> sign -> broadcast -> display tx hash + solscan link.
+4. Display confirmation. On confirm -> terminal [tx-checkin.md](./tx-checkin.md) with **`txBundle`** (`-tx-bundle-file`) -> sign (`unsigned_tx_hex`) -> broadcast -> display tx hash + solscan link.
 
 **Example 4 (Happy Path): SPL token transfer (e.g., USDC on Solana)**
 User: "Transfer 50 USDC to my friend's Solana address BTYz..."
@@ -301,7 +308,7 @@ Agent:
 2. Call `dex_wallet_get_token_list({ chain: "sol" })` -> verify USDC balance >= 50 AND SOL >= gas + ATA rent.
 3. Call `dex_tx_transfer_preview` with token mint address.
 4. Display confirmation including note about possible ATA creation fee.
-5. On confirm -> sign -> broadcast.
+5. On confirm -> terminal [tx-checkin.md](./tx-checkin.md) with **`txBundle`** -> sign (`unsigned_tx_hex`) -> broadcast.
 
 **Example 5 (Happy Path): Transfer on L2 (Arbitrum)**
 User: "Send 200 USDT to 0xDEF... on Arbitrum"
@@ -309,7 +316,7 @@ Agent:
 1. Get wallet address (same as ETH — EVM chains share address).
 2. Check USDT balance on Arbitrum and ETH balance for gas.
 3. Build preview, display confirmation with Arbitrum-specific gas estimate.
-4. On confirm -> sign -> broadcast -> display arbiscan link.
+4. On confirm -> terminal [tx-checkin.md](./tx-checkin.md) with **`txBundle`** -> sign (`unsigned_tx_hex`) -> broadcast -> display arbiscan link.
 
 **Example 6 (Edge Case): Insufficient token balance**
 User: "Transfer 1000 USDT on Ethereum"

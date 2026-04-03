@@ -4,13 +4,37 @@ All notable changes to `gate-dex-trade` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.2-1] - 2026-04-02
+
+### Added
+
+- **tools/tx-checkin/**: Pre-built `swap-checkin-mac` (macOS / Apple Silicon + Intel), `swap-checkin-linux`, and `swap-checkin-win.exe` (Windows amd64); `README.md` with usage, binary selection rules, and check-in response shape
+- Binary selection rule: macOS (`darwin`) → `swap-checkin-mac`; Linux → `swap-checkin-linux`; Windows (`windows`, amd64) → `swap-checkin-win.exe`; do not use `go run`
+
+### Changed
+
+- **SKILL.md**: version `2026.4.2-1`; MCP Server detection updated to staged swap tools (`dex_tx_swap_quote`, `dex_tx_swap_prepare`, staged sign tools); MCP mode description updated to include staged sign flow, local binary check-in, and binary selection rule
+- **README.md**: Execution row updated to "Staged swap + local check-in CLI"
+- **references/mcp.md**: Replaced one-shot `dex_tx_swap` with full staged 6-tool flow — `dex_tx_swap_quote` → `dex_tx_swap_prepare` → `dex_tx_swap_checkin_preview` → local `swap-checkin` binary → `dex_tx_swap_sign_approve` (EVM with `need_approved` only) → `dex_tx_swap_sign_swap` → `dex_tx_swap_submit`; description and intro updated; `dex_tx_quote` renamed to `dex_tx_swap_quote` throughout
+
+---
+
+## [2026.3.26-1] - 2026-03-26
+
+### Changed
+
+- **gate-runtime-rules.md** / **gate-skills-disambiguation.md**: Removed per-skill duplicate copies; SKILL.md updated to reference shared root-level files via GitHub URL
+
+---
+
 ## [2026.3.24-1] - 2026-03-24
 
 ### Changed
 
 - **SKILL.md streamlined**: Removed Auto-Update section (now handled by `gate-runtime-rules.md` §1); removed Cross-Skill Collaboration (non-actionable); consolidated Security Rules (credential handling defers to runtime-rules §3); removed "No repeated guidance" rule
 - **General Rules**: Added mandatory reference to `gate-runtime-rules.md` before any tool call
-
+- **gate-runtime-rules.md**: Added shared runtime rules file to skill directory
+- **gate-skills-disambiguation.md**: Added intent disambiguation rules to skill directory
 
 ## [2026.3.19-1] - 2026-03-19
 
