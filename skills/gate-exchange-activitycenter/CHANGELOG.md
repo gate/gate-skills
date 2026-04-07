@@ -2,6 +2,19 @@
 
 All notable changes to this skill will be documented in this file.
 
+## [2026.4.3-1] - 2026-04-03
+
+### Changed
+- Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
+- Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
+- No MCP workflow or business logic changes.
+
+## [2026.3.23-1] - 2026-03-23
+
+### Changed
+- Aligned runtime-rule references and documentation wording for ClawHub review.
+- No MCP workflow or business logic changes.
+
 ## [2026.3.19-18] - 2026-03-19
 
 ### Added
@@ -11,7 +24,7 @@ All notable changes to this skill will be documented in this file.
 
 ### Changed
 - Fixed heading hierarchy: H1 now appears before H2 General Rules
-- Fixed General Rules reference: now points to [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) instead of `scenarios.md`
+- Fixed General Rules reference: now points to local `gate-runtime-rules.md` instead of `scenarios.md`
 - Translated all Chinese content to English (trigger examples, error messages, labels)
 - Expanded Error Handling table with 401/400/429/500/Network error scenarios
 - Fixed link placeholder format: `[{activity_title}]({processed_url})`

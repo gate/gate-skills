@@ -15,7 +15,7 @@
 
 ## Scenario 2: General social sentiment
 
-**Context**: User asks for broad market social mood without naming one coin.
+**Context**: User asks for overall market social mood without naming one coin.
 
 **Prompt Examples**:
 - "Overall crypto social sentiment"

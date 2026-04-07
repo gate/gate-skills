@@ -21,7 +21,7 @@ Query and manage Gate Exchange affiliate/partner program data, including commiss
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+→ Read `../gate-runtime-rules.md`
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
@@ -54,11 +54,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
 
 ## MCP Mode
 
@@ -71,7 +68,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 - **Role**: This skill uses Partner APIs only. The term "affiliate" in user queries refers to Partner role.
 - **Time Limit**: API supports maximum 30 days per request. For queries >30 days (up to 180 days), agent must split into multiple 30-day segments.
-- **Authentication**: Requires `X-Gate-User-Id` header with partner privileges.
+- **Authentication**: Partner APIs still run through the local Gate MCP session. Any required partner headers (including `X-Gate-User-Id`) are supplied by that session, not pasted by the user.
 - **CRITICAL - user_id Parameter**: In both `commission_history` and `transaction_history` APIs, the `user_id` parameter filters by "trader/trading user" NOT "commission receiver". Only use this parameter when explicitly querying a specific trader's contribution. For general commission queries, DO NOT use user_id parameter.
 - **Data Aggregation**: When calculating totals from API response lists, use custom aggregation logic based on business rules. DO NOT simply sum all values as this may lead to incorrect results due to data structure and business logic considerations.
 

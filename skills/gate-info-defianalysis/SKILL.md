@@ -1,7 +1,7 @@
 ---
 name: gate-info-defianalysis
-version: "2026.4.1-2"
-updated: "2026-04-01"
+version: "2026.4.7-1"
+updated: "2026-04-07"
 description: "DeFi ecosystem analysis via Gate-Info MCP. Use this skill whenever the user wants TVL rankings, protocol metrics, yield/APY, stablecoins, bridges, exchange reserves, or liquidation heatmaps. Trigger phrases include Uniswap TVL, DeFi ranking, USDC yield, bridge volume, exchange BTC reserves, liquidation density. Route coin-only fundamentals to gate-info-coinanalysis. Sub-scenario tools: info_platformmetrics_* family and info_coin_get_coin_info (exact tool names per scenario in SKILL.md)."
 required_credentials: []
 required_env_vars: []
@@ -14,24 +14,14 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, and output standards).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > The DeFi Ecosystem Analysis Skill. Routes to different sub-scenarios based on user intent (overview / single platform / yield / stablecoins / bridges / reserves / liquidation), each calling one or more MCP tools.
 
 **Trigger Scenarios**: User asks about DeFi protocols, TVL, yield rates, stablecoins, cross-chain bridges, exchange reserves, liquidation distribution, etc.
-
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
 
 ---
 
@@ -64,11 +54,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-Info
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 

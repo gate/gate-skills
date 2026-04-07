@@ -1,5 +1,18 @@
 # Changelog
 
+## [2026.4.3-1] - 2026-04-03
+
+### Changed
+- Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
+- Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
+- No MCP workflow or business logic changes.
+
+## [2026.3.23-1] - 2026-03-23
+
+### Changed
+- Aligned runtime-rule references and documentation wording for ClawHub review.
+- No MCP workflow or business logic changes.
+
 ## [2026.3.18-1] - 2026-03-18
 
 ### Changed

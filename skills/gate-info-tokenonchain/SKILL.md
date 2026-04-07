@@ -1,7 +1,7 @@
 ---
 name: gate-info-tokenonchain
-version: "2026.4.1-2"
-updated: "2026-04-01"
+version: "2026.4.7-1"
+updated: "2026-04-07"
 description: "Token on-chain analysis via Gate-Info MCP: holder distribution, on-chain activity, and large or unusual transfers (scopes holders / activity / transfers). Smart Money is not available in this version. Triggers include ETH on-chain analysis, BTC holder distribution, whale movements, large transfers. Route single-address tracking to gate-info-addresstracker. Tools: info_onchain_get_token_onchain, info_coin_get_coin_info."
 required_credentials: []
 required_env_vars: []
@@ -14,24 +14,14 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, and output standards).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > Token On-Chain Analysis Skill (current version: **no Smart Money**). For token-level holder distribution, activity, and large transfers, call on-chain + basic coin info tools in parallel, then aggregate into a structured report.
 
 **Trigger Scenarios**: User asks about token on-chain data, holder distribution, on-chain activity, large transfers, on-chain chip analysis, etc.
-
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
 
 ---
 
@@ -56,11 +46,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-Info
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 
@@ -199,4 +186,4 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 5. **Data lag**: Note indexing delays where relevant.
 6. **Smart Money**: Clearly state unavailability rather than approximating.
 7. **Age & eligibility**: Intended for users **aged 18 or above** with **full civil capacity** in their jurisdiction.
-8. **Data flow**: The host agent processes user prompts; this skill directs **read-only** **Gate-Info** MCP tools listed above. The LLM summarizes tool output. Aside from those MCP calls and the documented skill-update flow (GitHub URLs in **General Rules** and `info-news-runtime-rules.md`), this skill does not invoke additional third-party data services.
+8. **Data flow**: The host agent processes user prompts; this skill directs **read-only** **Gate-Info** MCP tools listed above. The LLM summarizes tool output. This skill does not invoke additional third-party data services.

@@ -32,7 +32,7 @@ An AI Agent skill for **community sentiment** via **Gate-News MCP**, **X/Twitter
 
 ## Runtime prerequisites
 
-- **Skill self-update**: **Bash** or **Windows PowerShell**; sandbox **full / all permissions** may be needed for `apply`.
+- **Skill self-update**: **Bash** or **Windows PowerShell**; sandboxed agents may need host-approved permissions for `apply`.
 - **Typical install roots**: `~/.cursor/skills/gate-news-communityscan/`, etc. — see `SKILL.md` **Trigger update**.
 - **MCP**: **Gate-News** required per `SKILL.md`. No user API key for documented read-only tools.
 
@@ -40,8 +40,8 @@ An AI Agent skill for **community sentiment** via **Gate-News MCP**, **X/Twitter
 
 | URL / pattern | Purpose |
 |---------------|---------|
-| `https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md` | Runtime rules (**General Rules**). |
-| `https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md` | Info/news runtime rules. |
+| Local file `../gate-runtime-rules.md` | Runtime rules (**General Rules**). |
+| Local file `../info-news-runtime-rules.md` | Info/news runtime rules. |
 | `https://raw.githubusercontent.com/gate/gate-skills/master/skills/<skill-name>/SKILL.md` | Version **check**. |
 | `https://github.com/gate/gate-skills` | Repo references. |
 

@@ -1,7 +1,7 @@
 ---
 name: gate-info-riskcheck
-version: "2026.4.1-1"
-updated: "2026-04-01"
+version: "2026.4.3-1"
+updated: "2026-04-03"
 description: "Token and address risk assessment. Use this skill ONLY when the user's query is exclusively about token/contract/address security with no other analysis dimensions. Trigger phrases: is this token safe, check contract risk, is this address safe, honeypot, rug. If the query ALSO mentions fundamentals, technicals, news, sentiment, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report. Address risk mode (is this address safe) is exclusive to this skill and must NOT be routed to gate-info-research."
 required_credentials: []
 required_env_vars: []
@@ -14,8 +14,8 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `../gate-runtime-rules.md`
+→ Also read `../info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, routing, and optional local maintenance when `scripts/` is present).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
@@ -23,15 +23,10 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Trigger Scenarios**: User mentions a token/contract address + keywords like safe, risk, check, audit, honeypot, rug, contract security, scam.
 
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
+**Local maintenance (optional, repository copy only):**
+- If `scripts/update-skill.*` exists in the repository copy, `check` may compare the installed copy with the packaged skill source used by the current install.
+- Ask the user before `apply`.
+- `apply` updates files within this skill directory only.
 
 ---
 
@@ -57,11 +52,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-Info
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 

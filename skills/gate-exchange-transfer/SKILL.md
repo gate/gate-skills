@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-transfer
-version: "2026.3.23-1"
-updated: "2026-03-23"
+version: "2026.4.6-1"
+updated: "2026-04-06"
 description: "Gate Exchange same-UID internal transfer skill. Use when the user asks to move funds between their own Gate accounts. Triggers on 'transfer funds', 'move USDT to futures', 'internal transfer'."
 required_credentials:
   - gate_api_key
@@ -16,6 +16,14 @@ required_permissions:
   - Options:Read
   - Spot:Read
   - Wallet:Write
+metadata:
+  openclaw:
+    requires:
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+    primaryEnv: GATE_API_KEY
+    homepage: https://github.com/gate/gate-skills
 ---
 
 # Gate Exchange Transfer (Internal Transfer)
@@ -24,7 +32,7 @@ required_permissions:
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+→ Read `./references/gate-runtime-rules.md`
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
@@ -32,7 +40,7 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
 
 **Scope (Phase 1)**  
 - Supported: internal transfer only (same UID, between account types above).  
-- Not supported: main-to-sub, sub-to-main, sub-to-sub. See `references/scenarios.md` for future scenario coverage.
+- Not supported: main-to-sub, sub-to-main, sub-to-sub.
 
 ---
 
@@ -66,11 +74,8 @@ Execute same-UID internal transfers between Gate trading accounts: **spot**, **i
 
 ### Installation Check
 - Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
 
 ## MCP Mode
 

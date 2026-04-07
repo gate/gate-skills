@@ -45,7 +45,7 @@ No MCP Resources required.
 | Tool | Required inputs | Key return fields | Common errors |
 |---|---|---|---|
 | `news_events_get_latest_events` | optional `coin`, `time_range`, `limit` | event title/time/impact/source | empty recent events |
-| `news_feed_search_news` | optional `coin/topic`, sort, limit | news list, source, timestamp, importance | query too broad |
+| `news_feed_search_news` | optional `coin/topic`, sort, limit | news list, source, timestamp, importance | query too general |
 | `news_feed_get_social_sentiment` | optional `coin` | sentiment polarity, volume trend, social focus | sentiment unavailable |
 
 ## 6. Execution SOP (Non-Skippable)

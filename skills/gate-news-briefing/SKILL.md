@@ -1,7 +1,7 @@
 ---
 name: gate-news-briefing
-version: "2026.4.1-1"
-updated: "2026-04-01"
+version: "2026.4.7-1"
+updated: "2026-04-07"
 description: "News briefing. Use this skill ONLY when the user's query is exclusively about recent news or headlines with no other analysis dimensions. Trigger phrases: what happened recently, today's highlights, crypto news, any new updates. If the query ALSO mentions coin analysis, risk check, technicals, or any other analysis dimension, use gate-info-research instead — it handles multi-dimension queries in a single unified report."
 required_credentials: []
 required_env_vars: []
@@ -14,24 +14,14 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, and output standards).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > The crypto industry "morning briefing" Skill. The user asks what's been happening; the system calls 3 MCP Tools in parallel to fetch major events + trending news + social sentiment, then the LLM aggregates into a layered news briefing.
 
 **Trigger Scenarios**: User asks about recent/today's news, headlines, or what's been happening.
-
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
 
 ---
 
@@ -56,11 +46,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-News
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 

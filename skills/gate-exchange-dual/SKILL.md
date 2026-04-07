@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-dual
-version: "2026.3.23-1"
-updated: "2026-03-23"
+version: "2026.4.3-1"
+updated: "2026-04-03"
 description: "Gate dual investment skill. Use when the user asks about dual currency products, target price settlement, or placing dual orders. Triggers on 'dual investment', 'dual currency', 'target price', 'exercise price', 'dual orders', 'dual balance', 'sell-high', 'buy-low', 'place dual order', 'subscribe dual'."
 required_credentials:
   - gate_api_key
@@ -11,6 +11,14 @@ required_env_vars:
   - GATE_API_SECRET
 required_permissions:
   - Earn:Write
+metadata:
+  openclaw:
+    requires:
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+    primaryEnv: GATE_API_KEY
+    homepage: https://github.com/gate/gate-skills
 ---
 
 # Gate Exchange Dual Investment Skill
@@ -19,7 +27,7 @@ required_permissions:
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+→ Read `./references/gate-runtime-rules.md`
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 

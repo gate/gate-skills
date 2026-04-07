@@ -1,13 +1,13 @@
 ---
 title: Gate Skills Intent Disambiguation Rules
-version: v1.0.0
-last_updated: 2026-03-26
-scope: "gate-mcp / CEX × DEX × Info × News"
+version: v1.1.0
+last_updated: 2026-04-02
+scope: "gate-mcp / CEX × DEX × Pay × Info × News"
 ---
 
 # Intent Disambiguation Rules
 
-> Shared routing rules for all Gate Skills (CEX / DEX / Info / News).
+> Shared routing rules for all Gate Skills (CEX / DEX / Pay / Info / News).
 > This document is referenced by `gate-runtime-rules.md` Rule 0 and loaded automatically for all skills that follow the shared runtime rules.
 
 This document is only responsible for determining which domain a user's intent belongs to. The specific skill to call is determined by each domain's skill list.
@@ -26,6 +26,7 @@ This document is only responsible for determining which domain a user's intent b
 | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **CEX**  | Gate centralized exchange: market data queries (spot/futures/options/delivery tickers, order books, K-line, funding rates, etc.) need no login; trading, account management, wallet operations (balance, orders, transfers, withdrawals, etc.) require authorization                 |
 | **DEX**  | On-chain decentralized context: on-chain data queries (including token info, liquidity, market data, chip / position distribution, holders, leaderboards, token security checks, same-name / similar-token analysis, etc.) need no login; wallet, swap, transfer, withdraw to exchange (DEX to CEX), UID binding, etc. require login |
+| **Pay**  | Dedicated payment and checkout context: handling merchant payments, order settlements, bills, and GatePay / specific payment services.                                                                                                                                               |
 | **Info** | Market information & analysis, including coin info, technical analysis, on-chain data, compliance checks, etc., no login required                                                                                                                                                    |
 | **News** | News & announcements, including exchange announcements, industry news, social sentiment, etc., no login required                                                                                                                                                                     |
 
@@ -51,6 +52,7 @@ When identifying user intent, prioritize matching the following signal words to 
 | connect DApp, sign message, approve token, revoke approval, contract call, EIP-712, personal_sign, add liquidity, stake on Lido, mint NFT                                                                                                                                                                                                                                                                             | → **DEX** (DApp)                                 |
 | gate-wallet CLI, command line, terminal, openapi-swap, hybrid swap, script automation                                                                                                                                                                                                                                                                                                                                  | → **DEX** (CLI)                                  |
 | withdraw to exchange, cash out to Gate, bind UID, link Gate account                                                                                                                                                                                                                                                                                                                                                    | → **DEX** (withdraw to CEX)                      |
+| pay for order, checkout, merchant payment, settle bill, GatePay                                                                                                                                                                                                                                                                                                                                                        | → **Pay** (Order payment, see Scenario 20)       |
 | technical analysis, RSI, MACD, Bollinger Bands, moving average, KDJ, indicators                                                                                                                                                                                                                                                                                                                                        | → **Info**                                       |
 | news, announcement, listing, social sentiment                                                                                                                                                                                                                                                                                                                                                                          | → **News**                                       |
 | compliance check + no contract address                                                                                                                                                                                                                                                                                                                                                                                 | → **Info**                                       |
@@ -306,14 +308,17 @@ First identify if there's a price trigger condition, then determine domain:
 
 **Trigger words:** 402 payment, x402, payment required, pay for API, pay for URL, HTTP 402, paid endpoint, pay for access, Permit2 payment, upto payment
 
-**Background:** x402 is a payment protocol for HTTP 402 Payment Required responses. The DEX wallet can automatically pay for gated APIs/resources using on-chain payment schemes.
+**Background:** x402 is a payment protocol for HTTP 402 Payment Required responses. Both dedicated **Pay** MCPs and **DEX** wallets can handle these API/resource payment requests.
 
 **Rules:**
 
-1. Any mention of "402", "x402", "pay for API", "pay for URL", "payment required", "paid endpoint" → **DEX** (x402)
-2. URL that returns 402 or user reports "that URL returned 402" → **DEX** (x402)
-3. **Do NOT route to CEX** — x402 is exclusively an on-chain wallet payment mechanism
-4. If token approval is required during x402 payment → route to **DEX** (DApp approval flow) first, then retry **DEX** (x402)
+1. **Follow Established Context:**
+   * If **Pay** context is established → Route to **Pay** (x402 module).
+   * If **DEX** context is established → Route to **DEX** (x402 module).
+2. **No Context (Ambiguous):** If there is no clear history of Pay or DEX usage in the current session, do NOT default. Must confirm:
+   > "Would you like to process this API/URL payment using your dedicated payment account (Pay) or your on-chain wallet (DEX)?"
+3. **Do NOT route to CEX:** x402 is handled via Web3/Payment mechanisms, NOT centralized exchange balances.
+4. **Approval Flow (DEX handling only):** If routed to DEX and token approval is required during the x402 payment → route to **DEX** (DApp approval flow) first, then retry the x402 payment.
 
 ---
 
@@ -348,11 +353,33 @@ First identify if there's a price trigger condition, then determine domain:
 
 ---
 
+### Scenario 20: Pay / Payment (Order & Checkout)
+
+**Trigger words:** pay, payment, pay for, pay this, pay for this order, checkout, settle, pay the bill
+
+**Pre-check: API/URL or Transfer?**
+* "pay for API/URL" / HTTP 402 → **DEX / Pay** (See **Scenario 17**)
+* "pay someone" / P2P crypto send → **CEX / DEX** transfer (See **Scenario 9**)
+* General order/merchant checkout → Follow rules below:
+
+**Rules:**
+
+1. **Follow Established Context:** If the current session has an established context, route accordingly:
+   * Pay context established → **Pay** (Dedicated Payment MCP)
+   * CEX context established → **CEX** (Exchange Pay)
+   * DEX context established → **DEX** (Wallet Pay)
+2. **No Context (Ambiguous):** If no context exists, do NOT default. Must confirm:
+   > "Would you like to pay for this order using your dedicated payment account (Pay), exchange balance (CEX), or on-chain wallet (DEX)?"
+3. **Session Continuity:** For vague follow-ups ("pay again"), stick to the established domain (Pay / CEX / DEX) unless the user explicitly requests a switch.
+4. **Prohibited:** If the target payment tool is unavailable, **NEVER** silently switch to another domain to execute a deduction. Prompt the user instead.
+
+---
+
 ## IV. Session Context Memory Rules
 
 1. If user has clearly chosen a domain in this conversation, subsequent ambiguous intents **prioritize continuation of that domain**, no need to re-confirm
 2. When context switches (e.g., from checking CEX balance to asking about on-chain address), **explicitly identify switch signals**, do not reuse old context
-3. When both CEX and DEX are connected, context memory **does not cross domains**
+3. When multiple domains (e.g., CEX, DEX, Pay) are connected, context memory **does not cross domains**
 
 ---
 
@@ -360,7 +387,7 @@ First identify if there's a price trigger condition, then determine domain:
 
 When intent signals are insufficient and cannot route via above rules, use uniformly:
 
-> "Your request may involve exchange account (CEX) or on-chain wallet (DEX). Which one would you like to operate?"
+> "Your request may involve exchange account (CEX), on-chain wallet (DEX), or payment service (Pay). Which one would you like to operate?"
 
 **Prohibited:** Randomly selecting a domain when intent is unclear, especially for fund-related operations.
 
@@ -370,17 +397,17 @@ When intent signals are insufficient and cannot route via above rules, use unifo
 
 ### 6.1 Explicitly Inform User, Do Not Fail Silently
 
-> "Current [DEX / CEX] related tools not detected, please install the corresponding MCP first. See [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) Rule 2: MCP Installation Pre-check."
+> "Current [DEX / CEX / Pay] related tools not detected, please install the corresponding MCP first. See [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) Rule 2: MCP Installation Pre-check."
 
 ### 6.2 Prohibit Cross-Domain Degradation Substitution
 
 
-| User Request                         | Prohibited Behavior                    |
-| ------------------------------------ | -------------------------------------- |
-| DEX balance query, DEX unavailable   | ❌ Do NOT change to check CEX balance   |
-| On-chain swap, DEX unavailable       | ❌ Do NOT change to CEX flash swap      |
-| CEX order placement, CEX unavailable | ❌ Do NOT change to DEX swap            |
-| Market K-line, Info unavailable      | ❌ Do NOT patch data from other domains |
-
+| User Request                         | Prohibited Behavior                                    |
+| ------------------------------------ | ------------------------------------------------------ |
+| DEX balance query, DEX unavailable   | ❌ Do NOT change to check CEX balance                  |
+| On-chain swap, DEX unavailable       | ❌ Do NOT change to CEX flash swap                     |
+| CEX order placement, CEX unavailable | ❌ Do NOT change to DEX swap                           |
+| Order payment, Pay unavailable       | ❌ Do NOT change to CEX/DEX transfer to deduct funds   |
+| Market K-line, Info unavailable      | ❌ Do NOT patch data from other domains                |
 
 > Cross-domain substitution may cause users to execute operations in the wrong domain, especially dangerous for fund-related scenarios.

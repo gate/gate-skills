@@ -1,7 +1,7 @@
 ---
 name: gate-news-listing
-version: "2026.4.1-1"
-updated: "2026-04-01"
+version: "2026.4.6-1"
+updated: "2026-04-06"
 description: "Exchange listing tracker. Use this skill whenever the user asks about exchange listing, delisting, or maintenance announcements. Trigger phrases include: any new coins listed recently, what did Binance list, new listings, delisted. MCP tools: news_feed_get_exchange_announcements, info_coin_get_coin_info, info_marketsnapshot_get_market_snapshot."
 required_credentials: []
 required_env_vars: []
@@ -14,26 +14,14 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, routing, and graceful fallback behavior).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > Listing radar Skill. The user queries exchange listing/delisting/maintenance announcements, the system first calls the exchange announcements Tool, then supplements high-interest coins with fundamentals and market data. The LLM aggregates everything into a structured exchange activity report.
 
 **Trigger Scenarios**: User mentions an exchange name + listing/delisting keywords, or asks "any new coins listed recently" or "any new projects".
-
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
-
----
 
 ## MCP Dependencies
 
@@ -57,7 +45,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-News
-- Install: `gate-mcp-installer` — `bash skills/gate-mcp-installer/scripts/install.sh` (use `--platform cursor|claude|codex|openclaw` if multiple dev environments exist)
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 

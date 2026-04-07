@@ -2,7 +2,7 @@
 # Trigger update for one skill: compare remote vs local (version/updated), then clone+copy if needed.
 # Compatibility: Bash (macOS/Linux; Windows: Git Bash / WSL). HTTP: curl first (macOS has curl by default), else wget.
 # Prefers git; then ZIP+unzip; then tar.gz+tar (no unzip).
-# Run with full/all permissions in sandboxed agents (e.g. Cursor) for git clone / network.
+# Run with the host-approved permissions needed for git clone / network in sandboxed agents (e.g. Cursor).
 # Usage:
 #   ./scripts/update-skill.sh run   <NAME>          # check → optional clone/ZIP → copy (DEST auto-derived)
 #   ./scripts/update-skill.sh check <NAME>          # compare only, no download (see GATE_SKILL_UPDATE_MODE)
@@ -246,7 +246,7 @@ verify_and_finish() {
   local DEST="$1"
   if [ -f "$DEST/SKILL.md" ]; then
     gate_skill_remove_apply_token "$DEST"
-    log_ok "overwrite complete — DEST=$DEST"
+    log_ok "sync complete — DEST=$DEST"
     gate_skill_log_version_after_apply "$DEST"
     log_result "success"
     echo "Trigger update: Result=success; Overwrite OK; DEST=$DEST"
@@ -593,7 +593,7 @@ main() {
         NAME="${1:?}"
         DEST=$(resolve_dest_single_arg "$NAME")
       fi
-      log_step "apply: force download and overwrite"
+      log_step "apply: force download and sync files"
       log_dim "DEST=$DEST  NAME=$NAME"
       require_apply_token_if_pending "$DEST" || exit $?
       do_apply "$DEST" "$NAME"
