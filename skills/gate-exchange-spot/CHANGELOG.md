@@ -1,5 +1,16 @@
 # Changelog
 
+## [2026.4.3-1] - 2026-04-03
+
+- Added ClawHub-compatible `metadata.openclaw` runtime credential declarations in `SKILL.md`.
+- Replaced the package-external runtime-rules reference with a bundled `references/gate-runtime-rules.md` file so the published skill remains fully auditable.
+- No MCP workflow or business logic changes.
+
+## [2026.3.23-1] - 2026-03-23
+
+- Aligned documentation wording for ClawHub review.
+- No MCP workflow or business logic changes.
+
 ## [2026.3.12-1] - 2026-03-12
 
 - Added 5 trigger-order and TP/SL automation scenarios (`Scenario 32-36`) in `references/scenarios.md`:

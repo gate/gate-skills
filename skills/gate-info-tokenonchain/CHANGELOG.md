@@ -4,6 +4,27 @@
 
 ---
 
+## [2026.4.7-1] - 2026-04-07
+
+### Changed
+
+- Packaged required runtime-rule references inside this skill so `SKILL.md` no longer points outside the published bundle.
+- Removed repository-only maintenance guidance and update-flow references from the published skill instructions.
+- Excluded `README.md`, `CHANGELOG.md`, and `references/scenarios.md` from the published bundle to reduce non-runtime audit noise.
+- No MCP workflow or business logic changes.
+
+---
+
+## [2026.4.3-1] - 2026-04-03
+
+### Changed
+
+- Added `.clawhubignore` so repository-only maintenance scripts are excluded from published skill bundles.
+- Clarified in `SKILL.md` that local maintenance steps apply only to the repository copy.
+- No MCP workflow or business logic changes.
+
+---
+
 ## [2026.4.1-2] - 2026-04-01
 
 ### Added

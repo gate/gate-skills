@@ -5,18 +5,15 @@
 
 ---
 
-## 1. Skill version check & update
+## 1. Skill maintenance
 
-Before execution, check whether a newer version of the current skill exists in the official Gate Skills repository:
-https://github.com/gate/gate-skills
+Optional maintenance only:
 
-- If the skill directory contains `scripts/update-skill.sh` (or `scripts/update-skill.ps1` on Windows), you may run the `check` subcommand to compare the local skill with the official repo.
-- Version checks fetch the remote `SKILL.md` head via GitHub Raw URL: `https://raw.githubusercontent.com/gate/gate-skills/master/skills/{skill_name}/SKILL.md`
-- In interactive sessions, `check` is optional maintenance. If it reports `update_available`, ask the user before running `apply`.
+- If the skill directory contains `scripts/update-skill.sh` (or `scripts/update-skill.ps1` on Windows), `check` may compare the installed copy with the packaged skill source used by the current install.
+- In interactive sessions, ask the user before running `apply`.
 - Never auto-apply updates in chat or agent-driven interactive flows.
-- If `check` cannot run or returns `check_failed`, continue with the currently installed version. Explain update-check details only when the user explicitly asks.
-- Do not auto-download replacement updater scripts during the session. If local updater files are missing, direct users to the official repo for manual repair.
-- Applying an update writes only inside the current skill directory under the local skills install root. It must not modify unrelated local directories.
+- If `check` cannot run, continue with the currently installed version. Share maintenance details only when the user asks.
+- Applying an update may modify files only inside the current skill directory under the local skills install root. It must not modify unrelated local directories.
 
 ---
 
@@ -29,8 +26,7 @@ Before using MCP-dependent capabilities, check whether the required Gate MCP Ser
 | gate-info (Gate Info for AI) | Coin info, market snapshots, technical analysis, on-chain data, compliance checks |
 | gate-news (Gate News for AI) | News search, social sentiment, exchange announcements, event tracking             |
 
-- If not installed, guide the user to one-click install:
-  https://github.com/gate/gate-skills/tree/master/skills
+- If not installed, guide the user to the local Gate MCP installation flow for the current host IDE.
 - Ask whether the user wants to install now.
 - If the user agrees and the environment supports it, install the required MCP Server first, then continue the task.
 - If MCP Server is installed but specific tools are unavailable, inform the user and degrade gracefully (see Section 3).
@@ -115,9 +111,8 @@ Canonical **gate-info-skills** / **gate-news-skills** L1 scope, in rollout order
 Before routing, check if the target Skill is available:
 
 - **Target Skill available** → route normally.
-- **Target Skill unavailable but underlying MCP Tool exists** → call the Tool directly, return basic results, and suggest installing the full Skills package.
-- **Target Skill and Tool both unavailable** → inform the user and provide install link:
-  https://github.com/gate/gate-skills/tree/master/skills
+- **Target Skill unavailable but underlying MCP Tool exists** → call the Tool directly, return basic results, and suggest installing the full Skills package through the local Gate MCP installation flow.
+- **Target Skill and Tool both unavailable** → inform the user and point them to the local Gate MCP installation flow for the current host IDE.
 
 ---
 

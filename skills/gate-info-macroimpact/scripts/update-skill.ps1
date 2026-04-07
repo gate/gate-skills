@@ -11,7 +11,7 @@
   Legacy (explicit DEST):
     powershell -ExecutionPolicy Bypass -File .\scripts\update-skill.ps1 run "<DEST>" "<NAME>"
 
-  Use full/all permissions in sandboxed agents when needed.
+  Use the host-approved sandbox permissions when needed.
 
   GATE_SKILL_UPDATE_MODE=auto — check applies newer remote without confirm token; apply/run skip token gate.
   Without auto: optional GATE_SKILL_CHECK_STRICT=1 on check → exit 3 + GATE_SKILL_CONFIRM_TOKEN for apply/run.
@@ -279,7 +279,7 @@ function Invoke-Apply {
     Remove-Item -LiteralPath $cloneDir -Recurse -Force -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath (Join-Path $Dest 'SKILL.md')) {
       Remove-ApplyToken $Dest
-      Log-Ok "overwrite complete — DEST=$Dest"
+      Log-Ok "sync complete — DEST=$Dest"
       Write-GateSkillVersionLogAfterApply $Dest
       Log-Result 'success'
       Write-Host "Trigger update: Result=success; Overwrite OK; DEST=$Dest"
@@ -325,7 +325,7 @@ function Invoke-Apply {
 
   if ($zipOk -and (Test-Path -LiteralPath (Join-Path $Dest 'SKILL.md'))) {
     Remove-ApplyToken $Dest
-    Log-Ok "overwrite complete — DEST=$Dest"
+    Log-Ok "sync complete — DEST=$Dest"
     Write-GateSkillVersionLogAfterApply $Dest
     Log-Result 'success'
     Write-Host "Trigger update: Result=success; Overwrite OK; DEST=$Dest"
@@ -374,7 +374,7 @@ function Invoke-Apply {
 
   if ($tarOk -and (Test-Path -LiteralPath (Join-Path $Dest 'SKILL.md'))) {
     Remove-ApplyToken $Dest
-    Log-Ok "overwrite complete — DEST=$Dest"
+    Log-Ok "sync complete — DEST=$Dest"
     Write-GateSkillVersionLogAfterApply $Dest
     Log-Result 'success'
     Write-Host "Trigger update: Result=success; Overwrite OK; DEST=$Dest"
@@ -592,7 +592,7 @@ switch ($cmd.ToLowerInvariant()) {
   'run'   { Invoke-Run -Dest $destArg -Name $nameArg; exit $LASTEXITCODE }
   'check' { Invoke-Check -Dest $destArg -Name $nameArg; exit $LASTEXITCODE }
   'apply' {
-    Log-Step 'apply: force download and overwrite'
+    Log-Step 'apply: force download and sync files'
     if (-not [string]::IsNullOrWhiteSpace($destArg) -and -not [string]::IsNullOrWhiteSpace($nameArg)) {
       $ap = Resolve-DestTwoArg -Raw1 $destArg -Raw2 $nameArg
       $destArg = $ap.Dest

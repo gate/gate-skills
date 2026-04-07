@@ -34,7 +34,7 @@ An AI Agent skill for **macro-driven crypto context** using **Gate-Info** and **
 
 ## Runtime prerequisites
 
-- **Skill self-update**: **Bash 3+** or **Windows PowerShell** for `scripts/update-skill.sh` / `update-skill.ps1`; sandboxed agents often need **full / all permissions** for `apply`.
+- **Skill self-update**: **Bash 3+** or **Windows PowerShell** for `scripts/update-skill.sh` / `update-skill.ps1`; sandboxed agents may need host-approved permissions for `apply`.
 - **Typical install roots**: `~/.cursor/skills/gate-info-macroimpact/`, `~/.codex/skills/gate-info-macroimpact/`, etc. — see `SKILL.md` **Trigger update**.
 - **MCP**: **Gate-Info** and **Gate-News** required per `SKILL.md`; install via IDE installer skills. No user API key required for documented read-only tools.
 
@@ -42,8 +42,8 @@ An AI Agent skill for **macro-driven crypto context** using **Gate-Info** and **
 
 | URL / pattern | Purpose |
 |---------------|---------|
-| `https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md` | Runtime rules (**General Rules**). |
-| `https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md` | Info/news runtime rules. |
+| Local file `../gate-runtime-rules.md` | Runtime rules (**General Rules**). |
+| Local file `../info-news-runtime-rules.md` | Info/news runtime rules. |
 | `https://raw.githubusercontent.com/gate/gate-skills/master/skills/<skill-name>/SKILL.md` | Version **check** vs remote `SKILL.md`. |
 | `https://github.com/gate/gate-skills` | Repo / install references. |
 

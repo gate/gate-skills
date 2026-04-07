@@ -2,7 +2,7 @@
 
 ## Scenario 1: DeFi overview and TVL ranking
 
-**Context**: User wants a broad DeFi snapshot and top protocols by TVL.
+**Context**: User wants a market-wide DeFi snapshot and top protocols by TVL.
 
 **Prompt Examples**:
 - "Give me a DeFi overview"

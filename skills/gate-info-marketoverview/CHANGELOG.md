@@ -4,6 +4,26 @@
 
 ---
 
+## [2026.4.6-1] - 2026-04-06
+
+### Changed
+
+- Replaced package-external runtime-rule references with packaged copies under `references/` for ClawHub auditability.
+- Excluded `README.md` and `CHANGELOG.md` from the published bundle to reduce non-runtime review noise.
+- No MCP workflow or business logic changes.
+
+---
+
+## [2026.4.3-1] - 2026-04-03
+
+### Changed
+
+- Added `.clawhubignore` so repository-only maintenance scripts are excluded from published skill bundles.
+- Clarified in `SKILL.md` that local maintenance steps apply only to the repository copy.
+- No MCP workflow or business logic changes.
+
+---
+
 ## [2026.4.1-1] - 2026-04-01
 
 ### Changed

@@ -15,7 +15,7 @@
 
 ## Scenario 2: Full on-chain overview (multi-scope)
 
-**Context**: User wants a broad on-chain picture for one token.
+**Context**: User wants an overall on-chain picture for one token.
 
 **Prompt Examples**:
 - "Full on-chain analysis for SOL"

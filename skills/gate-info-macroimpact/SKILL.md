@@ -1,7 +1,7 @@
 ---
 name: gate-info-macroimpact
-version: "2026.4.1-2"
-updated: "2026-04-01"
+version: "2026.4.6-1"
+updated: "2026-04-06"
 description: "Macro-driven crypto via Gate-Info and Gate-News MCP. Use this skill whenever macro (CPI, NFP, Fed, rates, payrolls) ties to crypto, calendar, or indicator-price links. Trigger phrases include CPI and BTC, macro today, Fed, NFP, rates. Route: price/technicals → gate-info-coinanalysis or gate-info-trendanalysis; headlines → gate-news-briefing; attribution → gate-news-eventexplain. Tools: info_macro_* (calendar, indicator, summary), news_feed_search_news, info_marketsnapshot_get_market_snapshot."
 required_credentials: []
 required_env_vars: []
@@ -14,24 +14,14 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-→ Also read [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) for **gate-info** / **gate-news**-specific rules (tool degradation, report standards, security, routing degradation, and per-skill version checks when `scripts/` is present).
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, and output standards).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
 > The Macro-Economic Impact Analysis Skill. When the user asks about the impact of macro data/events on the crypto market, the system calls MCP tools in parallel to fetch economic calendar, macro indicators (or summary), related news, and correlated coin market data, then the LLM produces a structured correlation analysis report.
 
 **Trigger Scenarios**: User mentions macroeconomic events/indicators and crypto market impact, e.g., "how does non-farm payroll affect BTC", "any macro data today", "Fed meeting impact on the market", "has CPI been released".
-
-**Per-skill updates:** This skill may include `scripts/update-skill.sh` and, in full source trees, `scripts/update-skill.ps1` for optional maintenance checks against the official Gate Skills repository. The shared policy is defined in [info-news-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md).
-
-**Maintenance flow:**
-- Use `check` only when you need to compare the installed skill with the official repo.
-- In interactive sessions, `check` never rewrites files.
-- If `update_available`, ask the user before `apply`.
-- If update scripts are unavailable or the version check cannot run, continue with the current installed version.
-- `apply` rewrites only this skill's local directory under the active skills root.
-- Do not download replacement updater scripts during the session; use the official repo for manual repair when needed.
 
 ---
 
@@ -60,11 +50,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate-Info, Gate-News
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the required Gate MCP server is available in the current environment.
 
 ## Routing Rules
 
@@ -221,4 +208,4 @@ The LLM must:
 5. **Flag uncertainty**: When data is pending, label forecast vs actual clearly.
 6. **Historical patterns disclaimer**: Past performance does not guarantee future results.
 7. **Age & eligibility**: Intended for users **aged 18 or above** with **full civil capacity** in their jurisdiction.
-8. **Data flow**: The host agent processes user prompts; this skill directs **read-only** **Gate-Info** and **Gate-News** MCP tools listed above. The LLM synthesizes from tool results. Aside from those MCP calls and the documented skill-update flow (GitHub URLs in **General Rules** and `info-news-runtime-rules.md`), this skill does not invoke additional third-party data services.
+8. **Data flow**: The host agent processes user prompts; this skill directs **read-only** **Gate-Info** and **Gate-News** MCP tools listed above. The LLM synthesizes from tool results. This skill does not invoke additional third-party data services.

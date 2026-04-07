@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-welfare
-version: "2026.3.23-1"
-updated: "2026-03-23"
+version: "2026.4.3-1"
+updated: "2026-04-03"
 description: "Gate welfare center and new-user task skill. Use when the user asks about welfare rewards, tasks, or how to claim benefits. Triggers on 'welfare center', 'new user tasks', 'claim reward'. Must use real MCP data only."
 required_credentials:
   - gate_api_key
@@ -11,6 +11,14 @@ required_env_vars:
   - GATE_API_SECRET
 required_permissions:
   - Welfare:Read
+metadata:
+  openclaw:
+    requires:
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+    primaryEnv: GATE_API_KEY
+    homepage: https://github.com/gate/gate-skills
 ---
 
 # Gate Exchange Welfare Center
@@ -19,7 +27,7 @@ required_permissions:
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
+→ Read `./references/gate-runtime-rules.md`
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 
@@ -49,11 +57,8 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Installation Check
 - Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
+- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
 
 ## MCP Mode
 

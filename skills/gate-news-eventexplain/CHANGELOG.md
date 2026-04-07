@@ -4,6 +4,14 @@
 
 ---
 
+## [2026.4.3-1] - 2026-04-03
+
+### Changed
+
+- Added `.clawhubignore` to exclude local update scripts from published ClawHub bundles.
+- Clarified in `SKILL.md` that local maintenance scripts are repository-only helpers and are not required for the published skill bundle.
+- No MCP workflow or business logic changes.
+
 ## [2026.4.1-2] - 2026-04-01
 
 ### Fixed
