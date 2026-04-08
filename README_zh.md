@@ -63,6 +63,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx 跨所交易：订单、持仓与历史查询（Gate、Binance、OKX） | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-transfer](#-gate-exchange-transfer) | Gate 内部划转：在现货、杠杆、合约、交割、期权账户间转移资金 | `2026.3.16-2` | ✅ Active |
 | [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate 闪兑查询：币对列表、兑换限额、订单历史与详情 | `2026.3.11-5` | ✅ Active |
+| [gate-exchange-smallbalance](#-gate-exchange-smallbalance) | Gate 小额资产/粉尘：可兑列表、兑换 GT、兑换历史 | `2026.3.20-1` | ✅ Active |
 | [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP 等级与手续费率查询：现货费率、合约费率、VIP 等级 | `2026.3.11-2` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate 直播与回放列表：按分类、币种、热度/最新排序筛选 | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | Gate 合约交易：开仓、平仓、撤单、改单 | `2026.3.5-1` | ✅ Active |
@@ -206,6 +207,20 @@ Gate 闪兑查询：浏览支持的币对、验证兑换额度限制、查看闪
 - `BTC/USDT 闪兑限额`
 - `显示我的闪兑订单历史`
 - `查询闪兑订单 #12345`
+
+---
+
+## 🪙 gate-exchange-smallbalance
+
+> **路径**: `skills/gate-exchange-smallbalance/`
+
+查询符合平台阈值的现货 **粉尘/小额资产**、将指定或全部可兑资产 **兑换为 GT**（不可撤销；写操作前需用户确认），以及 **小额兑换历史**。需认证；兑换需具备钱包写权限的 API。
+
+**示例提示词**：
+- `有哪些小额可以换成 GT？`
+- `把粉尘全部换成 GT`
+- `把 FLOKI 粉尘换成 GT`
+- `小额兑换历史`
 
 ---
 
@@ -957,6 +972,7 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # 市场盘口分析 skill
     ├── gate-exchange-pay/              # Gate Pay 支付执行 skill
     ├── gate-exchange-simpleearn/       # Simple Earn（活期理财）查询：持仓、利息、利率（只读）
+    ├── gate-exchange-smallbalance/     # 粉尘/小额资产：列表、兑 GT、历史
     ├── gate-exchange-spot/             # 现货交易 skill
     ├── gate-exchange-staking/          # 理财/质押查询（只读）
     ├── gate-exchange-autoinvest/       # Earn 极速定投（DCA）：计划、记录、现货与 Uni 上下文

@@ -63,6 +63,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: orders, positions, and history across Gate, Binance, OKX | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-transfer](#-gate-exchange-transfer) | Gate internal transfer: move funds between spot, margin, perpetual, delivery, and options accounts | `2026.3.16-2` | ✅ Active |
 | [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: currency pairs, swap limits, order history, and order details | `2026.3.11-5` | ✅ Active |
+| [gate-exchange-smallbalance](#-gate-exchange-smallbalance) | Gate small balance (dust): list eligible assets, convert to GT, conversion history | `2026.3.20-1` | ✅ Active |
 | [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rate query: spot fees, futures fees, VIP level | `2026.3.11-2` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.3.13-1` | ✅ Active |
 | [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
@@ -206,6 +207,20 @@ Gate Flash Swap query: browse supported currency pairs, validate swap amount lim
 - `Flash swap limits for BTC/USDT`
 - `Show my flash swap order history`
 - `Look up flash swap order #12345`
+
+---
+
+## 🪙 gate-exchange-smallbalance
+
+> **Path**: `skills/gate-exchange-smallbalance/`
+
+List spot **dust / small-balance** holdings eligible under the platform threshold, **convert** selected or all eligible balances to **GT** (irreversible; confirm before write), and query **conversion history**. Requires authentication; convert needs wallet write-capable API access.
+
+**Example Prompts**:
+- `What small balances can I convert to GT?`
+- `Convert all my dust to GT`
+- `Convert FLOKI dust to GT`
+- `Show my small balance conversion history`
 
 ---
 
@@ -957,6 +972,7 @@ gate-github-skills/
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
     ├── gate-exchange-pay/              # Gate Pay payment execution skill
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
+    ├── gate-exchange-smallbalance/     # Dust / small balance: list, convert to GT, history
     ├── gate-exchange-autoinvest/       # Earn fast auto-invest (DCA): plans, records, spot & Uni context
     ├── gate-exchange-spot/             # Spot trading skill
     ├── gate-exchange-staking/          # Staking (earn) query (read-only)
