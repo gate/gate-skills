@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.3.25-1"
-updated: "2026-03-25"
+version: "2026.4.8-1"
+updated: "2026-04-08"
 description: "Gate partner affiliate data and application skill. Use when the user asks about partner commissions, referral volume, or applying for the affiliate program. Triggers on 'my affiliate data', 'partner earnings', 'apply for affiliate', 'commission'."
 required_credentials:
   - gate_api_key
@@ -11,6 +11,14 @@ required_env_vars:
   - GATE_API_SECRET
 required_permissions:
   - Rebate:Read
+metadata:
+  openclaw:
+    requires:
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+    primaryEnv: GATE_API_KEY
+    homepage: https://github.com/gate/gate-skills
 ---
 
 # Gate Exchange Affiliate Program Assistant
@@ -21,7 +29,7 @@ Query and manage Gate Exchange affiliate/partner program data, including commiss
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read `../gate-runtime-rules.md`
+→ Read `./references/gate-runtime-rules.md`
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 

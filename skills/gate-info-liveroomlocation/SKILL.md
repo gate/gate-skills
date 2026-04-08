@@ -1,7 +1,7 @@
 ---
 name: gate-info-liveroomlocation
-version: "2026.3.23-1"
-updated: "2026-03-23"
+version: "2026.4.8-1"
+updated: "2026-04-08"
 description: "Gate live stream and replay listing skill. Use when the user asks to find live rooms or replays by tag, coin, or sort. Triggers on 'live room list', '最热直播', 'replay list', 'SOL live stream'."
 required_credentials: []
 required_env_vars: []
@@ -14,7 +14,8 @@ required_permissions: []
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read `../gate-runtime-rules.md`
+→ Read `./references/gate-runtime-rules.md`
+→ Also read `./references/info-news-runtime-rules.md` for gate-info / gate-news shared rules (tool degradation, report standards, security, and output standards).
 - **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
   exist in the MCP server.
 

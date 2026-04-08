@@ -37,7 +37,7 @@ Thumbs.db
 
 # Applications
 *.app
-*.exe
+# *.exe
 *.war
 test-for-skill
 # Large media files

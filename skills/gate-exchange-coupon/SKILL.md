@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-coupon
-version: "2026.4.3-1"
-updated: "2026-04-03"
+version: "2026.4.8-1"
+updated: "2026-04-08"
 description: "Gate coupon and voucher query skill. Use when the user asks about coupon balance, rules, expiry, or source. Triggers on 'my coupons', 'coupon details', 'voucher rules', 'coupon expires'."
 required_credentials:
   - gate_api_key

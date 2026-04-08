@@ -1,5 +1,13 @@
 # Changelog
 
+## [2026.4.8-1] - 2026-04-08
+
+### Changed
+
+- Moved the mandatory runtime-rules references into this skill bundle for publish-time auditability.
+- Excluded non-runtime documentation from the published bundle.
+- No MCP workflow or business logic changes.
+
 ## [2026.3.23-1] - 2026-03-23
 
 ### Changed

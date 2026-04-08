@@ -1,5 +1,11 @@
 # Changelog
 
+## [2026.4.8-1] - 2026-04-08
+
+### Changed
+- Excluded non-runtime documentation from the published bundle to reduce ClawHub scan noise.
+- No MCP workflow or business logic changes.
+
 ## [2026.4.3-1] - 2026-04-03
 
 ### Changed
