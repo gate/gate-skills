@@ -7,3 +7,5 @@ gate-cex-ex|http|https://api.gatemcp.ai/mcp/exchange|oauth|Remote CEX Exchange (
 gate-dex|http|https://api.gatemcp.ai/mcp/dex|x_api_key|DEX Operations
 gate-info|http|https://api.gatemcp.ai/mcp/info|none|Info & Analysis
 gate-news|http|https://api.gatemcp.ai/mcp/news|none|News Feed
+gatepay-local-mcp|stdio|npx -y gatepay-local-mcp|gatepay_env|Gate Pay x402 (stdio; env placeholders — see gate-pay-x402)
+gatepay-merchant-discovery|http|http://dev.halftrust.xyz/pay-mcp-server/mcp|none|Gate Pay merchant catalog (discoveryResource)

@@ -4,6 +4,8 @@ One script for **Cursor**, **Claude Code**, **Codex**, and **OpenClaw** (`mcport
 
 CEX: local stdio (`gate-mcp`), remote public (`/mcp`), remote exchange (`/mcp/exchange` + OAuth2). See [gate-mcp](https://github.com/gate/gate-mcp).
 
+**Gate Pay** (optional): **`--mcp gatepay-local`** for x402 stdio (`npx -y gatepay-local-mcp`); **`--mcp gatepay-discovery`** for remote merchant catalog (`gatepay-merchant-discovery` → `discoveryResource`). Details: **gate-pay-x402** skill.
+
 ## Quick start
 
 ```bash
@@ -24,6 +26,11 @@ bash skills/gate-mcp-installer/scripts/install.sh --no-skills
 
 # Subset
 bash skills/gate-mcp-installer/scripts/install.sh --mcp main --mcp cex-public
+
+# Gate Pay x402 stdio (optional)
+bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp gatepay-local
+# Gate Pay merchant discovery HTTP (optional)
+bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp gatepay-discovery
 
 # OpenClaw interactive (single server)
 bash skills/gate-mcp-installer/scripts/install.sh --platform openclaw --select
@@ -51,5 +58,7 @@ Windows Cursor: `%APPDATA%\Cursor\mcp.json` and `...\skills`.
 - **Gate (main)**: https://www.gate.com/myaccount/profile/api-key/manage  
 - **gate-cex-ex**: OAuth in IDE; OpenClaw: `mcporter auth gate-cex-ex`  
 - **gate-dex**: https://web3.gate.com/ + OAuth when tools require it  
+- **gatepay-local-mcp**: replace placeholder **`env`** in MCP config per **gate-pay-x402** (`PLUGIN_WALLET_TOKEN`, `EVM_PRIVATE_KEY`, `SVM_PRIVATE_KEY`, …)  
+- **gatepay-merchant-discovery**: URL wired by installer; no keys — see **gate-pay-x402** for **`discoveryResource`**
 
 Restart the client after install.

@@ -1,7 +1,7 @@
 ---
 name: gate-mcp-installer-mcp
-version: "2026.4.1-1"
-updated: "2026-04-01"
+version: "2026.4.10-2"
+updated: "2026-04-10"
 description: "Execution specification for unified Gate MCP + gate-skills installer (Cursor, Claude Code, Codex, OpenClaw)."
 ---
 
@@ -12,7 +12,7 @@ description: "Execution specification for unified Gate MCP + gate-skills install
 **In scope**
 
 - Detect or accept target platform; merge/write MCP config without removing unrelated servers.
-- Install selected Gate MCP endpoints (default: all six).
+- Install selected Gate MCP endpoints (default: all six trading MCPs; Gate Pay stdio is opt-in via `gatepay-local`; merchant discovery HTTP via `gatepay-discovery`).
 - Clone **gate-skills** into the platform skills directory unless `--no-skills`.
 
 **Out of scope**
@@ -45,6 +45,8 @@ description: "Execution specification for unified Gate MCP + gate-skills install
 - Local CEX trading needs `GATE_API_KEY` / `GATE_API_SECRET` after install.
 - Remote exchange needs OAuth2 at first use.
 - DEX may need wallet + OAuth as documented in [gate-mcp](https://github.com/gate/gate-mcp).
+- **gatepay-local-mcp**: plugin token / EVM / Solana key placeholders in config; replace locally only. Product flow: **gate-pay-x402** in this repo.
+- **gatepay-merchant-discovery**: URL-only remote MCP; no installer secrets. Catalog tool often **`discoveryResource`** — confirm in live tool list (**gate-pay-x402**).
 
 ---
 
@@ -59,7 +61,7 @@ No Gate business MCP calls. Entrypoint:
 | Flag | Meaning |
 |------|---------|
 | `--platform` | `cursor` \| `claude` \| `codex` \| `openclaw` |
-| `--mcp` | Repeatable: `main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news` |
+| `--mcp` | Repeatable: `main`, `cex-public`, `cex-exchange`, `dex`, `info`, `news`, `gatepay-local`, `gatepay-discovery` |
 | `--no-skills` | Skip gate-skills clone |
 | `--select` / `-s` | OpenClaw only: interactive menu for one server |
 
