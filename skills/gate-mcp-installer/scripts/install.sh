@@ -2,10 +2,10 @@
 # Gate MCP unified installer: Cursor / Claude Code / Codex / OpenClaw (mcporter)
 # Usage:
 #   install.sh [--platform cursor|claude|codex|openclaw]
-#              [--mcp main|cex-public|cex-exchange|dex|info|news] ...
+#              [--mcp main|cex-public|cex-exchange|dex|info|news|gatepay-local|gatepay-discovery] ...
 #              [--no-skills] [--select|-s]
 #   --platform  Force target; required if multiple dev environments are detected.
-#   --mcp       Repeatable; omit to install all six MCP surfaces.
+#   --mcp       Repeatable; omit to install all six trading MCP surfaces (Gate Pay: add gatepay-local / gatepay-discovery).
 #   --no-skills MCP only (no gate-skills clone).
 #   --select    OpenClaw: interactive pick one server (legacy mcporter UX).
 set -e
@@ -23,12 +23,14 @@ MCP_CEX_EXCHANGE=0
 MCP_DEX=0
 MCP_INFO=0
 MCP_NEWS=0
+MCP_GATEPAY_LOCAL=0
+MCP_GATEPAY_DISCOVERY=0
 INSTALL_SKILLS=1
 SELECT_MODE=0
 
 usage() {
   echo "Usage: $0 [--platform cursor|claude|codex|openclaw]"
-  echo "          [--mcp main|cex-public|cex-exchange|dex|info|news] ..."
+  echo "          [--mcp main|cex-public|cex-exchange|dex|info|news|gatepay-local|gatepay-discovery] ..."
   echo "          [--no-skills] [--select|-s]"
   echo ""
   echo "  Auto-detects platform when exactly one of: ~/.cursor, Claude config, ~/.codex,"
@@ -55,7 +57,9 @@ while [[ $# -gt 0 ]]; do
         dex)          MCP_DEX=1 ;;
         info)         MCP_INFO=1 ;;
         news)         MCP_NEWS=1 ;;
-        *) echo "Unknown MCP: $1 (main, cex-public, cex-exchange, dex, info, news)" >&2; exit 1 ;;
+        gatepay-local) MCP_GATEPAY_LOCAL=1 ;;
+        gatepay-discovery) MCP_GATEPAY_DISCOVERY=1 ;;
+        *) echo "Unknown MCP: $1 (main, cex-public, cex-exchange, dex, info, news, gatepay-local, gatepay-discovery)" >&2; exit 1 ;;
       esac
       shift
       ;;
@@ -66,7 +70,7 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ $MCP_MAIN -eq 0 && $MCP_CEX_PUBLIC -eq 0 && $MCP_CEX_EXCHANGE -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 ]]; then
+if [[ $MCP_MAIN -eq 0 && $MCP_CEX_PUBLIC -eq 0 && $MCP_CEX_EXCHANGE -eq 0 && $MCP_DEX -eq 0 && $MCP_INFO -eq 0 && $MCP_NEWS -eq 0 && $MCP_GATEPAY_LOCAL -eq 0 && $MCP_GATEPAY_DISCOVERY -eq 0 ]]; then
   MCP_MAIN=1
   MCP_CEX_PUBLIC=1
   MCP_CEX_EXCHANGE=1
@@ -156,9 +160,9 @@ install_gate_skills_to() {
 }
 
 ensure_node_for_main() {
-  if [[ $MCP_MAIN -ne 1 ]]; then return 0; fi
+  if [[ $MCP_MAIN -ne 1 && $MCP_GATEPAY_LOCAL -ne 1 ]]; then return 0; fi
   if ! command -v node &>/dev/null; then
-    echo "Error: Node.js required for Gate (main). https://nodejs.org" >&2
+    echo "Error: Node.js required for Gate (main) and/or gatepay-local-mcp. https://nodejs.org" >&2
     exit 1
   fi
   if ! command -v npx &>/dev/null; then
@@ -177,6 +181,9 @@ prompt_gate_api_keys() {
   echo ""
   echo "Gate (main) trading uses API Key + Secret:"
   echo "  https://www.gate.com/myaccount/profile/api-key/manage"
+  if [[ $MCP_GATEPAY_LOCAL -eq 1 ]]; then
+    echo "  (Prompt is for Gate (main) only, not gatepay-local-mcp — pay MCP uses PLUGIN_WALLET_TOKEN / EVM_PRIVATE_KEY / … per gate-pay-x402.)"
+  fi
   echo ""
   read -r -p "  GATE_API_KEY (empty to skip): " USER_GATE_API_KEY
   if [[ -n "$USER_GATE_API_KEY" ]]; then
@@ -229,6 +236,8 @@ install_json_merge_platform() {
   [[ $MCP_DEX -eq 1 ]]          && FRAGS+=("$FRAG_DIR/gate-dex.json")
   [[ $MCP_INFO -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-info.json")
   [[ $MCP_NEWS -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-news.json")
+  [[ $MCP_GATEPAY_LOCAL -eq 1 ]] && FRAGS+=("$FRAG_DIR/gatepay-local-mcp.json")
+  [[ $MCP_GATEPAY_DISCOVERY -eq 1 ]] && FRAGS+=("$FRAG_DIR/gatepay-merchant-discovery.json")
 
   if command -v node &>/dev/null; then
     local EXISTING="{}"
@@ -269,6 +278,16 @@ install_json_merge_platform() {
   if [[ $MCP_DEX -eq 1 ]]; then
     echo ""
     echo "Gate-Dex: wallet at https://web3.gate.com/ then OAuth via assistant link if required."
+  fi
+  if [[ $MCP_GATEPAY_LOCAL -eq 1 ]]; then
+    echo ""
+    echo "gatepay-local-mcp: Gate Pay x402 stdio — replace env placeholders with real values only on your machine."
+    echo "  See skill gate-pay-x402 (PLUGIN_WALLET_TOKEN, EVM_PRIVATE_KEY, SVM_PRIVATE_KEY, PAYMENT_METHOD_PRIORITY)."
+  fi
+  if [[ $MCP_GATEPAY_DISCOVERY -eq 1 ]]; then
+    echo ""
+    echo "gatepay-merchant-discovery: remote catalog (typically discoveryResource). No payment on this server."
+    echo "  If the client fails to connect, try adjusting transport in $CONFIG_JSON per host docs."
   fi
 
   if [[ "$kind" == "cursor" ]]; then
@@ -352,6 +371,8 @@ TOML
   [[ $MCP_DEX -eq 1 ]]          && append_named "gate-dex" "$FRAG_DIR/gate-dex.toml" "gate-dex"
   [[ $MCP_INFO -eq 1 ]]         && append_named "gate-info" "$FRAG_DIR/gate-info.toml" "gate-info"
   [[ $MCP_NEWS -eq 1 ]]         && append_named "gate-news" "$FRAG_DIR/gate-news.toml" "gate-news"
+  [[ $MCP_GATEPAY_LOCAL -eq 1 ]] && append_named "gatepay-local-mcp" "$FRAG_DIR/gatepay-local-mcp.toml" "gatepay-local-mcp"
+  [[ $MCP_GATEPAY_DISCOVERY -eq 1 ]] && append_named "gatepay-merchant-discovery" "$FRAG_DIR/gatepay-merchant-discovery.toml" "gatepay-merchant-discovery"
 
   if [[ $MCP_MAIN -eq 1 && $GATE_MAIN_USE_NPX -eq 1 ]]; then
     echo ""
@@ -372,6 +393,14 @@ TOML
     echo ""
     echo "Gate-Dex: https://web3.gate.com/ for wallet; OAuth via assistant if needed."
   fi
+  if [[ $MCP_GATEPAY_LOCAL -eq 1 ]]; then
+    echo ""
+    echo "gatepay-local-mcp: see gate-pay-x402 skill for wallet env and x402 tools."
+  fi
+  if [[ $MCP_GATEPAY_DISCOVERY -eq 1 ]]; then
+    echo ""
+    echo "gatepay-merchant-discovery: merchant resource list (discoveryResource); see gate-pay-x402."
+  fi
   echo "Done. Restart Codex to load MCP servers."
 }
 
@@ -389,13 +418,15 @@ load_openclaw_servers() {
 openclaw_wants_name() {
   local n="$1"
   case "$n" in
-    gate)          [[ $MCP_MAIN -eq 1 ]] ;;
-    gate-cex-pub)  [[ $MCP_CEX_PUBLIC -eq 1 ]] ;;
-    gate-cex-ex)   [[ $MCP_CEX_EXCHANGE -eq 1 ]] ;;
-    gate-dex)      [[ $MCP_DEX -eq 1 ]] ;;
-    gate-info)     [[ $MCP_INFO -eq 1 ]] ;;
-    gate-news)     [[ $MCP_NEWS -eq 1 ]] ;;
-    *)             false ;;
+    gate)               [[ $MCP_MAIN -eq 1 ]] ;;
+    gate-cex-pub)       [[ $MCP_CEX_PUBLIC -eq 1 ]] ;;
+    gate-cex-ex)        [[ $MCP_CEX_EXCHANGE -eq 1 ]] ;;
+    gate-dex)           [[ $MCP_DEX -eq 1 ]] ;;
+    gate-info)          [[ $MCP_INFO -eq 1 ]] ;;
+    gate-news)          [[ $MCP_NEWS -eq 1 ]] ;;
+    gatepay-local-mcp)           [[ $MCP_GATEPAY_LOCAL -eq 1 ]] ;;
+    gatepay-merchant-discovery)   [[ $MCP_GATEPAY_DISCOVERY -eq 1 ]] ;;
+    *)                           false ;;
   esac
 }
 
@@ -431,6 +462,14 @@ openclaw_install_oauth_http() {
   mcporter config add "$1" --url "$2" --auth oauth 2>/dev/null || return 1
 }
 
+openclaw_install_gatepay_stdio() {
+  local name="$1"
+  mcporter config add "$name" --stdio --command "npx -y gatepay-local-mcp" \
+    --env "PLUGIN_WALLET_TOKEN=your-plugin-wallet-token" \
+    --env "EVM_PRIVATE_KEY=your-evm-private-key" \
+    --env "SVM_PRIVATE_KEY=your-svm-private-key" 2>/dev/null || return 1
+}
+
 openclaw_install_server_line() {
   local config="$1" gate_key="$2" gate_secret="$3" dex_key="$4"
   local name type endpoint auth_type desc
@@ -457,6 +496,9 @@ openclaw_install_server_line() {
         openclaw_install_http "$name" "$endpoint" "" || { echo "failed"; return 1; }
       fi
       ;;
+    gatepay_env)
+      openclaw_install_gatepay_stdio "$name" || { echo "failed"; return 1; }
+      ;;
   esac
   echo "installed"
 }
@@ -476,26 +518,23 @@ install_openclaw_platform() {
   if [[ $SELECT_MODE -eq 1 ]]; then
     echo "Gate MCP OpenClaw — interactive select"
     local i=1
+    local max="${#OPENCLAW_SERVERS[@]}"
     for server in "${OPENCLAW_SERVERS[@]}"; do
       local name type endpoint auth_type desc
       IFS='|' read -r name type endpoint auth_type desc <<< "$server"
       local st=""
       openclaw_check_existing "$name" && st=" [installed]"
-      printf "  %d) %-15s - %s%s\n" "$i" "$name" "$desc" "$st"
+      printf "  %d) %-18s - %s%s\n" "$i" "$name" "$desc" "$st"
       i=$((i + 1))
     done
     echo ""
-    read -r -p "Enter choice [1-6]: " choice
+    read -r -p "Enter choice [1-$max]: " choice
     local selected=""
-    case "$choice" in
-      1) selected="${OPENCLAW_SERVERS[0]}" ;;
-      2) selected="${OPENCLAW_SERVERS[1]}" ;;
-      3) selected="${OPENCLAW_SERVERS[2]}" ;;
-      4) selected="${OPENCLAW_SERVERS[3]}" ;;
-      5) selected="${OPENCLAW_SERVERS[4]}" ;;
-      6) selected="${OPENCLAW_SERVERS[5]}" ;;
-      *) echo "Invalid choice" >&2; exit 1 ;;
-    esac
+    if ! [[ "$choice" =~ ^[0-9]+$ ]] || [[ "$choice" -lt 1 || "$choice" -gt $max ]]; then
+      echo "Invalid choice" >&2
+      exit 1
+    fi
+    selected="${OPENCLAW_SERVERS[$((choice - 1))]}"
     local name type endpoint auth_type desc gate_key="" gate_secret=""
     IFS='|' read -r name type endpoint auth_type desc <<< "$selected"
     case "$auth_type" in
@@ -507,6 +546,9 @@ install_openclaw_platform() {
         ;;
       oauth)
         echo "After install: mcporter auth $name"
+        ;;
+      gatepay_env)
+        echo "gatepay-local-mcp: edit mcporter env for PLUGIN_WALLET_TOKEN / EVM_PRIVATE_KEY / SVM_PRIVATE_KEY (see gate-pay-x402)."
         ;;
     esac
     openclaw_install_server_line "$selected" "$gate_key" "$gate_secret" "$GATE_DEX_API_KEY"
