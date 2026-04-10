@@ -2,12 +2,12 @@
 name: gate-dex-auth
 version: "2026.3.25-1"
 updated: "2026-03-25"
-description: "Gate Wallet authentication module. Manages Google OAuth and Gate OAuth login, and logout. Use when the user needs to log in, log out, or refresh an expired session, or when another skill detects a missing mcp_token."
+description: "Gate Wallet authentication module. Manages Google OAuth and Gate OAuth login, and logout. Use when the user needs to log in, log out, re-authenticate after session loss or expiry, or when another skill detects a missing mcp_token."
 ---
 
 # Gate DEX Auth
 
-> Authentication module — manages Google OAuth and Gate OAuth login, token refresh, and logout. 7 MCP tools.
+> Authentication module — manages Google OAuth and Gate OAuth login, and logout. 7 MCP tools.
 
 ## Applicable Scenarios
 
@@ -53,14 +53,14 @@ Polls Google OAuth login results using `flow_id`.
 | Field          | Description                                                                           |
 | -------------- | ------------------------------------------------------------------------------------- |
 | **Parameters** | `{ flow_id: string }`                                                                 |
-| **Returns**    | `{ status: string, mcp_token?: string, refresh_token?: string, account_id?: string }` |
+| **Returns**    | `{ status: string, mcp_token?: string, account_id?: string }` |
 
 
 
 | status    | Meaning                              | Next Action                                        |
 | --------- | ------------------------------------ | -------------------------------------------------- |
 | `pending` | User has not completed authorization | Wait a few seconds, then retry                     |
-| `success` | Login successful                     | Extract `mcp_token`, `refresh_token`, `account_id` |
+| `success` | Login successful                     | Extract `mcp_token`, `account_id` |
 | `expired` | Login flow timed out                 | Prompt user to initiate login again                |
 | `error`   | Login error                          | Display error message                              |
 
@@ -73,7 +73,7 @@ Direct login using an existing Google OAuth authorization code.
 | Field          | Description                                                              |
 | -------------- | ------------------------------------------------------------------------ |
 | **Parameters** | `{ code: string, redirect_url: string }`                                 |
-| **Returns**    | `MCPLoginResponse` (contains `mcp_token`, `refresh_token`, `account_id`) |
+| **Returns**    | `MCPLoginResponse` (contains `mcp_token`, `account_id`) |
 
 
 ### 4. `dex_auth_gate_login_start` — Start Gate OAuth Login
@@ -152,12 +152,12 @@ Step 3: Display verification link to user
   |
 Step 4: After user confirms, call dex_auth_google_login_poll({ flow_id })
   |- pending  -> Ask user to confirm completion; retry (max 10 times, 3s intervals)
-  |- success  -> Extract mcp_token, refresh_token, account_id -> Step 5
+  |- success  -> Extract mcp_token, account_id -> Step 5
   |- expired  -> Notify timeout; suggest re-initiating login
   |- error    -> Display error message
   |
 Step 5: Login success
-  Record mcp_token, refresh_token, account_id internally (never display tokens).
+  Record mcp_token, account_id internally (never display tokens).
   If user had a prior intent -> return to that operation.
   If no prior intent -> display available actions (see Post-Auth template).
 ```
@@ -189,7 +189,7 @@ Step 1: User requests logout
   |
 Step 2: Call dex_auth_logout({ mcp_token })
   |
-Step 3: Clear internally held mcp_token, refresh_token, account_id
+Step 3: Clear internally held mcp_token, account_id
   |
 Step 4: Confirm: "Successfully logged out. To use wallet functions again, please re-login."
 ```
@@ -264,9 +264,9 @@ Agent:
 User: "Check my ETH balance" (but mcp_token is expired)
 Agent:
 
-1. Attempt silent token refresh.
-2. On success, proceed with balance query transparently.
-3. On failure, notify user and initiate re-login flow.
+1. Notify the user the session is invalid or expired.
+2. Guide them through re-login (Flow A or B).
+3. After successful login, proceed with the balance query.
 
 **Example 4: Implicit login need — vague request**
 User: "I can't access my wallet" / "something is wrong with my session"
@@ -274,7 +274,7 @@ Agent:
 
 1. Check current auth status.
 2. If no valid `mcp_token`, initiate login flow.
-3. If token exists but is expired, attempt refresh first.
+3. If the token is expired or tools return auth errors, initiate re-login (Flow A or B).
 
 **Example 5: Account switch**
 User: "I want to switch to a different account"
@@ -319,7 +319,7 @@ Agent: Route to [transfer.md](./transfer.md) — this is a transfer, not authent
 | User hasn't completed browser auth  | Poll returns `pending`; prompt user to complete browser operation first           |
 | Login flow timeout (`expired`)      | Notify timeout; automatically call login_start to start a new flow                |
 | Consecutive poll failures           | Max 10 retries at 3s intervals; after that, prompt user to check network or retry |
-| Token refresh fails                 | Guide through full re-login (Flow A or B)                                         |
+| `mcp_token` missing or expired      | Guide through full re-login (Flow A or B)                                         |
 | `dex_auth_logout` fails             | Display error; still clear local token state                                      |
 | User already logged in              | Notify already logged in; ask if they want to switch accounts                     |
 | Invalid authorization code          | Display error; suggest re-obtaining the code or using Device Flow                 |
@@ -329,9 +329,9 @@ Agent: Route to [transfer.md](./transfer.md) — this is a transfer, not authent
 
 ## Security Rules
 
-1. **Token confidentiality**: Never display `mcp_token` or `refresh_token` in plaintext. Use placeholders like `<mcp_token>`.
+1. **Token confidentiality**: Never display `mcp_token` in plaintext. Use placeholders like `<mcp_token>`.
 2. **Account masking**: When displaying `account_id`, show only partial characters (e.g., `acc_12...89`).
-3. **Silent refresh**: Prioritize silent token refresh; only require re-login if refresh fails.
+3. **Re-login on expiry**: When the session is invalid or expired, guide the user through full re-login (Flow A or B); do not assume a renewed token without login.
 4. **No silent login retry**: After login failure, clearly display the error — do not retry in the background.
 5. **MCP Server required**: If connection detection fails, abort all operations.
 6. **Single session**: Maintain only one active `mcp_token` at a time. Switching accounts requires logout first.

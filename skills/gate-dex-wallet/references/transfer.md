@@ -462,8 +462,8 @@ You can:
 
 | Scenario | Handling |
 |----------|----------|
-| Not logged in / `mcp_token` missing | Attempt silent refresh via `dex_auth_refresh_token`; on failure route to [auth.md](./auth.md) |
-| Token expired mid-transfer | Attempt silent refresh; on failure route to re-login, preserve transfer intent for retry |
+| Not logged in / `mcp_token` missing | Route to [auth.md](./auth.md) for re-login, then continue |
+| Token expired mid-transfer | Route to re-login via [auth.md](./auth.md); preserve transfer intent for retry |
 | Transfer token balance insufficient | Abort; show current balance vs. required amount; suggest reducing amount or topping up |
 | Gas token balance insufficient | Abort; display gas token shortfall; suggest acquiring gas tokens |
 | Invalid recipient address format | Refuse to initiate; show correct format for the target chain |
@@ -487,7 +487,7 @@ You can:
 
 1. **Token confidentiality**: Never display `mcp_token` in plaintext.
 2. **Account ID masking**: Show only partial `account_id` characters in user-facing output.
-3. **Silent refresh**: Attempt `dex_auth_refresh_token` before routing to re-login.
+3. **Re-login on auth failure**: If `mcp_token` is missing or invalid, route to [auth.md](./auth.md) before transfer steps.
 4. **Mandatory balance validation**: Always validate balance (token + gas) before transfer. Never initiate signing when balance is insufficient.
 5. **Mandatory user confirmation**: Before signing, display a complete confirmation summary and get an explicit "confirm" reply. Never skip, simplify, or auto-confirm.
 6. **Individual confirmation for batches**: Each transaction in a batch must be confirmed individually.

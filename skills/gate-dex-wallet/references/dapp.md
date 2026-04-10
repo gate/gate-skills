@@ -417,7 +417,7 @@ You can also:
 | Scenario | Handling |
 |----------|----------|
 | Not logged in / no `mcp_token` | Route to [auth.md](./auth.md) |
-| Token expired | Silent refresh; on failure re-login via [auth.md](./auth.md) |
+| Token expired | Re-login via [auth.md](./auth.md) |
 | Gas token insufficient | Abort tx/approve; display shortfall; suggest top-up |
 | Approve token not in holdings | Warn user (approve possible but meaningless); confirm intent |
 | Spender contract is high risk | Strongly warn; recommend cancellation; allow only with re-confirmation |
@@ -439,7 +439,7 @@ You can also:
 
 1. **Token confidentiality**: Never display `mcp_token` in plaintext. Use placeholders like `<mcp_token>`.
 2. **Account masking**: Show only partial `account_id`.
-3. **Silent refresh**: Prioritize silent token refresh on expiration.
+3. **Re-login on expiry**: If `mcp_token` is invalid or expired, route to [auth.md](./auth.md) before signing or contract calls.
 4. **Confirmation + tx-checkin before all signing**: All signing operations (messages, transactions, approves) require explicit user confirmation **and** terminal [tx-checkin.md](./tx-checkin.md). Never skip or auto-confirm.
 5. **Contract security review**: For unknown contracts, call `dex_token_get_risk_info` and display results. High-risk contracts get additional prominent warnings.
 6. **Default exact authorization**: ERC20 Approve defaults to exact amount. Unlimited authorization requires explicit user request plus risk warning.

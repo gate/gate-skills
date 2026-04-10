@@ -1,8 +1,8 @@
 ---
 name: gate-dex-wallet
-version: "2026.4.3-2"
-updated: "2026-04-03"
-description: "Gate DEX wallet account management. Handles authentication (Google OAuth and Gate OAuth), token balance queries, wallet address retrieval, transaction and swap history, token transfers, on-chain withdraw to Gate Exchange (deposit address, UID binding, min-deposit), x402 payment (HTTP 402 Payment Required with EVM exact/upto and Solana exact/upto schemes; terminal tx-checkin before dex_tx_x402_fetch per references/x402.md), DApp wallet-connect and contract interactions, and CLI tooling. Signing MCP calls require mandatory terminal tx-checkin (prebuilt **`tools/tx-checkin/bin/`** — users do not compile) per references/tx-checkin.md. Use when the user wants to manage their on-chain wallet identity or assets — not for market data lookups or token swap execution."
+version: "2026.4.8-1"
+updated: "2026-04-08"
+description: "Gate DEX wallet account management for on-chain identity and asset operations. Use when the user wants to log in with Google or Gate, check balances, wallet addresses, transaction or swap history, send tokens, withdraw on-chain to Gate Exchange, pay HTTP 402/x402 requests, or connect a DApp wallet. Key capabilities include authentication, portfolio queries, transfers, Gate UID and deposit flows, tx-checkin-based signing, and contract interactions. Do NOT use for market-data lookups or token swap execution."
 ---
 
 # Gate DEX Wallet
