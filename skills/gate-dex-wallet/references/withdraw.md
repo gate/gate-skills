@@ -400,7 +400,7 @@ You can:
 
 | Scenario | Handling |
 |----------|----------|
-| Not logged in / `mcp_token` missing | Same as transfer.md: refresh then [auth.md](./auth.md) |
+| Not logged in / `mcp_token` missing | Same as transfer.md: route to [auth.md](./auth.md) for re-login |
 | `gateUid` missing for exchange withdraw | Run wallet type + OAuth / bind per `nextSteps`; never invent UID |
 | `dex_withdraw_deposit_address` rejects amount | Show min deposit / disabled message; do not sign |
 | `suggested_pick_error` or empty `suggested_to_address` | Stop; resolve inputs with user or support |

@@ -19,7 +19,7 @@ description: "Mandatory tx check-in before any wallet signing MCP call: run the 
 - **Do not skip** check-in because a previous transaction succeeded without it, or because no error appeared yet.
 - **x402:** **Do not** call `dex_tx_x402_fetch` first to probe 402 or GV behavior — check-in comes first; then pass `checkin_token` into `dex_tx_x402_fetch` per [x402.md](./x402.md).
 - If check-in fails (non-zero exit, `ok: false`, or missing `checkin_token` when required by your gateway), **abort** — do not call signing tools or `dex_tx_x402_fetch`.
-- Passing `checkin_token` into MCP tools requires **backend/MCP support**; if the tool has no parameter, rely on gateway session binding (see §9 of the backend technical documentation).
+- Passing `checkin_token` into MCP tools requires **backend/MCP support**; if the tool has no parameter, rely on gateway session binding as documented in the tool description.
 
 ## Applicable scenarios
 
@@ -67,7 +67,7 @@ For **`dex_wallet_sign_message`**, or flows without preview `txBundle` (e.g. som
 
 若后端要求 `intent` 对象、或全量自定义 body，用 **`-intent` / `-intent-file` / `-body-file`**（与 `-message`、`-tx-bundle-file` 互斥，按 CLI 校验）。
 
-详见后端技术文档 §2.3。
+详见 **Check-in `message` 规则**章节。
 
 ## Agent flow
 
@@ -116,4 +116,4 @@ On failed HTTP or transport errors, **stderr** may include **`# Replay with curl
 
 ## Further reading
 
-For CLI flags, response shape, and the `api-sign` algorithm, refer to backend technical documentation or the inline descriptions above.
+(tx-checkin CLI flags, response shape, and api-sign algorithm are documented in the sections above.)

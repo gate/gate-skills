@@ -32,7 +32,7 @@ This skill automatically checks for updates from the [Gate Skills Repository](ht
 
 | Module | Function Scope | Typical Scenarios |
 |--------|----------------|-------------------|
-| 🔐 **Authentication** | Google OAuth and Gate OAuth login, token management | Login verification, session management, auto refresh |
+| 🔐 **Authentication** | Google OAuth and Gate OAuth login, token management | Login verification, session management |
 | 💰 **Assets** | Balance queries, address retrieval, transaction history | View holdings, total assets, historical records |
 | 💸 **Transfer** | Gas estimation, transaction building, signature broadcasting | Token transfers, batch transfers, fee calculation |
 | 💳 **x402 Payment** | HTTP 402 — `dex_tx_x402_fetch`: pay (EVM exact / EVM upto / Solana) and retry | Gated API, flight order, usage-based upto (see [references/x402.md](./references/x402.md)) |
@@ -263,7 +263,7 @@ gate-dex-wallet/
 
 ### Authentication Instructions
 - **First Use**: Complete login authentication via Google OAuth or Gate OAuth
-- **Token Management**: `mcp_token` automatically acquired and saved, supports silent refresh
+- **Token Management**: `mcp_token` is acquired at login and saved for subsequent protected calls
 - **Security Mechanism**: Server-side hosted signing, users don't need to manage private keys
 
 ---
@@ -272,7 +272,7 @@ gate-dex-wallet/
 
 - ✅ **Unified Authentication Management**: All modules share secure OAuth token mechanism
 - 🔒 **Sensitive Information Protection**: `mcp_token` not displayed in plain text in conversations
-- ⚡ **Auto Refresh**: Intelligent re-authentication when token expires
+- ⚡ **Session renewal**: Re-login when the token is missing or invalid
 - 🚨 **Transaction Confirmation**: Transfers and DApp operations include mandatory user confirmation
 - 📊 **Balance Verification**: Auto-verify sufficient assets before transactions
 - 🔍 **Flexible Server Naming**: Auto-identify through tool characteristics, not dependent on fixed names

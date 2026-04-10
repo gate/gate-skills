@@ -1,7 +1,7 @@
 ---
 name: gate-dex-asset-query
-version: "2026.3.25-1"
-updated: "2026-03-25"
+version: "2026.3.25-2"
+updated: "2026-04-09"
 description: "Gate Wallet asset query module. Query token balances, total portfolio value, wallet addresses, transaction history, and swap history. Use when the user wants to check their holdings, view past transactions, or retrieve wallet addresses."
 ---
 
@@ -33,8 +33,8 @@ Use when the user wants to:
 
 | Tool                         | Purpose                    | Key Parameters                                                               |
 | ---------------------------- | -------------------------- | ---------------------------------------------------------------------------- |
-| `dex_wallet_get_token_list`  | Token balances per chain   | `chain?`, `network_keys?`, `account_id?`, `mcp_token`, `page?`, `page_size?` |
-| `dex_wallet_get_total_asset` | Total asset value (USD)    | `account_id`, `mcp_token`                                                    |
+| `dex_wallet_get_token_list`  | Token balances per chain   | `mcp_token`; optional `account_id` (session default). Filter networks with **`network_keys`** only (comma-separated, e.g. `ETH,SOL,ARB`); **do not pass `chain`**. Optional `page`, `page_size`. |
+| `dex_wallet_get_total_asset` | Total asset value (USD)    | `mcp_token`; optional `account_id` (session default).                         |
 | `dex_wallet_get_addresses`   | Wallet addresses per chain | `account_id`, `mcp_token`                                                    |
 | `dex_chain_config`           | Chain configuration info   | `chain`, `mcp_token`                                                         |
 | `dex_tx_list`                | Transaction history        | `account_id`, `chain?`, `page?`, `limit?`, `mcp_token`                       |
@@ -54,8 +54,8 @@ Step 1: Authentication check
   +- Valid token  -> Continue
   |
 Step 2: Execute query based on user intent
-  |- Token balances:   dex_wallet_get_token_list({ chain?, mcp_token })
-  |- Total assets:     dex_wallet_get_total_asset({ account_id, mcp_token })
+  |- Token balances:   dex_wallet_get_token_list({ mcp_token, network_keys?, page?, page_size? }) — use network_keys, not chain
+  |- Total assets:     dex_wallet_get_total_asset({ mcp_token, account_id? })
   |- Wallet addresses: dex_wallet_get_addresses({ account_id, mcp_token })
   |- Chain config:     dex_chain_config({ chain, mcp_token })
   |- Tx history:       dex_tx_list({ account_id, chain?, mcp_token })
@@ -75,15 +75,15 @@ Step 4: Proactively display post-query suggestions (see Post-Query Suggestions)
 
 | User Intent                                                                                          | Tool                         | Notes                                      |
 | ---------------------------------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------ |
-| "What tokens do I have?" / "check balance" / "show my holdings" / "list my coins"                    | `dex_wallet_get_token_list`  | Pass `chain` if user specifies a chain     |
-| "How much is my portfolio worth?" / "total assets" / "net worth" / "how much do I have in USD"       | `dex_wallet_get_total_asset` | Returns USD value with per-chain breakdown |
+| "What tokens do I have?" / "check balance" / "show my holdings" / "list my coins"                    | `dex_wallet_get_token_list`  | Pass **`network_keys`** when the user names chains; omit for all networks |
+| "How much is my portfolio worth?" / "total assets" / "net worth" / "how much do I have in USD"       | `dex_wallet_get_total_asset` | Returns USD value with per-chain breakdown; `account_id` optional if session supplies it |
 | "What is my wallet address?" / "my address" / "show my ETH address" / "give me my receiving address" | `dex_wallet_get_addresses`   | EVM chains share the same address          |
 | "Show my recent transactions" / "tx history" / "what transfers did I make" / "past activity"         | `dex_tx_list`                | Paginated; pass `chain` to filter          |
 | "What happened with tx 0xabc...?" / "check this transaction" / "look up this hash"                   | `dex_tx_detail`              | Requires `hash_id` and `chain`             |
 | "Show my swap history" / "past swaps" / "exchange history" / "what did I trade"                      | `dex_tx_history_list`        | Paginated; pass `chain` to filter          |
 | "What chains are supported?" / "which networks" / "chain config"                                     | `dex_chain_config`           | Returns RPC, block explorer, etc.          |
 | "Do I have any USDT?" / "how many ETH do I hold" / "check my SOL balance"                            | `dex_wallet_get_token_list`  | Filter results for the specific token      |
-| "Show everything on BSC" / "Arbitrum tokens" / "my Solana portfolio"                                 | `dex_wallet_get_token_list`  | Pass specific `chain` parameter            |
+| "Show everything on BSC" / "Arbitrum tokens" / "my Solana portfolio"                                 | `dex_wallet_get_token_list`  | Pass **`network_keys`** for that network (e.g. `BSC`, `ARB`, `SOL`) |
 
 
 ---
@@ -95,7 +95,7 @@ User: "What tokens do I have on Ethereum?"
 Agent:
 
 1. Verify `mcp_token` is valid.
-2. Call `dex_wallet_get_token_list({ chain: "eth", mcp_token })`.
+2. Call `dex_wallet_get_token_list({ network_keys: "ETH", mcp_token })`.
 3. Format and display token list with symbols, balances, and USD values.
 4. Display post-query suggestions (balance template).
 
@@ -104,7 +104,7 @@ User: "How much are my assets worth in total?"
 Agent:
 
 1. Verify `mcp_token` is valid.
-2. Call `dex_wallet_get_total_asset({ account_id, mcp_token })`.
+2. Call `dex_wallet_get_total_asset({ account_id, mcp_token })` (omit `account_id` when the session already provides it).
 3. Display total value in USD with per-chain breakdown.
 4. Display post-query suggestions (total asset template).
 
@@ -131,7 +131,7 @@ User: "Show all my tokens across all chains"
 Agent:
 
 1. Verify `mcp_token` is valid.
-2. Call `dex_wallet_get_token_list({ mcp_token })` without chain filter.
+2. Call `dex_wallet_get_token_list({ mcp_token })` without `network_keys` to include all networks.
 3. Group results by chain, sort by USD value.
 4. Display summary table with chain, token, balance, USD value.
 
@@ -149,7 +149,7 @@ User: "Show my tokens on Avalanche"
 Agent:
 
 1. Verify `mcp_token` is valid.
-2. Call `dex_wallet_get_token_list({ chain: "avax", mcp_token })`.
+2. Call `dex_wallet_get_token_list({ network_keys: "AVAX", mcp_token })` (use the network key your deployment expects, e.g. from `dex_chain_config` if needed).
 3. Result is empty. Reply: "No tokens found on Avalanche. You may not hold any assets on this chain yet."
 4. Suggest: "You can check balances on other chains or view your wallet addresses."
 
@@ -174,7 +174,7 @@ User: "How much do I have?"
 Agent:
 
 1. Interpret as total portfolio value.
-2. Call `dex_wallet_get_total_asset({ account_id, mcp_token })`.
+2. Call `dex_wallet_get_total_asset({ account_id, mcp_token })` (omit `account_id` when the session already provides it).
 3. Display total USD value. Suggest viewing per-chain breakdown if needed.
 
 **Example 11 (Boundary Case): Not this module — market data**
@@ -296,7 +296,7 @@ This module provides the **wallet data center** — other skills call its tools:
 
 | Scenario                              | Handling                                                                                        |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `mcp_token` missing or expired        | Attempt silent refresh via `dex_auth_refresh_token`; on failure route to [auth.md](./auth.md)   |
+| `mcp_token` missing or expired        | Route to [auth.md](./auth.md) for re-login, then retry the query                                 |
 | Chain not supported                   | Inform user; list supported chains from parent SKILL.md                                         |
 | `dex_tx_detail` with invalid hash     | Display error; prompt user to verify the transaction hash and chain                             |
 | Empty result (no tokens / no history) | Inform user the result is empty (e.g., "No tokens found on this chain") — do not fabricate data |
@@ -312,7 +312,7 @@ This module provides the **wallet data center** — other skills call its tools:
 1. **Authentication first**: Verify `mcp_token` validity before all queries.
 2. **Token confidentiality**: Never display `mcp_token` in plaintext.
 3. **Account ID masking**: Show only partial `account_id` characters in any user-facing output.
-4. **Silent refresh**: Prioritize `dex_auth_refresh_token` on token expiration before routing to re-login.
+4. **Re-login on auth failure**: If `mcp_token` is missing or invalid, route to [auth.md](./auth.md) before continuing.
 5. **No data fabrication**: If a query returns empty or errors, report truthfully. Never invent balances or transaction data.
 6. **Transparent errors**: Display all MCP Server error messages to users without modification.
 7. **MCP Server required**: Abort all operations if connection detection fails.

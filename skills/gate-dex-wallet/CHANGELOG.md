@@ -4,6 +4,12 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.8-1] - 2026-04-08
+
+### Changed
+
+- **SKILL.md**: Streamlined description to ≤30 words, removed redundant info, added cross-skill routing hints
+
 ## Unreleased
 
 ### Changed
@@ -95,7 +101,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Tool Naming Alignment**: Renamed legacy `auth.refresh_token` → `dex_auth_refresh_token`, `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
+- **Tool Naming Alignment**: Renamed legacy `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
 - **Cross-Reference Paths**: Replaced stale standalone skill names (`gate-dex-auth`, `gate-dex-transfer`, `gate-dex-dapp`) with current file-based paths (`gate-dex-wallet/references/auth.md`, etc.)
 - **Legacy Skill Identifiers**: Renamed `gate-dex-cli` metadata to `gate-dex-wallet-cli` in cli.md
 
@@ -103,7 +109,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Fixed
 
-- **Tool Naming Alignment**: Renamed legacy `auth.refresh_token` → `dex_auth_refresh_token`, `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
+- **Tool Naming Alignment**: Renamed legacy `tx.history_list` → `dex_tx_history_list`, `tx.swap_detail` → `dex_tx_swap_detail` across SKILL.md, auth.md, transfer.md, dapp.md, cli.md
 - **Cross-Reference Paths**: Replaced stale standalone skill names (`gate-dex-auth`, `gate-dex-transfer`, `gate-dex-dapp`) with current file-based paths (`gate-dex-wallet/references/auth.md`, etc.)
 - **Legacy Skill Identifiers**: Renamed `gate-dex-cli` metadata to `gate-dex-wallet-cli` in cli.md
 
