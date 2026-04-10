@@ -1,5 +1,22 @@
 # Changelog
 
+## [2026.4.10-2] - 2026-04-10
+
+### Added
+
+- **gatepay-merchant-discovery** (Gate Pay merchant catalog, HTTP): optional install via `--mcp gatepay-discovery`. URL `http://dev.halftrust.xyz/pay-mcp-server/mcp`; Cursor/Claude JSON uses `transport: streamable-http` aligned with other remote MCP fragments. OpenClaw: **servers.manifest** entry + `mcporter` URL registration.
+
+## [2026.4.10-1] - 2026-04-10
+
+### Added
+
+- **gatepay-local-mcp** (Gate Pay x402, stdio): optional install via `--mcp gatepay-local` on Cursor, Claude Code, Codex, and OpenClaw (`mcporter`). Fragments use `npx -y gatepay-local-mcp` with placeholder **`env`** (`PLUGIN_WALLET_TOKEN`, `EVM_PRIVATE_KEY`, `SVM_PRIVATE_KEY`); document alignment with **gate-pay-x402**.
+- OpenClaw: **servers.manifest** seventh entry and dynamic interactive **--select** menu range.
+
+### Notes
+
+- Not part of the default six trading MCPs; users opt in when they need x402 / Gate Pay MCP tools.
+
 ## [2026.4.1-1] - 2026-04-01
 
 ### Added
