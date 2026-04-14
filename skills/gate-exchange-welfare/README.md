@@ -2,42 +2,70 @@
 
 ## Overview
 
-Gate Exchange welfare center new user task Skill (version 2026.3.18-6, with updated MCP tools integration). Triggered when users ask about welfare benefits, new user rewards, or available tasks. **Core Logic**: Call interface to determine user identity (new vs existing) then branch processing—existing users receive direct guidance text (redirect to Web/App); new users call task query interface to return all new user onboarding tasks, displaying task title, subtitle, reward content, and action button text, with restriction condition prompts. Read-only operations, does not execute task claiming or reward distribution.
+Gate Exchange welfare center newcomer skill (version `2026.4.10-1`). It covers the phase-2 newcomer workflow end to end: user identity detection, newcomer task list retrieval, single task claim, newcomer reward claim, and generic completion guidance for KYC / first deposit / first trade flows. The skill must use real MCP data and current business codes; it must never invent task or reward information.
 
 ### Core Capabilities
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **User Type Detection** | Call interface to identify if user is new, determines subsequent branching | Any welfare/task query triggers this |
-| **Existing User Guidance** | Existing users don't see new user tasks, unified guidance to Web/App welfare center | "What welfare do I have" → existing user → return guidance link |
-| **New User Task List** | Return complete new user onboarding tasks: title, subtitle, rewards, action buttons | "What new user rewards are available" → new user → show task cards |
-| **Exception Fallback** | Interface timeout / empty task list / not logged in / various user identity restrictions, all have corresponding fallback text | Risk control user → contact customer service prompt |
+| **User Type Detection** | Calls the identity endpoint before any newcomer action | "What welfare tasks can I do?" |
+| **Newcomer Task List** | Returns all current newcomer tasks with real reward info and current task status | "Show my new user tasks" |
+| **Single Task Claim** | Claims a selected status=`0` newcomer task, mainly the download task flow | "Claim the download task" |
+| **Reward Claim** | Claims all currently claimable newcomer rewards by iterating status=`2` tasks | "Claim all my newcomer rewards" |
+| **Completion Guidance** | Guides KYC / first deposit / first trade completion without fabricating thresholds | "How do I finish the first deposit task?" |
+| **Restriction Fallback** | Handles old user / no-login / risk-control / task-empty / reward-edge cases | Existing user → rewards-hub guidance |
 
 ### Routing
 
 | User Intent | Handling Method |
 |-------------|-----------------|
-| Query welfare / rewards / tasks | Execute this Skill |
-| Query new user benefits / new user tasks | Execute this Skill |
-| Want to complete "First Deposit" task | Route to deposit / funding Skill |
-| Want to complete "First Trade" task | Route to `gate-exchange-spot` |
-| Want to complete "Identity Verification" task | Guide to Web / App to complete KYC |
+| Query welfare / newcomer rewards / newcomer tasks | Execute this skill |
+| Claim a newcomer task | Execute this skill |
+| Claim newcomer rewards | Execute this skill |
+| Complete identity verification task | Return generic KYC guidance |
+| Complete first deposit task | Return generic deposit guidance |
+| Complete first trade task | Route to `gate-exchange-trading` |
 | Query asset balance | Route to `gate-exchange-assets` |
 
 ## Architecture
 
-- **Input**: User asks about welfare, tasks, rewards related content, no additional parameters needed (user identity automatically retrieved by MCP tools).
+- **Input**: Welfare/task/reward/claim/completion intent related to the newcomer welfare center.
 - **Tools**:
-  - Step 1: `cex_welfare_get_user_identity` (User type determination interface) → Check if current user qualifies for new user benefits. Returns code=0 indicating qualification, or specific error codes (1001=existing user, 1002=risk control, 1003=sub-account, 1004=agent, 1005=market maker, 1006=enterprise, 1008=not logged in)
-  - Step 2 (new users only): `cex_welfare_get_beginner_task_list` (Query beginner guidance task list) → Get beginner guidance task list, including registration tasks (type=10) and guidance tasks (type=11), each task contains reward information, completion status and task description
-- **Output**: Existing user guidance text / New user task card list + restriction condition prompts. Detailed response templates, exception handling, cross-Skill integration rules see SKILL.md; complete scenario examples see references/scenarios.md.
+  - `cex_welfare_get_user_identity`
+  - `cex_welfare_get_beginner_task_list`
+  - `cex_welfare_claim_task`
+  - `cex_welfare_claim_reward`
+- **Execution model**:
+  - Step 1: Identity gate
+  - Step 2: Task list lookup when newcomer flow is allowed
+  - Step 3: Branch into list / claim task / completion guidance / claim reward
+  - Step 4: Map business `code` values and task `status` values to user-facing handling
+- **Response model**: Existing-user guidance, newcomer task list, task-claim success, reward-claim summary, or generic completion guidance.
+
+### Status Semantics
+
+| Status | Meaning | Typical action |
+|--------|---------|----------------|
+| `0` | Unclaimed task | Claim task |
+| `1` | Claimed / in progress | Complete the task |
+| `2` | Completed, reward claimable | Claim reward |
+| `3` | Reward distributing | Wait |
+| `4` | Completed / settled | No further action |
+| `5` | Expired | No further action |
 
 ### Scope
 
-This Skill covers the following scenarios:
-- Case 1: Existing user query → Guide to Web / App
-- Case 2: New user query → Show new user task list
-- Exception handling: Covers all user identity restrictions and system exception situations (error codes 1001-1008)
+This skill covers:
+- Existing-user / restricted-user welfare handling
+- Newcomer task list lookup
+- Single newcomer task claim
+- Newcomer reward claim
+- Generic completion guidance for KYC, deposit, and first-trade task flows
+
+This skill does **not** cover:
+- Deposit execution itself
+- Trading execution itself
+- Non-welfare account operations
 
 ## Source
 

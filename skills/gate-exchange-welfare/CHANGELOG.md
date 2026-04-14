@@ -4,13 +4,63 @@
 
 ---
 
+## [2026.4.10-1] - 2026-04-10
+
+### Changed
+
+- Rewrote the SKILL frontmatter description to the standardized organization template with explicit `Use this skill whenever` and `Trigger phrases include` phrasing.
+- Confirmed SKILL.md uses compliant Gate branding links and removed dependence on non-compliant `gate.io` wording in this skill bundle.
+- Renamed `## Execution Workflow` to `## Execution` in `SKILL.md`.
+- Renamed `## Exception Handling` to `## Error Handling` in `SKILL.md`.
+- Renamed `references/mcp.md` sections to validator-aligned headings: `## Workflow`, `## Report Template`, and `## Error Handling`.
+- Normalized `references/scenarios.md` to validator-required field names and added `**Context**:` to every scenario.
+- No welfare MCP business logic changes.
+
+---
+
 ## [2026.4.3-1] - 2026-04-03
 
 ### Changed
 
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
-- No MCP workflow or business logic changes.
+- Preserved the welfare phase-2 MCP workflow introduced in `2026.4.2-1`.
+
+---
+
+## [2026.4.2-1] - 2026-04-02
+
+### Updated
+
+- Aligned the skill with the latest welfare Ex-Skill phase-2 requirement and the latest welfare OpenAPI surface.
+- Expanded MCP coverage from 2 tools to 4 tools:
+  - `cex_welfare_get_user_identity`
+  - `cex_welfare_get_beginner_task_list`
+  - `cex_welfare_claim_task`
+  - `cex_welfare_claim_reward`
+- Added new supported newcomer flows:
+  - Claim a single task
+  - Claim all currently claimable newcomer rewards
+  - Complete-task guidance for KYC, first deposit, and first trade
+- Updated newcomer task status handling from the old two-state simplification to the current phase-2 mapping:
+  - `0` unclaimed
+  - `1` claimed / in progress
+  - `2` completed, reward claimable
+  - `3` reward distributing
+  - `4` completed / settled
+  - `5` expired
+- Added handling notes for dynamic download tasks (`task_type=23`, `status=0`) and M-select-N reward tasks (`has_m_n_task=true`).
+- Replaced the outdated read-only positioning with the current query + write scope for task claim and reward claim.
+- Updated the first-trade follow-up route to `gate-exchange-trading`.
+
+### Files Updated
+
+- `SKILL.md`
+- `README.md`
+- `references/mcp.md`
+- `references/scenarios.md`
+- `references/mcp-data-usage.md`
+- `CHANGELOG.md`
 
 ---
 

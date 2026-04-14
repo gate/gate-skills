@@ -1,8 +1,8 @@
 ---
 name: gate-dex-trade
-version: "2026.4.2-1"
-updated: "2026-04-02"
-description: "Gate DEX swap EXECUTION skill. For on-chain token exchange transactions that MODIFY blockchain state: swap, buy, sell, exchange, convert tokens, cross-chain bridge. Every operation here results in an on-chain transaction requiring signing. This skill EXECUTES trades — it does not provide read-only data lookups or manage wallet accounts."
+version: "2026.4.8-1"
+updated: "2026-04-08"
+description: "Executes on-chain token swaps via Gate DEX. Use when user wants to swap, buy, sell, exchange, or convert tokens, or bridge cross-chain. Covers full swap flow: price quotes, transaction build, signing, and submission. Do NOT use for read-only data lookups or wallet account management."
 ---
 
 # Gate DEX Trade
@@ -69,7 +69,17 @@ Step 4: MCP unavailable → setup guide only ([`references/setup.md`](./referenc
 
 **Read and strictly follow** [`references/mcp.md`](./references/mcp.md), execute according to its complete workflow.
 
-Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (`dex_tx_swap_quote` / `dex_tx_swap_prepare` / `dex_tx_swap_checkin_preview` / staged sign-submit / `dex_tx_swap_detail`), local prebuilt `swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` (Windows amd64) binary execution, token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
+Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (`dex_tx_swap_quote` / `dex_tx_swap_prepare` / `dex_tx_swap_checkin_preview` / staged sign-submit / `dex_tx_swap_detail`), token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
+
+**Local swap check-in (staged swap only)** — after `dex_tx_swap_checkin_preview`, run the **prebuilt** executable from this skill’s [`tools/tx-checkin/`](./tools/tx-checkin/) directory. **Pick the binary for the user’s platform**:
+
+| User OS | Executable (in `gate-dex-trade/tools/tx-checkin/`) |
+|---------|---------------------------------------------------|
+| macOS (`darwin`, Apple Silicon or Intel) | `swap-checkin-mac` |
+| Linux (`linux`, amd64/x86_64) | `swap-checkin-linux` |
+| Windows (`windows`, amd64) | `swap-checkin-win.exe` |
+
+All three share the same flags (e.g. `--preview-json '...'`). **`Authorization` for GV check-in** matches gate-dex-wallet: preview may omit `mcp_token` if the machine has **`MCP_TOKEN`** or **`~/.cursor/mcp.json`** (see `tools/tx-checkin/README.md` § Credential). This skill only ships those **prebuilt executables** under `tools/tx-checkin/`.
 
 ### OpenAPI Mode (Progressive Loading)
 
