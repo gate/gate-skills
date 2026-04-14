@@ -2,107 +2,111 @@
 
 ## Problem Description
 
-Previous skill templates contained hardcoded fake reward information, such as:
-- "10 points" 
-- "5 USDT trial voucher"
-- "20 USDT bonus"
+Older welfare templates only covered identity lookup and beginner-task listing. They also used outdated status mapping and omitted phase-2 newcomer actions such as task claim and reward claim.
 
-These are all fabricated data and should not appear in skill responses.
+This skill must now support:
+- Identity lookup
+- Beginner task list query
+- Single task claim
+- Newcomer reward claim
+- Completion guidance for KYC / deposit / first trade flows
 
 ## Correct Implementation Method
 
-### 1. Must Call Real MCP Interface
+### 1. Always gate welfare flows by identity
 
 ```javascript
-// Step 1: Determine user identity
-const userIdentity = await cex_welfare_get_user_identity();
+const identity = await cex_welfare_get_user_identity();
 
-// Step 2: If new user (code=0), get real task list
-if (userIdentity.code === 0) {
-    const taskList = await cex_welfare_get_beginner_task_list();
-    // Use real returned task data
+if (identity.code !== 0) {
+  // map 1001 / 1002 / 1003 / 1004 / 1005 / 1006 / 1008
+  // and stop the newcomer flow
 }
 ```
 
-### 2. Use Real MCP Data Fields
+### 2. Query the real newcomer task list before any claim/completion decision
 
-Real data structure returned from MCP interface:
-```json
-{
-    "message": "success",
-    "data": {
-        "tasks": [
-            {
-                "welfare_task_id": 128,
-                "task_type": 26,
-                "task_name": "Sign Up",
-                "task_desc": "Sign up and log in to receive 10 USDT", 
-                "reward_num": "10",
-                "reward_unit": "USDT",
-                "prize_type": 2,
-                "status": 2
-            },
-            {
-                "welfare_task_id": 133,
-                "task_center_id": 1590,
-                "task_type": 1,
-                "task_name": "Identity Verification",
-                "task_desc": "Complete identity verification",
-                "reward_num": "1", 
-                "reward_unit": "USDT",
-                "prize_type": 2,
-                "status": 1
-            }
-        ]
-    }
+```javascript
+const taskList = await cex_welfare_get_beginner_task_list();
+
+if (taskList.code === 1007 || !taskList.data?.tasks?.length) {
+  // no active newcomer tasks
 }
 ```
 
-### 3. Correct Response Format
+### 3. Claim a single task only from real status=`0` task data
 
+```javascript
+const claimableTasks = taskList.data.tasks.filter((task) => task.status === 0);
+
+if (claimableTasks.length === 1) {
+  await cex_welfare_claim_task({
+    welfare_task_id: claimableTasks[0].welfare_task_id,
+  });
+}
 ```
-🎁 Your exclusive new user tasks are as follows. Complete tasks to claim corresponding rewards:
 
-📌 Sign Up
-   Sign up and log in to receive 10 USDT
-   💰 Reward: 10 USDT
-   Status: Completed
+### 4. Claim rewards only from real status=`2` task data
 
-📌 Identity Verification  
-   Complete identity verification
-   💰 Reward: 1 USDT
-   Status: Pending
+```javascript
+const rewardableTasks = taskList.data.tasks.filter((task) => task.status === 2);
 
----
+for (const task of rewardableTasks) {
+  const result = await cex_welfare_claim_reward({
+    welfare_task_id: task.welfare_task_id,
+  });
 
-⚠️ Non-agent, non-institutional users and users with normal account status can complete tasks and claim rewards. Specific tasks and rewards are subject to final display on Gate official website/App.
+  if (result.data?.has_m_n_task) {
+    // redirect user to Gate web/App rewards hub
+    continue;
+  }
+
+  const rewardLabel =
+    result.data?.coupon_full_name || `${task.reward_num} ${task.reward_unit}`;
+}
 ```
+
+## Real Data Fields
+
+| Display Content | MCP Field | Notes |
+|----------------|-----------|-------|
+| Task title | `task_name` | Use real task name |
+| Task description | `task_desc` | Remove HTML tags first |
+| Reward amount | `reward_num` | Use real amount from task list |
+| Reward unit | `reward_unit` | Use real unit from task list |
+| Reward title after claim | `coupon_full_name` | Prefer this when reward claim returns it |
+| Task status | `status` | Use the current phase-2 mapping |
+| Task id for writes | `welfare_task_id` | Required by both write tools |
+
+## Status Mapping
+
+| Status | Meaning | Action |
+|--------|---------|--------|
+| `0` | Unclaimed | Can claim task |
+| `1` | Claimed / in progress | Complete the task |
+| `2` | Completed, reward claimable | Can claim reward |
+| `3` | Reward distributing | Wait |
+| `4` | Completed / settled | Done |
+| `5` | Expired | Expired |
 
 ## Prohibited Wrong Practices
 
-❌ **Absolutely cannot use template example data**:
-- "Complete Identity Verification / KYC" + "10 points"
-- "Download Gate App" + "5 USDT trial voucher"  
-- "First Deposit" + "20 USDT bonus"
+❌ Do not fabricate newcomer task names, reward numbers, coupon names, or thresholds.
 
-❌ **Cannot fabricate any reward information**
+❌ Do not claim a task without first confirming from the current task list that it is `status=0`.
 
-✅ **Must use real return data from MCP interface**
+❌ Do not claim a reward without first confirming from the current task list that it is `status=2`.
 
-## Data Mapping Relationships
+❌ Do not mark an M-select-N reward as claimed when `has_m_n_task=true`.
 
-| Display Content | MCP Field | Description |
-|----------------|-----------|-------------|
-| Task Title | `task_name` | Real task name from interface |
-| Task Description | `task_desc` | Real task description from interface |
-| Reward Amount | `reward_num` | Real reward amount from interface |
-| Reward Unit | `reward_unit` | Real reward unit from interface |
-| Completion Status | `status` | 1=Pending, 2=Completed |
+✅ Use the real MCP task list and real claim responses.
+
+✅ Use response `code` as the source of truth, even when HTTP status is `200`.
 
 ## Summary
 
-This fix ensures the `gate-exchange-welfare` skill:
-1. Must call real MCP interface to get data
-2. Cannot use any fabricated reward information
-3. Strictly format responses according to real data
-4. Provide accurate user task status information
+This update ensures the `gate-exchange-welfare` skill:
+1. Uses the latest four-tool welfare MCP surface
+2. Applies the current newcomer task status semantics
+3. Supports task claim and reward claim safely
+4. Still forbids fabricated reward information

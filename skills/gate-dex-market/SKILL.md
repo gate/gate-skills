@@ -1,8 +1,8 @@
 ---
 name: gate-dex-market
-version: "2026.3.24-1"
-updated: "2026-03-24"
-description: "Gate DEX read-only market data skill. Use when the user asks for prices, K-lines, rankings, holders, or liquidity without signing a tx. Triggers on 'DEX price', 'token K-line', 'holder analysis'. Do NOT use for swaps or wallet auth — use gate-dex-trade or gate-dex-wallet."
+version: "2026.4.8-1"
+updated: "2026-04-08"
+description: "On-chain DEX market data queries via Gate: token prices/价格, K-line/OHLC candlestick charts, token rankings, security risk audits, new token discovery, holder analysis, and trading volume stats. Read-only — no transactions. Use when the user asks for 'token price', 'price of ETH', 'check SOL price', '查价格', 'K线', 'candlestick', 'OHLC', 'top gainers', 'trending tokens', 'is this token safe', 'honeypot check', 'new tokens', 'trading volume', or 'liquidity events'. Do NOT use for swap/trade execution (use gate-dex-trade) or wallet balance/account queries (use gate-dex-wallet)."
 ---
 
 # Gate DEX Market
@@ -22,40 +22,6 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - Security: "is this token safe", "security audit", "honeypot check", "risk analysis"
 - Discovery: "new tokens", "newly listed", "holder analysis", "whale tracking"
 - Volume: "trading volume", "buy-sell pressure", "liquidity events"
-
-
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate-Dex | ✅ Required |
-
-### MCP Tools Used
-
-**Query Operations (Read-only)**
-
-- dex_market_get_kline
-- dex_token_get_coin_info
-- dex_token_ranking
-- dex_token_get_risk_info
-- dex_token_list_swap_tokens
-- dex_token_list_cross_chain_bridge_tokens
-
-### Authentication
-- API Key Required: No for MCP market queries
-- OAuth `mcp_token` Required: No for MCP market queries
-- Note: This skill is read-only. In MCP mode, market-data tools can be called without authentication. OpenAPI mode has its own credential model and is only used when the user explicitly requests it.
-
-### Installation Check
-- Required: Gate-Dex
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
 
 ## Project convention — MCP only
 
@@ -125,7 +91,7 @@ Explicit user request only. Load files progressively:
 ## Supported Chains
 
 Actual supported chains are determined by runtime API/Resource returns:
-- **MCP Mode**: determined by MCP tool responses for the given `chain` argument
+- **MCP Mode**: via `dex_chain_config` tool
 - **OpenAPI Mode**: chain parameter in request
 
 Common chains: eth, bsc, polygon, arbitrum, optimism, avax, base, sol.

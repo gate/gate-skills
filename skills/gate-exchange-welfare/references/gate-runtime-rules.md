@@ -14,7 +14,7 @@ description: "Packaged runtime rules for gate-exchange-welfare so the published 
 
 - Use the already configured Gate MCP session for the current host.
 - Local Gate MCP deployments use `GATE_API_KEY` and `GATE_API_SECRET`; never ask the user to paste these secrets into chat.
-- Minimal permission for this skill is `Welfare:Read`.
+- The configured session must support the welfare query and claim tools documented in `SKILL.md`.
 - If the required Gate MCP tools are missing, stop and switch to setup guidance only.
 - If the MCP session returns an auth or permission error, stop and guide the user to repair the configured local MCP credentials before continuing.
 
@@ -22,7 +22,7 @@ description: "Packaged runtime rules for gate-exchange-welfare so the published 
 
 - Use only the MCP tools documented in `SKILL.md` and `references/mcp.md`.
 - Do not call undocumented Gate tools, browser flows, or unrelated system tools.
-- This skill is read-only. Do not attempt trading, coupon redemption, or other write actions through this skill.
+- This skill may call only the documented welfare claim tools for task claim and reward claim. Do not attempt trading, coupon redemption outside the welfare claim flow, or other unrelated write actions through this skill.
 
 ## 3. Failure Handling
 

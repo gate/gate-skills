@@ -4,12 +4,25 @@ All notable changes to `gate-dex-trade` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.8-1] - 2026-04-08
+
+### Changed
+
+- **SKILL.md**: Streamlined description to ≤30 words, removed redundant info (skill, EXECUTION, Redis, etc.), added cross-skill routing hints
+
+## [2026.4.7-1] - 2026-04-06
+
+### Changed
+
+- **SKILL.md** / **references/mcp.md**: Re-aligned with current **wallet_service_mcp** staged swap tools and flow. Documented server-side **Redis** persistence for swap sessions (`swap_` + `swap_session_id`) so multi-replica MCP works without sticky sessions.
+- **tools/tx-checkin/**: Ship **prebuilt binaries only** in this path. README and parent `tools/README.md` updated accordingly.
+
 ## [2026.4.2-1] - 2026-04-02
 
 ### Added
 
 - **tools/tx-checkin/**: Pre-built `swap-checkin-mac` (macOS / Apple Silicon + Intel), `swap-checkin-linux`, and `swap-checkin-win.exe` (Windows amd64); `README.md` with usage, binary selection rules, and check-in response shape
-- Binary selection rule: macOS (`darwin`) → `swap-checkin-mac`; Linux → `swap-checkin-linux`; Windows (`windows`, amd64) → `swap-checkin-win.exe`; do not use `go run`
+- Binary selection rule: macOS (`darwin`) → `swap-checkin-mac`; Linux → `swap-checkin-linux`; Windows (`windows`, amd64) → `swap-checkin-win.exe`; always invoke the matching shipped executable
 
 ### Changed
 

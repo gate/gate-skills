@@ -1,265 +1,281 @@
 # gate-exchange-welfare — Scenarios & Prompt Examples
 
-## Scenario 1: Existing User Queries Welfare (Case 1)
+## Scenario 1: Existing user queries welfare
 
-**Context**: User asks about welfare or rewards, but identity is existing user (has trading history).
+**Context**: The user is an existing account holder asking about welfare access or newcomer rewards.
 
 **Prompt Examples**:
-- "What welfare do I have"
-- "How can I claim rewards"
-- "What tasks can I do"
-- "What welfare benefits do I have"
-- "How can I claim rewards"
+- "What welfare do I have?"
+- "How do I claim newcomer rewards?"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1001 (existing user).
-2. Do not call any additional MCP tools.
-3. Directly output guidance text:
-
-```
-Please visit Gate web at https://www.gate.com/rewards_hub or open Gate App to view welfare tasks and rewards.
-```
+1. Call `cex_welfare_get_user_identity`.
+2. If `code=1001`, do not call other welfare tools.
+3. Return rewards-hub guidance.
 
 ---
 
-## Scenario 2: New User Queries New User Benefits (Case 2)
+## Scenario 2: Newcomer queries welfare task list (Base flow)
 
-**Context**: User asks about new user benefits or new user tasks, identity is new user (newly registered, has not completed any trades).
+**Context**: The user is eligible for newcomer welfare and wants to see the current task list.
 
 **Prompt Examples**:
-- "What new user benefits are available"
-- "How to claim new user rewards"
-- "What new user tasks can I do"
-- "What new user benefits are available"
-- "Show me my new user tasks"
+- "What new user benefits are available?"
+- "Show my new user tasks"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=0 (new user).
-2. Call `cex_welfare_get_beginner_task_list` (query beginner guidance task list), return task list.
-3. Format and output all tasks according to template (title, subtitle, rewards, action buttons), append restriction condition prompt at the end:
-
-```
-🎁 Your exclusive new user tasks are as follows. Complete tasks to claim corresponding rewards:
-
-{Generate dynamically based on actual task data returned from MCP interface, for example:}
-
-📌 {Real task name obtained from MCP interface}
-   {Real task description obtained from MCP interface}
-   💰 Reward: {Real reward amount from MCP interface} {Real reward unit from MCP interface}
-   Status: {Display based on status field returned by MCP interface}
-
-{Continue displaying other real tasks...}
+1. Call `cex_welfare_get_user_identity` and get `code=0`.
+2. Call `cex_welfare_get_beginner_task_list`.
+3. Render all real tasks with reward, cleaned description, and mapped status.
 
 ---
 
-⚠️ Non-agent, non-institutional users and users with normal account status can complete tasks and claim rewards. Specific tasks and rewards are subject to final display on Gate official website/App.
-```
+## Scenario 3: Newcomer queries general tasks without saying "new user"
 
----
-
-## Scenario 3: New User Queries General Tasks (trigger words do not contain "new user")
-
-**Context**: User says "what tasks", does not explicitly mention "new user", identity is new user.
+**Context**: The user asks for available tasks in a generic way and identity resolution is required.
 
 **Prompt Examples**:
-- "What tasks can I do"
-- "What tasks are available"
+- "What tasks can I do?"
 - "Task list"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=0 (new user).
-2. Enter Case 2 flow, same as Scenario 2, show new user task list.
+1. Call `cex_welfare_get_user_identity`.
+2. If `code=0`, enter the same flow as Scenario 2.
 
 ---
 
-## Scenario 4: Interface Timeout / User Type Determination Failed
+## Scenario 4: Claim a single task successfully (Case 1)
 
-**Context**: Calling user type determination interface times out or returns error.
+**Context**: A newcomer wants to claim one currently claimable welfare task, typically the download task.
 
 **Prompt Examples**:
-- "Check welfare status"
-- "What welfare do I have"
+- "Claim task"
+- "Claim the download task"
 
 **Expected Behavior**:
-1. Do not enter Case 1 or Case 2 branch.
-2. Output fallback text:
-
-```
-Welfare information is temporarily unavailable, please try again later, or visit https://www.gate.com/rewards_hub directly.
-```
+1. Call `cex_welfare_get_user_identity`.
+2. Call `cex_welfare_get_beginner_task_list`.
+3. Find one task with `status=0`.
+4. Call `cex_welfare_claim_task` with its `welfare_task_id`.
+5. Reply that the task was claimed successfully and remind the user to complete it before claiming the reward.
 
 ---
 
-## Scenario 5: New User Task List is Empty
+## Scenario 5: Claim task but no claimable task is available
 
-**Context**: User is new user, but task query interface returns empty list (activity not started or account exception).
+**Context**: The user wants to claim a task, but the current newcomer list has no `status=0` task.
 
 **Prompt Examples**:
-- "New user benefits"
-- "What new user benefits are available"
+- "Claim task"
 
 **Expected Behavior**:
-1. Step 1 determines user as new user.
-2. Step 2 calls task interface, returns empty list.
-3. Output fallback text:
-
-```
-No new user tasks available at the moment, please check later, or visit https://www.gate.com/rewards_hub for more benefits.
-```
+1. Call identity and task list.
+2. If no task with `status=0` exists, do not call `cex_welfare_claim_task`.
+3. Tell the user there is no currently claimable newcomer task.
 
 ---
 
-## Scenario 6: User Not Logged In
+## Scenario 6: Complete identity verification task (Case 2)
 
-**Context**: User asks about welfare tasks while not logged in.
+**Context**: The user wants to finish the newcomer KYC task and needs guidance instead of a welfare write action.
 
 **Prompt Examples**:
-- "What welfare benefits do I have"
-- "What welfare do I have"
+- "I want to complete the identity verification task"
+- "How do I finish the KYC task?"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1008 (not logged in).
-2. Output prompt text:
-
-```
-Please log in to your Gate account first before querying welfare tasks.
-```
+1. Do not call a welfare write tool.
+2. Return generic KYC guidance.
 
 ---
 
-## Scenario 7: New User Asks How to Complete "First Deposit" Task (Cross-Skill)
+## Scenario 7: Complete first deposit task (Case 3)
 
-**Context**: New user sees task list and asks how to complete "First Deposit" task.
+**Context**: The user wants to finish the newcomer first-deposit task and needs deposit guidance.
 
 **Prompt Examples**:
-- "How to deposit"
-- "How to complete deposit task"
-- "I want to deposit"
+- "I want to complete the first deposit task"
+- "How do I finish the deposit task?"
 
 **Expected Behavior**:
-1. Identify user intent as completing deposit task.
-2. Route to deposit/funding Skill, do not handle deposit process within this Skill.
+1. Do not call a welfare write tool.
+2. Return generic deposit guidance without inventing deposit thresholds.
 
 ---
 
-## Scenario 8: New User Asks How to Complete "First Trade" Task (Cross-Skill)
+## Scenario 8: Complete first trade task (Case 4)
 
-**Context**: New user sees task list and asks how to complete "First Trade" task.
+**Context**: The user wants to finish the newcomer first-trade task and should be handed off to the trading skill.
 
 **Prompt Examples**:
-- "How to trade"
-- "I want to buy coins"
-- "How to complete trading task"
+- "I want to complete the first trade task"
+- "Help me do my first trade"
 
 **Expected Behavior**:
-1. Identify user intent as completing trading task.
-2. Route to `gate-exchange-spot`, do not handle trading process within this Skill.
+1. Resolve this as a trade-completion flow.
+2. Hand off to `gate-exchange-trading`.
 
 ---
 
-## Scenario 9: New User Asks How to Complete "Identity Verification" Task (Cross-Skill)
+## Scenario 9: Complete task with ambiguous intent (Case 5)
 
-**Context**: New user sees task list and asks how to complete KYC verification task.
+**Context**: The user says only "complete task" and the agent must resolve which actionable newcomer task is meant.
 
 **Prompt Examples**:
-- "How to complete identity verification"
-- "How to do KYC"
-- "Where is identity verification"
+- "I want to complete a task"
+- "Help me finish my welfare task"
 
 **Expected Behavior**:
-1. Identify user intent as completing KYC task.
-2. Output guidance text, do not route to other Skills:
-
-```
-Please visit Gate web or open Gate App, go to welfare center to complete identity verification task. Once verified, you can claim corresponding rewards.
-```
+1. Call identity and task list.
+2. Collect actionable tasks from `status=0` and `status=1`.
+3. If more than one actionable task exists, ask the user which task to complete.
+4. If exactly one exists, dispatch to claim/KYC/deposit/trade guidance based on the task.
 
 ---
 
-## Scenario 10: Risk Control User Queries Welfare
+## Scenario 10: Claim all available rewards (Case 6)
 
-**Context**: User asks about welfare, but account is in risk control status.
+**Context**: The user wants to claim all currently claimable newcomer rewards in one pass.
+
+**Prompt Examples**:
+- "Claim my rewards"
+- "Claim all newcomer rewards"
+
+**Expected Behavior**:
+1. Call identity and task list.
+2. Filter tasks with `status=2`.
+3. Call `cex_welfare_claim_reward` for each status=`2` task.
+4. Summarize all successfully claimed rewards using `coupon_full_name` when available.
+
+---
+
+## Scenario 11: Claim reward hits M-select-N pool
+
+**Context**: A reward-claim attempt returns an M-select-N pool response and must be redirected to the rewards hub.
+
+**Prompt Examples**:
+- "Claim my reward"
+
+**Expected Behavior**:
+1. Call `cex_welfare_claim_reward`.
+2. If `has_m_n_task=true`, do not describe the reward as claimed.
+3. Tell the user to claim it from Gate web `https://www.gate.com/zh/rewards_hub` or the Gate App.
+
+---
+
+## Scenario 12: Claim reward but nothing is claimable
+
+**Context**: The user asks to claim rewards, but the current newcomer list has no `status=2` task.
+
+**Prompt Examples**:
+- "Claim rewards"
+
+**Expected Behavior**:
+1. Call identity and task list.
+2. If no task with `status=2` exists, do not call `cex_welfare_claim_reward`.
+3. Tell the user there are no currently claimable newcomer rewards.
+
+---
+
+## Scenario 13: Identity lookup fails or times out
+
+**Context**: The welfare identity gate fails, times out, or returns an unusable technical result.
+
+**Prompt Examples**:
+- "Check my welfare status"
+
+**Expected Behavior**:
+1. Do not enter claim/list flows.
+2. Return the temporary-unavailable fallback and rewards-hub URL.
+
+---
+
+## Scenario 14: Task list returns no active tasks
+
+**Context**: Identity succeeds for a newcomer, but the beginner-task list is empty or returns `code=1007`.
+
+**Prompt Examples**:
+- "What new user benefits are available?"
+
+**Expected Behavior**:
+1. Identity succeeds with `code=0`.
+2. `cex_welfare_get_beginner_task_list` returns `code=1007` or an empty list.
+3. Tell the user there are currently no active newcomer tasks and suggest the rewards hub.
+
+---
+
+## Scenario 15: User is not logged in
+
+**Context**: The user asks about welfare without an authenticated Gate session.
+
+**Prompt Examples**:
+- "What welfare benefits do I have?"
+
+**Expected Behavior**:
+1. `cex_welfare_get_user_identity` returns `code=1008`.
+2. Tell the user to log in first.
+
+---
+
+## Scenario 16: Risk-control user queries welfare
+
+**Context**: The identity gate identifies the account as risk-controlled and ineligible for welfare participation.
 
 **Prompt Examples**:
 - "My welfare benefits"
-- "What welfare benefits can I get"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1002 (risk control).
-2. Output prompt text:
-
-```
-Your account is temporarily unable to participate in new user activities, please contact customer service for details.
-```
+1. `cex_welfare_get_user_identity` returns `code=1002`.
+2. Return the risk-control guidance.
 
 ---
 
-## Scenario 11: Sub-account Queries Welfare
+## Scenario 17: Sub-account queries welfare
 
-**Context**: User uses sub-account to ask about welfare.
+**Context**: The welfare request comes from a sub-account that cannot participate in newcomer activities.
 
 **Prompt Examples**:
 - "Sub-account welfare"
-- "Sub-account welfare benefits"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1003 (sub-account).
-2. Output prompt text:
-
-```
-Sub-accounts cannot participate in new user activities, please log in with main account.
-```
+1. `cex_welfare_get_user_identity` returns `code=1003`.
+2. Tell the user to use the main account.
 
 ---
 
-## Scenario 12: Agent User Queries Welfare
+## Scenario 18: Agent user queries welfare
 
-**Context**: Agent user asks about welfare.
+**Context**: The identity gate classifies the account as an agent account.
 
 **Prompt Examples**:
 - "Agent welfare benefits"
-- "Agent user benefits"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1004 (agent).
-2. Output prompt text:
-
-```
-Agent users cannot participate in new user activities.
-```
+1. `cex_welfare_get_user_identity` returns `code=1004`.
+2. Tell the user agent accounts cannot participate.
 
 ---
 
-## Scenario 13: Market Maker User Queries Welfare
+## Scenario 19: Market maker queries welfare
 
-**Context**: Market maker user asks about welfare.
+**Context**: The welfare request comes from a market-maker account that is excluded from newcomer benefits.
 
 **Prompt Examples**:
 - "Market maker welfare"
-- "Market maker benefits"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1005 (market maker).
-2. Output prompt text:
-
-```
-Market maker users cannot participate in new user activities.
-```
+1. `cex_welfare_get_user_identity` returns `code=1005`.
+2. Tell the user market maker accounts cannot participate.
 
 ---
 
-## Scenario 14: Enterprise User Queries Welfare
+## Scenario 20: Enterprise user queries welfare
 
-**Context**: Enterprise user asks about welfare.
+**Context**: The identity gate classifies the account as an enterprise account.
 
 **Prompt Examples**:
 - "Enterprise welfare benefits"
-- "Enterprise user benefits"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` (user type determination interface), return result: code=1006 (enterprise).
-2. Output prompt text:
-
-```
-Enterprise users cannot participate in new user activities.
-```
+1. `cex_welfare_get_user_identity` returns `code=1006`.
+2. Tell the user enterprise accounts cannot participate.
