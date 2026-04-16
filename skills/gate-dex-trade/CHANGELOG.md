@@ -4,6 +4,12 @@ All notable changes to `gate-dex-trade` will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.14-2] - 2026-04-14
+
+### Changed
+
+- Staged swap check-in documented as **GV MCP `tx_checkin`** (§4.3); removed obsolete **`tools/`** directory. Updated **SKILL.md**, **references/mcp.md**, and **README.md**.
+
 ## [2026.4.8-1] - 2026-04-08
 
 ### Changed

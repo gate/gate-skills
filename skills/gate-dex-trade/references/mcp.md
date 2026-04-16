@@ -1,13 +1,13 @@
 ---
 name: gate-dex-trade-mcp
-version: "2026.4.7-1"
-updated: "2026-04-06"
-description: "Gate Wallet Swap/DEX trading. Get quotes, run staged swap with local check-in CLI, and track status. Use when users want to 'swap USDT to ETH', 'swap', 'exchange tokens', 'buy tokens', 'sell tokens'. Includes mandatory three-step confirmation gate. Supports EVM multi-chain + Solana, supports cross-chain Swap."
+version: "2026.4.14-2"
+updated: "2026-04-14"
+description: "Gate Wallet Swap/DEX trading. Get quotes, run staged swap with GV MCP tx_checkin for check-in, and track status. Use when users want to 'swap USDT to ETH', 'swap', 'exchange tokens', 'buy tokens', 'sell tokens'. Includes mandatory three-step confirmation gate. Supports EVM multi-chain + Solana, supports cross-chain Swap."
 ---
 
 # Gate Wallet Swap Skill
 
-> Swap/DEX Domain — Quote retrieval, slippage control, route display, staged swap execution, local check-in CLI, status tracking, includes mandatory three-step confirmation gateway.
+> Swap/DEX Domain — Quote retrieval, slippage control, route display, staged swap execution, GV MCP `tx_checkin` check-in, status tracking, includes mandatory three-step confirmation gateway.
 
 **Trigger Scenarios**: When users mention "swap", "exchange", "buy", "sell", "convert", "swap X for Y", "cross-chain", or when other Skills guide users to execute token swaps.
 
@@ -303,7 +303,7 @@ This value difference includes all comprehensive costs (DEX fees, bridge fees, s
 
 ### 4. Staged Swap Execution Tools
 
-Staged swap splits execution into quote, prepare, check-in preview, local `tx-checkin` binary, sign, and submit. This avoids server-side hidden check-in logic and keeps Solana signable payload generation late in the flow.
+Staged swap splits execution into quote, prepare, check-in preview, **GV MCP `tx_checkin`**, sign, and submit. This avoids server-side hidden check-in logic and keeps Solana signable payload generation late in the flow. See §4.3 for mapping preview fields to **`tx_checkin`**.
 
 #### 4.1 `dex_tx_swap_prepare`
 
@@ -325,7 +325,7 @@ Return highlights:
 
 #### 4.2 `dex_tx_swap_checkin_preview`
 
-Expose only the minimal stage-specific fields required by the local `tx-checkin` binary.
+Expose the minimal stage-specific fields required to call **GV MCP `tx_checkin`**.
 
 | Field | Description |
 |-------|-------------|
@@ -336,72 +336,44 @@ Return highlights:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `mcp_token` | string | Current session token passed directly as the `Authorization` header value |
+| `mcp_token` | string | Session token echoed from the `dex_tx_swap_checkin_preview` call (see below); map to GV `tx_checkin` **`authorization`** as `Bearer <token>` |
 | `chain` | string | Chain name for check-in request |
-| `chain_category` | string | Value to send directly to the check-in API |
-| `user_wallet` | string | Wallet address for the local `tx-checkin` binary |
-| `checkin_path` | string | Usually `/api/v1/tx/checkin` |
-| `checkin_message` | string | Canonical tx-bundle string for the local `tx-checkin` binary |
+| `chain_category` | string | Value to send to GV check-in (`chain_category`) |
+| `user_wallet` | string | Wallet address → GV `tx_checkin` **`wallet_address`** |
+| `checkin_path` | string | Usually `/api/v1/tx/checkin` (informational; **not** passed to `tx_checkin` — the GV MCP uses the correct endpoint) |
+| `checkin_message` | string | Payload for GV `tx_checkin` **`message`** |
 
-**`mcp_token` in the preview response:** The MCP server **echoes** the `mcp_token` argument from the tool call (it does not read the HTTP session). Pass **`mcp_token` in `dex_tx_swap_checkin_preview`** when you need it embedded in the JSON for agents that forward the blob verbatim. If the preview has an **empty** `mcp_token`, the local **`swap-checkin-*`** binary still works: it resolves HTTP **`Authorization`** the same way as **gate-dex-wallet** terminal check-in — in order: non-empty preview `mcp_token`, then **`MCP_TOKEN`**, then **`~/.cursor/mcp.json`** (`mcpServers.*.headers.Authorization`, optional **`TX_CHECKIN_MCP_SERVER`**). See [`tools/tx-checkin/README.md`](../tools/tx-checkin/README.md) § Credential.
+**`mcp_token` in the preview response:** The wallet MCP server **echoes** the `mcp_token` argument from the tool call (it does not read the HTTP session). Pass **`mcp_token` in `dex_tx_swap_checkin_preview`** when you need it in the preview for **`authorization`**. If the preview has an **empty** `mcp_token`, resolve a Bearer token the same way as **gate-dex-wallet** credential resolution when calling `tx_checkin`: in order — non-empty preview `mcp_token`, then **`MCP_TOKEN`**, then **`~/.cursor/mcp.json`** (`mcpServers.*.headers.Authorization`, optional **`TX_CHECKIN_MCP_SERVER`**). Strip a leading `Bearer ` from env/config values once before building `authorization` if you normalize to a single `Bearer <token>` string. See [`gate-dex-wallet/references/tx-checkin.md`](../../gate-dex-wallet/references/tx-checkin.md) § Credential for session resolution order.
 
-#### 4.3 Local check-in CLI
+#### 4.3 GV MCP `tx_checkin`
 
-After `dex_tx_swap_checkin_preview`, the agent must run the **platform-specific prebuilt binary** under this skill’s `tools/tx-checkin/` directory with the preview payload serialized as a JSON string (`--preview-json`). Use the shipped executable that matches the user’s OS. **Mandatory agent behavior** (preview file + `jq`, stdout vs stderr, no custom signing scripts) is specified in **§4.3.1** below.
+**Prerequisite:** The runtime must include the **Gate Web3 GV MCP** server (e.g. `gate-gv-mcp`), with tool `tx_checkin` visible in `tools/list`.
 
-| Platform | Binary name (folder: `<SKILL_ROOT>/tools/tx-checkin/`) |
-|----------|--------------------------------------------------------|
-| macOS (`darwin`) | `swap-checkin-mac` (fat/universal: arm64 + amd64) |
-| Linux (`linux`, amd64) | `swap-checkin-linux` |
-| Windows (`windows`, amd64) | `swap-checkin-win.exe` |
+After `dex_tx_swap_checkin_preview`, **call GV MCP `tx_checkin`** using the **full preview object**. Map fields as follows:
 
-**`<SKILL_ROOT>`** is the directory where **this** `gate-dex-trade` skill is **installed** (the folder that contains `SKILL.md` and `tools/tx-checkin/`). Resolve it from the agent’s skill install location (e.g. editor/user skills path), **not** from an arbitrary workspace checkout such as `web3_wallet_skill/gate-dex-trade` unless that checkout *is* the installed skill.
+| `dex_tx_swap_checkin_preview` field | `tx_checkin` argument | Notes |
+|-------------------------------------|------------------------|--------|
+| — | `authorization` | **Required.** Use `Bearer <session_token>`. Build from preview `mcp_token` (prefix `Bearer ` if the token is bare; do not double-prefix if it already starts with `Bearer `). If preview `mcp_token` is empty, use the same credential resolution as above, then form `authorization`. |
+| `user_wallet` | `wallet_address` | Required. |
+| `checkin_message` | `message` | Required for swap (use `message`, not `intent`). |
+| — | `source` | **Required.** Integer **`3`** (AI agent). |
+| — | `type` | **Required** by the GV tool schema. Preview has no top-level `type` field. Pass **`""`** unless GV/product documents a non-empty business type for swap; if `tx_checkin` rejects empty `type`, align with the GV/wallet team on a constant or a future preview field. |
+| `chain` | `chain` | Recommended; omit only if tooling requires non-empty and preview provides a value. |
+| `chain_category` | `chain_category` | Optional; pass as returned when present. |
 
-```bash
-# macOS / Linux — quote full path under your installed skill
-"$SKILL_ROOT/tools/tx-checkin/swap-checkin-mac" --preview-json '<preview-json>'
-"$SKILL_ROOT/tools/tx-checkin/swap-checkin-linux" --preview-json '<preview-json>'
-```
+**Response handling:** Parse the tool result JSON for **`data.checkin_token`** and pass it **verbatim** to `dex_tx_swap_sign_approve` or `dex_tx_swap_sign_swap`. If **`need_otp`** is true, follow product OTP guidance before continuing.
 
-```powershell
-# Windows (PowerShell) — $SKILL_ROOT = installed gate-dex-trade skill root
-& "$SKILL_ROOT\tools\tx-checkin\swap-checkin-win.exe" --preview-json '<preview-json>'
-```
-
-The binary prints the full check-in HTTP response body. Example:
-
-```json
-{"code":0,"msg":"success","data":{"checkin_token":"checkin_tok_xxx","need_otp":false}}
-```
-
-Then extract `data.checkin_token` from that response. Use one token per stage:
-
-- approve stage uses approve `checkin_token`
-- swap stage uses swap `checkin_token`
+**Forbidden:** Do **not** implement GV check-in with ad-hoc Python, Node, or `curl` that rebuilds `api-sign` or bypasses the GV MCP.
 
 #### 4.3.1 Agent canonical check-in procedure
 
-Agents **MUST** follow this sequence for staged swap check-in. Do not substitute ad hoc HTTP clients for this step.
+Agents **MUST** follow this sequence for staged swap check-in:
 
-**Before running the binary**
-
-- You have already called `dex_tx_swap_checkin_preview` and hold the **full** preview object (every field the tool returns). Non-empty `mcp_token` in that object is recommended so the blob is self-contained; otherwise resolve credentials per [`tools/tx-checkin/README.md`](../tools/tx-checkin/README.md) § Credential (`MCP_TOKEN`, `~/.cursor/mcp.json`, optional `TX_CHECKIN_MCP_SERVER`).
-- **Do not** implement GV check-in with one-off Python, Node, or `curl` scripts that recompute `api-sign`. The **only** supported check-in path is the prebuilt `swap-checkin-*` binary under this skill’s `tools/tx-checkin/`.
-
-**How to invoke `swap-checkin-*` (recommended)**
-
-- **Resolve the binary:** Use `"$SKILL_ROOT/tools/tx-checkin/swap-checkin-mac"` (or `swap-checkin-linux` / `swap-checkin-win.exe`) where **`$SKILL_ROOT`** is the **installed** `gate-dex-trade` skill root (see §4.3), never a guessed path inside the user’s unrelated repo tree.
-- **macOS / Linux (bash/zsh):** Write the preview JSON to a UTF-8 file (name by stage, e.g. `swap-checkin-preview-approve.json`, `swap-checkin-preview-swap.json`), then run:
-  - `"$SKILL_ROOT/tools/tx-checkin/swap-checkin-mac" --preview-json "$(jq -c . path/to/swap-checkin-preview-approve.json)"`  
-  On Linux use `swap-checkin-linux` with the same flags. `jq -c` emits one-line JSON so the shell does not need manual escaping inside `checkin_message`.
-- **Windows (PowerShell):** Save the preview as UTF-8 (no BOM). Prefer a **minified single-line** file, then e.g. `$p = Get-Content -Raw 'path\to\preview.json'; & "$SKILL_ROOT\tools\tx-checkin\swap-checkin-win.exe" --preview-json $p`. If `jq` is installed, use `$p = jq -c . path\to\preview.json | Out-String` (trim) the same way as bash.
-- **Avoid** pasting large raw JSON into the shell. The inline `'<preview-json>'` examples above are for minimal demos only; real previews often break unquoted pastes.
-
-**After the binary exits**
-
-- **Success:** The GV response body is on **stdout** (JSON). Parse **`data.checkin_token`** and pass it **verbatim** to `dex_tx_swap_sign_approve` or `dex_tx_swap_sign_swap`.
-- **Failure:** **stderr** carries `{"ok":false,"error":"..."}` and the exit code is non-zero. Never parse stderr as a `checkin_token`.
-- **Persistence:** Temp preview/response files are optional for debugging only; do not treat them as required artifacts in the repo.
+1. Call `dex_tx_swap_checkin_preview` and retain the **full** preview object for the stage (`approve` or `swap`).
+2. Resolve **`authorization`** (`Bearer …`) per §4.2 / preview `mcp_token` / credential fallback.
+3. Call **GV MCP** **`tx_checkin`** with the mapping in §4.3 (server identifier from the user’s configured GV MCP).
+4. On success, read **`data.checkin_token`** from the GV MCP tool result JSON.
+5. Pass that token into the next wallet MCP sign tool call. On tool error, surface the error; do not treat error payloads as `checkin_token`.
 
 #### 4.4 `dex_tx_swap_sign_approve`
 
@@ -547,7 +519,7 @@ Complete Swap flow calls following tools in sequence, forming strict linear pipe
 8.  [Agent signature authorization confirmation, wait user confirmation]  ← staged swap SOP Step 3 (mandatory gate)
 9.  dex_tx_swap_prepare                                   ← Create staged swap session
 10. dex_tx_swap_checkin_preview                           ← Get approve/swap stage check-in input
-11. `<SKILL_ROOT>/tools/tx-checkin/` `swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` (installed skill) ← Produce stage-specific checkin_token; see §4.3
+11. GV MCP `tx_checkin` ← Produce stage-specific `checkin_token`; see §4.3
 12. dex_tx_swap_sign_approve / dex_tx_swap_sign_swap      ← Sign staged approve/swap
 13. dex_tx_swap_submit                                    ← Submit signed staged swap
 14. dex_tx_swap_detail (by tx_order_id, poll every 5s)    ← Query Swap execution result (optional, poll as needed)
@@ -758,16 +730,14 @@ Step 11: Create staged swap session
 Step 12: Run stage-specific check-in + signing
   If need_approved == true:
     a) Call dex_tx_swap_checkin_preview({ swap_session_id, stage: "approve", mcp_token })
-    b) Run check-in binary from **installed** skill: `<SKILL_ROOT>/tools/tx-checkin/` (`swap-checkin-mac` / `swap-checkin-linux` / `swap-checkin-win.exe` per OS); see §4.3–§4.3.1 for `$SKILL_ROOT` and `--preview-json` (file + jq)
-    c) Read approve checkin_token from response.body.data.checkin_token
-    d) Call dex_tx_swap_sign_approve({ swap_session_id, checkin_token, mcp_token })
+    b) Call GV MCP `tx_checkin` with the approve-stage preview (§4.3); read `data.checkin_token` from the tool result
+    c) Call dex_tx_swap_sign_approve({ swap_session_id, checkin_token, mcp_token })
 
   Then always:
     a) Call dex_tx_swap_checkin_preview({ swap_session_id, stage: "swap", mcp_token })
-    b) Run the same binary from `<SKILL_ROOT>/tools/tx-checkin/` again with the swap preview to get swap checkin_token
-    c) Read swap checkin_token from response.body.data.checkin_token
-    d) Call dex_tx_swap_sign_swap({ swap_session_id, checkin_token, mcp_token })
-    e) Call dex_tx_swap_submit({ swap_session_id, mcp_token })
+    b) Call GV MCP `tx_checkin` with the swap-stage preview; read `data.checkin_token` from the tool result
+    c) Call dex_tx_swap_sign_swap({ swap_session_id, checkin_token, mcp_token })
+    d) Call dex_tx_swap_submit({ swap_session_id, mcp_token })
   Get tx_hash and tx_order_id
   ↓
 
@@ -1066,7 +1036,7 @@ AskQuestion({
 
 | User Selection | Handling |
 |----------------|----------|
-| `confirm` | Execute staged swap flow (`prepare` → `checkin_preview` → local check-in CLI → `sign` → `submit`) |
+| `confirm` | Execute staged swap flow (`prepare` → `checkin_preview` → GV MCP `tx_checkin` → `sign` → `submit`) |
 | `modify` | Return to SOP Step 1 re-display trading pair Table and re-get quote |
 | `cancel` | Abort Swap, show cancellation prompt |
 

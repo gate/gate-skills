@@ -23,7 +23,7 @@ Verify: `"Swap 100 USDT for ETH"` or `"Use OpenAPI mode to swap"`
 |-----------|----------|-------------|
 | **Connection** | Gate Wallet MCP Server | Direct AK/SK API |
 | **Authentication** | mcp_token (OAuth login) | HMAC-SHA256 signature |
-| **Execution** | Staged swap + local check-in CLI | Step-by-step lifecycle |
+| **Execution** | Staged swap + GV MCP `tx_checkin` | Step-by-step lifecycle |
 | **Cross-chain** | Supported | Same-chain only |
 | **Three-step Confirmation** | Mandatory | Mandatory |
 
