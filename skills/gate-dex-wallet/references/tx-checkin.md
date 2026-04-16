@@ -1,7 +1,7 @@
 ---
 name: gate-dex-wallet-tx-checkin
 version: "2.2.0"
-updated: "2026-04-13"
+updated: "2026-04-16"
 description: "Mandatory transaction check-in before wallet signing via Gate Verify (tool tx_checkin or /v1/tx/checkin). Pass mcp_token as tool argument authorization (not wallet MCP HTTP headers on the Verify server). For x402 EVM EIP-3009, use dex_tx_x402_checkin_preview first to obtain message. Applies before dex_wallet_sign_transaction, dex_wallet_sign_message, and dex_tx_x402_fetch."
 ---
 
@@ -51,11 +51,11 @@ If `need_otp` is true, follow product OTP guidance before continuing.
 ## Applicable scenarios
 
 - **Always** before `dex_wallet_sign_transaction` (transfers, withdraws, DApp txs, any raw tx signing).
-- **Always** before `dex_wallet_sign_message` (personal_sign, EIP-712, DApp login). **`message`** argument to **`/v1/tx/checkin`** / **`tx_checkin`** must match the **exact** payload to be signed (see **Check-in `message` 规则** below).
+- **Always** before `dex_wallet_sign_message` (personal_sign, EIP-712, DApp login). **`message`** argument to **`/v1/tx/checkin`** / **`tx_checkin`** must match the **exact** payload to be signed (see **Check-in message rules** below).
 - **Always** before `dex_tx_x402_fetch`. For **EVM exact / EIP-3009**, the **`message`** passed to Gate Verify **`/v1/tx/checkin`** / **`tx_checkin`** **must** be **`tx_checkin.message`** from the **`dex_tx_x402_checkin_preview`** result (64-hex digest) — **do not** compute that digest in the agent. For Solana or Permit2 **upto**, use **`message`** / **`intent`** per backend ([x402.md](./x402.md)); then pass **`checkin_token`** into `dex_tx_x402_fetch`.
 - If the gateway returns an error mentioning check-in / registration, re-run **`/v1/tx/checkin`** / **`tx_checkin`** and retry only after success.
 
-## Check-in `message` 规则（与签名类型一致）
+## Check-in message rules (aligned with signature type)
 
 1. **`dex_wallet_sign_message`**: pass the **exact** string the wallet MCP will sign as **`message`** to **`/v1/tx/checkin`** / **`tx_checkin`** (same as former CLI `-message`).
 2. **`dex_wallet_sign_transaction`** after **`dex_tx_transfer_preview`**: pass preview field **`txBundle`** **as-is** as **`message`**. **Do not** assemble txbundle JSON from `unsigned_tx_hex` or other fields.
