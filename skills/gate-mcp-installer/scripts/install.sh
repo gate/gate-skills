@@ -5,9 +5,11 @@
 #              [--mcp main|cex-public|cex-exchange|dex|info|news|gatepay-local|gatepay-discovery] ...
 #              [--no-skills] [--select|-s]
 #   --platform  Force target; required if multiple dev environments are detected.
-#   --mcp       Repeatable; omit to install all six trading MCP surfaces (Gate Pay: add gatepay-local / gatepay-discovery).
+#   --mcp       Repeatable; omit to install all six trading MCP surfaces + Gate Verify when dex is on (Gate Pay: add gatepay-local / gatepay-discovery).
 #   --no-skills MCP only (no gate-skills clone).
 #   --select    OpenClaw: interactive pick one server (legacy mcporter UX).
+#
+# Gate Verify (GV): HTTP MCP gate-dex-sec (tx_checkin) added whenever gate-dex is installed — see SKILL.md / gate-dex-wallet.
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -27,6 +29,11 @@ MCP_GATEPAY_LOCAL=0
 MCP_GATEPAY_DISCOVERY=0
 INSTALL_SKILLS=1
 SELECT_MODE=0
+
+echo_gate_dex_gv_checkin_note() {
+  echo "  Gate Verify (tx check-in): call MCP tool tx_checkin or /v1/tx/checkin on the gate-dex-sec server;"
+  echo "  pass authorization (same mcp_token as wallet MCP) in tool arguments — see gate-dex-wallet/references/tx-checkin.md."
+}
 
 usage() {
   echo "Usage: $0 [--platform cursor|claude|codex|openclaw]"
@@ -233,7 +240,7 @@ install_json_merge_platform() {
   fi
   [[ $MCP_CEX_PUBLIC -eq 1 ]]   && FRAGS+=("$FRAG_DIR/gate-cex-pub.json")
   [[ $MCP_CEX_EXCHANGE -eq 1 ]] && FRAGS+=("$FRAG_DIR/gate-cex-ex.json")
-  [[ $MCP_DEX -eq 1 ]]          && FRAGS+=("$FRAG_DIR/gate-dex.json")
+  [[ $MCP_DEX -eq 1 ]]          && FRAGS+=("$FRAG_DIR/gate-dex.json" "$FRAG_DIR/gate-verify.json")
   [[ $MCP_INFO -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-info.json")
   [[ $MCP_NEWS -eq 1 ]]         && FRAGS+=("$FRAG_DIR/gate-news.json")
   [[ $MCP_GATEPAY_LOCAL -eq 1 ]] && FRAGS+=("$FRAG_DIR/gatepay-local-mcp.json")
@@ -278,6 +285,7 @@ install_json_merge_platform() {
   if [[ $MCP_DEX -eq 1 ]]; then
     echo ""
     echo "Gate-Dex: wallet at https://web3.gate.com/ then OAuth via assistant link if required."
+    echo_gate_dex_gv_checkin_note
   fi
   if [[ $MCP_GATEPAY_LOCAL -eq 1 ]]; then
     echo ""
@@ -369,6 +377,7 @@ TOML
   [[ $MCP_CEX_PUBLIC -eq 1 ]]   && append_named "gate-cex-pub" "$FRAG_DIR/gate-cex-pub.toml" "gate-cex-pub"
   [[ $MCP_CEX_EXCHANGE -eq 1 ]] && append_named "gate-cex-ex" "$FRAG_DIR/gate-cex-ex.toml" "gate-cex-ex"
   [[ $MCP_DEX -eq 1 ]]          && append_named "gate-dex" "$FRAG_DIR/gate-dex.toml" "gate-dex"
+  [[ $MCP_DEX -eq 1 ]]          && append_named "gate-dex-sec" "$FRAG_DIR/gate-verify.toml" "gate-dex-sec (Gate Verify)"
   [[ $MCP_INFO -eq 1 ]]         && append_named "gate-info" "$FRAG_DIR/gate-info.toml" "gate-info"
   [[ $MCP_NEWS -eq 1 ]]         && append_named "gate-news" "$FRAG_DIR/gate-news.toml" "gate-news"
   [[ $MCP_GATEPAY_LOCAL -eq 1 ]] && append_named "gatepay-local-mcp" "$FRAG_DIR/gatepay-local-mcp.toml" "gatepay-local-mcp"
@@ -392,6 +401,7 @@ TOML
   if [[ $MCP_DEX -eq 1 ]]; then
     echo ""
     echo "Gate-Dex: https://web3.gate.com/ for wallet; OAuth via assistant if needed."
+    echo_gate_dex_gv_checkin_note
   fi
   if [[ $MCP_GATEPAY_LOCAL -eq 1 ]]; then
     echo ""
@@ -422,6 +432,7 @@ openclaw_wants_name() {
     gate-cex-pub)       [[ $MCP_CEX_PUBLIC -eq 1 ]] ;;
     gate-cex-ex)        [[ $MCP_CEX_EXCHANGE -eq 1 ]] ;;
     gate-dex)           [[ $MCP_DEX -eq 1 ]] ;;
+    gate-dex-sec)       [[ $MCP_DEX -eq 1 ]] ;;
     gate-info)          [[ $MCP_INFO -eq 1 ]] ;;
     gate-news)          [[ $MCP_NEWS -eq 1 ]] ;;
     gatepay-local-mcp)           [[ $MCP_GATEPAY_LOCAL -eq 1 ]] ;;
@@ -552,7 +563,23 @@ install_openclaw_platform() {
         ;;
     esac
     openclaw_install_server_line "$selected" "$gate_key" "$gate_secret" "$GATE_DEX_API_KEY"
+    if [[ "$name" == "gate-dex" ]]; then
+      local vline=""
+      while IFS= read -r line || [[ -n "$line" ]]; do
+        [[ -z "$line" || "$line" == \#* ]] && continue
+        [[ "$line" == gate-dex-sec* ]] && vline="$line" && break
+      done < "$OPENCLAW_MANIFEST"
+      if [[ -n "$vline" ]] && ! openclaw_check_existing "gate-dex-sec"; then
+        echo ""
+        echo "Also installing Gate Verify companion (gate-dex-sec) for tx_checkin..."
+        openclaw_install_server_line "$vline" "$gate_key" "$gate_secret" "$GATE_DEX_API_KEY"
+      fi
+    fi
     install_gate_skills_to "$OPENCLAW_SKILLS"
+    if [[ "$name" == "gate-dex" || "$name" == "gate-dex-sec" ]]; then
+      echo ""
+      echo_gate_dex_gv_checkin_note
+    fi
     echo "mcporter auth gate-cex-ex  # when using remote exchange"
     return 0
   fi
@@ -605,6 +632,10 @@ install_openclaw_platform() {
   fi
   if openclaw_check_existing "gate-dex"; then
     echo "Gate-Dex: https://web3.gate.com/ then OAuth if tools require it."
+  fi
+  if openclaw_check_existing "gate-dex" || openclaw_check_existing "gate-dex-sec"; then
+    echo ""
+    echo_gate_dex_gv_checkin_note
   fi
   echo "Quick: mcporter list gate-cex-pub | mcporter call gate-info.list_tickers currency_pair=BTC_USDT"
 }

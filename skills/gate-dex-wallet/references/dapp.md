@@ -2,12 +2,12 @@
 name: gate-dex-dapp
 version: "2026.3.31-1"
 updated: "2026-03-31"
-description: "Gate Wallet DApp interaction module. Connect wallet, sign messages (EIP-712 / personal_sign), sign and send DApp-generated transactions, and manage ERC20 Approve authorizations. Includes mandatory confirmation gates, terminal tx-checkin before every signing MCP call, and contract security review."
+description: "Gate Wallet DApp interaction module. Connect wallet, sign messages (EIP-712 / personal_sign), sign and send DApp-generated transactions, and manage ERC20 Approve authorizations. Includes mandatory confirmation gates, Gate Verify MCP check-in (tx_checkin) before every signing MCP call, and contract security review."
 ---
 
 # Gate DEX DApp
 
-> DApp interaction module — connect wallet, sign messages, execute DApp transactions, and manage ERC20 Approve authorizations. Includes mandatory confirmation gates, **terminal tx-checkin before `dex_wallet_sign_message` and `dex_wallet_sign_transaction`**, and contract security review. 4 MCP tools + cross-skill calls.
+> DApp interaction module — connect wallet, sign messages, execute DApp transactions, and manage ERC20 Approve authorizations. Includes mandatory confirmation gates, **Gate Verify MCP `tx_checkin` before `dex_wallet_sign_message` and `dex_wallet_sign_transaction`**, and contract security review. 4 MCP tools + cross-skill calls.
 
 ## Applicable Scenarios
 
@@ -29,7 +29,7 @@ Use when the user wants to interact with external DApps:
 
 **Prerequisites**: MCP Server available (see parent SKILL.md). All operations require `mcp_token`. If missing, route to [auth.md](./auth.md).
 
-**Signing prerequisite**: After the user confirms the message or transaction, **always** run terminal [tx-checkin.md](./tx-checkin.md) **before** calling `dex_wallet_sign_message` or `dex_wallet_sign_transaction`. On check-in failure, abort. When an MCP preview returns **`txBundle`** (same shape as transfer preview), check-in **only** uses **`-tx-bundle-file`** with that string — do not build txbundle manually.
+**Signing prerequisite**: After the user confirms the message or transaction, **always** call **`tx_checkin`** per [tx-checkin.md](./tx-checkin.md) **before** calling `dex_wallet_sign_message` or `dex_wallet_sign_transaction`. On check-in failure, abort. When an MCP preview returns **`txBundle`** (same shape as transfer preview), pass that string **as-is** as the check-in **`message`** — do not build txbundle manually.
 
 ---
 
@@ -46,7 +46,7 @@ Returns wallet addresses per chain. EVM chains share the same address.
 
 ### 2. `dex_wallet_sign_message` — Sign Messages
 
-Signs arbitrary messages using server-side custodial keys. Supports personal_sign and EIP-712. **Call only after** user confirmation **and** successful terminal [tx-checkin.md](./tx-checkin.md) (use `-message` / `-intent` per backend for the approved payload).
+Signs arbitrary messages using server-side custodial keys. Supports personal_sign and EIP-712. **Call only after** user confirmation **and** successful verify MCP [tx-checkin.md](./tx-checkin.md) (pass the exact payload as **`message`** or structured **`intent`** per backend).
 
 | Field | Description |
 |-------|-------------|
@@ -58,7 +58,7 @@ Signs arbitrary messages using server-side custodial keys. Supports personal_sig
 
 ### 3. `dex_wallet_sign_transaction` — Sign DApp Transactions
 
-Signs unsigned transactions using server-side custodial keys. **Only call after explicit user confirmation and successful terminal** [tx-checkin.md](./tx-checkin.md).
+Signs unsigned transactions using server-side custodial keys. **Only call after explicit user confirmation and successful verify MCP** [tx-checkin.md](./tx-checkin.md).
 
 | Field | Description |
 |-------|-------------|
@@ -112,7 +112,7 @@ Step 3: Display signing content confirmation (MANDATORY GATE)
    Content: {message}. This will not generate on-chain transactions or consume gas.
    Reply 'confirm' to sign, 'cancel' to abort."
   |
-Step 4: Terminal tx-checkin (MANDATORY) — [tx-checkin.md](./tx-checkin.md); on failure abort
+Step 4: Gate Verify MCP `tx_checkin` (MANDATORY) — [tx-checkin.md](./tx-checkin.md); on failure abort
   |
 Step 5: Call dex_wallet_sign_message -> get signature
   |
@@ -151,7 +151,7 @@ Step 8: Display confirmation (MANDATORY GATE)
   Show: chain, protocol, operation, contract, details, balance info, gas, security audit
   Wait for explicit "confirm".
   |
-Step 9: Terminal tx-checkin (MANDATORY) — [tx-checkin.md](./tx-checkin.md); on failure abort
+Step 9: Gate Verify MCP `tx_checkin` (MANDATORY) — [tx-checkin.md](./tx-checkin.md); on failure abort
   |
 Step 10: Sign -> Step 11: Broadcast -> Step 12: Display result
   "✅ DApp transaction broadcast successfully!
@@ -181,7 +181,7 @@ Step 3: Build approve calldata
 Step 4: Display approve confirmation (MANDATORY GATE)
   Show: chain, token, spender, amount, gas estimate
   |
-Step 5: Terminal tx-checkin (MANDATORY) — [tx-checkin.md](./tx-checkin.md); then sign + broadcast approve tx
+Step 5: Gate Verify MCP `tx_checkin` (MANDATORY) — [tx-checkin.md](./tx-checkin.md); then sign + broadcast approve tx
   |
 Step 6: Continue to main DApp operation (Flow C Step 9)
 ```
@@ -195,14 +195,14 @@ Step 2: Encode calldata
   |
 Step 3-5: Security review + balance validation + confirmation gate (same as Flow C Steps 4-8)
   |
-Step 6: Terminal tx-checkin then sign + broadcast (same as Flow C Steps 9-12)
+Step 6: Gate Verify MCP `tx_checkin` then sign + broadcast (same as Flow C Steps 9-12)
 ```
 
 ---
 
 ## DApp Transaction Confirmation Template
 
-**MANDATORY gate — Agent must NOT sign before explicit user confirmation and successful terminal [tx-checkin.md](./tx-checkin.md).**
+**MANDATORY gate — Agent must NOT sign before explicit user confirmation and successful Gate Verify MCP [tx-checkin.md](./tx-checkin.md).**
 
 ```
 ========== DApp Transaction Confirmation ==========
@@ -439,8 +439,8 @@ You can also:
 
 1. **Token confidentiality**: Never display `mcp_token` in plaintext. Use placeholders like `<mcp_token>`.
 2. **Account masking**: Show only partial `account_id`.
-3. **Re-login on expiry**: If `mcp_token` is invalid or expired, route to [auth.md](./auth.md) before signing or contract calls.
-4. **Confirmation + tx-checkin before all signing**: All signing operations (messages, transactions, approves) require explicit user confirmation **and** terminal [tx-checkin.md](./tx-checkin.md). Never skip or auto-confirm.
+3. **Token refresh and re-login**: Prioritize silent token refresh on expiration when supported; if `mcp_token` is invalid or expired, route to [auth.md](./auth.md) before signing or contract calls.
+4. **Confirmation + Gate Verify MCP check-in before all signing**: All signing operations (messages, transactions, approves) require explicit user confirmation **and** **`tx_checkin`** per [tx-checkin.md](./tx-checkin.md). Never skip or auto-confirm.
 5. **Contract security review**: For unknown contracts, call `dex_token_get_risk_info` and display results. High-risk contracts get additional prominent warnings.
 6. **Default exact authorization**: ERC20 Approve defaults to exact amount. Unlimited authorization requires explicit user request plus risk warning.
 7. **EIP-712 transparency**: Parse and display all key fields in human-readable format. Never omit `verifyingContract`, `spender`, or amount fields.

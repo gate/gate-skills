@@ -4,6 +4,13 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.10-1] - 2026-04-10
+
+### Changed
+
+- **SKILL.md**: version updated to 2026.4.10-1
+- **tools/tx-checkin**: Removed obsolete `tx-checkin` binary (binaries now ship in `tools/tx-checkin/bin/`)
+
 ## [2026.4.8-1] - 2026-04-08
 
 ### Changed
@@ -12,10 +19,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## Unreleased
 
+### Removed
+
+- **`tools/tx-checkin/`**: Prebuilt `tx-checkin` CLI binaries removed; transaction check-in is **Gate Verify MCP** only (`https://api.gatemcp.ai/mcp/dex/sec`, tool **`tx_checkin`**).
+
 ### Changed
 
-- **tools/tx-checkin**: Fixed gateway base URL to **`https://webapi.w3-api.com/api/web/v1/web3-gv-api`** (check-in POST: **`.../api/v1/tx/checkin`**). Prebuilt binaries in **`tools/tx-checkin/bin/`** rebuilt.
-- **tools/tx-checkin**: Optional **`TX_CHECKIN_GATEWAY_BASE`** env (automation/CI only; not user-facing in skill docs) overrides the gateway URL prefix.
 - **references/cli.md**: version `2026.4.3-1`; tx-checkin integrated as mandatory step in On-Chain Operation Flow (preview → confirm → tx-checkin → execute); `send`, `swap`, `openapi-swap` commands annotated with tx-checkin requirement; new "tx-checkin Binary for CLI Operations" section with step-by-step flows; Security Rules updated (rule 3: terminal tx-checkin before signing); Common Pitfall #24 added; Capability Boundaries updated with signing prerequisite note
 - **install.sh**: Removed misleading placeholder Bearer token from Cursor and Codex MCP configs (OAuth login populates at runtime); Claude Code install now appends to existing CLAUDE.md instead of overwriting; Codex config.toml checks for existing gate-dex entry before appending; AGENTS.md uses same append-not-overwrite logic; OpenClaw removed hardcoded default API key and unused key prompt
 - **install_cli.sh**: OpenAPI credential input now escaped via `jq` (with `sed` fallback) to prevent JSON injection from special characters in API keys

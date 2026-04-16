@@ -1,8 +1,8 @@
 ---
 name: gate-mcp-installer
-version: "2026.4.10-2"
-updated: "2026-04-10"
-description: "One-click installer for Gate MCP servers and gate-skills on Cursor, Claude Code, Codex, or OpenClaw/mcporter. Use when the user asks to install Gate MCP, Gate skills, setup Gate trading tools, mcporter Gate, or configure any supported client. Triggers on 'install Gate MCP', 'Gate skills', 'setup Gate Cursor', 'Gate Claude Code', 'Gate Codex', 'OpenClaw Gate', 'mcporter Gate'."
+version: "2026.4.14-4"
+updated: "2026-04-14"
+description: "One-click installer for Gate MCP servers and gate-skills on Cursor, Claude Code, Codex, or OpenClaw/mcporter. When gate-dex is installed, also wires Gate Verify HTTP MCP as gate-dex-sec for MCP tool tx_checkin before wallet signing per gate-dex-wallet. Triggers on 'install Gate MCP', 'Gate skills', 'Gate Verify', 'tx check-in', 'setup Gate Cursor', 'Gate Claude Code', 'Gate Codex', 'OpenClaw Gate', 'mcporter Gate'."
 ---
 
 # Gate MCP Installer (unified: Cursor / Claude Code / Codex / OpenClaw)
@@ -30,6 +30,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | gate-news | ✅ News |
 | gatepay-local-mcp | ➕ Optional (Gate Pay x402 stdio; `--mcp gatepay-local`) |
 | gatepay-merchant-discovery | ➕ Optional (HTTP merchant catalog / `discoveryResource`; `--mcp gatepay-discovery`) |
+| Gate Verify (tx check-in) | ✅ HTTP MCP **`https://api.gatemcp.ai/mcp/dex/sec`** — merged as **`gate-dex-sec`** (Cursor / Claude / Codex / mcporter) **whenever `dex` is installed**; call **`tx_checkin`** / **`/v1/tx/checkin`** per **gate-dex-wallet** |
 
 ### Installation Check
 
@@ -72,6 +73,19 @@ See [gate-mcp](https://github.com/gate/gate-mcp):
 
 ---
 
+## Tx check-in (Gate Verify / GV)
+
+Gate Verify is a **second HTTP MCP** on the same host as remote DEX, used only for signing check-in:
+
+| Role | Install surface |
+|------|------------------|
+| Wallet / DEX tools | **`gate-dex`** → `https://api.gatemcp.ai/mcp/dex` (headers per fragment) |
+| Gate Verify | **`gate-dex-sec`** → `https://api.gatemcp.ai/mcp/dex/sec` (URL-only / `streamable-http`; **no** wallet HTTP headers on this entry) |
+
+This installer **adds the Verify MCP whenever `--mcp dex` is included** (default full install includes it). Agents call **`tx_checkin`** or **`/v1/tx/checkin`** on the Verify server with **`authorization`** = the same **`mcp_token`** as wallet MCP tool args — see [gate-dex-wallet `references/tx-checkin.md`](../gate-dex-wallet/references/tx-checkin.md). Staged swap specifics: **gate-dex-trade** skill.
+
+---
+
 ## Resources
 
 | Type | Name | Notes |
@@ -80,16 +94,18 @@ See [gate-mcp](https://github.com/gate/gate-mcp):
 | MCP | **gate-cex-pub** | HTTP remote public |
 | MCP | **gate-cex-ex** | HTTP remote private + OAuth2 |
 | MCP | **gate-dex** | HTTP + headers |
+| MCP | **gate-dex-sec** | HTTP `https://api.gatemcp.ai/mcp/dex/sec`; **`tx_checkin`** before signing — bundled with **`dex`** install |
 | MCP | **gate-info** / **gate-news** | HTTP |
 | MCP | **gatepay-local-mcp** | stdio `npx -y gatepay-local-mcp`; wallet **`env`** per **gate-pay-x402** |
 | MCP | **gatepay-merchant-discovery** | HTTP `http://dev.halftrust.xyz/pay-mcp-server/mcp`; catalog only (**gate-pay-x402**) |
+| Skill | **gate-dex-wallet** | Routing for Verify MCP + wallet flows — `references/tx-checkin.md` |
 | Skills | gate-skills | https://github.com/gate/gate-skills |
 
 ---
 
 ## Behavior rules
 
-1. **Default**: Install **all six** trading MCP surfaces + **all gate-skills** unless the user opts out. **Gate Pay** MCPs are **not** included by default: add **`--mcp gatepay-local`** (x402 stdio) and/or **`--mcp gatepay-discovery`** (remote merchant catalog) when needed.
+1. **Default**: Install **all six** trading MCP surfaces + **Gate Verify** (bundled with **`dex`**) + **all gate-skills** unless the user opts out. **Gate Pay** MCPs are **not** included by default: add **`--mcp gatepay-local`** (x402 stdio) and/or **`--mcp gatepay-discovery`** (remote merchant catalog) when needed. Omitting **`dex`** also omits the Verify MCP entry.
 2. **Selectable**: `--mcp main|cex-public|cex-exchange|dex|info|news|gatepay-local|gatepay-discovery` (repeatable).
 3. **Skills**: `--no-skills` installs MCP configuration only.
 4. **OpenClaw**: `--select` / `-s` keeps the interactive single-server menu (mcporter legacy UX).
@@ -150,6 +166,7 @@ mcporter call gate-dex.list_balances
 - **API Key**: https://www.gate.com/myaccount/profile/api-key/manage for local `Gate (main)` trading.
 - **gate-cex-ex**: OAuth2 when the client prompts; OpenClaw: `mcporter auth gate-cex-ex`.
 - **gate-dex**: https://web3.gate.com/ for wallet; complete OAuth if tools require it.
+- **Gate Verify (`gate-dex-sec`)**: merged with **`dex`**; before signing or **`dex_tx_x402_fetch`**, call **`tx_checkin`** / **`/v1/tx/checkin`** on this MCP with **`authorization`** = wallet **`mcp_token`** (tool argument, not copied HTTP headers) — **gate-dex-wallet** [`references/tx-checkin.md`](../gate-dex-wallet/references/tx-checkin.md).
 - **gatepay-local-mcp**: stdio Gate Pay x402; set **`env`** placeholders in the client config to real values only locally — see **gate-pay-x402** (`PLUGIN_WALLET_TOKEN`, **`EVM_PRIVATE_KEY`**, **`SVM_PRIVATE_KEY`**, optional **`PAYMENT_METHOD_PRIORITY`**).
 - **gatepay-merchant-discovery**: remote URL only (no secrets in installer); lists payable resources — confirm tool name (**`discoveryResource`**) in the live tool list (**gate-pay-x402**). If connect fails, adjust **`transport`** in JSON per your host (fragment uses `streamable-http` like other Gate HTTP MCPs).
 

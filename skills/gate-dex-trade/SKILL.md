@@ -1,7 +1,7 @@
 ---
 name: gate-dex-trade
-version: "2026.4.8-1"
-updated: "2026-04-08"
+version: "2026.4.14-2"
+updated: "2026-04-14"
 description: "Executes on-chain token swaps via Gate DEX. Use when user wants to swap, buy, sell, exchange, or convert tokens, or bridge cross-chain. Covers full swap flow: price quotes, transaction build, signing, and submission. Do NOT use for read-only data lookups or wallet account management."
 ---
 
@@ -51,7 +51,7 @@ Step 2: Is this a cross-chain swap?
   └─ Same-chain / uncertain → Step 3
   ↓
 Step 3: Gate Wallet MCP Server Discovery & Detection
-  a) Scan configured MCP Server list for Servers providing `dex_tx_swap_quote`, `dex_tx_swap_prepare`, and staged swap signing tools
+  a) Scan configured MCP Server list for Servers providing `dex_tx_swap_quote`, `dex_tx_swap_prepare`, and staged swap signing tools (and the Gate GV MCP that exposes `tx_checkin` for staged check-in; see MCP Mode below)
   b) If found → Record server identifier, verify with:
      CallMcpTool(server="<identifier>", toolName="dex_chain_config", arguments={chain: "ETH"})
      ├─ Success → MCP mode
@@ -71,15 +71,7 @@ Step 4: MCP unavailable → setup guide only ([`references/setup.md`](./referenc
 
 Includes: connection detection, authentication (mcp_token), MCP Resource/tool calls (`dex_tx_swap_quote` / `dex_tx_swap_prepare` / `dex_tx_swap_checkin_preview` / staged sign-submit / `dex_tx_swap_detail`), token address resolution, native_in/native_out rules, three-step confirmation gateway (SOP), quote templates, risk warnings, cross-Skill collaboration, security rules.
 
-**Local swap check-in (staged swap only)** — after `dex_tx_swap_checkin_preview`, run the **prebuilt** executable from this skill’s [`tools/tx-checkin/`](./tools/tx-checkin/) directory. **Pick the binary for the user’s platform**:
-
-| User OS | Executable (in `gate-dex-trade/tools/tx-checkin/`) |
-|---------|---------------------------------------------------|
-| macOS (`darwin`, Apple Silicon or Intel) | `swap-checkin-mac` |
-| Linux (`linux`, amd64/x86_64) | `swap-checkin-linux` |
-| Windows (`windows`, amd64) | `swap-checkin-win.exe` |
-
-All three share the same flags (e.g. `--preview-json '...'`). **`Authorization` for GV check-in** matches gate-dex-wallet: preview may omit `mcp_token` if the machine has **`MCP_TOKEN`** or **`~/.cursor/mcp.json`** (see `tools/tx-checkin/README.md` § Credential). This skill only ships those **prebuilt executables** under `tools/tx-checkin/`.
+**Staged swap check-in** — after each `dex_tx_swap_checkin_preview` (per stage: `approve` then `swap` as required), call the **Gate Web3 GV MCP** tool **`tx_checkin`** using the preview fields. The user environment must include that MCP server (discover via `tools/list`). **Parameter mapping:** [`references/mcp.md`](./references/mcp.md) §4.3 — map preview `mcp_token` → `authorization` as `Bearer <token>`; `user_wallet` → `wallet_address`; `checkin_message` → `message`; set `source` to **integer `3`**; pass `chain` / `chain_category` as returned; set `type` to **`""`** unless GV/product documents a required non-empty value. Read **`data.checkin_token`** (and handle **`need_otp`**) from the tool result, then call `dex_tx_swap_sign_approve` / `dex_tx_swap_sign_swap`. **Do not** reimplement GV check-in with raw `curl` or custom signing.
 
 ### OpenAPI Mode (Progressive Loading)
 

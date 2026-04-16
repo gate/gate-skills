@@ -103,15 +103,24 @@ install_cursor() {
         if [ -f "$config_file" ]; then
             existing_config=$(cat "$config_file")
         fi
-        echo "$existing_config" | jq '.mcpServers["gate-dex"] = {
-          "url": "https://api.gatemcp.ai/mcp/dex"
-        }' > "$config_file"
+        echo "$existing_config" | jq '
+          .mcpServers |= (. // {})
+          | .mcpServers["gate-dex"] = {
+              "url": "https://api.gatemcp.ai/mcp/dex"
+            }
+          | .mcpServers["gate-dex-sec"] = {
+              "url": "https://api.gatemcp.ai/mcp/dex/sec"
+            }
+        ' > "$config_file"
     else
         cat > "$config_file" << 'EOF'
 {
   "mcpServers": {
     "gate-dex": {
       "url": "https://api.gatemcp.ai/mcp/dex"
+    },
+    "gate-dex-sec": {
+      "url": "https://api.gatemcp.ai/mcp/dex/sec"
     }
   }
 }
@@ -132,6 +141,7 @@ EOF
     done
     
     echo -e "${GREEN}  ✓${NC} MCP configuration updated: $config_file"
+    echo -e "${GREEN}    →${NC} gate-dex (wallet / DEX) + gate-dex-sec (tx check-in before signing; see gate-dex-wallet/references/tx-checkin.md)"
     echo -e "${GREEN}  ✓${NC} Skills installed to: $skills_dir"
 }
 
@@ -139,9 +149,14 @@ EOF
 install_claude() {
     echo -e "${CYAN}🤖 Configuring Claude Code...${NC}"
     
-    # Try CLI first
+    # Try CLI first (wallet + Gate Verify check-in)
     if claude mcp add --transport http gate-dex --scope project https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
-        echo -e "${GREEN}  ✓${NC} MCP server added successfully via CLI"
+        echo -e "${GREEN}  ✓${NC} gate-dex MCP server added via CLI"
+        if claude mcp add --transport http gate-dex-sec --scope project https://api.gatemcp.ai/mcp/dex/sec 2>/dev/null; then
+            echo -e "${GREEN}  ✓${NC} gate-dex-sec (tx check-in) MCP server added via CLI"
+        else
+            echo -e "${YELLOW}  ⚠${NC} gate-dex-sec not added via CLI; merge .mcp.json manually or run: claude mcp add --transport http gate-dex-sec --scope project https://api.gatemcp.ai/mcp/dex/sec"
+        fi
     else
         cat > .mcp.json << 'EOF'
 {
@@ -149,11 +164,15 @@ install_claude() {
     "gate-dex": {
       "type": "http",
       "url": "https://api.gatemcp.ai/mcp/dex"
+    },
+    "gate-dex-sec": {
+      "type": "http",
+      "url": "https://api.gatemcp.ai/mcp/dex/sec"
     }
   }
 }
 EOF
-        echo -e "${GREEN}  ✓${NC} .mcp.json configuration created"
+        echo -e "${GREEN}  ✓${NC} .mcp.json configuration created (gate-dex + gate-dex-sec)"
     fi
 
     # Create or update routing file (do not overwrite existing content)
@@ -187,9 +206,14 @@ When users request the following operations, read the corresponding SKILL.md fil
 install_codex() {
     echo -e "${CYAN}⚙️ Configuring Codex CLI...${NC}"
     
-    # Try CLI first
+    # Try CLI first (wallet + Gate Verify check-in)
     if codex mcp add gate-dex --transport http --url https://api.gatemcp.ai/mcp/dex 2>/dev/null; then
-        echo -e "${GREEN}  ✓${NC} MCP server added successfully via CLI"
+        echo -e "${GREEN}  ✓${NC} gate-dex MCP server added via CLI"
+        if codex mcp add gate-dex-sec --transport http --url https://api.gatemcp.ai/mcp/dex/sec 2>/dev/null; then
+            echo -e "${GREEN}  ✓${NC} gate-dex-sec (tx check-in) MCP server added via CLI"
+        else
+            echo -e "${YELLOW}  ⚠${NC} gate-dex-sec not added via CLI; add manually: codex mcp add gate-dex-sec --transport http --url https://api.gatemcp.ai/mcp/dex/sec"
+        fi
     else
         local config_file="$HOME/.codex/config.toml"
         mkdir -p "$(dirname "$config_file")"
@@ -203,7 +227,18 @@ install_codex() {
 transport = "http"
 url = "https://api.gatemcp.ai/mcp/dex"
 EOF
-            echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated"
+            echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated (gate-dex)"
+        fi
+        if [ -f "$config_file" ] && grep -q '\[mcp\.gate-dex-sec\]' "$config_file"; then
+            echo -e "${GREEN}  ✓${NC} gate-dex-sec already configured in $config_file"
+        else
+            cat >> "$config_file" << 'EOF'
+
+[mcp.gate-dex-sec]
+transport = "http"
+url = "https://api.gatemcp.ai/mcp/dex/sec"
+EOF
+            echo -e "${GREEN}  ✓${NC} ~/.codex/config.toml updated (gate-dex-sec)"
         fi
     fi
 
@@ -237,17 +272,22 @@ When users request the following operations, read the corresponding SKILL.md fil
 # Install for OpenClaw
 install_openclaw() {
     echo -e "${CYAN}🐾 Configuring OpenClaw (mcporter)...${NC}"
-    
+
     if mcporter config list 2>/dev/null | grep -q "^gate-dex$"; then
-        echo -e "${YELLOW}  ✓${NC} gate-dex already configured"
-        return 0
-    fi
-    
-    if mcporter config add gate-dex --url "https://api.gatemcp.ai/mcp/dex" 2>/dev/null; then
+        echo -e "${GREEN}  ✓${NC} gate-dex already configured"
+    elif mcporter config add gate-dex --url "https://api.gatemcp.ai/mcp/dex" 2>/dev/null; then
         echo -e "${GREEN}  ✓${NC} gate-dex MCP server configured successfully"
     else
-        echo -e "${RED}  ✗${NC} Configuration failed, please check manually"
+        echo -e "${RED}  ✗${NC} gate-dex configuration failed, please check manually"
         return 1
+    fi
+
+    if mcporter config list 2>/dev/null | grep -q "^gate-dex-sec$"; then
+        echo -e "${GREEN}  ✓${NC} gate-dex-sec already configured"
+    elif mcporter config add gate-dex-sec --url "https://api.gatemcp.ai/mcp/dex/sec" 2>/dev/null; then
+        echo -e "${GREEN}  ✓${NC} gate-dex-sec (tx check-in) MCP server configured successfully"
+    else
+        echo -e "${YELLOW}  ⚠${NC} gate-dex-sec not configured; add manually: mcporter config add gate-dex-sec --url \"https://api.gatemcp.ai/mcp/dex/sec\""
     fi
 }
 
@@ -289,6 +329,7 @@ main() {
     echo ""
     echo -e "${CYAN}💡 Tips:${NC}"
     echo "  First-time use requires logging in via Google OAuth or Gate OAuth to get mcp_token"
+    echo "  Signing flows need the gate-dex-sec MCP (tx check-in); pass the same mcp_token as tool arg authorization — gate-dex-wallet/references/tx-checkin.md"
     echo "  For CLI command line tool (gate-wallet command), run: ./gate-dex-wallet/install_cli.sh"
     echo "  Detailed documentation: ./gate-dex-wallet/README.md"
     echo ""

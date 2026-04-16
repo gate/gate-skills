@@ -1,0 +1,3 @@
+
+[mcp_servers.gate-dex-sec]
+url = "https://api.gatemcp.ai/mcp/dex/sec"

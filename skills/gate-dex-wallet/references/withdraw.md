@@ -2,12 +2,12 @@
 name: gate-dex-withdraw
 version: "2026.3.31-1"
 updated: "2026-03-31"
-description: "Gate Wallet withdraw: on-chain moves from the user wallet to Gate Exchange (deposit address resolved for their UID) or to a custom address, with Gate UID binding, min-deposit validation, mandatory confirmation, terminal tx-checkin before signing, and the shared transfer sign/broadcast pipeline. Use when the user wants to cash out to their exchange account, send funds to the exchange deposit address, rebind or verify exchange identity, or review withdrawal-related history for this flow."
+description: "Gate Wallet withdraw: on-chain moves from the user wallet to Gate Exchange (deposit address resolved for their UID) or to a custom address, with Gate UID binding, min-deposit validation, mandatory confirmation, Gate Verify MCP check-in before signing, and the shared transfer sign/broadcast pipeline. Use when the user wants to cash out to their exchange account, send funds to the exchange deposit address, rebind or verify exchange identity, or review withdrawal-related history for this flow."
 ---
 
 # Gate DEX Withdraw
 
-> Withdraw module — exchange binding, deposit-address resolution (with minimum-deposit checks), balance verification, transaction preview, mandatory user confirmation, **terminal tx-checkin before signing**, signing, and broadcasting. **6** withdraw/binding MCP tools + **Gate OAuth** tools + the transfer execution chain from [transfer.md](./transfer.md) (plus cross-skill balance).
+> Withdraw module — exchange binding, deposit-address resolution (with minimum-deposit checks), balance verification, transaction preview, mandatory user confirmation, **Gate Verify MCP check-in before signing**, signing, and broadcasting. **6** withdraw/binding MCP tools + **Gate OAuth** tools + the transfer execution chain from [transfer.md](./transfer.md) (plus cross-skill balance).
 
 ## Product definition (Knowledge)
 
@@ -66,7 +66,7 @@ API mapping, parameters, and call order for withdraw-to-exchange and related bin
 | `dex_wallet_get_addresses` | Resolve `from_address` for the target chain | `account_id`, `mcp_token` |
 | `dex_tx_gas` | Estimate gas for the on-chain leg | `chain`, `from_address`, `to_address`, `value?`, `data?`, `mcp_token` |
 | `dex_tx_transfer_preview` | Build unsigned tx to deposit or custom `to` | `chain`, `from_address`, `to_address`, `token_address`, `amount`, `account_id`, `mcp_token` |
-| `dex_wallet_sign_transaction` | Sign after user confirms **and** terminal [tx-checkin.md](./tx-checkin.md) | `raw_tx`, `chain`, `account_id`, `mcp_token` |
+| `dex_wallet_sign_transaction` | Sign after user confirms **and** verify MCP [tx-checkin.md](./tx-checkin.md) | `raw_tx`, `chain`, `account_id`, `mcp_token` |
 | `dex_tx_send_raw_transaction` | Broadcast | `signed_tx`, `chain`, `mcp_token` |
 | `dex_tx_list` | Outgoing / history (scope per product) | Per server schema |
 
@@ -152,7 +152,7 @@ Do not call dex_withdraw_deposit_address before destination is confirmed.
 9. [Agent balance validation]                <- MANDATORY, same rules as transfer.md
 10. dex_tx_transfer_preview                  <- to = suggested_to_address (unless product allows explicit pick)
 11. [Display confirmation, wait for user]    <- MANDATORY gate
-12. [Terminal tx-checkin]                    <- MANDATORY: [tx-checkin.md](./tx-checkin.md)
+12. [Gate Verify MCP `tx_checkin`]      <- MANDATORY: [tx-checkin.md](./tx-checkin.md)
 13. dex_wallet_sign_transaction
 14. dex_tx_send_raw_transaction
 ```
@@ -212,7 +212,7 @@ Step 9: Display confirmation (MANDATORY GATE)
         amount, balances, gas, server confirm_message
   Wait for explicit "confirm" / "cancel" / parameter change
   |
-Step 10: Terminal tx-checkin (MANDATORY) — [tx-checkin.md](./tx-checkin.md): use **`dex_tx_transfer_preview` → `txBundle`** with **`-tx-bundle-file`** (no hand-built txbundle); on failure abort
+Step 10: Gate Verify MCP check-in (MANDATORY) — [tx-checkin.md](./tx-checkin.md): use **`dex_tx_transfer_preview` → `txBundle`** as **`message`** on **`tx_checkin`** (no hand-built txbundle); on failure abort
   |
 Step 11: Sign + broadcast
   dex_wallet_sign_transaction -> dex_tx_send_raw_transaction
@@ -227,7 +227,7 @@ Treat as **standard transfer** end-to-end:
 ```
 Step 1: Authentication -> auth.md if needed
 Step 2: Collect chain, token, amount, destination address (validate format — see transfer.md)
-Step 3-12: Follow transfer.md Flow A (balance, gas, preview, confirm, tx-checkin, sign, broadcast)
+Step 3-12: Follow transfer.md Flow A (balance, gas, preview, confirm, `tx_checkin`, sign, broadcast)
 ```
 
 Do **not** call `dex_withdraw_deposit_address` unless the user has explicitly selected exchange withdraw (Flow A) for their UID.
