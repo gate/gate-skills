@@ -6,6 +6,8 @@ CEX: local stdio (`gate-mcp`), remote public (`/mcp`), remote exchange (`/mcp/ex
 
 **Gate Pay** (optional): **`--mcp gatepay-local`** for x402 stdio (`npx -y gatepay-local-mcp`); **`--mcp gatepay-discovery`** for remote merchant catalog (`gatepay-merchant-discovery` → `discoveryResource`). Details: **gate-pay-x402** skill.
 
+**Gate Verify (tx check-in)** uses a **second HTTP MCP** (`https://api.gatemcp.ai/mcp/dex/sec`). This installer registers it as **`gate-dex-sec`** whenever **`gate-dex`** is installed. Call MCP **`tx_checkin`** / **`/v1/tx/checkin`** with wallet **`mcp_token`** in tool args — **gate-dex-wallet** `references/tx-checkin.md`.
+
 ## Quick start
 
 ```bash
@@ -58,6 +60,7 @@ Windows Cursor: `%APPDATA%\Cursor\mcp.json` and `...\skills`.
 - **Gate (main)**: https://www.gate.com/myaccount/profile/api-key/manage  
 - **gate-cex-ex**: OAuth in IDE; OpenClaw: `mcporter auth gate-cex-ex`  
 - **gate-dex**: https://web3.gate.com/ + OAuth when tools require it  
+- **Gate Verify (tx check-in)**: **`gate-dex-sec`** MCP (installed with **gate-dex**); workflow in **gate-dex-wallet** `references/tx-checkin.md`  
 - **gatepay-local-mcp**: replace placeholder **`env`** in MCP config per **gate-pay-x402** (`PLUGIN_WALLET_TOKEN`, `EVM_PRIVATE_KEY`, `SVM_PRIVATE_KEY`, …)  
 - **gatepay-merchant-discovery**: URL wired by installer; no keys — see **gate-pay-x402** for **`discoveryResource`**
 

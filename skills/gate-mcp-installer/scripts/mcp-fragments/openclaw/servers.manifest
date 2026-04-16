@@ -5,6 +5,7 @@ gate|stdio|npx -y gate-mcp|api_key_secret|Local CEX (stdio, API Key/Secret)
 gate-cex-pub|http|https://api.gatemcp.ai/mcp|none|Remote CEX Public (no auth)
 gate-cex-ex|http|https://api.gatemcp.ai/mcp/exchange|oauth|Remote CEX Exchange (Gate OAuth2)
 gate-dex|http|https://api.gatemcp.ai/mcp/dex|x_api_key|DEX Operations
+gate-dex-sec|http|https://api.gatemcp.ai/mcp/dex/sec|none|Gate Verify (tx check-in before DEX signing)
 gate-info|http|https://api.gatemcp.ai/mcp/info|none|Info & Analysis
 gate-news|http|https://api.gatemcp.ai/mcp/news|none|News Feed
 gatepay-local-mcp|stdio|npx -y gatepay-local-mcp|gatepay_env|Gate Pay x402 (stdio; env placeholders — see gate-pay-x402)

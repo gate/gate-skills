@@ -1,8 +1,8 @@
 ---
 name: gate-mcp-installer-mcp
-version: "2026.4.10-2"
-updated: "2026-04-10"
-description: "Execution specification for unified Gate MCP + gate-skills installer (Cursor, Claude Code, Codex, OpenClaw)."
+version: "2026.4.14-4"
+updated: "2026-04-14"
+description: "Execution specification for unified Gate MCP + gate-skills installer (Cursor, Claude Code, Codex, OpenClaw). Gate Verify is HTTP MCP gate-dex-sec (tx_checkin), merged when dex is installed; gate-dex-wallet references/tx-checkin.md."
 ---
 
 # Gate MCP Installer — execution specification
@@ -13,7 +13,7 @@ description: "Execution specification for unified Gate MCP + gate-skills install
 
 - Detect or accept target platform; merge/write MCP config without removing unrelated servers.
 - Install selected Gate MCP endpoints (default: all six trading MCPs; Gate Pay stdio is opt-in via `gatepay-local`; merchant discovery HTTP via `gatepay-discovery`).
-- Clone **gate-skills** into the platform skills directory unless `--no-skills`.
+- Clone **gate-skills** into the platform skills directory unless `--no-skills` (recommended for **gate-dex-wallet** docs / routing even though Verify check-in is MCP-based).
 
 **Out of scope**
 
@@ -47,6 +47,7 @@ description: "Execution specification for unified Gate MCP + gate-skills install
 - DEX may need wallet + OAuth as documented in [gate-mcp](https://github.com/gate/gate-mcp).
 - **gatepay-local-mcp**: plugin token / EVM / Solana key placeholders in config; replace locally only. Product flow: **gate-pay-x402** in this repo.
 - **gatepay-merchant-discovery**: URL-only remote MCP; no installer secrets. Catalog tool often **`discoveryResource`** — confirm in live tool list (**gate-pay-x402**).
+- **Gate Verify (tx check-in)**: Second HTTP MCP (**`gate-dex-sec`**, URL `https://api.gatemcp.ai/mcp/dex/sec`) merged **with** **`gate-dex`**. Agents call **`tx_checkin`** / **`/v1/tx/checkin`**; pass **`authorization`** as tool argument per **gate-dex-wallet** `references/tx-checkin.md`.
 
 ---
 
@@ -77,6 +78,7 @@ No Gate business MCP calls. Entrypoint:
    - **Codex**: `[mcp_servers.gate-cex-pub]` (etc.) present in `config.toml` when selected.
    - **OpenClaw**: `mcporter config list` includes expected server names.
 5. Return restart + OAuth / API key next steps; mask secrets in output.
+6. **GV / check-in questions**: Confirm **`dex`** (so **`gate-dex-sec`** is present), OAuth / `mcp_token` for wallet MCP, and **gate-dex-wallet** `references/tx-checkin.md` for **`tx_checkin`** argument shape.
 
 ---
 
