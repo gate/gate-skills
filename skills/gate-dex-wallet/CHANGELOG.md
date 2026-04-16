@@ -4,6 +4,19 @@ All notable changes to `gate-dex-wallet` skill will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [2026.4.16-1] - 2026-04-16
+
+### Changed
+
+- **SKILL.md** (v2026.4.16-1): Signing gate documents **Gate Verify MCP** (`https://api.gatemcp.ai/mcp/dex/sec`; tools **`tx_checkin`** / **`/v1/tx/checkin`**) instead of the legacy terminal `tx-checkin` binary; adds setup guidance for the verify server; clarifies x402 ordering (`dex_tx_x402_checkin_preview` → verify → `dex_tx_x402_fetch` for EVM EIP-3009).
+- **references/tx-checkin.md**: Gate Verify MCP procedure, `message` / `intent` mapping, and OpenClaw / mcporter examples (English-only section titles).
+- **references/cli.md**, **transfer.md**, **withdraw.md**, **dapp.md**, **x402.md**: Orchestration updated so agents call **Gate Verify `tx_checkin`** before signing; CLI still does not perform check-in internally.
+- **install.sh**: Install output references **gate-dex-sec** / Gate Verify MCP for signing check-in.
+
+### Removed
+
+- **`tools/tx-checkin/`** (prebuilt `tx-checkin` binaries): removed from the skill package; check-in is **Gate Verify MCP** only.
+
 ## [2026.4.10-1] - 2026-04-10
 
 ### Changed
