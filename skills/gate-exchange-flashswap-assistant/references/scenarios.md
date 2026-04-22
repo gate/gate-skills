@@ -11,10 +11,10 @@
 
 **Expected Behavior**:
 
-1. Call `cex_fc_list_fc_currency_pairs` and `cex_spot_get_spot_accounts` in parallel for the sell asset.
+1. Call `gate-cli cex flash-swap pairs` and `gate-cli cex spot account get` in parallel for the sell asset.
 2. Verify amount is between `sell_min_amount` and `sell_max_amount`; if over max, plan S6 batches or explain the cap.
-3. Call `cex_fc_preview_fc_order_v1`, present Action Draft with `valid_timestamp`, wait for **Y**.
-4. Call `cex_fc_create_fc_order_v1` with the returned `quote_id` and matching amounts.
+3. Call `gate-cli cex flash-swap preview-v1`, present Action Draft with `valid_timestamp`, wait for **Y**.
+4. Call `gate-cli cex flash-swap create-v1` with the returned `quote_id` and matching amounts.
 5. Report `status` and final amounts; on failure, suggest a fresh preview.
 
 ## Scenario 2: Many-to-One Consolidation With Skipped Legs
@@ -28,10 +28,10 @@
 
 **Expected Behavior**:
 
-1. For each asset, parallel `cex_spot_get_spot_accounts` and `cex_fc_list_fc_currency_pairs`.
+1. For each asset, parallel `gate-cli cex spot account get` and `gate-cli cex flash-swap pairs`.
 2. Build **will execute** vs **skipped** tables with reasons (zero, below min, unsupported pair).
-3. If the execute set is non-empty, call `cex_fc_preview_fc_multi_currency_many_to_one_order`, highlight preview errors per leg.
-4. Action Draft with both tables; after **Y**, call `cex_fc_create_fc_multi_currency_many_to_one_order` excluding failed preview legs.
+3. If the execute set is non-empty, call `gate-cli cex flash-swap preview-many-to-one`, highlight preview errors per leg.
+4. Action Draft with both tables; after **Y**, call `gate-cli cex flash-swap create-many-to-one` excluding failed preview legs.
 5. Verify each leg status separately.
 
 ## Scenario 3: Below-Minimum Balance Diagnosis (S5)
@@ -45,9 +45,9 @@
 
 **Expected Behavior**:
 
-1. Call `cex_fc_list_fc_currency_pairs` and `cex_spot_get_spot_accounts` for the asset.
+1. Call `gate-cli cex flash-swap pairs` and `gate-cli cex spot account get` for the asset.
 2. If available < `sell_min_amount`, **do not** call fc preview; show balance vs minimum gap.
-3. Optionally call `cex_wallet_list_small_balance`; if the asset appears, explain the separate **dust → GT** path and require S7 confirmation for convert.
+3. Optionally call `gate-cli cex wallet balance small`; if the asset appears, explain the separate **dust → GT** path and require S7 confirmation for convert.
 4. If the user then increases balance or switches intent, continue with S1 only after gates pass.
 
 ## Scenario 4: Dust to GT (S7)
@@ -61,10 +61,10 @@
 
 **Expected Behavior**:
 
-1. Call `cex_wallet_list_small_balance` and present the list.
+1. Call `gate-cli cex wallet balance small` and present the list.
 2. Action Draft must state **GT** outcome and exact `currencies` or `is_all`; wait for **Y**.
-3. Call `cex_wallet_convert_small_balance` only after confirmation.
-4. Optionally call `cex_wallet_list_small_balance_history` to summarize recent conversions.
+3. Call `gate-cli cex wallet balance convert-small` only after confirmation.
+4. Optionally call `gate-cli cex wallet balance small-history` to summarize recent conversions.
 
 ## Scenario 5: Route to Trading Copilot for Pure Spot Buy
 

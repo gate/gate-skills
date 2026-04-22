@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-alpha
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate Alpha token market skill. Use when the user specifically asks to browse, trade, or check Alpha market tokens. Triggers on 'alpha tokens', 'alpha market', 'buy alpha', 'alpha history'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Alpha Assistant
 
@@ -14,54 +66,46 @@ This skill is the single entry for Gate Alpha operations. It supports **seven mo
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_alpha_get_alpha_order
-- cex_alpha_list_alpha_account_book
-- cex_alpha_list_alpha_accounts
-- cex_alpha_list_alpha_currencies
-- cex_alpha_list_alpha_orders
-- cex_alpha_list_alpha_tickers
-- cex_alpha_list_alpha_tokens
-- cex_alpha_quote_alpha_order
+- `gate-cli cex alpha order get`
+- `gate-cli cex alpha account book`
+- `gate-cli cex alpha account balances`
+- `gate-cli cex alpha market currencies`
+- `gate-cli cex alpha order list`
+- `gate-cli cex alpha market tickers`
+- `gate-cli cex alpha market tokens`
+- `gate-cli cex alpha order quote`
 
 **Execution Operations (Write)**
 
-- cex_alpha_place_alpha_order
+- `gate-cli cex alpha order place`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Alpha:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Alpha:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute module routing in this skill.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute module routing in this skill.
 
 - `SKILL.md` keeps module dispatch and business boundaries.
-- `references/mcp.md` is the authoritative MCP execution layer for quote->confirm->place order flow and post-order verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for quote->confirm->place order flow and post-order verification.
 
 ## Module Overview
 
@@ -88,19 +132,19 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 | **Order management** | "我刚才那笔买单成功了吗？", "看看我买 ELON 的订单" | Read `references/order-management.md` |
 | **Unclear** | "Tell me about Alpha", "Help with Alpha" | **Clarify**: ask which module the user needs |
 
-## MCP Tools
+## gate-cli command index
 
 | # | Tool | Auth | Purpose |
 |---|------|------|---------|
-| 1 | `cex_alpha_list_alpha_currencies` | No | List all tradable Alpha currencies with chain, address, precision, status |
-| 2 | `cex_alpha_list_alpha_tokens` | No | Filter tokens by chain, launch platform, or contract address |
-| 3 | `cex_alpha_list_alpha_tickers` | No | Get latest price, 24h change, volume, market cap for Alpha tokens |
-| 4 | `cex_alpha_list_alpha_accounts` | Yes | Query Alpha account balances (available + locked per currency) |
-| 5 | `cex_alpha_quote_alpha_order` | Yes | Get a price quote for a buy/sell order (returns quote_id, valid 1 min) |
-| 6 | `cex_alpha_place_alpha_order` | Yes | Place a buy/sell order using a quote_id |
-| 7 | `cex_alpha_get_alpha_order` | Yes | Get details of a single order by order_id |
-| 8 | `cex_alpha_list_alpha_orders` | Yes | List orders with filters (currency, side, status, time range) |
-| 9 | `cex_alpha_list_alpha_account_book` | Yes | Query account transaction history by time range |
+| 1 | `gate-cli cex alpha market currencies` | No | List all tradable Alpha currencies with chain, address, precision, status |
+| 2 | `gate-cli cex alpha market tokens` | No | Filter tokens by chain, launch platform, or contract address |
+| 3 | `gate-cli cex alpha market tickers` | No | Get latest price, 24h change, volume, market cap for Alpha tokens |
+| 4 | `gate-cli cex alpha account balances` | Yes | Query Alpha account balances (available + locked per currency) |
+| 5 | `gate-cli cex alpha order quote` | Yes | Get a price quote for a buy/sell order (returns quote_id, valid 1 min) |
+| 6 | `gate-cli cex alpha order place` | Yes | Place a buy/sell order using a quote_id |
+| 7 | `gate-cli cex alpha order get` | Yes | Get details of a single order by order_id |
+| 8 | `gate-cli cex alpha order list` | Yes | List orders with filters (currency, side, status, time range) |
+| 9 | `gate-cli cex alpha account book` | Yes | Query account transaction history by time range |
 
 ## Domain Knowledge
 
@@ -124,7 +168,7 @@ meteora_dbc, fourmeme, moonshot, pump, raydium_launchlab, letsbonk, gatefun, vir
 
 - **Buy amount**: USDT quantity (e.g., `amount="5"` means spend 5 USDT).
 - **Sell amount**: Token quantity (e.g., `amount="1000"` means sell 1000 tokens).
-- **Quote validity**: `quote_id` from `cex_alpha_quote_alpha_order` expires after **1 minute**. Re-quote if expired.
+- **Quote validity**: `quote_id` from `gate-cli cex alpha order quote` expires after **1 minute**. Re-quote if expired.
 - **Gas modes**: Input `"speed"` (default) or `"custom"` (with slippage). API returns `gasMode` as `"1"` (speed) or `"2"` (custom).
 - **Order statuses**: `1` = Processing, `2` = Success, `3` = Failed, `4` = Cancelled, `5` = Transferring, `6` = Cancelling transfer. Terminal statuses: 2, 3, 4.
 
@@ -163,13 +207,13 @@ Return the result using the report template defined in each sub-module.
 
 | Error Type | Typical Cause | Handling Strategy |
 |------------|---------------|-------------------|
-| Currency not found | Invalid or misspelled currency symbol | Suggest searching via `cex_alpha_list_alpha_currencies` or `cex_alpha_list_alpha_tokens` |
+| Currency not found | Invalid or misspelled currency symbol | Suggest searching via `gate-cli cex alpha market currencies` or `gate-cli cex alpha market tokens` |
 | Token suspended | Trading status is 2 (suspended) | Inform user that the token is currently suspended from trading |
 | Token delisted | Trading status is 3 (delisted) | Inform user that the token has been delisted |
 | Empty result | No tokens match the filter criteria | Clarify filter parameters (chain, platform, address) and suggest alternatives |
 | Authentication required | Calling authenticated endpoint without credentials | Inform user that API Key authentication is needed; guide to setup |
 | Pagination overflow | Requested page beyond available data | Return last available page and inform user of total count |
-| Quote expired | quote_id used after 1-minute validity window | Re-call `cex_alpha_quote_alpha_order` to obtain a fresh quote_id |
+| Quote expired | quote_id used after 1-minute validity window | Re-call `gate-cli cex alpha order quote` to obtain a fresh quote_id |
 | Insufficient balance | Sell amount exceeds available balance | Inform user of actual available balance and suggest adjusting the amount |
 | Order failed | On-chain transaction failed | Report the `failed_reason` from the order detail and suggest retrying |
 | Order timeout | Polling exceeded 60 seconds without terminal status | Inform user the order is still processing; provide order_id for manual follow-up |

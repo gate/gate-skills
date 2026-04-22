@@ -185,7 +185,7 @@ Project: `<project>/.cursor/mcp.json`. User-wide: `~/.cursor/mcp.json`. Under `m
 ```json
 {
   "gatepay-merchant-discovery": {
-    "url": "http://dev.halftrust.xyz/pay-mcp-server/mcp"
+    "url": "https://openplatform.gateapi.io/pay-mcp-server/mcp"
   },
   "gatepay-local-mcp": {
     "command": "npx",
@@ -241,7 +241,7 @@ Payment MCP (gatepay-local-mcp)
 
 ```
 Discovery MCP (example id: gatepay-merchant-discovery)
-  - Add a remote MCP entry with your vendor URL, e.g. "url": "http://dev.halftrust.xyz/pay-mcp-server/mcp" (confirm exact URL and transport with your deployment).
+  - Add a remote MCP entry with your vendor URL, e.g. "url": "https://openplatform.gateapi.io/pay-mcp-server/mcp" (confirm exact URL and transport with your deployment).
   - Merge into the same mcpServers object as the payment MCP; reload MCP.
   - After reload, confirm the catalog tool appears (name may be discoveryResource or differ — use the live tool list).
 ```

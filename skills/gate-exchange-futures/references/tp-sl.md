@@ -1,6 +1,6 @@
 # Gate Futures Take Profit / Stop Loss — Scenarios & Reference
 
-This reference covers creating and managing TP/SL orders on existing futures positions using `cex_fx_create_fx_price_triggered_order`.
+This reference covers creating and managing TP/SL orders on existing futures positions using `gate-cli cex futures price-trigger create`.
 
 ---
 
@@ -21,10 +21,10 @@ A TP/SL order is a **price-triggered order** attached to an existing position. I
 
 ### 1. Identify position
 
-Call `cex_fx_get_fx_accounts(settle)` to determine account mode, then call position query:
+Call `gate-cli cex futures account get` to determine account mode, then call position query:
 
-- **Single mode** (`position_mode === "single"`): call `cex_fx_get_fx_position(settle, contract)`
-- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): call `cex_fx_list_fx_positions(settle, holding=true)` or `cex_fx_get_fx_dual_position(settle, contract)`
+- **Single mode** (`position_mode === "single"`): call `gate-cli cex futures position get`
+- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): call `gate-cli cex futures position list` or `gate-cli cex futures position get`
 
 Key data to extract:
 - `position_mode` — from account query (`single` or `dual`)
@@ -35,7 +35,7 @@ If no position exists, tell the user and abort.
 
 ### 2. Determine trigger rule
 
-Call `cex_fx_get_fx_order_book(settle, contract, limit=1)` to get current best bid/ask for validation.
+Call `gate-cli cex futures market orderbook` to get current best bid/ask for validation.
 
 | Position side | TP trigger | SL trigger |
 |--------------|-----------|-----------|
@@ -54,7 +54,7 @@ Key data to extract:
 
 ### 3. Determine size, close, auto_size, and order_type
 
-Call `cex_fx_get_fx_contract(settle, contract)` to get size constraints. The `close`, `auto_size`, and `order_type` fields depend on **position mode** (from step 1), **position side**, and **close scope** (full vs partial).
+Call `gate-cli cex futures market contract` to get size constraints. The `close`, `auto_size`, and `order_type` fields depend on **position mode** (from step 1), **position side**, and **close scope** (full vs partial).
 
 #### `order_type` field rules
 
@@ -141,42 +141,20 @@ Expiration:    [never / X hours]
 Reply 'confirm' to place this order.
 ```
 
-**Only after user confirms**, call `cex_fx_create_fx_price_triggered_order`.
+**Only after user confirms**, call `gate-cli cex futures price-trigger create`.
 
 ### 6. Place order
 
-Call `cex_fx_create_fx_price_triggered_order`. The `close`, `auto_size`, and `order_type` fields differ by position mode and close scope:
+Call `gate-cli cex futures price-trigger create`. The `close`, `auto_size`, and `order_type` fields differ by position mode and close scope:
 
 **Single mode — full close (close long TP)**:
 ```
-cex_fx_create_fx_price_triggered_order(
-  settle          = "usdt",
-  contract        = "BTC_USDT",
-  order_type      = "close-long-position",  # full close long
-  trigger_price   = "72000",
-  trigger_rule    = ">=",
-  order_price     = "0",          # market
-  order_tif       = "ioc",
-  order_size      = 0,
-  order_close     = true,         # single mode: must be true for full close
-                                  # auto_size: do NOT set in single mode
-  order_reduce_only = true,
-  trigger_expiration = <seconds>  # optional; omit for no expiry
-)
+`gate-cli cex futures price-trigger create`
 ```
 
 **Dual mode — full close (close long TP)**:
 ```
-cex_fx_create_fx_price_triggered_order(
-  settle          = "usdt",
-  contract        = "BTC_USDT",
-  order_type      = "close-long-position",  # full close long
-  trigger_price   = "72000",
-  trigger_rule    = ">=",
-  order_price     = "0",          # market
-  order_tif       = "ioc",
-  order_size      = 0,
-  order_close     = false,        # dual mode: must be false (or omit)
+`gate-cli cex futures price-trigger create`
   auto_size       = "close_long", # dual mode full close: required (close_long / close_short)
   order_reduce_only = true,
   trigger_expiration = <seconds>  # optional; omit for no expiry
@@ -185,24 +163,12 @@ cex_fx_create_fx_price_triggered_order(
 
 **Dual mode — partial close (SL 3 contracts of a long)**:
 ```
-cex_fx_create_fx_price_triggered_order(
-  settle          = "usdt",
-  contract        = "BTC_USDT",
-  order_type      = "plan-close-long-position",  # partial close long
-  trigger_price   = "58000",
-  trigger_rule    = "<=",
-  order_price     = "0",          # market
-  order_tif       = "ioc",
-  order_size      = -3,           # negative = sell to close long
-  order_close     = false,        # partial: always false
-                                  # auto_size: do NOT set for partial close
-  order_reduce_only = true,
-)
+`gate-cli cex futures price-trigger create`
 ```
 
 ### 7. Verify
 
-Call `cex_fx_get_fx_price_triggered_order(settle, order_id)` to confirm status is `open`.
+Call `gate-cli cex futures price-trigger get` to confirm status is `open`.
 
 Key data to extract:
 - `id` — order ID (pass as string)
@@ -221,14 +187,14 @@ Key data to extract:
 - "BTC 止盈 72000"
 
 **Expected Behavior**:
-1. Query position via `cex_fx_get_fx_position` / `cex_fx_get_fx_dual_position` → long 5 contracts.
+1. Query position via `gate-cli cex futures position get` / `gate-cli cex futures position get` → long 5 contracts.
 2. Validate trigger: current price ~68000, TP 72000 > current → valid.
 3. Determine trigger rule: long TP → `>=`.
 4. No size specified → full close, `order_type = "close-long-position"`, `order_reduce_only = true`.
    - Single mode: `order_close = true`, no `auto_size`.
    - Dual mode: `order_close = false`, `auto_size = "close_long"`.
 5. No execution price specified → market (`order_price = "0"`, `order_tif = "ioc"`).
-6. Show summary, ask user to confirm, then call `cex_fx_create_fx_price_triggered_order`.
+6. Show summary, ask user to confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -249,14 +215,14 @@ Key data to extract:
 - "BTC 止损 58000，限价 57800 平仓"
 
 **Expected Behavior**:
-1. Query position via `cex_fx_get_fx_position` / `cex_fx_get_fx_dual_position` → long 5 contracts.
+1. Query position via `gate-cli cex futures position get` / `gate-cli cex futures position get` → long 5 contracts.
 2. Validate trigger: current price ~68000, SL 58000 < current → valid.
 3. Determine trigger rule: long SL → `<=`.
 4. No size specified → full close, `order_type = "close-long-position"`, `order_reduce_only = true`.
    - Single mode: `order_close = true`, no `auto_size`.
    - Dual mode: `order_close = false`, `auto_size = "close_long"`.
 5. User specified execution price 57800 → limit (`order_price = "57800"`, `order_tif = "gtc"`).
-6. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+6. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -282,7 +248,7 @@ Key data to extract:
 3. Partial close: 3 contracts; closing long → `order_type = "plan-close-long-position"`, `order_size = -3` (negative = sell to close long), `order_reduce_only = true`.
    - Both single and dual mode: `order_close = false`, no `auto_size` (partial close never uses `auto_size`).
 4. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-5. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+5. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -310,7 +276,7 @@ Key data to extract:
    - Dual mode: `close = false`, `auto_size = "close_long"`.
 4. Order 2: SL (`<=` 58000, close all, market), `order_type = "close-long-position"`.
    - Same `close`/`auto_size` logic as Order 1.
-5. Show combined summary for both, ask for single confirmation before placing both via `cex_fx_create_fx_price_triggered_order`.
+5. Show combined summary for both, ask for single confirmation before placing both via `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -343,7 +309,7 @@ Key data to extract:
    - Single mode: `order_close = true`, no `auto_size`.
    - Dual mode: `order_close = false`, `auto_size = "close_short"`.
 5. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-6. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+6. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -371,7 +337,7 @@ Key data to extract:
    - Single mode: `order_close = true`, no `auto_size`.
    - Dual mode: `order_close = false`, `auto_size = "close_short"`.
 5. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-6. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+6. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -398,7 +364,7 @@ Key data to extract:
 4. Partial close: 2 contracts; closing short → `order_type = "plan-close-short-position"`, `order_size = 2` (positive = buy to close short), `order_reduce_only = true`.
    - Both single and dual mode: `order_close = false`, no `auto_size` (partial close never uses `auto_size`).
 5. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-6. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+6. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```

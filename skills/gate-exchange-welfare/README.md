@@ -2,7 +2,7 @@
 
 ## Overview
 
-Gate Exchange welfare center newcomer skill (version `2026.4.10-1`). It covers the phase-2 newcomer workflow end to end: user identity detection, newcomer task list retrieval, single task claim, newcomer reward claim, and generic completion guidance for KYC / first deposit / first trade flows. The skill must use real MCP data and current business codes; it must never invent task or reward information.
+Gate Exchange welfare center newcomer skill (version `2026.4.10-1`). It covers the phase-2 newcomer workflow end to end: user identity detection, newcomer task list retrieval, single task claim, newcomer reward claim, and generic completion guidance for KYC / first deposit / first trade flows. The skill must use real `gate-cli` data and current business codes; it must never invent task or reward information.
 
 ### Core Capabilities
 
@@ -31,10 +31,10 @@ Gate Exchange welfare center newcomer skill (version `2026.4.10-1`). It covers t
 
 - **Input**: Welfare/task/reward/claim/completion intent related to the newcomer welfare center.
 - **Tools**:
-  - `cex_welfare_get_user_identity`
-  - `cex_welfare_get_beginner_task_list`
-  - `cex_welfare_claim_task`
-  - `cex_welfare_claim_reward`
+  - `gate-cli cex welfare identity`
+  - `gate-cli cex welfare beginner-tasks`
+  - `cex_welfare_claim_task` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+  - `cex_welfare_claim_reward` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 - **Execution model**:
   - Step 1: Identity gate
   - Step 2: Task list lookup when newcomer flow is allowed

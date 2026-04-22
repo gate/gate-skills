@@ -47,7 +47,7 @@ Key data to extract:
 
 When user does not specify size in **contracts**, convert using the same rules as the main futures open-position skill.
 
-Call `cex_fx_get_fx_contract(settle, contract)` and `cex_fx_get_fx_order_book(settle, contract, limit=1)` for conversion data.
+Call `gate-cli cex futures market contract` and `gate-cli cex futures market orderbook` for conversion data.
 
 Key data to extract:
 - `quanto_multiplier` — from contract, for unit conversion
@@ -111,29 +111,19 @@ Expiration:    [never / 24 hours]
 Reply 'confirm' to place this order.
 ```
 
-**Only after user confirms**, call `cex_fx_create_fx_price_triggered_order`.
+**Only after user confirms**, call `gate-cli cex futures price-trigger create`.
 
 ### 6. Place order
 
-Call `cex_fx_create_fx_price_triggered_order` with:
+Call `gate-cli cex futures price-trigger create` with:
 
 ```
-cex_fx_create_fx_price_triggered_order(
-  settle           = "usdt",
-  contract         = "BTC_USDT",
-  trigger_price    = "60000",
-  trigger_rule     = "<=",
-  order_price      = "0",       # market
-  order_tif        = "ioc",
-  order_size       = 3,         # positive = long
-  order_reduce_only = false,    # this is an open order
-  order_close      = false
-)
+`gate-cli cex futures price-trigger create`
 ```
 
 ### 7. Verify
 
-Call `cex_fx_get_fx_price_triggered_order(settle, order_id)` to confirm the order status is `open`.
+Call `gate-cli cex futures price-trigger get` to confirm the order status is `open`.
 
 Key data to extract:
 - `id` — order ID (pass as string)
@@ -155,7 +145,7 @@ Key data to extract:
 1. Determine side: long. Trigger: drops to 60000 → `trigger_rule = "<="`.
 2. Size: 2 contracts → `order_size = 2` (positive = long).
 3. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-4. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+4. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -177,9 +167,9 @@ Key data to extract:
 
 **Expected Behavior**:
 1. Determine side: long. Trigger: breaks above 68000 → `trigger_rule = ">="`.
-2. Call `cex_fx_get_fx_contract` for `quanto_multiplier`. Size: 100U value → `contracts = 100 / 68000 / quanto_multiplier` (floor, check `order_size_min`).
+2. Call `gate-cli cex futures market contract` for `quanto_multiplier`. Size: 100U value → `contracts = 100 / 68000 / quanto_multiplier` (floor, check `order_size_min`).
 3. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-4. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+4. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -201,9 +191,9 @@ Key data to extract:
 
 **Expected Behavior**:
 1. Determine side: short. Trigger: breaks above 3200 → `trigger_rule = ">="`.
-2. Call `cex_fx_get_fx_contract` for `quanto_multiplier` and `cex_fx_get_fx_order_book` for best bid. Size: 50U cost, 10x leverage → `contracts = 50 / (0.0015 + 1.00075/10) / quanto_multiplier / max(3200, best_bid)` (floor, check `order_size_min`). `order_size` = negative (short).
+2. Call `gate-cli cex futures market contract` for `quanto_multiplier` and `gate-cli cex futures market orderbook` for best bid. Size: 50U cost, 10x leverage → `contracts = 50 / (0.0015 + 1.00075/10) / quanto_multiplier / max(3200, best_bid)` (floor, check `order_size_min`). `order_size` = negative (short).
 3. No execution price → market (`order_price = "0"`, `order_tif = "ioc"`).
-4. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+4. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -227,7 +217,7 @@ Key data to extract:
 1. Determine side: long. Trigger: drops to 61000 → `trigger_rule = "<="`.
 2. User specified execution price 60800 → limit (`order_price = "60800"`, `order_tif = "gtc"`).
 3. Size: 1 contract → `order_size = 1` (positive = long).
-4. Show summary, confirm, then call `cex_fx_create_fx_price_triggered_order`.
+4. Show summary, confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -252,7 +242,7 @@ Key data to extract:
 2. Size: 2 contracts → `order_size = 2`.
 3. No execution price → market.
 4. User specified 24-hour expiry → `trigger_expiration = 86400` (24 × 3600 seconds).
-5. Show summary (including expiration), confirm, then call `cex_fx_create_fx_price_triggered_order`.
+5. Show summary (including expiration), confirm, then call `gate-cli cex futures price-trigger create`.
 
 **Response Template**:
 ```
@@ -291,15 +281,15 @@ Key data to extract:
 
 ## Amending conditional open orders (cancel & re-create)
 
-Gate does **not** support amending API-created conditional open orders via `cex_fx_update_fx_price_triggered_order`. The API returns `APIOrderNotSupportUpdateTouchOrder`. This limitation only applies to conditional open orders; TP/SL orders can be amended normally.
+Gate does **not** support amending API-created conditional open orders via `gate-cli cex futures price-trigger update`. The API returns `APIOrderNotSupportUpdateTouchOrder`. This limitation only applies to conditional open orders; TP/SL orders can be amended normally.
 
 **Workaround**: cancel the existing order, then create a new one with the updated parameters.
 
 ### Workflow
 
-1. **Cancel**: call `cex_fx_cancel_fx_price_triggered_order(settle, order_id)` to cancel the existing order.
+1. **Cancel**: call `gate-cli cex futures price-trigger cancel` to cancel the existing order.
 2. **Verify cancel**: confirm status is `cancelled`.
-3. **Re-create**: call `cex_fx_create_fx_price_triggered_order` with the updated parameters.
+3. **Re-create**: call `gate-cli cex futures price-trigger create` with the updated parameters.
 4. **Verify new order**: confirm new order status is `open`.
 
 When user requests to amend a conditional open order (e.g. "change trigger price to X"), automatically perform the cancel-and-recreate flow without requiring separate confirmation for each step. Show one combined confirmation: *"Conditional open orders cannot be amended directly. I will cancel the old order and create a new one. Confirm?"*

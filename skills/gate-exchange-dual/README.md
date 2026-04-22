@@ -30,7 +30,7 @@ User Query
           │
           ▼
 ┌─────────────────────┐
-│  Gate MCP Tools      │
+│  gate-cli commands      │
 │                      │
 │                      │
 │  • cex_earn_list_    │
@@ -49,17 +49,17 @@ User Query
 └─────────────────────┘
 ```
 
-## MCP Tools
+## gate-cli command index
 
 | Tool | Auth | Description |
 |------|------|-------------|
-| `cex_earn_list_dual_investment_plans` | Yes | List dual plans (optional param: plan_id) |
-| `cex_earn_list_dual_orders` | Yes | Order history (params: status, investment_type, from, to, page, limit; limit max 100) |
-| `cex_earn_list_dual_balance` | Yes | Balance & interest |
+| `gate-cli cex earn dual plans` | Yes | List dual plans (optional param: plan_id) |
+| `gate-cli cex earn dual orders` | Yes | Order history (params: status, investment_type, from, to, page, limit; limit max 100) |
+| `gate-cli cex earn dual balance` | Yes | Balance & interest |
 
 ## Quick Start
 
-1. Install the [Gate MCP server](https://github.com/gate/gate-mcp)
+1. Install the [gate-cli](https://github.com/gate/gate-cli)
 2. Load this skill into your AI Agent (Claude, ChatGPT, etc.)
 3. Try: _"What dual investment plans are available?"_ or _"Show me BTC dual investment plans"_
 

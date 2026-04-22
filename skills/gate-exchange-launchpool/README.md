@@ -8,13 +8,13 @@ This skill provides users with complete access to Gate LaunchPool operations, in
 
 ### Core Capabilities
 
-| Capability | Description | MCP Tools |
+| Capability | Description | `gate-cli` commands |
 |------------|-------------|-----------|
-| Browse LaunchPool projects | View projects, filter by status/APR/coin/pool type | `cex_launch_list_launch_pool_projects` |
-| Stake tokens | Participate in LaunchPool by staking tokens | `cex_launch_create_launch_pool_order` |
-| Redeem staked assets | Early withdraw staked tokens from a project | `cex_launch_redeem_launch_pool` |
-| Query pledge records | View staking/redemption participation history | `cex_launch_list_launch_pool_pledge_records` |
-| Query reward records | View airdrop reward distribution history | `cex_launch_list_launch_pool_reward_records` |
+| Browse LaunchPool projects | View projects, filter by status/APR/coin/pool type | `gate-cli cex launch projects` |
+| Stake tokens | Participate in LaunchPool by staking tokens | `gate-cli cex launch pledge` |
+| Redeem staked assets | Early withdraw staked tokens from a project | `gate-cli cex launch redeem` |
+| Query pledge records | View staking/redemption participation history | `gate-cli cex launch pledge-records` |
+| Query reward records | View airdrop reward distribution history | `gate-cli cex launch reward-records` |
 
 ### 1. Browse LaunchPool Projects
 - View all available LaunchPool projects
@@ -59,7 +59,7 @@ This skill provides users with complete access to Gate LaunchPool operations, in
 └──────────┬──────────┘
            │
 ┌──────────▼──────────┐
-│   MCP Tool Call     │
+│   `gate-cli` command Call     │
 │  - list_projects    │
 │  - create_order     │
 │  - redeem           │
@@ -75,13 +75,13 @@ This skill provides users with complete access to Gate LaunchPool operations, in
 └─────────────────────┘
 ```
 
-## MCP Tools Used
+## gate-cli command index Used
 
-- `cex_launch_list_launch_pool_projects`: Browse available LaunchPool projects
-- `cex_launch_create_launch_pool_order`: Create staking order
-- `cex_launch_redeem_launch_pool`: Redeem staked assets
-- `cex_launch_list_launch_pool_pledge_records`: Query pledge history
-- `cex_launch_list_launch_pool_reward_records`: Query reward history
+- `gate-cli cex launch projects`: Browse available LaunchPool projects
+- `gate-cli cex launch pledge`: Create staking order
+- `gate-cli cex launch redeem`: Redeem staked assets
+- `gate-cli cex launch pledge-records`: Query pledge history
+- `gate-cli cex launch reward-records`: Query reward history
 
 ## Error Handling
 

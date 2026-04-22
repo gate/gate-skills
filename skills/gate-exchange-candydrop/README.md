@@ -8,14 +8,14 @@ This skill provides users with complete access to Gate CandyDrop activity operat
 
 ### Core Capabilities
 
-| Capability | Description | MCP Tools |
+| Capability | Description | `gate-cli` commands |
 |------------|-------------|-----------|
-| Browse CandyDrop activities | View activities, filter by status/token/task type | `cex_launch_get_candy_drop_activity_list_v4` |
-| View activity rules | See prize pools, tasks, and reward details | `cex_launch_get_candy_drop_activity_rules_v4` |
-| Register for activities | Join CandyDrop activities (with confirmation) | `cex_launch_register_candy_drop_v4` |
-| Check task progress | View task completion progress for enrolled activities | `cex_launch_get_candy_drop_task_progress_v4` |
-| Query participation records | View registration/participation history | `cex_launch_get_candy_drop_participation_records_v4` |
-| Query airdrop records | View airdrop reward distribution history | `cex_launch_get_candy_drop_airdrop_records_v4` |
+| Browse CandyDrop activities | View activities, filter by status/token/task type | `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| View activity rules | See prize pools, tasks, and reward details | `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| Register for activities | Join CandyDrop activities (with confirmation) | `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| Check task progress | View task completion progress for enrolled activities | `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| Query participation records | View registration/participation history | `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| Query airdrop records | View airdrop reward distribution history | `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
 
 ### 1. Browse CandyDrop Activities
 - View all available CandyDrop activities
@@ -67,7 +67,7 @@ This skill provides users with complete access to Gate CandyDrop activity operat
 └──────────┬──────────┘
            │
 ┌──────────▼──────────┐
-│   MCP Tool Call     │
+│   `gate-cli` command Call     │
 │  - activity_list    │
 │  - activity_rules   │
 │  - register         │
@@ -84,14 +84,14 @@ This skill provides users with complete access to Gate CandyDrop activity operat
 └─────────────────────┘
 ```
 
-## MCP Tools Used
+## gate-cli command index Used
 
-- `cex_launch_get_candy_drop_activity_list_v4`: Browse available CandyDrop activities (public)
-- `cex_launch_get_candy_drop_activity_rules_v4`: View activity rules and prize pools (public)
-- `cex_launch_register_candy_drop_v4`: Register for an activity (auth required)
-- `cex_launch_get_candy_drop_task_progress_v4`: Check task completion progress (auth required)
-- `cex_launch_get_candy_drop_participation_records_v4`: Query participation history (auth required)
-- `cex_launch_get_candy_drop_airdrop_records_v4`: Query airdrop reward history (auth required)
+- `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): Browse available CandyDrop activities (public)
+- `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): View activity rules and prize pools (public)
+- `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): Register for an activity (auth required)
+- `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): Check task completion progress (auth required)
+- `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): Query participation history (auth required)
+- `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二): Query airdrop reward history (auth required)
 
 ## Error Handling
 

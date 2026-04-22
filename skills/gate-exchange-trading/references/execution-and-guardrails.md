@@ -85,30 +85,30 @@ Never translate missing auth into a fake successful execution.
 
 | Purpose | MCP Tools |
 |---|---|
-| account / balances | `cex_spot_get_spot_accounts`, `cex_spot_list_spot_account_book` |
-| trading rules | `cex_spot_get_currency`, `cex_spot_get_currency_pair` |
-| market data | `cex_spot_get_spot_tickers`, `cex_spot_get_spot_order_book`, `cex_spot_get_spot_candlesticks` |
-| order placement | `cex_spot_create_spot_order`, `cex_spot_create_spot_batch_orders` |
-| open orders | `cex_spot_list_all_open_orders`, `cex_spot_list_spot_orders` when the pair is already known |
-| cancellation | `cex_spot_cancel_spot_order`, `cex_spot_cancel_all_spot_orders`, `cex_spot_cancel_spot_batch_orders` |
-| amendment | `cex_spot_amend_spot_order`, `cex_spot_amend_spot_batch_orders` |
-| fill verification | `cex_spot_list_spot_my_trades` |
-| fee estimation | `cex_wallet_get_wallet_fee`, `cex_spot_get_spot_batch_fee` |
+| account / balances | `gate-cli cex spot account get`, `gate-cli cex spot account book` |
+| trading rules | `gate-cli cex spot market currency`, `gate-cli cex spot market pair` |
+| market data | `gate-cli cex spot market tickers`, `gate-cli cex spot market orderbook`, `gate-cli cex spot market candlesticks` |
+| order placement | `gate-cli cex spot order buy`, `gate-cli cex spot order batch-create` |
+| open orders | `gate-cli cex spot order all-open`, `gate-cli cex spot order list` when the pair is already known |
+| cancellation | `gate-cli cex spot order cancel`, `gate-cli cex spot order cancel`, `gate-cli cex spot order batch-cancel` |
+| amendment | `gate-cli cex spot order amend`, `gate-cli cex spot order batch-amend` |
+| fill verification | `gate-cli cex spot order my-trades` |
+| fee estimation | `gate-cli cex wallet market trade-fee`, `gate-cli cex spot account batch-fee` |
 
 ### Futures
 
 | Purpose | MCP Tools |
 |---|---|
-| contract info | `cex_fx_get_fx_contract` |
-| market data / order book | `cex_fx_get_fx_order_book`, `cex_fx_get_fx_tickers` |
-| account / position mode | `cex_fx_get_fx_accounts` |
-| position query | `cex_fx_list_fx_positions`, `cex_fx_get_fx_dual_position`, `cex_fx_get_fx_position` |
-| margin-mode switching | `cex_fx_update_fx_dual_position_cross_mode`, `cex_fx_update_fx_position_cross_mode` |
-| leverage update | `cex_fx_update_fx_dual_position_leverage`, `cex_fx_update_fx_position_leverage` |
-| order placement | `cex_fx_create_fx_order` |
-| order query | `cex_fx_list_fx_orders`, `cex_fx_get_fx_order` |
-| cancellation | `cex_fx_cancel_fx_order`, `cex_fx_cancel_all_fx_orders` |
-| amendment | `cex_fx_amend_fx_order` |
+| contract info | `gate-cli cex futures market contract` |
+| market data / order book | `gate-cli cex futures market orderbook`, `gate-cli cex futures market tickers` |
+| account / position mode | `gate-cli cex futures account get` |
+| position query | `gate-cli cex futures position list`, `gate-cli cex futures position get`, `gate-cli cex futures position get` |
+| margin-mode switching | `gate-cli cex futures position update-cross-mode`, `gate-cli cex futures position update-cross-mode` |
+| leverage update | `gate-cli cex futures position update-leverage`, `gate-cli cex futures position update-leverage` |
+| order placement | `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` |
+| order query | `gate-cli cex futures order list`, `gate-cli cex futures order get` |
+| cancellation | `gate-cli cex futures order cancel`, `gate-cli cex futures order cancel` |
+| amendment | `gate-cli cex futures order amend` |
 
 ---
 
@@ -198,22 +198,22 @@ If any of the following happens, old confirmation becomes invalid:
 
 #### Market / limit buy or sell
 
-1. `cex_spot_get_spot_accounts`
-2. `cex_spot_get_currency_pair`
+1. `gate-cli cex spot account get`
+2. `gate-cli cex spot market pair`
 3. when live pricing or book data is needed:
-   - `cex_spot_get_spot_tickers`
-   - add `cex_spot_get_spot_order_book` if book depth matters
+   - `gate-cli cex spot market tickers`
+   - add `gate-cli cex spot market orderbook` if book depth matters
 4. produce `Order Draft`
 5. wait for user confirmation
-6. `cex_spot_create_spot_order`
+6. `gate-cli cex spot order buy`
 7. when verification is needed:
-   - `cex_spot_list_spot_my_trades`
-   - or `cex_spot_get_spot_accounts`
+   - `gate-cli cex spot order my-trades`
+   - or `gate-cli cex spot account get`
 
 #### Amend / cancel
 
-1. `cex_spot_list_all_open_orders`
-   - if the pair is already known, `cex_spot_list_spot_orders(currency_pair="...")` is also valid
+1. `gate-cli cex spot order all-open`
+   - if the pair is already known, `gate-cli cex spot order list` is also valid
 2. identify the target order
 3. produce amend/cancel draft
 4. wait for confirmation
@@ -263,35 +263,35 @@ Rules:
 
 #### Open position
 
-1. `cex_fx_get_fx_contract`
-2. `cex_fx_get_fx_accounts`
+1. `gate-cli cex futures market contract`
+2. `gate-cli cex futures account get`
 3. choose the correct position-query tool based on single vs dual mode
 4. if the user explicitly requests leverage or margin-mode changes, apply the corresponding update tools first
 5. when price/book data is needed:
-   - `cex_fx_get_fx_order_book`
-   - `cex_fx_get_fx_tickers`
+   - `gate-cli cex futures market orderbook`
+   - `gate-cli cex futures market tickers`
 6. produce `Order Draft`
 7. wait for confirmation
-8. `cex_fx_create_fx_order`
+8. `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
 9. verify the position:
-   - `cex_fx_list_fx_positions`
-   - or `cex_fx_get_fx_dual_position` / `cex_fx_get_fx_position`
+   - `gate-cli cex futures position list`
+   - or `gate-cli cex futures position get` / `gate-cli cex futures position get`
 
 #### Close / reverse
 
 1. query the current position first
 2. produce the action draft
 3. wait for confirmation
-4. `cex_fx_create_fx_order`
+4. `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
 5. query again to verify the remaining position
 
 #### Amend / cancel
 
-1. `cex_fx_list_fx_orders`
+1. `gate-cli cex futures order list`
 2. identify the target order
 3. produce amend/cancel draft
 4. wait for confirmation
-5. call `cex_fx_amend_fx_order` or `cex_fx_cancel_fx_order`
+5. call `gate-cli cex futures order amend` or `gate-cli cex futures order cancel`
 
 ### 6.1 Supported futures actions
 

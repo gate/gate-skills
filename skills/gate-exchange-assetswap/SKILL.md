@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-assetswap
-version: "2026.4.9-1"
-updated: "2026-04-09"
 description: "Use this skill whenever the user wants Gate Exchange asset allocation optimization for spot holdings (list eligible assets, load config, evaluate/preview, place orders, query history). Trigger phrases include \"asset allocation optimization\", \"allocation configuration\", \"portfolio allocation\", \"rebalance spot to stablecoin\", \"Top 5 market cap allocation\", \"optimize holdings to BTC\", \"preview allocation optimization\", \"allocation optimization order list\"."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Asset Allocation Optimization
 
@@ -12,44 +64,40 @@ description: "Use this skill whenever the user wants Gate Exchange asset allocat
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query operations (read-only, profile scope)**
 
-- `cex_assetswap_list_asset_swap_assets`
-- `cex_assetswap_get_asset_swap_config`
-- `cex_assetswap_evaluate_asset_swap`
-- `cex_assetswap_list_asset_swap_orders_v1`
-- `cex_assetswap_get_asset_swap_order_v1`
+- `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 
 **Execution operations (write, trade scope)**
 
-- `cex_assetswap_preview_asset_swap_order_v1`
-- `cex_assetswap_create_asset_swap_order_v1`
+- `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 
 ### Authentication
 
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key required: Yes
-- Permissions: Profile (read) for listing, config, evaluation, and order queries; Trade for preview and order creation
-- Get API Key: https://www.gate.com/myaccount/profile/api-key/manage
+- **Permissions:** Profile (read) for listing, config, evaluation, and order queries; Trade for preview and order creation
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
 
-- Required: Gate (main) MCP with asset allocation optimization (`cex_assetswap_*`) tools enabled
-- Install: use the Gate MCP installer skill for your environment (`gate-mcp-cursor-installer`, `gate-mcp-codex-installer`, `gate-mcp-claude-installer`, or `gate-mcp-openclaw-installer`)
+- **Required:** Gate (main) MCP with asset allocation optimization (`cex_assetswap_*`) tools enabled; **`gate-cli`** when using CLI-backed flows.
+- **Install (MCP / IDE):** `gate-mcp-cursor-installer`, `gate-mcp-codex-installer`, `gate-mcp-claude-installer`, or `gate-mcp-openclaw-installer`.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Before preview or order creation, confirm the runtime works (e.g. **`gate-cli --version`** or deployment-specific checks).
 
 ---
 
@@ -79,7 +127,7 @@ Do **not** use this skill for: transfers between accounts or products, Launchpoo
 
 **Product**: Asset Allocation Optimization exposes Exchange capability for restructuring multiple spot holdings into a target mix. One optimization may map to multiple internal execution legs at the order layer.
 
-**Strategy types** (conceptual; exact enums and parameters come from `cex_assetswap_get_asset_swap_config`):
+**Strategy types** (conceptual; exact enums and parameters come from `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)):
 
 | Strategy | Typical targets | Meaning |
 |----------|------------------|---------|
@@ -102,7 +150,7 @@ Do **not** use this skill for: transfers between accounts or products, Launchpoo
 
 **Preview → create payload (mandatory for agents)**:
 
-- After a successful `cex_assetswap_preview_asset_swap_order_v1`, construct the `cex_assetswap_create_asset_swap_order_v1` body from the preview response **`data.order`** only: for each object in **`data.order.from`** and **`data.order.to`**, emit `{ "asset": <value>, "amount": <value> }` using the preview’s **`asset`** and **`amount`** string fields (use **`amount`**, not **`amount_show`**, unless published API docs say otherwise).
+- After a successful `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), construct the `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) body from the preview response **`data.order`** only: for each object in **`data.order.from`** and **`data.order.to`**, emit `{ "asset": <value>, "amount": <value> }` using the preview’s **`asset`** and **`amount`** string fields (use **`amount`**, not **`amount_show`**, unless published API docs say otherwise).
 - Preserve the **array order** of `to` (and `from` if multiple legs) exactly as returned in `data.order`; do not reorder symbols for convenience.
 - A preview request may use **`ratio`** on `to`; the **create** call must still use the **resolved `asset` + `amount`** legs from the preview output. Creating with ratio-only `to` while omitting preview amounts often yields quote errors (for example `code: 4`).
 - If the API returns additional preview-bound fields (for example top-level `usdt_evaluated_value` or `transaction_fee` inside `data`), mirror them on create **when the MCP or Exchange docs require it**; otherwise the `from` / `to` legs from preview are the primary contract.
@@ -127,13 +175,13 @@ Do **not** jump from Case 2 to Case 4 without Case 3b preview unless product rul
 
 | Tool | Type | Scope |
 |------|------|--------|
-| `cex_assetswap_list_asset_swap_assets` | Read | profile |
-| `cex_assetswap_get_asset_swap_config` | Read | profile |
-| `cex_assetswap_evaluate_asset_swap` | Read | profile |
-| `cex_assetswap_list_asset_swap_orders_v1` | Read | profile |
-| `cex_assetswap_get_asset_swap_order_v1` | Read | profile |
-| `cex_assetswap_preview_asset_swap_order_v1` | Write | trade |
-| `cex_assetswap_create_asset_swap_order_v1` | Write | trade |
+| `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Read | profile |
+| `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Read | profile |
+| `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Read | profile |
+| `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Read | profile |
+| `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Read | profile |
+| `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Write | trade |
+| `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Write | trade |
 
 **Compliance**: Restricted regions, KYC, and disabled accounts are enforced by the API. On compliance errors, relay the message and stop; do not promise outcomes the platform does not guarantee.
 
@@ -157,7 +205,7 @@ Key data to extract:
 
 ### Step 2: Case 1 — List assets eligible for optimization
 
-Call `cex_assetswap_list_asset_swap_assets` with: parameters per MCP and API documentation (no undocumented fields).
+Call `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: parameters per MCP and API documentation (no undocumented fields).
 
 Key data to extract:
 
@@ -166,7 +214,7 @@ Key data to extract:
 
 ### Step 3: Case 2 — Load configuration
 
-Call `cex_assetswap_get_asset_swap_config` with: no required body unless the API specifies optional filters; obtain allowed strategies, targets, limits, and precision rules.
+Call `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: no required body unless the API specifies optional filters; obtain allowed strategies, targets, limits, and precision rules.
 
 Key data to extract:
 
@@ -177,7 +225,7 @@ Key data to extract:
 
 When the user needs a quick estimate before final parameters, or while iterating on strategy choice:
 
-Call `cex_assetswap_evaluate_asset_swap` with: payload required by the API for the selected assets and strategy.
+Call `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: payload required by the API for the selected assets and strategy.
 
 Key data to extract:
 
@@ -188,7 +236,7 @@ Key data to extract:
 
 After the user confirms the asset set and strategy parameters:
 
-Call `cex_assetswap_preview_asset_swap_order_v1` with: candidate selection and strategy fields per API docs.
+Call `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: candidate selection and strategy fields per API docs.
 
 Present preview outputs clearly: estimated fills, slippage or risk hints, and any server-side notices. Obtain **explicit user confirmation** after preview before Step 6.
 
@@ -205,7 +253,7 @@ Key data to extract:
 
 Only after successful preview and explicit confirmation:
 
-Call `cex_assetswap_create_asset_swap_order_v1` with: JSON body whose **`from`** is `create_from_legs` and **`to`** is `create_to_legs` from Step 5 (each leg **`asset` + `amount`** from `data.order`). Add any other preview-bound fields required by the API (for example values under `data` such as `usdt_evaluated_value` or `transaction_fee`) only when documentation or repeated failures indicate they are required. Do **not** substitute ratio-only `to` for this step when the preview already returned concrete `amount` per target asset.
+Call `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: JSON body whose **`from`** is `create_from_legs` and **`to`** is `create_to_legs` from Step 5 (each leg **`asset` + `amount`** from `data.order`). Add any other preview-bound fields required by the API (for example values under `data` such as `usdt_evaluated_value` or `transaction_fee`) only when documentation or repeated failures indicate they are required. Do **not** substitute ratio-only `to` for this step when the preview already returned concrete `amount` per target asset.
 
 Key data to extract:
 
@@ -217,7 +265,7 @@ Key data to extract:
 
 When the user asks for recent history:
 
-Call `cex_assetswap_list_asset_swap_orders_v1` with: pagination parameters per API (for example recent months as defined by product).
+Call `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: pagination parameters per API (for example recent months as defined by product).
 
 Key data to extract:
 
@@ -228,7 +276,7 @@ Key data to extract:
 
 When the user supplies an order id or picks one from a list:
 
-Call `cex_assetswap_get_asset_swap_order_v1` with: `order_id` string per MCP and API documentation.
+Call `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with: `order_id` string per MCP and API documentation.
 
 Key data to extract:
 
@@ -241,19 +289,19 @@ Key data to extract:
 
 | Situation | Action |
 |-----------|--------|
-| Preview expired or price invalid | Re-run `cex_assetswap_preview_asset_swap_order_v1` (and evaluation if needed); explain briefly |
+| Preview expired or price invalid | Re-run `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (and evaluation if needed); explain briefly |
 | Create returns quote error after successful preview | Confirm create body uses **`asset` + `amount`** from `data.order.from` / `data.order.to` (preview order preserved); re-preview and retry; avoid ratio-only `to` if preview returned amounts |
 | Insufficient available balance | Stop create; ask user to free balance or adjust selection |
 | Rate limit | Back off and retry later; show the API message |
 | Compliance or region block | Stop; relay compliance message; do not retry with workarounds |
-| Partial completion | Report actual status from `cex_assetswap_get_asset_swap_order_v1`; no guaranteed completion time |
+| Partial completion | Report actual status from `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二); no guaranteed completion time |
 
 ---
 
 ## Safety Rules
 
 - **Trading risk**: Digital asset trading involves significant risk and may result in partial or total loss of your investment. See the [Gate Risk Disclosure](https://www.gate.com/legal/risk-disclosure) and [User Agreement](https://www.gate.com/legal/user-agreement).
-- Never call `cex_assetswap_create_asset_swap_order_v1` without a successful preview and clear user confirmation of preview contents, except where the user’s own explicit one-shot authorization is defined by runtime rules for this product (default: require confirmation).
+- Never call `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) without a successful preview and clear user confirmation of preview contents, except where the user’s own explicit one-shot authorization is defined by runtime rules for this product (default: require confirmation).
 - Never build the create payload with ratio-only target legs when the preview response already includes **`data.order.to`** entries with **`amount`**; use those **`asset` + `amount`** pairs (and matching `from` legs) for create.
 - Never fabricate order IDs, preview tokens, or success when the API returned an error.
 - Display rates and amounts as estimates until execution; final settlement is authoritative.
@@ -265,13 +313,13 @@ Key data to extract:
 
 | Condition | Action |
 |-----------|--------|
-| User wants eligible spot assets for portfolio optimization | Case 1 only (`cex_assetswap_list_asset_swap_assets`) |
-| User needs strategy options or limits | Case 2 (`cex_assetswap_get_asset_swap_config`) |
-| User wants a quick estimate | Case 3a (`cex_assetswap_evaluate_asset_swap`) |
-| User is ready to see executable preview | Case 3b (`cex_assetswap_preview_asset_swap_order_v1`) |
-| User confirmed preview | Case 4 (`cex_assetswap_create_asset_swap_order_v1`) |
-| User asks for past optimizations | Case 5 (`cex_assetswap_list_asset_swap_orders_v1`) |
-| User asks for one order’s progress | Case 6 (`cex_assetswap_get_asset_swap_order_v1`) |
+| User wants eligible spot assets for portfolio optimization | Case 1 only (`cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User needs strategy options or limits | Case 2 (`cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User wants a quick estimate | Case 3a (`cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User is ready to see executable preview | Case 3b (`cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User confirmed preview | Case 4 (`cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User asks for past optimizations | Case 5 (`cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
+| User asks for one order’s progress | Case 6 (`cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)) |
 | User wants single spot order or grid bot | Route out of this skill |
 | Preview failed or expired | Re-preview; do not create |
 

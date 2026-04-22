@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-flashswap
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate Flash Swap skill. Use when the user asks to instantly convert or exchange cryptocurrencies without placing an order book trade. Triggers on 'flash swap', 'convert USDT to BTC', 'swap multiple coins'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Flash Swap
 
@@ -12,54 +64,46 @@ description: "Gate Flash Swap skill. Use when the user asks to instantly convert
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_fc_get_fc_order
-- cex_fc_list_fc_currency_pairs
-- cex_fc_list_fc_orders
-- cex_fc_preview_fc_multi_currency_many_to_one_order
-- cex_fc_preview_fc_multi_currency_one_to_many_order
-- cex_fc_preview_fc_order_v1
+- `gate-cli cex flash-swap order`
+- `gate-cli cex flash-swap pairs`
+- `gate-cli cex flash-swap orders`
+- `gate-cli cex flash-swap preview-many-to-one`
+- `gate-cli cex flash-swap preview-one-to-many`
+- `gate-cli cex flash-swap preview-v1`
 
 **Execution Operations (Write)**
 
-- cex_fc_create_fc_multi_currency_many_to_one_order
-- cex_fc_create_fc_multi_currency_one_to_many_order
-- cex_fc_create_fc_order_v1
+- `gate-cli cex flash-swap create-many-to-one`
+- `gate-cli cex flash-swap create-one-to-many`
+- `gate-cli cex flash-swap create-v1`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Fc:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Fc:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's flashswap workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's flashswap workflow.
 
 - `SKILL.md` keeps routing and scenario boundaries.
-- `references/mcp.md` is the authoritative MCP execution layer for preview/create sequencing, confirmation gates, and degraded handling.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for preview/create sequencing, confirmation gates, and degraded handling.
 
 ## Trigger Conditions
 
@@ -99,9 +143,9 @@ Common usage examples:
 
 **API Field Naming**:
 
-- `cex_fc_list_fc_currency_pairs` returns **snake_case** fields: `sell_min_amount`, `sell_max_amount`, `buy_min_amount`, `buy_max_amount`, `currency_pair`, `sell_currency`, `buy_currency`
-- `cex_fc_preview_fc_order_v1` and multi-currency preview APIs return **camelCase** fields in some environments (e.g. `sellMinAmount`). Always read the actual field names from the response — do not assume a fixed naming convention
-- `cex_fc_list_fc_orders` and `cex_fc_get_fc_order` return snake_case: `sell_currency`, `buy_currency`, `sell_amount`, `buy_amount`, `create_time`
+- `gate-cli cex flash-swap pairs` returns **snake_case** fields: `sell_min_amount`, `sell_max_amount`, `buy_min_amount`, `buy_max_amount`, `currency_pair`, `sell_currency`, `buy_currency`
+- `gate-cli cex flash-swap preview-v1` and multi-currency preview APIs return **camelCase** fields in some environments (e.g. `sellMinAmount`). Always read the actual field names from the response — do not assume a fixed naming convention
+- `gate-cli cex flash-swap orders` and `gate-cli cex flash-swap order` return snake_case: `sell_currency`, `buy_currency`, `sell_amount`, `buy_amount`, `create_time`
 
 **Data type note**: `order_id` is returned as a **string** in API responses. `quote_id` is also a string.
 
@@ -109,15 +153,15 @@ Common usage examples:
 
 | Tool | Type | Description |
 |------|------|-------------|
-| `cex_fc_preview_fc_order_v1` | Preview | One-to-one swap quote preview |
-| `cex_fc_create_fc_order_v1` | Create | One-to-one swap order creation (requires `quote_id`) |
-| `cex_fc_preview_fc_multi_currency_one_to_many_order` | Preview | One-to-many swap quote preview |
-| `cex_fc_create_fc_multi_currency_one_to_many_order` | Create | One-to-many swap order creation |
-| `cex_fc_preview_fc_multi_currency_many_to_one_order` | Preview | Many-to-one swap quote preview |
-| `cex_fc_create_fc_multi_currency_many_to_one_order` | Create | Many-to-one swap order creation |
-| `cex_fc_list_fc_currency_pairs` | Query | List supported flash swap pairs and limits |
-| `cex_fc_list_fc_orders` | Query | Query flash swap order history |
-| `cex_fc_get_fc_order` | Query | Query single flash swap order by ID |
+| `gate-cli cex flash-swap preview-v1` | Preview | One-to-one swap quote preview |
+| `gate-cli cex flash-swap create-v1` | Create | One-to-one swap order creation (requires `quote_id`) |
+| `gate-cli cex flash-swap preview-one-to-many` | Preview | One-to-many swap quote preview |
+| `gate-cli cex flash-swap create-one-to-many` | Create | One-to-many swap order creation |
+| `gate-cli cex flash-swap preview-many-to-one` | Preview | Many-to-one swap quote preview |
+| `gate-cli cex flash-swap create-many-to-one` | Create | Many-to-one swap order creation |
+| `gate-cli cex flash-swap pairs` | Query | List supported flash swap pairs and limits |
+| `gate-cli cex flash-swap orders` | Query | Query flash swap order history |
+| `gate-cli cex flash-swap order` | Query | Query single flash swap order by ID |
 
 ## Workflow
 
@@ -129,18 +173,18 @@ Analyze the user's request to determine which flash swap operation to perform.
 
 | User Intent | Mode | Preview Tool | Create Tool |
 |-------------|------|-------------|-------------|
-| Swap one coin for another (e.g. "sell 1 BTC for USDT") | one-to-one | `cex_fc_preview_fc_order_v1` | `cex_fc_create_fc_order_v1` |
-| One-click swap without separate confirmation (e.g. "directly swap 100 USDT to GT") | one-to-one-auto | `cex_fc_preview_fc_order_v1` → `cex_fc_create_fc_order_v1` | — |
-| Buy multiple coins with one currency (e.g. "buy 1u BTC, 2u ETH") | one-to-many | `cex_fc_preview_fc_multi_currency_one_to_many_order` | `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| Split one currency into multiple by ratio (e.g. "split 1000 USDT, half BTC half ETH") | one-to-many-split | `cex_fc_preview_fc_multi_currency_one_to_many_order` | `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| Buy specific quantities of multiple coins (e.g. "buy 0.1 BTC and 1 ETH with USDT") | one-to-many-buy | `cex_fc_preview_fc_multi_currency_one_to_many_order` | `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| Sell multiple coins into one currency (e.g. "sell 1 BTC, 2 ETH for USDT") | many-to-one | `cex_fc_preview_fc_multi_currency_many_to_one_order` | `cex_fc_create_fc_multi_currency_many_to_one_order` |
-| Consolidate all holdings of certain coins into one (e.g. "convert all my BTC, ETH, DOGE to USDT") | many-to-one-all | `cex_fc_preview_fc_multi_currency_many_to_one_order` | `cex_fc_create_fc_multi_currency_many_to_one_order` |
-| Preview-only for multi-currency (e.g. "how much GT can I get for my BTC and ETH?") | many-to-one-preview | `cex_fc_preview_fc_multi_currency_many_to_one_order` | — |
-| Query supported flash swap pairs | query | `cex_fc_list_fc_currency_pairs` | — |
-| Query flash swap order list | query | `cex_fc_list_fc_orders` | — |
-| Query single flash swap order by ID | query | `cex_fc_get_fc_order` | — |
-| Verify latest order result (e.g. "did my swap succeed?") | verify-order | `cex_fc_get_fc_order` | — |
+| Swap one coin for another (e.g. "sell 1 BTC for USDT") | one-to-one | `gate-cli cex flash-swap preview-v1` | `gate-cli cex flash-swap create-v1` |
+| One-click swap without separate confirmation (e.g. "directly swap 100 USDT to GT") | one-to-one-auto | `gate-cli cex flash-swap preview-v1` → `gate-cli cex flash-swap create-v1` | — |
+| Buy multiple coins with one currency (e.g. "buy 1u BTC, 2u ETH") | one-to-many | `gate-cli cex flash-swap preview-one-to-many` | `gate-cli cex flash-swap create-one-to-many` |
+| Split one currency into multiple by ratio (e.g. "split 1000 USDT, half BTC half ETH") | one-to-many-split | `gate-cli cex flash-swap preview-one-to-many` | `gate-cli cex flash-swap create-one-to-many` |
+| Buy specific quantities of multiple coins (e.g. "buy 0.1 BTC and 1 ETH with USDT") | one-to-many-buy | `gate-cli cex flash-swap preview-one-to-many` | `gate-cli cex flash-swap create-one-to-many` |
+| Sell multiple coins into one currency (e.g. "sell 1 BTC, 2 ETH for USDT") | many-to-one | `gate-cli cex flash-swap preview-many-to-one` | `gate-cli cex flash-swap create-many-to-one` |
+| Consolidate all holdings of certain coins into one (e.g. "convert all my BTC, ETH, DOGE to USDT") | many-to-one-all | `gate-cli cex flash-swap preview-many-to-one` | `gate-cli cex flash-swap create-many-to-one` |
+| Preview-only for multi-currency (e.g. "how much GT can I get for my BTC and ETH?") | many-to-one-preview | `gate-cli cex flash-swap preview-many-to-one` | — |
+| Query supported flash swap pairs | query | `gate-cli cex flash-swap pairs` | — |
+| Query flash swap order list | query | `gate-cli cex flash-swap orders` | — |
+| Query single flash swap order by ID | query | `gate-cli cex flash-swap order` | — |
+| Verify latest order result (e.g. "did my swap succeed?") | verify-order | `gate-cli cex flash-swap order` | — |
 
 Key data to extract:
 - `intent`: "one_to_one" / "one_to_one_auto" / "one_to_many" / "one_to_many_split" / "one_to_many_buy" / "many_to_one" / "many_to_one_all" / "many_to_one_preview" / "list_pairs" / "list_orders" / "get_order" / "verify_order"
@@ -151,7 +195,7 @@ Key data to extract:
 
 Before calling the preview API, validate the user's amount against the pair's min/max limits to avoid unnecessary API calls.
 
-Call `cex_fc_list_fc_currency_pairs` with:
+Call `gate-cli cex flash-swap pairs` with:
 - `currency`: the sell_asset or buy_asset from the user's request
 
 Key data to extract:
@@ -167,7 +211,7 @@ Skip this step if the user explicitly requests "one-click" or "direct" swap to m
 
 ### Step 3: Preview — One-to-One Swap (if intent = one_to_one or one_to_one_auto)
 
-Call `cex_fc_preview_fc_order_v1` with:
+Call `gate-cli cex flash-swap preview-v1` with:
 - `sell_asset` (required, string): asset to sell, e.g. "BTC"
 - `buy_asset` (required, string): asset to buy, e.g. "USDT"
 - `sell_amount` (string): amount to sell. Choose one between `sell_amount` and `buy_amount`
@@ -188,7 +232,7 @@ Key data to extract:
 
 **Pre-condition**: Step 3 must have returned `code == 0` with a valid `quote_id`. If Step 3 failed (any `code != 0`), do NOT execute this step. Never fabricate a `quote_id`.
 
-Call `cex_fc_create_fc_order_v1` with body JSON string:
+Call `gate-cli cex flash-swap create-v1` with body JSON string:
 - `quote_id` (required, string): from preview response — must be the actual value returned by the API
 - `sell_asset` (required, string): asset to sell
 - `sell_amount` (required, string): amount to sell
@@ -214,12 +258,12 @@ Key data to extract:
 
 **For one_to_many_buy**: The user specifies target `buy_amount` per currency (e.g. "buy 0.1 BTC and 1 ETH"). Use the `buy_amount` field instead of `sell_amount` in the params array to let the API calculate the required sell amount.
 
-Call `cex_fc_preview_fc_multi_currency_one_to_many_order` with body JSON string:
+Call `gate-cli cex flash-swap preview-one-to-many` with body JSON string:
 - `params` (required, array): each element contains:
-  - `sell_asset` (required, string): source currency (same for all, e.g. "USDT")
-  - `sell_amount` (string): amount of source currency to spend on this target
-  - `buy_asset` (required, string): target currency (e.g. "BTC", "ETH")
-  - `buy_amount` (string): alternative to sell_amount
+ - `sell_asset` (required, string): source currency (same for all, e.g. "USDT")
+ - `sell_amount` (string): amount of source currency to spend on this target
+ - `buy_asset` (required, string): target currency (e.g. "BTC", "ETH")
+ - `buy_amount` (string): alternative to sell_amount
 
 Key data to extract:
 - `orders[]`: array of preview results, each containing `quote_id`, `sell_amount`, `buy_amount`, `price`, and `error`
@@ -231,14 +275,13 @@ Present the full preview table and highlight any failed items. Ask for confirmat
 ### Step 6: Create — One-to-Many Swap (after user confirms Step 5)
 
 **Important**: Exclude any items that failed in preview (where `error.code != 0` or `quote_id` is missing).
-
-Call `cex_fc_create_fc_multi_currency_one_to_many_order` with body JSON string:
+Call `gate-cli cex flash-swap create-one-to-many` with body JSON string:
 - `params` (required, array): each element contains:
-  - `sell_asset` (required, string): source currency
-  - `sell_amount` (required, string): amount to sell
-  - `buy_asset` (required, string): target currency
-  - `buy_amount` (required, string): amount to buy (from preview)
-  - `quote_id` (string): from preview response
+ - `sell_asset` (required, string): source currency
+ - `sell_amount` (required, string): amount to sell
+ - `buy_asset` (required, string): target currency
+ - `buy_amount` (required, string): amount to buy (from preview)
+ - `quote_id` (string): from preview response
 
 Key data to extract:
 - `orders[]`: array of created orders, each with `id`, `status`, `error`
@@ -247,14 +290,13 @@ Key data to extract:
 
 ### Step 7: Preview — Many-to-One Swap (if intent = many_to_one, many_to_one_all, or many_to_one_preview)
 
-**For many_to_one_all**: The user wants to consolidate all holdings of specified currencies. Before previewing, query the user's spot account balances to determine the actual amount for each currency. Filter out currencies whose balance is below the flash swap minimum amount (`sell_min_amount` from `cex_fc_list_fc_currency_pairs`).
-
-Call `cex_fc_preview_fc_multi_currency_many_to_one_order` with body JSON string:
+**For many_to_one_all**: The user wants to consolidate all holdings of specified currencies. Before previewing, query the user's spot account balances to determine the actual amount for each currency. Filter out currencies whose balance is below the flash swap minimum amount (`sell_min_amount` from `gate-cli cex flash-swap pairs`).
+Call `gate-cli cex flash-swap preview-many-to-one` with body JSON string:
 - `params` (required, array): each element contains:
-  - `sell_asset` (required, string): source currency (e.g. "BTC", "ETH")
-  - `sell_amount` (string): amount to sell
-  - `buy_asset` (required, string): target currency (same for all, e.g. "USDT")
-  - `buy_amount` (string): alternative to sell_amount
+ - `sell_asset` (required, string): source currency (e.g. "BTC", "ETH")
+ - `sell_amount` (string): amount to sell
+ - `buy_asset` (required, string): target currency (same for all, e.g. "USDT")
+ - `buy_amount` (string): alternative to sell_amount
 
 Key data to extract:
 - `orders[]`: array of preview results with `quote_id`, `sell_amount`, `buy_amount`, `price`, `error`
@@ -271,13 +313,13 @@ Present the full preview table and highlight any failed items.
 
 **Important**: Exclude any items that failed in preview. Including a failed item (e.g. `buy_amount: "0"`) will cause the entire request to be rejected with `code: 4`.
 
-Call `cex_fc_create_fc_multi_currency_many_to_one_order` with body JSON string:
+Call `gate-cli cex flash-swap create-many-to-one` with body JSON string:
 - `params` (required, array): each element contains:
-  - `sell_asset` (required, string): source currency
-  - `sell_amount` (required, string): amount to sell
-  - `buy_asset` (required, string): target currency
-  - `buy_amount` (required, string): amount to buy (from preview)
-  - `quote_id` (string): from preview response
+ - `sell_asset` (required, string): source currency
+ - `sell_amount` (required, string): amount to sell
+ - `buy_asset` (required, string): target currency
+ - `buy_amount` (required, string): amount to buy (from preview)
+ - `quote_id` (string): from preview response
 
 Key data to extract:
 - `orders[]`: array of created orders with `id`, `status`, `error`
@@ -285,7 +327,7 @@ Key data to extract:
 
 ### Step 9: Query Flash Swap Pairs (if intent = list_pairs)
 
-Call `cex_fc_list_fc_currency_pairs` with:
+Call `gate-cli cex flash-swap pairs` with:
 - `currency` (optional, string): filter by currency symbol
 - `limit` (optional, number): max items returned (default 1000)
 - `page` (optional, number): page number
@@ -299,7 +341,7 @@ Key data to extract:
 
 Before calling, validate the `status` parameter if provided. Only `1` (success) and `2` (failed) are valid.
 
-Call `cex_fc_list_fc_orders` with:
+Call `gate-cli cex flash-swap orders` with:
 - `status` (optional, number): `1` = success, `2` = failed
 - `sell_currency` (optional, string): filter by sell currency
 - `buy_currency` (optional, string): filter by buy currency
@@ -312,7 +354,7 @@ Key data to extract:
 
 ### Step 11: Query Single Order (if intent = get_order or verify_order)
 
-Call `cex_fc_get_fc_order` with:
+Call `gate-cli cex flash-swap order` with:
 - `order_id` (required, number): the order ID to query
 
 If the API returns 404, inform the user the order was not found.
@@ -336,7 +378,7 @@ Format results using the appropriate Report Template. For swap operations, alway
 |----------------|----------|
 | **Region/compliance restriction (code -2)** | **CRITICAL**: The API returns `{"code":-2,"message":"This service is not supported in your region"}`. This means flash swap is not available for this user's region. Immediately stop all operations, do NOT proceed to create, and inform the user: "Flash swap is not available in your region due to compliance restrictions." Do NOT fabricate any results |
 | **Preview failed (any non-zero code)** | **CRITICAL**: If the preview API returns any `code != 0`, the operation has FAILED. Do NOT proceed to the create step. Do NOT fabricate a `quote_id`. Report the exact error code and message to the user. Never show "success" when the API returned an error |
-| Amount below minimum (sell_amount < sell_min_amount) | Query `cex_fc_list_fc_currency_pairs` first. If below minimum, inform the user with the exact minimum and do NOT call preview |
+| Amount below minimum (sell_amount < sell_min_amount) | Query `gate-cli cex flash-swap pairs` first. If below minimum, inform the user with the exact minimum and do NOT call preview |
 | Amount above maximum (sell_amount > sell_max_amount) | Inform the user the amount exceeds the maximum allowed, show the limit |
 | Quote expired (code 1052) | The `quote_id` has expired. Re-run the preview to get a fresh quote, then immediately create the order |
 | Unable to get accurate quote (code 4 / 400001 / 400007) | These are quote-related errors from the server. `code 4` is a top-level rejection (often caused by including a failed item). `400001` and `400007` are per-item errors meaning the server cannot price this pair/amount. Suggest adjusting the amount, trying a different pair, or removing the failed item |
@@ -367,16 +409,16 @@ Format results using the appropriate Report Template. For swap operations, alway
 
 | Condition | Action | Tool |
 |-----------|--------|------|
-| User wants to swap one coin for another | Preview one-to-one, then create after confirmation | `cex_fc_preview_fc_order_v1` → `cex_fc_create_fc_order_v1` |
-| User says "directly" or "one-click" swap | Preview + create automatically without separate confirmation | `cex_fc_preview_fc_order_v1` → `cex_fc_create_fc_order_v1` |
-| User references a previous quote_id for confirmation | Create order using the referenced quote_id | `cex_fc_create_fc_order_v1` |
-| Swap amount is suspiciously small | Pre-validate against pair min amount before preview | `cex_fc_list_fc_currency_pairs` |
-| User wants to buy multiple coins with one currency | Preview one-to-many, then create | `cex_fc_preview_fc_multi_currency_one_to_many_order` → `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| User wants to split one currency by ratio (e.g. "half and half") | Calculate per-target sell_amount, then preview one-to-many | `cex_fc_preview_fc_multi_currency_one_to_many_order` → `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| User specifies buy quantities (e.g. "buy 0.1 BTC and 1 ETH") | Use buy_amount in params, preview one-to-many | `cex_fc_preview_fc_multi_currency_one_to_many_order` → `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| User wants to sell multiple coins into one currency | Preview many-to-one, then create | `cex_fc_preview_fc_multi_currency_many_to_one_order` → `cex_fc_create_fc_multi_currency_many_to_one_order` |
-| User wants to consolidate "all" of certain holdings | Query balances, filter by min amounts, preview many-to-one, then create | `cex_fc_list_fc_currency_pairs` → `cex_fc_preview_fc_multi_currency_many_to_one_order` → `cex_fc_create_fc_multi_currency_many_to_one_order` |
-| User asks "how much can I get" without wanting to execute | Preview-only many-to-one, sum buy_amounts, do NOT create | `cex_fc_preview_fc_multi_currency_many_to_one_order` |
+| User wants to swap one coin for another | Preview one-to-one, then create after confirmation | `gate-cli cex flash-swap preview-v1` → `gate-cli cex flash-swap create-v1` |
+| User says "directly" or "one-click" swap | Preview + create automatically without separate confirmation | `gate-cli cex flash-swap preview-v1` → `gate-cli cex flash-swap create-v1` |
+| User references a previous quote_id for confirmation | Create order using the referenced quote_id | `gate-cli cex flash-swap create-v1` |
+| Swap amount is suspiciously small | Pre-validate against pair min amount before preview | `gate-cli cex flash-swap pairs` |
+| User wants to buy multiple coins with one currency | Preview one-to-many, then create | `gate-cli cex flash-swap preview-one-to-many` → `gate-cli cex flash-swap create-one-to-many` |
+| User wants to split one currency by ratio (e.g. "half and half") | Calculate per-target sell_amount, then preview one-to-many | `gate-cli cex flash-swap preview-one-to-many` → `gate-cli cex flash-swap create-one-to-many` |
+| User specifies buy quantities (e.g. "buy 0.1 BTC and 1 ETH") | Use buy_amount in params, preview one-to-many | `gate-cli cex flash-swap preview-one-to-many` → `gate-cli cex flash-swap create-one-to-many` |
+| User wants to sell multiple coins into one currency | Preview many-to-one, then create | `gate-cli cex flash-swap preview-many-to-one` → `gate-cli cex flash-swap create-many-to-one` |
+| User wants to consolidate "all" of certain holdings | Query balances, filter by min amounts, preview many-to-one, then create | `gate-cli cex flash-swap pairs` → `gate-cli cex flash-swap preview-many-to-one` → `gate-cli cex flash-swap create-many-to-one` |
+| User asks "how much can I get" without wanting to execute | Preview-only many-to-one, sum buy_amounts, do NOT create | `gate-cli cex flash-swap preview-many-to-one` |
 | Preview returns items with `error.code != 0` | Warn user, exclude failed items before creating | — |
 | **Preview returns code -2 (region restriction)** | **STOP immediately. Do NOT create. Inform user flash swap is not available in their region** | — |
 | **Preview returns any non-zero code** | **STOP. Do NOT create. Do NOT fabricate quote_id. Report exact error to user** | — |
@@ -384,10 +426,10 @@ Format results using the appropriate Report Template. For swap operations, alway
 | Create returns per-item error (400001/400007) | Report which items failed, suggest adjusting amounts | — |
 | Multi-currency create rejected with code 4 | Remove failed preview items and retry | Create tool |
 | Order status == 2 after create | Inform user swap failed, suggest retrying | — |
-| User asks "did my swap succeed?" | Query order by ID, check status field | `cex_fc_get_fc_order` |
-| User asks about supported pairs or limits | Query pair list | `cex_fc_list_fc_currency_pairs` |
-| User queries order history | Query order list | `cex_fc_list_fc_orders` |
-| User queries specific order by ID | Query single order | `cex_fc_get_fc_order` |
+| User asks "did my swap succeed?" | Query order by ID, check status field | `gate-cli cex flash-swap order` |
+| User asks about supported pairs or limits | Query pair list | `gate-cli cex flash-swap pairs` |
+| User queries order history | Query order list | `gate-cli cex flash-swap orders` |
+| User queries specific order by ID | Query single order | `gate-cli cex flash-swap order` |
 | Order not found (404) | Inform user, suggest checking ID | — |
 | User provides invalid status filter | Reject and inform valid values are 1 or 2 | — |
 

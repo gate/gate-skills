@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-marketanalysis
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate Exchange market analysis tool. Use when the user asks for deep market metrics like liquidity, slippage, funding arbitrage, or manipulation risk. Triggers on 'liquidity', 'depth', 'slippage', 'momentum', 'buy/sell pressure', 'squeeze', 'funding rate', 'arbitrage', 'basis', 'premium'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # gate-exchange-marketanalysis
 
@@ -12,38 +64,33 @@ description: "Gate Exchange market analysis tool. Use when the user asks for dee
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
 Market tape analysis covering thirteen scenarios, such as liquidity, momentum, liquidation monitoring, funding arbitrage, basis monitoring, manipulation risk, order book explanation, slippage simulation, K-line breakout/support–resistance, and liquidity with weekend vs weekday. This skill provides structured market insights by orchestrating Gate MCP tools; call order and judgment logic are defined in `references/scenarios.md`.
 
 ---
 
-## MCP Dependencies
+## Skill Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
 
 ### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Not necessarily
 - Note: This skill is read-only and primarily uses public market-data surfaces. In many runtimes these calls work without authentication, though some deployments may still route them through an authenticated MCP layer.
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** for `gate-cli`-backed auth. When **both** are unset or empty and the deployment still expects keys, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Confirm the CLI works (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** market call from this skill) before depending on deeper tool chains.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's market analysis workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's market analysis workflow.
 
 - `SKILL.md` keeps intent routing, scenario mapping, and output semantics.
-- `references/mcp.md` is the authoritative MCP execution layer for tool sequencing, parameter checks, and degradation rules.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for tool sequencing, parameter checks, and degradation rules.
 
 ## Sub-Modules
 
@@ -96,7 +143,6 @@ Determine which module (case) to run based on user intent:
 5. **Apply judgment logic** from scenarios (thresholds, flags, ratings).
 6. **Output the report** using that case’s Report Template.
 7. **Suggest related actions** (e.g. “For basis, ask ‘What is the basis for XXX?’”).
-
 ---
 
 ## Domain Knowledge (short)
@@ -109,11 +155,11 @@ Determine which module (case) to run based on user intent:
 - **Basis (Case 5):** Current basis vs history; basis widening/narrowing for sentiment.
 - **Manipulation (Case 6):** Top-10 depth total / 24h volume &lt; 0.5% → thin depth; consecutive same-direction large orders → possible manipulation. Use spot by default; use futures when user says perpetual/contract.
 - **Order book (Case 7):** Show bids/asks example, explain spread with last price, depth and volatility.
-- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_tickers (use quanto_multiplier from contract for ladder notional). Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
-- **K-line breakout / support–resistance (Case 9):** Trigger: e.g. “breakout, support, resistance”, “K-line”, “does X show signs of breaking out?”. Spot: cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers. Use candlesticks for support/resistance levels; use tickers for 24h price, volume, change (momentum).
-- **Liquidity + weekend vs weekday (Case 10):** Trigger: e.g. “liquidity”, “weekend vs weekday”, “compare weekend and weekday”. Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_candlesticks(90d) → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_candlesticks(90d) → cex_fx_get_fx_tickers (use quanto_multiplier for depth notional). Order book for current depth; 90d candlesticks to split weekend vs weekday volume and return; compare and summarize.
-- **Technical analysis / what to do (Case 11):** Trigger: e.g. "technical analysis, what should I do with BTC", "long or short at current level". Spot: cex_spot_get_spot_candlesticks(short & long timeframes 4h/1d) → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_funding_rate. Use history for support/resistance; compare current price and 24h volume to past for momentum; funding rate for long/short bias; give separate short- and long-term advice.
-- **Multi-asset buy & allocation (Case 12):** Trigger: e.g. "I'm watching BTC, ETH, GT and want to buy; analyze and give allocation for $5000". Per asset: cex_spot_get_spot_candlesticks(7d) → cex_spot_get_spot_tickers → cex_spot_get_spot_order_book; futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_order_book → cex_fx_get_fx_funding_rate. Spot ticker + order book + 7d daily; add funding for futures; output allocation % and rationale.
+- **Slippage simulation (Case 8):** **Requires both a currency pair and a quote amount** (e.g. ETH_USDT, $10K). If user does not specify either, prompt them — do not assume defaults (e.g. do not default to $10K). Spot: `gate-cli cex spot market orderbook` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market contract` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market tickers`. Simulate market buy by walking ask ladder; slippage = volume-weighted avg price − ask1 (points and %).
+- **K-line breakout / support–resistance (Case 9):** Trigger: e.g. “breakout, support, resistance”, “K-line”, “does X show signs of breaking out?”. Spot: `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers`. Use candlesticks for support/resistance levels; use tickers for 24h price, volume, change (momentum).
+- **Liquidity + weekend vs weekday (Case 10):** Trigger: e.g. “liquidity”, “weekend vs weekday”, “compare weekend and weekday”. Spot: `gate-cli cex spot market orderbook` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market contract` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers`. Order book for current depth; 90d candlesticks to split weekend vs weekday volume and return; compare and summarize.
+- **Technical analysis / what to do (Case 11):** Trigger: e.g. "technical analysis, what should I do with BTC", "long or short at current level". Spot: `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` → `gate-cli cex futures market funding-rate`. Use history for support/resistance; compare current price and 24h volume to past for momentum; funding rate for long/short bias; give separate short- and long-term advice.
+- **Multi-asset buy & allocation (Case 12):** Trigger: e.g. "I'm watching BTC, ETH, GT and want to buy; analyze and give allocation for $5000". Per asset: `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers` → `gate-cli cex spot market orderbook`; futures: `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market funding-rate`. Spot ticker + order book + 7d daily; add funding for futures; output allocation % and rationale.
 - **Portfolio allocation review (Case 13):** Trigger: e.g. "I hold 30% BTC, 30% ETH, 20% DOGE, 15% LTC, 5% USDT; is this allocation reasonable, how to adjust, what else to buy?". Same MCP order as Case 12 (per-asset spot candlesticks + tickers + order_book; futures + funding_rate). Assess allocation, suggest adjustments, or suggest what else to buy if no change.
 
 ---

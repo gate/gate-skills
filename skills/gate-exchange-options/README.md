@@ -28,7 +28,7 @@ See `references/scenarios.md` for the scenario index and shared safety/confirmat
 
 ### Prerequisites
 
-- Gate MCP configured and connected (options tools: `list_options_*`, `create_options_order`, `cancel_options_order`, etc.)
+- gate-cli configured and connected (options tools: `list_options_*`, `create_options_order`, `cancel_options_order`, etc.)
 - Contract names follow `{underlying}-{expiration}-{strike}-{C|P}` (e.g. `BTC_USDT-20210916-50000-C`). The API accepts **size in contracts** only; when the user says base notional (e.g. "1 BTC call") or USDT (e.g. "1000U"), convert to contracts using multiplier or price_per_contract (see `references/place-order.md`). Size and price must respect `order_size_min` and `order_price_round` from the contract.
 
 ### Example prompts

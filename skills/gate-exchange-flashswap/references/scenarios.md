@@ -12,7 +12,7 @@
 
 **Expected Behavior**:
 1. Identify intent as "list_pairs"
-2. Call `cex_fc_list_fc_currency_pairs` with optional currency filter
+2. Call `gate-cli cex flash-swap pairs` with optional currency filter
 3. If no filter and result is large, summarize total count and show a sample of 20 pairs
 4. If filtered by currency, show all matching pairs with min/max amounts
 5. Present results in a formatted table
@@ -29,8 +29,8 @@
 
 **Expected Behavior**:
 1. Identify intent as "list_orders" or "get_order"
-2. For order list: validate status if provided (only 1 or 2), call `cex_fc_list_fc_orders` with filters
-3. For single order: extract order_id, call `cex_fc_get_fc_order`
+2. For order list: validate status if provided (only 1 or 2), call `gate-cli cex flash-swap orders` with filters
+3. For single order: extract order_id, call `gate-cli cex flash-swap order`
 4. Present results in a formatted table or detail view
 5. If order not found (404), inform the user and suggest checking the ID
 
@@ -50,10 +50,10 @@
 
 **Expected Behavior**:
 1. Identify intent as "one_to_one" with sell_asset, buy_asset, and sell_amount or buy_amount
-2. Call `cex_fc_preview_fc_order_v1` with the extracted parameters
+2. Call `gate-cli cex flash-swap preview-v1` with the extracted parameters
 3. Present the preview to the user showing quote_id, exchange rate, amounts, and valid_timestamp
 4. Wait for user confirmation
-5. Call `cex_fc_create_fc_order_v1` with the quote_id and amounts from the preview
+5. Call `gate-cli cex flash-swap create-v1` with the quote_id and amounts from the preview
 6. Present the created order with order ID, status, and executed rate
 
 **Unexpected Behavior**:
@@ -71,11 +71,11 @@
 
 **Expected Behavior**:
 1. Identify intent as "one_to_many" with sell_asset (e.g. USDT) and a list of buy targets with amounts
-2. Call `cex_fc_preview_fc_multi_currency_one_to_many_order` with params array
+2. Call `gate-cli cex flash-swap preview-one-to-many` with params array
 3. Present the full preview table showing each target's quote_id, amounts, rate, and error status
 4. Highlight any items that failed to get a quote (error.code != 0)
 5. Wait for user confirmation
-6. Call `cex_fc_create_fc_multi_currency_one_to_many_order` with only the successful items (exclude failed ones)
+6. Call `gate-cli cex flash-swap create-one-to-many` with only the successful items (exclude failed ones)
 7. Present the order results showing order IDs, status, and any per-item errors
 
 **Unexpected Behavior**:
@@ -94,7 +94,7 @@
 
 **Expected Behavior**:
 1. Identify intent as "one_to_one"
-2. Call `cex_fc_preview_fc_order_v1` with sell_asset, buy_asset, and sell_amount
+2. Call `gate-cli cex flash-swap preview-v1` with sell_asset, buy_asset, and sell_amount
 3. Present the quote_id, exchange rate (price), estimated buy_amount, and quote validity period
 4. Inform the user of the quote details and ask if they want to proceed
 5. Do NOT auto-create the order — wait for explicit user confirmation
@@ -111,7 +111,7 @@
 
 **Expected Behavior**:
 1. Retrieve the quote_id and associated parameters from the most recent preview result
-2. Call `cex_fc_create_fc_order_v1` with the stored quote_id, sell_asset, sell_amount, buy_asset, buy_amount
+2. Call `gate-cli cex flash-swap create-v1` with the stored quote_id, sell_asset, sell_amount, buy_asset, buy_amount
 3. Check the response: if `status == 1`, inform user the swap succeeded with the final order ID and buy_amount
 4. If `status == 2`, inform user the swap failed and suggest retrying
 5. If code 1052 (quote expired), automatically re-preview and ask user to confirm again
@@ -128,8 +128,8 @@
 
 **Expected Behavior**:
 1. Identify intent as "one_to_one_auto" (user explicitly says "directly" / "one-click" / "just do it")
-2. Call `cex_fc_preview_fc_order_v1` to get the latest quote
-3. Immediately call `cex_fc_create_fc_order_v1` with the returned quote_id and amounts — no separate confirmation
+2. Call `gate-cli cex flash-swap preview-v1` to get the latest quote
+3. Immediately call `gate-cli cex flash-swap create-v1` with the returned quote_id and amounts — no separate confirmation
 4. Present the final order result: order ID, status, sell/buy amounts, and rate
 5. If the order fails, inform the user and suggest retrying
 
@@ -144,7 +144,7 @@
 
 **Expected Behavior**:
 1. Extract sell_asset, buy_asset, and sell_amount from the request
-2. Call `cex_fc_list_fc_currency_pairs` with the sell currency to get the sell_min_amount
+2. Call `gate-cli cex flash-swap pairs` with the sell currency to get the sell_min_amount
 3. Compare the user's sell_amount against sell_min_amount
 4. If below minimum: inform the user "The amount is too small. Minimum for selling {currency} is {sell_min_amount}." Do NOT call the preview API
 5. If within range: proceed normally to preview
@@ -164,8 +164,8 @@
 
 **Expected Behavior**:
 1. Identify intent as "verify_order"
-2. If the order_id is known from the recent create response, call `cex_fc_get_fc_order` with that ID
-3. If no order_id is available, call `cex_fc_list_fc_orders` with `reverse=true` and `limit=1` to get the most recent order
+2. If the order_id is known from the recent create response, call `gate-cli cex flash-swap order` with that ID
+3. If no order_id is available, call `gate-cli cex flash-swap orders` with `reverse=true` and `limit=1` to get the most recent order
 4. Check the `status` field: if `1`, confirm success and show the final buy_amount received
 5. If `status == 2`, inform the user it failed and suggest re-previewing with adjusted parameters
 
@@ -182,9 +182,9 @@
 **Expected Behavior**:
 1. Identify intent as "one_to_many_split"
 2. Calculate per-target sell_amount based on the user's specified ratio (e.g. 1000 USDT / 2 = 500 each for half-and-half)
-3. Call `cex_fc_preview_fc_multi_currency_one_to_many_order` with the calculated amounts
+3. Call `gate-cli cex flash-swap preview-one-to-many` with the calculated amounts
 4. Present the preview showing how much of each target currency the user will receive
-5. After user confirmation, call `cex_fc_create_fc_multi_currency_one_to_many_order`
+5. After user confirmation, call `gate-cli cex flash-swap create-one-to-many`
 6. Report the final results: how much BTC and ETH were received
 
 ## Scenario 11: One-to-Many with Specified Buy Quantities
@@ -198,9 +198,9 @@
 
 **Expected Behavior**:
 1. Identify intent as "one_to_many_buy"
-2. Call `cex_fc_preview_fc_multi_currency_one_to_many_order` with `buy_amount` specified for each item (instead of sell_amount)
+2. Call `gate-cli cex flash-swap preview-one-to-many` with `buy_amount` specified for each item (instead of sell_amount)
 3. Present the preview showing the required USDT cost per target and the total cost
-4. After user confirmation, call `cex_fc_create_fc_multi_currency_one_to_many_order`
+4. After user confirmation, call `gate-cli cex flash-swap create-one-to-many`
 5. Report the final order results
 
 ## Scenario 12: Many-to-One Asset Consolidation
@@ -216,11 +216,11 @@
 **Expected Behavior**:
 1. Identify intent as "many_to_one_all"
 2. Query the user's spot account balances for the specified currencies
-3. Call `cex_fc_list_fc_currency_pairs` to get sell_min_amount for each currency
+3. Call `gate-cli cex flash-swap pairs` to get sell_min_amount for each currency
 4. Filter out currencies whose balance is below sell_min_amount, inform the user which were excluded
-5. Call `cex_fc_preview_fc_multi_currency_many_to_one_order` with the qualifying currencies and their full balances
+5. Call `gate-cli cex flash-swap preview-many-to-one` with the qualifying currencies and their full balances
 6. Present the preview showing per-currency conversion amounts and total expected USDT
-7. After confirmation, call `cex_fc_create_fc_multi_currency_many_to_one_order` (excluding any failed preview items)
+7. After confirmation, call `gate-cli cex flash-swap create-many-to-one` (excluding any failed preview items)
 8. Report total USDT received
 
 **Unexpected Behavior**:
@@ -238,7 +238,7 @@
 
 **Expected Behavior**:
 1. Identify intent as "many_to_one_preview"
-2. Call `cex_fc_preview_fc_multi_currency_many_to_one_order` with the specified currencies and amounts
+2. Call `gate-cli cex flash-swap preview-many-to-one` with the specified currencies and amounts
 3. Sum up all successful `buy_amount` values to get the total expected target amount
 4. Present the per-currency breakdown and the total sum
 5. Explicitly state this is a preview only and no order has been placed

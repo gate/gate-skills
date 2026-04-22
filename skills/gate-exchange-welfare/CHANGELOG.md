@@ -12,9 +12,9 @@
 - Confirmed SKILL.md uses compliant Gate branding links and removed dependence on non-compliant `gate.io` wording in this skill bundle.
 - Renamed `## Execution Workflow` to `## Execution` in `SKILL.md`.
 - Renamed `## Exception Handling` to `## Error Handling` in `SKILL.md`.
-- Renamed `references/mcp.md` sections to validator-aligned headings: `## Workflow`, `## Report Template`, and `## Error Handling`.
+- Renamed `references/gate-cli.md` sections to validator-aligned headings: `## Workflow`, `## Report Template`, and `## Error Handling`.
 - Normalized `references/scenarios.md` to validator-required field names and added `**Context**:` to every scenario.
-- No welfare MCP business logic changes.
+- No welfare business logic changes.
 
 ---
 
@@ -24,7 +24,7 @@
 
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
-- Preserved the welfare phase-2 MCP workflow introduced in `2026.4.2-1`.
+- Preserved the welfare phase-2 execution workflow introduced in `2026.4.2-1`.
 
 ---
 
@@ -33,11 +33,11 @@
 ### Updated
 
 - Aligned the skill with the latest welfare Ex-Skill phase-2 requirement and the latest welfare OpenAPI surface.
-- Expanded MCP coverage from 2 tools to 4 tools:
-  - `cex_welfare_get_user_identity`
-  - `cex_welfare_get_beginner_task_list`
-  - `cex_welfare_claim_task`
-  - `cex_welfare_claim_reward`
+- Expanded documented command coverage from 2 tools to 4 tools:
+  - `gate-cli cex welfare identity`
+  - `gate-cli cex welfare beginner-tasks`
+  - `cex_welfare_claim_task` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+  - `cex_welfare_claim_reward` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 - Added new supported newcomer flows:
   - Claim a single task
   - Claim all currently claimable newcomer rewards
@@ -57,9 +57,9 @@
 
 - `SKILL.md`
 - `README.md`
-- `references/mcp.md`
+- `references/gate-cli.md`
 - `references/scenarios.md`
-- `references/mcp-data-usage.md`
+- `references/gate-cli-data-usage.md`
 - `CHANGELOG.md`
 
 ---
@@ -69,7 +69,7 @@
 ### Changed
 
 - Aligned documentation wording for ClawHub review.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ---
 
@@ -77,9 +77,9 @@
 
 ### Updated
 
-- Updated MCP tool calls: Replaced placeholders `XXX` with actual MCP tool names
-  - `cex_welfare_get_user_identity`: Check user eligibility for new user benefits, return specific error codes
-  - `cex_welfare_get_beginner_task_list`: Get beginner guidance task list
+- Updated Documented `gate-cli` calls: Replaced placeholders `XXX` with actual `gate-cli` command names
+  - `gate-cli cex welfare identity`: Check user eligibility for new user benefits, return specific error codes
+  - `gate-cli cex welfare beginner-tasks`: Get beginner guidance task list
 - Enhanced error code handling logic: Added specific handling for all user types (error codes 1001-1008)
 - Updated scenarios.md: Added complete test scenarios for various user types
 - Optimized workflow description: Branch judgment based on actual API return codes
@@ -87,7 +87,7 @@
 ### Files Updated
 
 - README.md: Updated tool descriptions and parameter explanations
-- SKILL.md: Enhanced MCP tool calls and error handling logic
+- SKILL.md: Enhanced Documented `gate-cli` calls and error handling logic
 - references/scenarios.md: Updated test scenarios, added new error code scenarios
 - CHANGELOG.md: Added this update record
 
@@ -120,7 +120,7 @@
 - Skill: Welfare center new user task entry (version 3/19). Trigger phrases: what welfare, how to claim rewards, new user benefits, new user tasks, what welfare, new user benefits.
 - SKILL.md: New/existing user determination process (Step 1 → branching); Case 1 existing user guidance (output Web/App redirect links); Case 2 new user task list (task title / subtitle / rewards / action buttons); response templates (with examples); exception handling (timeout, empty list, not logged in); Cross-Skill integration (deposit / spot trading / KYC / asset query); scope description (version 3/19 boundaries); Safety Rules.
 - README.md, CHANGELOG.md, references/scenarios.md.
-- MCP tool calls used `XXX` placeholders, replaced with actual tool names in version 2026.3.19-4.
+- Documented `gate-cli` calls used `XXX` placeholders, replaced with actual tool names in version 2026.3.19-4.
 
 ### Audit
 
@@ -145,7 +145,7 @@
 
 - SKILL.md: All templates and instructions converted to English
 - references/scenarios.md: All examples converted to English  
-- references/mcp-data-usage.md: Complete English documentation
+- references/gate-cli-data-usage.md: Complete English documentation
 - CHANGELOG.md: Updated with English language change record
 
 ---
@@ -156,15 +156,15 @@
 
 - **FIXED MAJOR ISSUE**: Removed all hardcoded fake reward information from templates and examples
   - Removed fake examples like "10 points", "5 USDT trial voucher", "20 USDT bonus" from response templates
-  - Added strict requirement to use only real MCP data from `cex_welfare_get_beginner_task_list`
+  - Added strict requirement to use only real `gate-cli` data from `gate-cli cex welfare beginner-tasks`
   - Enhanced Safety Rules with explicit prohibition against fabricated task information
-- Updated response templates to use real MCP data fields: `task_name`, `task_desc`, `reward_num`, `reward_unit`, `status`
-- Added detailed data mapping rules for proper MCP data extraction
+- Updated response templates to use real `gate-cli` data fields: `task_name`, `task_desc`, `reward_num`, `reward_unit`, `status`
+- Added detailed data mapping rules for proper `gate-cli` data extraction
 - Enhanced disclaimer text to emphasize official website/App as final authority
 - **LANGUAGE UPDATE**: Converted all templates and documentation to English for consistency
 
 ### Files Updated
 
 - SKILL.md: Enhanced safety rules, updated templates, added data mapping instructions
-- references/scenarios.md: Replaced fake examples with MCP data requirements  
+- references/scenarios.md: Replaced fake examples with `gate-cli` data requirements  
 - CHANGELOG.md: Added this critical security fix record

@@ -2,7 +2,7 @@
 
 ## Overview
 
-An L2 skill focused on **short-path flash swap execution** on Gate: one-to-one, one-to-many, and many-to-one **instant convert** using `cex_fc_*` preview and create tools, **spot available balance** checks via `cex_spot_get_spot_accounts`, **min/max** enforcement from `cex_fc_list_fc_currency_pairs`, optional **wallet dust → GT** via `cex_wallet_*` small-balance tools, **order history** queries, and **split-over-max** batching. `SKILL.md` embeds **all 21 atomic tool-call chains** from the L2 HTML spec (parallel **P1** vs serial **→**, confirm-before-write). It does **not** replace spot order trading, deep market research, full asset audits, or account transfers.
+An L2 skill focused on **short-path flash swap execution** on Gate: one-to-one, one-to-many, and many-to-one **instant convert** using `cex_fc_*` preview and create tools, **spot available balance** checks via `gate-cli cex spot account get`, **min/max** enforcement from `gate-cli cex flash-swap pairs`, optional **wallet dust → GT** via `cex_wallet_*` small-balance tools, **order history** queries, and **split-over-max** batching. `SKILL.md` embeds **all 21 atomic tool-call chains** from the L2 HTML spec (parallel **P1** vs serial **→**, confirm-before-write). It does **not** replace spot order trading, deep market research, full asset audits, or account transfers.
 
 ### Core Capabilities
 
@@ -48,4 +48,4 @@ gate-exchange-flashswap-assistant/
 
 - **Repository**: [bitbucket.org/gateio/gate-github-skills](https://bitbucket.org/gateio/gate-github-skills)
 - **Publisher**: [Gate.com](https://www.gate.com)
-- **MCP**: Requires Gate Exchange MCP with API key; use only tools listed in `SKILL.md`.
+- **`gate-cli`**: Requires Gate Exchange `gate-cli` with API key; use only tools listed in `SKILL.md`.

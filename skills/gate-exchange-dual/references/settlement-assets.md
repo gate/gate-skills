@@ -6,8 +6,8 @@ Settlement result query and dual asset briefing.
 
 | Tool | Auth | Description |
 |------|------|-------------|
-| `cex_earn_list_dual_orders` | Yes | List dual investment orders. `page` and `limit` are **required**: always pass `page=1, limit=100`, then loop. `from`/`to` optional (Unix timestamps). |
-| `cex_earn_list_dual_balance` | Yes | Get dual investment balance & interest stats |
+| `gate-cli cex earn dual orders` | Yes | List dual investment orders. `page` and `limit` are **required**: always pass `page=1, limit=100`, then loop. `from`/`to` optional (Unix timestamps). |
+| `gate-cli cex earn dual balance` | Yes | Get dual investment balance & interest stats |
 
 > **Pagination**: `page` and `limit` are **required** — always start with `page=1, limit=100`. Loop with incrementing `page` until returned rows < `limit`. Must fetch ALL pages before drawing any conclusion.
 
@@ -29,7 +29,7 @@ Settlement result query and dual asset briefing.
 
 If the user mentions a time period (e.g. "last month", "last week"), calculate exact `from`/`to` Unix timestamps (seconds, UTC+0). Always pass correct timestamps — do NOT ignore the time range.
 
-Call `cex_earn_list_dual_orders` with `from`, `to`, `page=1`, `limit=100`.
+Call `gate-cli cex earn dual orders` with `from`, `to`, `page=1`, `limit=100`.
 
 > **Critical**: Complete ALL pagination (loop until returned rows < limit) before drawing any conclusions. Do NOT answer based on partial data.
 
@@ -60,7 +60,7 @@ Both scenarios include principal + interest. Display: `settlement_currency`, `se
 
 ### Step 1: Fetch balance
 
-Call `cex_earn_list_dual_balance` (no parameters needed).
+Call `gate-cli cex earn dual balance` (no parameters needed).
 
 ### Step 2: Present summary
 

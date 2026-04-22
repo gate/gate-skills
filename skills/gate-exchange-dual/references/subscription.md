@@ -6,14 +6,14 @@ Sell-high / buy-low order placement, amount validation, and compliance handling.
 
 | Tool | Auth | Description |
 |------|------|-------------|
-| `cex_earn_list_dual_investment_plans` | Yes | List dual investment plans (optional param: plan_id) |
-| `cex_earn_place_dual_order` | Yes | Place a dual investment order. Params: `plan_id` (required, string), `amount` (required, string), `text` (optional comment). |
+| `gate-cli cex earn dual plans` | Yes | List dual investment plans (optional param: plan_id) |
+| `gate-cli cex earn dual place` | Yes | Place a dual investment order. Params: `plan_id` (required, string), `amount` (required, string), `text` (optional comment). |
 
-### Parameters: `cex_earn_place_dual_order`
+### Parameters: `gate-cli cex earn dual place`
 
 | Param | Required | Type | Description |
 |-------|----------|------|-------------|
-| `plan_id` | **Yes** | string | Plan ID from `cex_earn_list_dual_investment_plans` |
+| `plan_id` | **Yes** | string | Plan ID from `gate-cli cex earn dual plans` |
 | `amount` | **Yes** | string | Investment amount |
 | `text` | No | string | Custom order ID. Must start with `t-`; excluding the `t-` prefix, max 28 bytes; only digits, letters, underscore (`_`), hyphen (`-`), or dot (`.`) allowed. Example: `t-my_order.001` |
 
@@ -34,7 +34,7 @@ If any required parameter is missing, ask the user to provide it.
 
 ### Step 2: Find matching plan
 
-Call `cex_earn_list_dual_investment_plans` to get all plans.
+Call `gate-cli cex earn dual plans` to get all plans.
 
 Filter locally:
 - `type` = `call` (Sell High)
@@ -64,11 +64,11 @@ Settlement scenarios:
 Do you confirm this order? (Yes/No)
 ```
 
-> **Critical**: NEVER call `cex_earn_place_dual_order` without explicit user confirmation.
+> **Critical**: NEVER call `gate-cli cex earn dual place` without explicit user confirmation.
 
 ### Step 4: Place order
 
-If user confirms, call `cex_earn_place_dual_order` with:
+If user confirms, call `gate-cli cex earn dual place` with:
 - `plan_id`: the matched plan's ID (as string)
 - `amount`: the user's investment amount (as string)
 
@@ -102,7 +102,7 @@ If any required parameter is missing, ask the user to provide it.
 
 ### Step 2: Find matching plan
 
-Call `cex_earn_list_dual_investment_plans` to get all plans.
+Call `gate-cli cex earn dual plans` to get all plans.
 
 Filter locally:
 - `type` = `put` (Buy Low)
@@ -131,11 +131,11 @@ Settlement scenarios:
 Do you confirm this order? (Yes/No)
 ```
 
-> **Critical**: NEVER call `cex_earn_place_dual_order` without explicit user confirmation.
+> **Critical**: NEVER call `gate-cli cex earn dual place` without explicit user confirmation.
 
 ### Step 4: Place order
 
-If user confirms, call `cex_earn_place_dual_order` with:
+If user confirms, call `gate-cli cex earn dual place` with:
 - `plan_id`: the matched plan's ID (as string)
 - `amount`: the user's investment amount (as string)
 
@@ -160,7 +160,7 @@ User asks if their amount is enough (e.g. "I want to buy-low 5000U of ETH, can I
 
 ### Step 1: Fetch plans
 
-Call `cex_earn_list_dual_investment_plans` to get available plans for the target coin and type.
+Call `gate-cli cex earn dual plans` to get available plans for the target coin and type.
 
 ### Step 2: Check eligibility
 
@@ -178,7 +178,7 @@ User asks about the minimum amount (e.g. "I only have 50U, can I buy dual?").
 
 ### Step 1: Fetch plans
 
-Call `cex_earn_list_dual_investment_plans` to get available plans.
+Call `gate-cli cex earn dual plans` to get available plans.
 
 ### Step 2: Present minimum amounts
 
@@ -192,17 +192,17 @@ If the user's amount meets one or more plan's minimum, list those eligible plans
 
 ## Compliance Handling — Cases 15, 17
 
-These cases handle compliance errors returned by `cex_earn_place_dual_order`, or user questions about restrictions.
+These cases handle compliance errors returned by `gate-cli cex earn dual place`, or user questions about restrictions.
 
 ### Case 15: Restricted Region
 
-**Trigger**: User asks about region restrictions, or `cex_earn_place_dual_order` returns a region restriction error.
+**Trigger**: User asks about region restrictions, or `gate-cli cex earn dual place` returns a region restriction error.
 
 **Response**: "Dual investment requires meeting the platform's compliance requirements. Your region is currently not supported for this product. If you have any questions, please contact Gate support."
 
 ### Case 17: General Compliance Failure
 
-**Trigger**: `cex_earn_place_dual_order` returns a compliance error (OES, institutional/enterprise account, risk control blocklist, etc.).
+**Trigger**: `gate-cli cex earn dual place` returns a compliance error (OES, institutional/enterprise account, risk control blocklist, etc.).
 
 **Response**: Based on the specific error code/message:
 - OES / institutional / enterprise user: "Your account type does not currently support dual investment products."

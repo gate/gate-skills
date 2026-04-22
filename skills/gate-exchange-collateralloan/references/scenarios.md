@@ -4,12 +4,12 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 
 | Purpose | MCP tool | Auth |
 |---------|----------|------|
-| Create current/fixed loan | **cex_mcl_create_multi_collateral** (`order` JSON) | Yes |
-| Repay | **cex_mcl_repay_mcl** (`repay_loan` JSON) | Yes |
-| Add / redeem collateral | **cex_mcl_operate_multi_collateral** (`collateral_adjust` JSON) | Yes |
-| List orders | **cex_mcl_list_multi_collateral_orders** | Yes |
-| Order detail | **cex_mcl_get_multi_collateral_order_detail** | Yes |
-| Quota / LTV / fix rate / current rate | **cex_mcl_list_user_currency_quota**, **cex_mcl_get_multi_collateral_ltv**, **cex_mcl_get_multi_collateral_fix_rate**, **cex_mcl_get_multi_collateral_current_rate** | Mixed |
+| Create current/fixed loan | **`gate-cli cex mcl create`** (`order` JSON) | Yes |
+| Repay | **`gate-cli cex mcl repay`** (`repay_loan` JSON) | Yes |
+| Add / redeem collateral | **`gate-cli cex mcl collateral`** (`collateral_adjust` JSON) | Yes |
+| List orders | **`gate-cli cex mcl orders`** | Yes |
+| Order detail | **`gate-cli cex mcl order`** | Yes |
+| Quota / LTV / fix rate / current rate | **`gate-cli cex mcl quota`**, **`gate-cli cex mcl ltv`**, **`gate-cli cex mcl fix-rate`**, **`gate-cli cex mcl current-rate`** | Mixed |
 
 ---
 
@@ -22,18 +22,18 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Collateral 50 USDT, current borrow DOGE"
 
 **Expected Behavior**:
-1. Optionally call `cex_mcl_list_user_currency_quota` or `cex_mcl_get_multi_collateral_current_rate` to validate. Parse collateral and borrow (amount + currency).
-2. Show draft. After user confirms, call `cex_mcl_create_multi_collateral` with **`order`** JSON: borrow_currency, borrow_amount, collateral_currencies (if any), order_type: current.
+1. Optionally call `gate-cli cex mcl quota` or `gate-cli cex mcl current-rate` to validate. Parse collateral and borrow (amount + currency).
+2. Show draft. After user confirms, call `gate-cli cex mcl create` with **`order`** JSON: borrow_currency, borrow_amount, collateral_currencies (if any), order_type: current.
 3. On success: loan created message with order_id. On failure: show error guidance.
 
-**Tester**: User Prompt: `Pledge 100 USDT, borrow 7000 DOGE (current loan)` | Tools: optional quota → **cex_mcl_create_multi_collateral**
+**Tester**: User Prompt: `Pledge 100 USDT, borrow 7000 DOGE (current loan)` | Tools: optional quota → **`gate-cli cex mcl create`**
 
 **MCP steps**
 
 | Step | MCP tool |
 |------|----------|
-| 1 (optional) | **cex_mcl_list_user_currency_quota** |
-| 2 | **cex_mcl_create_multi_collateral** |
+| 1 (optional) | **`gate-cli cex mcl quota`** |
+| 2 | **`gate-cli cex mcl create`** |
 
 ---
 
@@ -47,19 +47,19 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 
 **Expected Behavior**:
 1. Parse term: **7 days → fixed_type `7d`**, **30 days → `30d`** (lowercase).
-2. Call `cex_mcl_get_multi_collateral_fix_rate`. Response is a **list**. **Filter** by borrow_currency. If empty or no row: stop; user message (no submit).
-3. Set **fixed_rate** from `rate_7d` or `rate_30d` (**hourly interest rate**; pass as-is; do not convert or describe as annual/daily). Show draft; on confirm call `cex_mcl_create_multi_collateral` with **`order`** JSON: order_type fixed, fixed_type, fixed_rate, borrow_currency, borrow_amount, collateral_currencies.
+2. Call `gate-cli cex mcl fix-rate`. Response is a **list**. **Filter** by borrow_currency. If empty or no row: stop; user message (no submit).
+3. Set **fixed_rate** from `rate_7d` or `rate_30d` (**hourly interest rate**; pass as-is; do not convert or describe as annual/daily). Show draft; on confirm call `gate-cli cex mcl create` with **`order`** JSON: order_type fixed, fixed_type, fixed_rate, borrow_currency, borrow_amount, collateral_currencies.
 4. On success/failure: same pattern as Scenario 1.
 
-**Tester**: User Prompt: `Pledge 0.01 BTC, borrow 100 USDT for 7 days` | Tools: **cex_mcl_get_multi_collateral_fix_rate** → **cex_mcl_create_multi_collateral**
+**Tester**: User Prompt: `Pledge 0.01 BTC, borrow 100 USDT for 7 days` | Tools: **`gate-cli cex mcl fix-rate`** → **`gate-cli cex mcl create`**
 
 **MCP steps**
 
 | Step | MCP tool |
 |------|----------|
-| 1 (optional) | **cex_mcl_list_user_currency_quota** |
-| 2 | **cex_mcl_get_multi_collateral_fix_rate** |
-| 3 | **cex_mcl_create_multi_collateral** |
+| 1 (optional) | **`gate-cli cex mcl quota`** |
+| 2 | **`gate-cli cex mcl fix-rate`** |
+| 3 | **`gate-cli cex mcl create`** |
 
 ---
 
@@ -72,12 +72,12 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Order 123456 repay 1000 USDT"
 
 **Expected Behavior**:
-1. Parse order_id and amount (or full). Show draft; on confirm call `cex_mcl_repay_mcl` with **`repay_loan`** JSON (order_id, repay_items).
+1. Parse order_id and amount (or full). Show draft; on confirm call `gate-cli cex mcl repay` with **`repay_loan`** JSON (order_id, repay_items).
 2. Success/failure user messages.
 
-**Tester**: User Prompt: `Order 123456 repay 1000 USDT` | **cex_mcl_repay_mcl**
+**Tester**: User Prompt: `Order 123456 repay 1000 USDT` | **`gate-cli cex mcl repay`**
 
-**MCP**: **cex_mcl_repay_mcl**
+**MCP**: **`gate-cli cex mcl repay`**
 
 ---
 
@@ -90,12 +90,12 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Order 123456 add collateral 0.01 ETH"
 
 **Expected Behavior**:
-1. Parse order_id, amount, currency. Show draft; on confirm call `cex_mcl_operate_multi_collateral` with **`collateral_adjust`** JSON: type append, collaterals array.
+1. Parse order_id, amount, currency. Show draft; on confirm call `gate-cli cex mcl collateral` with **`collateral_adjust`** JSON: type append, collaterals array.
 2. Success/failure messages.
 
-**Tester**: User Prompt: `Order 123456 add margin 100 USDT` | **cex_mcl_operate_multi_collateral**
+**Tester**: User Prompt: `Order 123456 add margin 100 USDT` | **`gate-cli cex mcl collateral`**
 
-**MCP**: **cex_mcl_operate_multi_collateral**
+**MCP**: **`gate-cli cex mcl collateral`**
 
 ---
 
@@ -108,12 +108,12 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Order 123456 reduce collateral 0.01 ETH"
 
 **Expected Behavior**:
-1. Parse order_id, amount, currency. Show draft; on confirm call `cex_mcl_operate_multi_collateral` with **`collateral_adjust`** JSON: type redeem.
+1. Parse order_id, amount, currency. Show draft; on confirm call `gate-cli cex mcl collateral` with **`collateral_adjust`** JSON: type redeem.
 2. Success/failure messages.
 
-**Tester**: User Prompt: `Order 123456 redeem margin 100 USDT` | **cex_mcl_operate_multi_collateral**
+**Tester**: User Prompt: `Order 123456 redeem margin 100 USDT` | **`gate-cli cex mcl collateral`**
 
-**MCP**: **cex_mcl_operate_multi_collateral**
+**MCP**: **`gate-cli cex mcl collateral`**
 
 ---
 
@@ -126,11 +126,11 @@ Skill maps write/read flows to **MCP tools** only. Arguments and JSON shapes: **
 - "Order detail for 123456"
 
 **Expected Behavior**:
-1. Call `cex_mcl_list_multi_collateral_orders` and/or `cex_mcl_get_multi_collateral_order_detail`.
+1. Call `gate-cli cex mcl orders` and/or `gate-cli cex mcl order`.
 2. Summarize **order_id, status, borrow amounts/currencies, collateral amounts/currencies, LTV** (and fixed term as **7d/30d label only** if fixed—no calendar dates).
 3. **Strip all time-related fields** from the user-facing answer: no borrow_time, maturity, due date, operate_time, create_time, repay_time, Unix timestamps, or natural-language dates derived from those fields. If the user asks for timing, direct them to Gate app/web; do not echo API timestamps.
 
-**MCP**: **cex_mcl_list_multi_collateral_orders**, **cex_mcl_get_multi_collateral_order_detail**
+**MCP**: **`gate-cli cex mcl orders`**, **`gate-cli cex mcl order`**
 
 ---
 

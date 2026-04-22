@@ -1,14 +1,65 @@
 ---
 name: gate-exchange-assets-manager
-version: "2026.3.25-1"
-updated: "2026-03-25"
 description: "Gate multi-account asset manager L2 skill. Use when the user asks to check total assets combined with margin/liquidation risk or earnings snapshots. Triggers on 'total assets', 'margin check', 'liquidation risk', 'earn interest', 'staking rewards', 'affiliate commissions', 'borrow USDT', 'add margin', 'set collateral'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Account and Asset Manager
 
 This is an L2 composite skill that orchestrates 58 deduplicated MCP tool calls (54 read + 4 write) across 7 L1 skills. It provides a unified entry point for account and asset overview, margin and liquidation risk assessment, SimpleEarn and staking earnings snapshots, affiliate commission queries, and unified-account write operations (borrowing, collateral, leverage settings).
-
 This skill is intended for users aged 18 or above with full civil capacity.
 
 ## General Rules
@@ -16,103 +67,94 @@ This skill is intended for users aged 18 or above with full civil capacity.
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
 
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_alpha_list_alpha_accounts
-- cex_alpha_list_alpha_currencies
-- cex_alpha_list_alpha_tickers
-- cex_alpha_list_alpha_tokens
-- cex_earn_asset_list
-- cex_earn_award_list
-- cex_earn_find_coin
-- cex_earn_get_uni_currency
-- cex_earn_get_uni_interest
-- cex_earn_list_dual_balance
-- cex_earn_list_dual_orders
+- `gate-cli cex alpha account balances`
+- `gate-cli cex alpha market currencies`
+- `gate-cli cex alpha market tickers`
+- `gate-cli cex alpha market tokens`
+- `gate-cli cex earn staking assets`
+- `gate-cli cex earn staking awards`
+- `gate-cli cex earn staking find`
+- `gate-cli cex earn uni currency`
+- `gate-cli cex earn uni interest`
+- `gate-cli cex earn dual balance`
+- `gate-cli cex earn dual orders`
 - cex_earn_list_structured_orders
-- cex_earn_list_uni_currencies
-- cex_earn_list_uni_rate
-- cex_earn_list_user_uni_lends
-- cex_earn_order_list
-- cex_fx_get_fx_accounts
-- cex_fx_get_fx_candlesticks
-- cex_fx_get_fx_contract
-- cex_fx_get_fx_funding_rate
-- cex_fx_get_fx_order_book
-- cex_fx_get_fx_premium_index
-- cex_fx_get_fx_tickers
-- cex_fx_get_fx_trades
-- cex_fx_list_fx_liq_orders
-- cex_fx_list_fx_positions
-- cex_margin_list_margin_accounts
-- cex_options_list_options_account
-- cex_rebate_broker_commission_history
-- cex_rebate_broker_transaction_history
-- cex_rebate_partner_commissions_history
-- cex_rebate_partner_sub_list
-- cex_rebate_partner_transaction_history
-- cex_rebate_user_info
-- cex_rebate_user_sub_relation
-- cex_spot_get_spot_accounts
-- cex_spot_get_spot_candlesticks
-- cex_spot_get_spot_order_book
-- cex_spot_get_spot_tickers
-- cex_spot_get_spot_trades
-- cex_spot_list_spot_account_book
-- cex_tradfi_query_user_assets
-- cex_unified_get_unified_accounts
-- cex_unified_get_unified_borrowable
-- cex_unified_get_unified_estimate_rate
-- cex_unified_get_unified_mode
-- cex_unified_get_unified_transferable
-- cex_unified_get_user_leverage_currency_setting
-- cex_unified_list_currency_discount_tiers
-- cex_unified_list_unified_currencies
-- cex_unified_list_unified_loan_interest_records
-- cex_unified_list_unified_loan_records
-- cex_wallet_get_total_balance
+- `gate-cli cex earn uni currencies`
+- `gate-cli cex earn uni rate`
+- `gate-cli cex earn uni lends`
+- `gate-cli cex earn staking orders`
+- `gate-cli cex futures account get`
+- `gate-cli cex futures market candlesticks`
+- `gate-cli cex futures market contract`
+- `gate-cli cex futures market funding-rate`
+- `gate-cli cex futures market orderbook`
+- `gate-cli cex futures market premium`
+- `gate-cli cex futures market tickers`
+- `gate-cli cex futures market trades`
+- `gate-cli cex futures market liquidations`
+- `gate-cli cex futures position list`
+- `gate-cli cex margin account list`
+- `gate-cli cex options account get`
+- `gate-cli cex rebate broker commissions`
+- `gate-cli cex rebate broker transactions`
+- `gate-cli cex rebate partner commissions`
+- `gate-cli cex rebate partner sub-list`
+- `gate-cli cex rebate partner transactions`
+- `gate-cli cex rebate user-info`
+- `gate-cli cex rebate sub-relation`
+- `gate-cli cex spot account get`
+- `gate-cli cex spot market candlesticks`
+- `gate-cli cex spot market orderbook`
+- `gate-cli cex spot market tickers`
+- `gate-cli cex spot market trades`
+- `gate-cli cex spot account book`
+- `gate-cli cex tradfi account assets`
+- `gate-cli cex unified account get`
+- `gate-cli cex unified query borrowable`
+- `gate-cli cex unified query estimate-rate`
+- `gate-cli cex unified mode get`
+- `gate-cli cex unified query transferable`
+- `gate-cli cex unified config leverage-get`
+- `gate-cli cex unified config discount-tiers`
+- `gate-cli cex unified account currencies`
+- `gate-cli cex unified loan interest`
+- `gate-cli cex unified loan records`
+- `gate-cli cex wallet balance total`
 
 **Execution Operations (Write)**
 
-- cex_unified_create_unified_loan
-- cex_unified_set_unified_collateral
-- cex_unified_set_unified_mode
-- cex_unified_set_user_leverage_currency_setting
+- `gate-cli cex unified loan create`
+- `gate-cli cex unified config collateral`
+- `gate-cli cex unified mode set`
+- `gate-cli cex unified config leverage-set`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Alpha:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Rebate:Read, Spot:Read, Tradfi:Read, Unified:Write, Wallet:Read
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Alpha:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Rebate:Read, Spot:Read, Tradfi:Read, Unified:Write, Wallet:Read
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute module routing in this skill.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute module routing in this skill.
 
 - `SKILL.md` keeps orchestration/routing logic across account domains.
-- `references/mcp.md` is the authoritative MCP execution layer for module aggregation, partial degradation strategy, and unified mutation safeguards.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for module aggregation, partial degradation strategy, and unified mutation safeguards.
 
 ## Sub-Modules
 
@@ -136,11 +178,11 @@ User queries often span multiple dimensions (e.g. "check my earn interest and wi
 
 | Signal | Dimension | Trigger Condition | Trigger Keywords | Tool Subset |
 |--------|-----------|-------------------|------------------|-------------|
-| S1 | Assets / Overview | User asks about overall assets, multi-account balances, asset inventory; also covers read-only borrowable/rate inquiry (no execution intent) and transferable limit snapshots | assets, balance, account, how much, total assets, inventory; borrowable (inquiry only), transferable limit | `cex_wallet_get_total_balance`, `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_margin_list_margin_accounts`, `cex_options_list_options_account`, `cex_earn_list_user_uni_lends`, `cex_earn_asset_list`, `cex_alpha_list_alpha_accounts`, `cex_tradfi_query_user_assets`; inquiry subset: + `cex_unified_get_unified_borrowable`, `cex_unified_get_unified_estimate_rate`, `cex_unified_get_unified_transferable` |
-| S2 | Risk / Margin | User asks about liquidation, margin, liquidation price, unrealised PnL, position risk | liquidation, margin, liquidation price, unrealised PnL, position, risk, margin call | `cex_unified_get_unified_accounts`, `cex_fx_list_fx_positions`, `cex_fx_get_fx_tickers`, `cex_fx_get_fx_contract`, `cex_fx_get_fx_funding_rate`, `cex_fx_get_fx_premium_index` |
-| S3 | Earn / Yield | User asks about existing SimpleEarn or staking positions, accrued interest and rewards (snapshot only, not product selection) | earn position, staking position, interest, yield, rewards | `cex_earn_list_user_uni_lends`, `cex_earn_get_uni_interest`, `cex_earn_asset_list`, `cex_earn_award_list` (Note: does not include `list_uni_currencies` / `list_uni_rate` / `find_coin` which are product-selection tools; those requests route to smart earn) |
-| S4 | Affiliate / Rebate | User asks about affiliate status, partner data, commissions | rebate, affiliate, commission, partner, broker, referral | `cex_rebate_user_info`, `cex_rebate_partner_commissions_history`, `cex_rebate_partner_sub_list`, `cex_rebate_partner_transaction_history`, `cex_rebate_user_sub_relation`, `cex_rebate_broker_commission_history`, `cex_rebate_broker_transaction_history` |
-| S5 | Borrow / Transfer (Write) | User has explicit execution intent: borrow amount, add margin, set collateral, switch mode. Does NOT activate for inquiry-only queries like "how much can I borrow" with negation like "don't borrow yet" | borrow [amount], add margin, transfer to futures, set collateral, switch mode | `cex_unified_get_unified_borrowable`, `cex_unified_get_unified_estimate_rate`, `cex_unified_create_unified_loan`, `cex_unified_set_unified_collateral`, `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting` |
+| S1 | Assets / Overview | User asks about overall assets, multi-account balances, asset inventory; also covers read-only borrowable/rate inquiry (no execution intent) and transferable limit snapshots | assets, balance, account, how much, total assets, inventory; borrowable (inquiry only), transferable limit | `gate-cli cex wallet balance total`, `gate-cli cex spot account get`, `gate-cli cex unified account get`, `gate-cli cex futures account get`, `gate-cli cex margin account list`, `gate-cli cex options account get`, `gate-cli cex earn uni lends`, `gate-cli cex earn staking assets`, `gate-cli cex alpha account balances`, `gate-cli cex tradfi account assets`; inquiry subset: + `gate-cli cex unified query borrowable`, `gate-cli cex unified query estimate-rate`, `gate-cli cex unified query transferable` |
+| S2 | Risk / Margin | User asks about liquidation, margin, liquidation price, unrealised PnL, position risk | liquidation, margin, liquidation price, unrealised PnL, position, risk, margin call | `gate-cli cex unified account get`, `gate-cli cex futures position list`, `gate-cli cex futures market tickers`, `gate-cli cex futures market contract`, `gate-cli cex futures market funding-rate`, `gate-cli cex futures market premium` |
+| S3 | Earn / Yield | User asks about existing SimpleEarn or staking positions, accrued interest and rewards (snapshot only, not product selection) | earn position, staking position, interest, yield, rewards | `gate-cli cex earn uni lends`, `gate-cli cex earn uni interest`, `gate-cli cex earn staking assets`, `gate-cli cex earn staking awards` (Note: does not include `list_uni_currencies` / `list_uni_rate` / `find_coin` which are product-selection tools; those requests route to smart earn) |
+| S4 | Affiliate / Rebate | User asks about affiliate status, partner data, commissions | rebate, affiliate, commission, partner, broker, referral | `gate-cli cex rebate user-info`, `gate-cli cex rebate partner commissions`, `gate-cli cex rebate partner sub-list`, `gate-cli cex rebate partner transactions`, `gate-cli cex rebate sub-relation`, `gate-cli cex rebate broker commissions`, `gate-cli cex rebate broker transactions` |
+| S5 | Borrow / Transfer (Write) | User has explicit execution intent: borrow amount, add margin, set collateral, switch mode. Does NOT activate for inquiry-only queries like "how much can I borrow" with negation like "don't borrow yet" | borrow [amount], add margin, transfer to futures, set collateral, switch mode | `gate-cli cex unified query borrowable`, `gate-cli cex unified query estimate-rate`, `gate-cli cex unified loan create`, `gate-cli cex unified config collateral`, `gate-cli cex unified mode set`, `gate-cli cex unified config leverage-set` |
 
 ### Routing Flow
 
@@ -149,28 +191,28 @@ Input: User Query
 Output: activated_signals[] + params{action_type, accounts[]}
 
 1. Parameter Extraction
-   Extract accounts[] (account types mentioned, 0-N)
-   Extract action_type (borrow / transfer / add margin / setting / none)
+ Extract accounts[] (account types mentioned, 0-N)
+ Extract action_type (borrow / transfer / add margin / setting / none)
 
 2. Signal Detection (each dimension independent, non-exclusive, multi-select)
-   S1 <- contains asset/balance/account/inventory expressions
-   S2 <- contains liquidation/margin/position/risk expressions
-   S3 <- contains earn/staking position/interest/rewards expressions
-   S4 <- contains rebate/affiliate/commission/partner expressions
-   S5 <- contains borrow/transfer/add-margin/setting expressions AND execution intent
+ S1 <- contains asset/balance/account/inventory expressions
+ S2 <- contains liquidation/margin/position/risk expressions
+ S3 <- contains earn/staking position/interest/rewards expressions
+ S4 <- contains rebate/affiliate/commission/partner expressions
+ S5 <- contains borrow/transfer/add-margin/setting expressions AND execution intent
 
 3. Fallback Rules (if no signal explicitly activated)
-   Vague account intent (e.g. "check my account") -> default S1 (asset overview)
-   Account + risk keywords (e.g. "is it safe") -> default S1 + S2
+ Vague account intent (e.g. "check my account") -> default S1 (asset overview)
+ Account + risk keywords (e.g. "is it safe") -> default S1 + S2
 
 4. Execution Mode
-   S5 not activated -> read-only mode (query and summarise)
-   S5 activated -> read+write mode (query -> Action Draft -> confirm -> execute)
+ S5 not activated -> read-only mode (query and summarise)
+ S5 activated -> read+write mode (query -> Action Draft -> confirm -> execute)
 
 5. Tool Set Assembly
-   Tool Set = Union(all activated signal tool subsets)
-   Deduplicate same tool + same parameters
-   Independent tools run in parallel; S5 write operations run serially after reads
+ Tool Set = Union(all activated signal tool subsets)
+ Deduplicate same tool + same parameters
+ Independent tools run in parallel; S5 write operations run serially after reads
 ```
 
 ### External Routing (Out of Scope)
@@ -229,7 +271,7 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 | Write operation parameters incomplete (e.g. "borrow" without amount) | Ask to complete: "Please confirm the currency and amount to borrow"; do not guess |
 | Multilingual / mixed Chinese-English prompts | Parse intent and parameters normally; if identifiable as account/asset/risk, enter this skill |
 | User asks "which earn product is best" | Product recommendation scope; route to smart earn. This skill only queries existing positions/yields |
-| `cex_rebate_user_info` returns an empty object | Still produce the S4 section from `cex_rebate_partner_commissions_history` and other S4 tools; do not treat empty user_info as "no affiliate data". See Domain Knowledge: Affiliate / rebate data (S4). |
+| `gate-cli cex rebate user-info` returns an empty object | Still produce the S4 section from `gate-cli cex rebate partner commissions` and other S4 tools; do not treat empty user_info as "no affiliate data". See Domain Knowledge: Affiliate / rebate data (S4). |
 
 ## Execution
 
@@ -253,9 +295,9 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 ### Tool Deduplication Rules
 
 - Same tool + same parameters within one request: execute once, reuse result for multiple aggregation steps
-- Example: `cex_unified_get_unified_accounts` needed by both S1 and S2 only executes once
+- Example: `gate-cli cex unified account get` needed by both S1 and S2 only executes once
 
-## MCP Tools
+## gate-cli command index
 
 ### Full Deduplicated Tool Inventory (58 tools: 54 read + 4 write)
 
@@ -263,99 +305,99 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 1 | `cex_wallet_get_total_balance` | R | Total balance in USDT equivalent |
-| 2 | `cex_spot_get_spot_accounts` | R | Spot account per-currency balances |
-| 3 | `cex_unified_get_unified_accounts` | R | Unified account equity/margin/loans |
-| 4 | `cex_fx_get_fx_accounts` | R | Futures account available balance |
-| 5 | `cex_options_list_options_account` | R | Options account balance |
-| 6 | `cex_margin_list_margin_accounts` | R | Isolated margin accounts |
-| 7 | `cex_tradfi_query_user_assets` | R | TradFi account equity |
-| 8 | `cex_earn_list_dual_balance` | R | Dual investment balance |
-| 9 | `cex_earn_list_dual_orders` | R | Dual investment orders |
-| 10 | `cex_earn_list_structured_orders` | R | Structured product orders |
-| 11 | `cex_spot_list_spot_account_book` | R | Spot account ledger |
+| 1 | `gate-cli cex wallet balance total` | R | Total balance in USDT equivalent |
+| 2 | `gate-cli cex spot account get` | R | Spot account per-currency balances |
+| 3 | `gate-cli cex unified account get` | R | Unified account equity/margin/loans |
+| 4 | `gate-cli cex futures account get` | R | Futures account available balance |
+| 5 | `gate-cli cex options account get` | R | Options account balance |
+| 6 | `gate-cli cex margin account list` | R | Isolated margin accounts |
+| 7 | `gate-cli cex tradfi account assets` | R | TradFi account equity |
+| 8 | `gate-cli cex earn dual balance` | R | Dual investment balance |
+| 9 | `gate-cli cex earn dual orders` | R | Dual investment orders |
+| 10 | `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | R | Structured product orders |
+| 11 | `gate-cli cex spot account book` | R | Spot account ledger |
 
 #### Unified Account Domain (14 tools, 10 read + 4 write)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 12 | `cex_unified_get_unified_accounts` | R | Unified account equity/margin ratio/loan balance |
-| 13 | `cex_unified_get_unified_mode` | R | Current unified account mode |
-| 14 | `cex_unified_get_unified_borrowable` | R | Borrowable limit per currency |
-| 15 | `cex_unified_get_unified_transferable` | R | Transferable limit |
-| 16 | `cex_unified_get_unified_estimate_rate` | R | **Hourly** estimated unified-account borrow rate per currency (API string decimals; **not** annualized APR/APY). See Domain Knowledge: Unified account estimated borrow rate. |
-| 17 | `cex_unified_list_unified_currencies` | R | Supported unified currencies |
-| 18 | `cex_unified_list_unified_loan_records` | R | Loan records |
-| 19 | `cex_unified_list_unified_loan_interest_records` | R | Loan interest records |
-| 20 | `cex_unified_get_user_leverage_currency_setting` | R | Per-currency leverage setting |
-| 21 | `cex_unified_list_currency_discount_tiers` | R | Collateral discount tiers |
-| 22 | `cex_unified_set_unified_mode` | W | Switch unified account mode |
-| 23 | `cex_unified_create_unified_loan` | W | Execute borrow/repay |
-| 24 | `cex_unified_set_user_leverage_currency_setting` | W | Set per-currency leverage |
-| 25 | `cex_unified_set_unified_collateral` | W | Set collateral currencies |
+| 12 | `gate-cli cex unified account get` | R | Unified account equity/margin ratio/loan balance |
+| 13 | `gate-cli cex unified mode get` | R | Current unified account mode |
+| 14 | `gate-cli cex unified query borrowable` | R | Borrowable limit per currency |
+| 15 | `gate-cli cex unified query transferable` | R | Transferable limit |
+| 16 | `gate-cli cex unified query estimate-rate` | R | **Hourly** estimated unified-account borrow rate per currency (API string decimals; **not** annualized APR/APY). See Domain Knowledge: Unified account estimated borrow rate. |
+| 17 | `gate-cli cex unified account currencies` | R | Supported unified currencies |
+| 18 | `gate-cli cex unified loan records` | R | Loan records |
+| 19 | `gate-cli cex unified loan interest` | R | Loan interest records |
+| 20 | `gate-cli cex unified config leverage-get` | R | Per-currency leverage setting |
+| 21 | `gate-cli cex unified config discount-tiers` | R | Collateral discount tiers |
+| 22 | `gate-cli cex unified mode set` | W | Switch unified account mode |
+| 23 | `gate-cli cex unified loan create` | W | Execute borrow/repay |
+| 24 | `gate-cli cex unified config leverage-set` | W | Set per-currency leverage |
+| 25 | `gate-cli cex unified config collateral` | W | Set collateral currencies |
 
 #### SimpleEarn Domain (5 tools, all read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 26 | `cex_earn_list_uni_currencies` | R | SimpleEarn supported currencies |
-| 27 | `cex_earn_get_uni_currency` | R | Single currency SimpleEarn details |
-| 28 | `cex_earn_list_user_uni_lends` | R | User SimpleEarn positions |
-| 29 | `cex_earn_get_uni_interest` | R | SimpleEarn interest earnings |
-| 30 | `cex_earn_list_uni_rate` | R | SimpleEarn APY rates |
+| 26 | `gate-cli cex earn uni currencies` | R | SimpleEarn supported currencies |
+| 27 | `gate-cli cex earn uni currency` | R | Single currency SimpleEarn details |
+| 28 | `gate-cli cex earn uni lends` | R | User SimpleEarn positions |
+| 29 | `gate-cli cex earn uni interest` | R | SimpleEarn interest earnings |
+| 30 | `gate-cli cex earn uni rate` | R | SimpleEarn APY rates |
 
 #### Staking Domain (4 tools, all read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 31 | `cex_earn_asset_list` | R | Staking positions |
-| 32 | `cex_earn_award_list` | R | Staking reward records |
-| 33 | `cex_earn_find_coin` | R | Stakeable coin search |
-| 34 | `cex_earn_order_list` | R | Staking order history |
+| 31 | `gate-cli cex earn staking assets` | R | Staking positions |
+| 32 | `gate-cli cex earn staking awards` | R | Staking reward records |
+| 33 | `gate-cli cex earn staking find` | R | Stakeable coin search |
+| 34 | `gate-cli cex earn staking orders` | R | Staking order history |
 
 #### Market Analysis Domain (12 tools, all read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 35 | `cex_spot_get_spot_order_book` | R | Spot order book |
-| 36 | `cex_spot_get_spot_candlesticks` | R | Spot K-line data |
-| 37 | `cex_spot_get_spot_tickers` | R | Spot ticker snapshot |
-| 38 | `cex_spot_get_spot_trades` | R | Spot trade records |
-| 39 | `cex_fx_get_fx_contract` | R | Futures contract specs |
-| 40 | `cex_fx_get_fx_order_book` | R | Futures order book |
-| 41 | `cex_fx_get_fx_candlesticks` | R | Futures K-line data |
-| 42 | `cex_fx_get_fx_tickers` | R | Futures ticker (mark price) |
-| 43 | `cex_fx_get_fx_trades` | R | Futures trade records |
-| 44 | `cex_fx_get_fx_funding_rate` | R | Funding rate |
-| 45 | `cex_fx_list_fx_liq_orders` | R | Liquidation orders |
-| 46 | `cex_fx_get_fx_premium_index` | R | Basis/premium index |
+| 35 | `gate-cli cex spot market orderbook` | R | Spot order book |
+| 36 | `gate-cli cex spot market candlesticks` | R | Spot K-line data |
+| 37 | `gate-cli cex spot market tickers` | R | Spot ticker snapshot |
+| 38 | `gate-cli cex spot market trades` | R | Spot trade records |
+| 39 | `gate-cli cex futures market contract` | R | Futures contract specs |
+| 40 | `gate-cli cex futures market orderbook` | R | Futures order book |
+| 41 | `gate-cli cex futures market candlesticks` | R | Futures K-line data |
+| 42 | `gate-cli cex futures market tickers` | R | Futures ticker (mark price) |
+| 43 | `gate-cli cex futures market trades` | R | Futures trade records |
+| 44 | `gate-cli cex futures market funding-rate` | R | Funding rate |
+| 45 | `gate-cli cex futures market liquidations` | R | Liquidation orders |
+| 46 | `gate-cli cex futures market premium` | R | Basis/premium index |
 
 #### Futures Positions (1 tool, read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 47 | `cex_fx_list_fx_positions` | R | All futures positions (unrealised PnL, liquidation price) |
+| 47 | `gate-cli cex futures position list` | R | All futures positions (unrealised PnL, liquidation price) |
 
 #### Affiliate Domain (7 tools, all read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 48 | `cex_rebate_user_info` | R | User rebate summary (may return an empty object; rely on commissions history when empty) |
-| 49 | `cex_rebate_user_sub_relation` | R | User affiliate relationship |
-| 50 | `cex_rebate_partner_sub_list` | R | Partner client list |
-| 51 | `cex_rebate_partner_commissions_history` | R | Partner commission history |
-| 52 | `cex_rebate_partner_transaction_history` | R | Client transaction history |
-| 53 | `cex_rebate_broker_commission_history` | R | Broker commission history |
-| 54 | `cex_rebate_broker_transaction_history` | R | Broker transaction history |
+| 48 | `gate-cli cex rebate user-info` | R | User rebate summary (may return an empty object; rely on commissions history when empty) |
+| 49 | `gate-cli cex rebate sub-relation` | R | User affiliate relationship |
+| 50 | `gate-cli cex rebate partner sub-list` | R | Partner client list |
+| 51 | `gate-cli cex rebate partner commissions` | R | Partner commission history |
+| 52 | `gate-cli cex rebate partner transactions` | R | Client transaction history |
+| 53 | `gate-cli cex rebate broker commissions` | R | Broker commission history |
+| 54 | `gate-cli cex rebate broker transactions` | R | Broker transaction history |
 
 #### Alpha Domain (4 tools, all read)
 
 | # | Tool Name | R/W | Purpose |
 |---|-----------|-----|---------|
-| 55 | `cex_alpha_list_alpha_currencies` | R | Alpha supported currencies |
-| 56 | `cex_alpha_list_alpha_tokens` | R | Alpha token list |
-| 57 | `cex_alpha_list_alpha_tickers` | R | Alpha ticker snapshot |
-| 58 | `cex_alpha_list_alpha_accounts` | R | User Alpha positions |
+| 55 | `gate-cli cex alpha market currencies` | R | Alpha supported currencies |
+| 56 | `gate-cli cex alpha market tokens` | R | Alpha token list |
+| 57 | `gate-cli cex alpha market tickers` | R | Alpha ticker snapshot |
+| 58 | `gate-cli cex alpha account balances` | R | User Alpha positions |
 
 ## Domain Knowledge
 
@@ -392,31 +434,30 @@ When a user query contains both account/risk intent and other L2 intents (e.g. "
 - Does NOT produce a total PnL ledger across all business lines (inconsistent data sources)
 - Does NOT provide idle fund allocation advice or product comparison — route to smart earn
 
-### Unified account estimated borrow rate (`cex_unified_get_unified_estimate_rate`)
+### Unified account estimated borrow rate (`gate-cli cex unified query estimate-rate`)
 
 - **Semantics (Gate API):** The tool returns **estimated borrow interest rates for the current hour**, per currency, as **string decimals** (e.g. `"0.000002"`). This matches the public API contract: hourly estimate, not a fixed annual quote.
 - **User-facing output:** Always state that the value is a **hourly estimated rate** (or equivalent). **Do not** present the raw number as **annualized APR/APY** unless you perform an explicit conversion and label it clearly as a **reference only** (e.g. simple scaling: hourly × 24 × 365 — actual accrual follows platform rules).
-- **Distinction:** SimpleEarn tools such as `cex_earn_list_uni_rate` expose **product APY-style** figures; they are a different product line from unified-account **borrow** estimates. Do not mix units in one sentence without naming each source.
+- **Distinction:** SimpleEarn tools such as `gate-cli cex earn uni rate` expose **product APY-style** figures; they are a different product line from unified-account **borrow** estimates. Do not mix units in one sentence without naming each source.
 
 ### Common Misconceptions
 
 | Misconception | Reality |
 |---------------|---------|
-| The number from `cex_unified_get_unified_estimate_rate` is an annual percentage (APR) | It is an **hourly** estimated borrow rate per currency. Label it as hourly; only annualize with explicit conversion and “reference only” wording if the user asks. |
+| The number from `gate-cli cex unified query estimate-rate` is an annual percentage (APR) | It is an **hourly** estimated borrow rate per currency. Label it as hourly; only annualize with explicit conversion and “reference only” wording if the user asks. |
 | "Check my account and buy BTC" will execute trades via this skill | This skill only handles account/asset/risk queries and limited write operations (borrow/settings). Trading execution routes to the trading copilot. |
 | Liquidation warning equals the actual liquidation line | This skill evaluates risk based on snapshot data. Always note "subject to the exchange's actual liquidation rules." |
 | This skill can query or manage sub-accounts | This skill covers main account only; sub-account management is out of scope. |
 | "Should I put idle funds in SimpleEarn or staking" will be answered by this skill | Product selection and fund allocation route to the smart earn skill. This skill only provides position and yield snapshots for existing holdings. |
-| Empty `cex_rebate_user_info` means I have no commissions | Partner commission rows may still exist in `cex_rebate_partner_commissions_history`; empty user_info does not block an S4 report. |
+| Empty `gate-cli cex rebate user-info` means I have no commissions | Partner commission rows may still exist in `gate-cli cex rebate partner commissions`; empty user_info does not block an S4 report. |
 
 ### Affiliate / rebate data (S4)
 
-- **`cex_rebate_user_info` may return an empty object.** You can still build a meaningful S4 report from **`cex_rebate_partner_commissions_history`** (and other S4 read tools such as partner sub list and transaction history). Empty `user_info` does **not** mean there is no commission data.
-- **Source of truth for commission flows:** `cex_rebate_partner_commissions_history` returns historical commission rows. **`commissionAsset`** is commonly **USDT** or **POINT**; rows may also carry a **source** dimension such as FUTURES, SPOT, TradFi, or ALPHA (names as returned by the API).
+- **`gate-cli cex rebate user-info` may return an empty object.** You can still build a meaningful S4 report from **`gate-cli cex rebate partner commissions`** (and other S4 read tools such as partner sub list and transaction history). Empty `user_info` does **not** mean there is no commission data.
+- **Source of truth for commission flows:** `gate-cli cex rebate partner commissions` returns historical commission rows. **`commissionAsset`** is commonly **USDT** or **POINT**; rows may also carry a **source** dimension such as FUTURES, SPOT, TradFi, or ALPHA (names as returned by the API).
 - **No fabricated lifetime rebate totals:** When `user_info` does not expose a ready-made cumulative rebate figure, do **not** invent a single "total rebate" number. To state **aggregate USDT and POINT** from history alone, you must **page through the full history** (use the API's offset/limit parameters, e.g. limit 100 per request), repeat until no more rows, then **sum `commissionAmount` grouped by `commissionAsset`**. If the session has **not** completed all pages, state that explicitly and **do not** guess totals.
 - **Official totals:** Direct users to the Gate **App or Web** partner or rebate center for **authoritative** cumulative figures if they need a single official number without full pagination in the session.
 - **Optional follow-up:** If the user asks, you may offer to **continue pagination for rebate only** and report **USDT total and POINT total** from commission history. **Do not** add those rebate totals to SimpleEarn, staking, or other yield sections (no cross-section "total income" mixing).
-
 ### Reference Documents
 
 - `gate-runtime-rules.md` — Exchange runtime rules (precision, price limits), referenced before executing borrow operations
@@ -433,12 +474,12 @@ Note: Unified account specifications (margin ratio calculation, borrowing rules,
 
 | Risk level | Operation type | Involved tools | Confirmation requirement |
 |------------|------------------|----------------|--------------------------|
-| **Medium** | Switch unified account mode / set per-currency leverage / set collateral | `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral` | **Single confirmation** plus a **risk disclosure** in the Action Draft. If the operation includes **mode switch** (`cex_unified_set_unified_mode`), the draft **must** state that **the mode change is irreversible** (or equivalent clear wording). |
-| **High** | Lending — borrow or repay | `cex_unified_create_unified_loan` | **Action Draft** must list **amount**, **currency**, and **estimated or applicable interest rate** (from `cex_unified_get_unified_estimate_rate` — **hourly** estimate — or API response), then **user confirmation** before execution. |
+| **Medium** | Switch unified account mode / set per-currency leverage / set collateral | `gate-cli cex unified mode set`, `gate-cli cex unified config leverage-set`, `gate-cli cex unified config collateral` | **Single confirmation** plus a **risk disclosure** in the Action Draft. If the operation includes **mode switch** (`gate-cli cex unified mode set`), the draft **must** state that **the mode change is irreversible** (or equivalent clear wording). |
+| **High** | Lending — borrow or repay | `gate-cli cex unified loan create` | **Action Draft** must list **amount**, **currency**, and **estimated or applicable interest rate** (from `gate-cli cex unified query estimate-rate` — **hourly** estimate — or API response), then **user confirmation** before execution. |
 
 **Implementation notes**
 
-- **`cex_unified_get_unified_estimate_rate`:** Treat returned rates as **hourly** estimates when quoting to the user or filling Action Drafts (see Domain Knowledge: Unified account estimated borrow rate).
+- **`gate-cli cex unified query estimate-rate`:** Treat returned rates as **hourly** estimates when quoting to the user or filling Action Drafts (see Domain Knowledge: Unified account estimated borrow rate).
 - **Medium vs High**: Medium-risk tools still use an Action Draft; the difference is emphasis — medium-risk settings require a concise risk tip (and irreversibility when switching mode). High-risk lending requires the financial fields (amount, currency, rate) to be explicit in the draft before confirmation.
 - **One tool per confirmation batch** if parameters differ; do not bundle unrelated writes under one generic “OK”.
 
@@ -456,8 +497,8 @@ All write operations require explicit user confirmation before execution. The co
 
 | Risk Level | Operations | Tools | Confirmation |
 |------------|-----------|-------|--------------|
-| Medium | Switch unified mode, set leverage, set collateral | `cex_unified_set_unified_mode`, `cex_unified_set_user_leverage_currency_setting`, `cex_unified_set_unified_collateral` | Action Draft + single confirmation + risk note; **mode switch: irreversibility must be stated** |
-| High | Borrow / Repay | `cex_unified_create_unified_loan` | Action Draft with **amount, currency, interest rate** → user confirmation |
+| Medium | Switch unified mode, set leverage, set collateral | `gate-cli cex unified mode set`, `gate-cli cex unified config leverage-set`, `gate-cli cex unified config collateral` | Action Draft + single confirmation + risk note; **mode switch: irreversibility must be stated** |
+| High | Borrow / Repay | `gate-cli cex unified loan create` | Action Draft with **amount, currency, interest rate** → user confirmation |
 
 ### No-Confirmation Guard
 
@@ -516,7 +557,7 @@ Note: Liquidation prices and margin ratios are reference values. Subject to the 
 
 ### S4 Affiliate Report (if activated)
 {rebate_and_commission_summary}
-Note: If `cex_rebate_user_info` is empty, rely on `cex_rebate_partner_commissions_history` (and other S4 tools). Do not fabricate lifetime USDT/POINT totals unless all history pages were fetched and summed by `commissionAsset`. Point to App/Web partner center for official cumulative figures when appropriate.
+Note: If `gate-cli cex rebate user-info` is empty, rely on `gate-cli cex rebate partner commissions` (and other S4 tools). Do not fabricate lifetime USDT/POINT totals unless all history pages were fetched and summed by `commissionAsset`. Point to App/Web partner center for official cumulative figures when appropriate.
 ```
 
 ### Write Operation Report
@@ -546,7 +587,7 @@ Reply **Y** to confirm or **N** to cancel.
 | Operation | {borrow / repay} |
 | Currency | {e.g. USDT} |
 | Amount | {numeric amount} |
-| Interest rate | {hourly estimated rate from `cex_unified_get_unified_estimate_rate` / API; state **hourly** — not APR unless explicitly converted and labeled reference-only} |
+| Interest rate | {hourly estimated rate from `gate-cli cex unified query estimate-rate` / API; state **hourly** — not APR unless explicitly converted and labeled reference-only} |
 | Risk warning | {e.g. interest accrual, repayment obligation} |
 
 Reply **Y** to confirm or **N** to cancel.

@@ -38,7 +38,7 @@ This skill uses a **routing architecture**: `SKILL.md` routes user intent by key
 
 ### Prerequisites
 
-- Gate MCP configured and connected
+- gate-cli configured and connected
 
 ### Example Prompts
 
@@ -96,7 +96,7 @@ gate-exchange-futures/
 
 ## Security
 
-- Uses Gate MCP tools only
+- Uses gate-cli tools only
 - Open/close/cancel/amend and all price-triggered order operations require user confirmation before execution
 - No credential handling or storage in this skill
 

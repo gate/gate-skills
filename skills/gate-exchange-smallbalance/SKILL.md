@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-smallbalance
-version: "2026.3.20-1"
-updated: "2026-03-20"
-description: Gate Exchange small balance (dust) conversion to GT via wallet APIs. Use this skill whenever the user wants to list eligible dust balances, convert small balances to GT, or view small-balance conversion history. Trigger phrases include "small balance", "dust", "convert to GT", "clean up dust", "convert all small coins", "small balance history", or any request involving consolidating low-value spot holdings into GT.
+description: "Gate Exchange small balance (dust) conversion to GT via wallet APIs. Use this skill whenever the user wants to list eligible dust balances, convert small balances to GT, or view small-balance conversion history. Trigger phrases include \"small balance\", \"dust\", \"convert to GT\", \"clean up dust\", \"convert all small coins\", \"small balance history\", or any request involving consolidating low-value spot holdings into GT."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Small Balance (Dust to GT)
 
@@ -11,6 +63,20 @@ description: Gate Exchange small balance (dust) conversion to GT via wallet APIs
 
 Read and follow the shared runtime rules before proceeding:
 → `exchange-runtime-rules.md` (in parent directory `skills/`)
+
+## Skill Dependencies
+
+### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Wallet read and small-balance convert as required for dust-to-GT flows (least privilege).
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
+
+### Installation Check
+- **Required:** `gate-cli` (install from [gate-cli releases](https://github.com/gate/gate-cli/releases) or via your environment’s Gate MCP / skills installer).
+- Add the directory containing **`gate-cli`** to **`PATH`** when invoking by name.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Before convert operations, confirm the CLI works (e.g. **`gate-cli cex wallet balance small`** or **`gate-cli --version`**).
 
 ---
 
@@ -31,15 +97,15 @@ This Skill covers **small balance conversion**: listing spot holdings that quali
 
 **Account scope**: Primarily **spot** or **unified** account spot balances (per product scope).
 
-**Payload note**: `cex_wallet_list_small_balance` and `cex_wallet_list_small_balance_history` responses may wrap rows in an **outer array** whose first element is the **list of objects** to render; if so, use that inner list. Typical row fields: list — `currency`, `available_balance`, `estimated_as_btc`, `convertible_to_gt`; history — `id`, `create_time`, `currency`, `amount`, `gt_amount` (`create_time` often Unix seconds).
+**Payload note**: `gate-cli cex wallet balance small` and `gate-cli cex wallet balance small-history` responses may wrap rows in an **outer array** whose first element is the **list of objects** to render; if so, use that inner list. Typical row fields: list — `currency`, `available_balance`, `estimated_as_btc`, `convertible_to_gt`; history — `id`, `create_time`, `currency`, `amount`, `gt_amount` (`create_time` often Unix seconds).
 
 **MCP Tool Inventory**:
 
 | Tool | Type | Description |
 |------|------|-------------|
-| `cex_wallet_list_small_balance` | Query | List currencies eligible for small-balance conversion and estimated GT |
-| `cex_wallet_convert_small_balance` | Write | Convert selected currencies or all eligible dust to GT |
-| `cex_wallet_list_small_balance_history` | Query | Paginated history of small-balance conversions |
+| `gate-cli cex wallet balance small` | Query | List currencies eligible for small-balance conversion and estimated GT |
+| `gate-cli cex wallet balance convert-small` | Write | Convert selected currencies or all eligible dust to GT |
+| `gate-cli cex wallet balance small-history` | Query | Paginated history of small-balance conversions |
 
 ## Workflow
 
@@ -76,7 +142,7 @@ Key data to extract:
 1. Intent is `list`
 2. Intent is `convert_selected`, `convert_all`, or `convert_unspecified` (before any conversion)
 
-Call `cex_wallet_list_small_balance` with:
+Call `gate-cli cex wallet balance small` with:
 - No required parameters (empty call is valid)
 
 Key data to extract:
@@ -144,7 +210,7 @@ Before calling the convert API:
 
 #### 3.4: Execute Conversion
 
-After user confirmation, call `cex_wallet_convert_small_balance` with:
+After user confirmation, call `gate-cli cex wallet balance convert-small` with:
 - `currencies` (array of strings): e.g. `["FLOKI","MBLK"]` when converting selected tickers — use with `is_all: false`
 - `is_all` (boolean): `true` to convert all eligible small balances
 
@@ -156,7 +222,7 @@ Key data to extract:
 
 ### Step 4: Query Small Balance History (if intent = history)
 
-Call `cex_wallet_list_small_balance_history` with:
+Call `gate-cli cex wallet balance small-history` with:
 - `currency` (optional, string): filter by converted currency
 - `page` (optional, number): page index
 - `limit` (optional, number): page size (default/max per API, often up to 100)
@@ -177,7 +243,7 @@ Use the **Report Template** section. For any API error, report the real code/mes
 
 | Scenario | Handling |
 |----------|----------|
-| Empty eligible list after `cex_wallet_list_small_balance` | Friendly message: no qualifying small-balance assets |
+| Empty eligible list after `gate-cli cex wallet balance small` | Friendly message: no qualifying small-balance assets |
 | User-specified currency not in eligible list | Inform user which currencies are not eligible; offer to proceed with eligible ones or review full list |
 | `BALANCE_NOT_ENOUGH` or balance-related failure | Explain insufficient balance; do not claim success |
 | `TOO_MANY_REQUESTS` / rate limit | Ask user to retry later; respect 200 requests / 10s class limits for wallet endpoints |
@@ -189,7 +255,7 @@ Use the **Report Template** section. For any API error, report the real code/mes
 ## Safety Rules
 
 - **NEVER fabricate** conversion results, GT amounts, or IDs — only report API truth
-- **ALWAYS confirm** before `cex_wallet_convert_small_balance`: explicit currency list **or** confirmed **convert all**, plus **irreversibility** and **rate** disclaimer (final rate at execution time)
+- **ALWAYS confirm** before `gate-cli cex wallet balance convert-small`: explicit currency list **or** confirmed **convert all**, plus **irreversibility** and **rate** disclaimer (final rate at execution time)
 - **Always query eligible list first** when user wants to convert — never skip to convert without showing what's available
 - **Validate user-specified currencies** against the eligible list and inform user of any discrepancies
 - **Do not convert** coins the user asked to **keep**
@@ -201,12 +267,12 @@ Use the **Report Template** section. For any API error, report the real code/mes
 
 | Condition | Action | Tool |
 |-----------|--------|------|
-| User asks what dust/small balances can convert | List eligible assets | `cex_wallet_list_small_balance` |
-| User wants wallet cleanup / "what can I convert" | List first, then offer convert if they proceed | `cex_wallet_list_small_balance` → interactive Step 3 |
-| User specifies tickers to convert to GT | Query list → Validate currencies → Confirm → Execute | `cex_wallet_list_small_balance` → `cex_wallet_convert_small_balance` |
-| User says convert all dust / all small coins | Query list → Show scope → Confirm → Execute with `is_all: true` | `cex_wallet_list_small_balance` → `cex_wallet_convert_small_balance` |
-| User wants to convert but hasn't specified which | Query list → Ask user to select → Confirm → Execute | `cex_wallet_list_small_balance` → interactive selection → `cex_wallet_convert_small_balance` |
-| User asks for small-balance / dust conversion history | Query history with optional filters | `cex_wallet_list_small_balance_history` |
+| User asks what dust/small balances can convert | List eligible assets | `gate-cli cex wallet balance small` |
+| User wants wallet cleanup / "what can I convert" | List first, then offer convert if they proceed | `gate-cli cex wallet balance small` → interactive Step 3 |
+| User specifies tickers to convert to GT | Query list → Validate currencies → Confirm → Execute | `gate-cli cex wallet balance small` → `gate-cli cex wallet balance convert-small` |
+| User says convert all dust / all small coins | Query list → Show scope → Confirm → Execute with `is_all: true` | `gate-cli cex wallet balance small` → `gate-cli cex wallet balance convert-small` |
+| User wants to convert but hasn't specified which | Query list → Ask user to select → Confirm → Execute | `gate-cli cex wallet balance small` → interactive selection → `gate-cli cex wallet balance convert-small` |
+| User asks for small-balance / dust conversion history | Query history with optional filters | `gate-cli cex wallet balance small-history` |
 | User wants normal spot sell of large position | Exclude; use spot trading Skill | — |
 | User refuses conversion or keeps specific assets | Do not call convert | — |
 | API returns error | Stop; show real error | — |

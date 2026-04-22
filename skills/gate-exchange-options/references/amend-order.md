@@ -1,6 +1,6 @@
 # Gate Options Amend Order — Scenarios & Prompt Examples
 
-Gate options amend-order scenarios and expected behavior. Use MCP `cex_options_amend_options_order` to update open order price or size.
+Gate options amend-order scenarios and expected behavior. Use MCP `gate-cli cex options order amend` to update open order price or size.
 
 ## Scenario 1: Change order price
 
@@ -15,7 +15,7 @@ Gate options amend-order scenarios and expected behavior. Use MCP `cex_options_a
 1. Call `list_options_orders`(status=open, underlying) to find the order matching strike, expiry, call/put (and side if needed).
 2. If multiple match: list them and ask user to choose (e.g. by number or order id).
 3. Confirm: current price → new price. New price must respect `order_price_round` from `get_options_contract`.
-4. Call `cex_options_amend_options_order`(order_id, contract, price=new_price).
+4. Call `gate-cli cex options order amend`(order_id, contract, price=new_price).
 5. Output result.
 
 **Response Template**:
@@ -38,7 +38,7 @@ Amend confirmed! Your open order on {underlying} has been updated: price is now 
 1. Call `list_options_orders`(status=open, underlying) to find the order.
 2. If multiple match: ask user to choose.
 3. Confirm: current size → new size. New size must be integer and ≥ `order_size_min` from `get_options_contract`.
-4. Call `cex_options_amend_options_order`(order_id, contract, size=new_size).
+4. Call `gate-cli cex options order amend`(order_id, contract, size=new_size).
 5. Output result.
 
 **Response Template**:
@@ -52,7 +52,7 @@ Amend confirmed! Your open order on {underlying} has been updated: size is now {
 
 **Context**: User wants to change both price and size of an open order.
 
-**Expected Behavior**: Same as above; confirm both new price and new size; call `cex_options_amend_options_order`(order_id, contract, price=new_price, size=new_size); output "price is now {new price}, size is now {new size}."
+**Expected Behavior**: Same as above; confirm both new price and new size; call `gate-cli cex options order amend`(order_id, contract, price=new_price, size=new_size); output "price is now {new price}, size is now {new size}."
 
 ---
 

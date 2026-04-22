@@ -1,25 +1,61 @@
 ---
 name: gate-exchange-welfare
-version: "2026.4.10-1"
-updated: "2026-04-10"
 description: "Gate Exchange welfare center phase-2 skill with MCP integration. Use this skill whenever the user asks about welfare benefits, newcomer rewards, available newcomer tasks, claiming a task, completing a welfare task, or claiming newcomer rewards. Trigger phrases include \"welfare center\", \"new user tasks\", \"claim task\", \"claim download task\", \"complete KYC task\", \"complete first deposit task\", \"complete first trade task\", \"claim reward\", and \"claim all rewards\". Use only real MCP data and current business codes; never fabricate task or reward details."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Welfare:Read
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Welfare Center
 
@@ -28,48 +64,43 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations**
 
-- `cex_welfare_get_user_identity`
-- `cex_welfare_get_beginner_task_list`
+- `gate-cli cex welfare identity`
+- `gate-cli cex welfare beginner-tasks`
 
 **Execution Operations**
 
-- `cex_welfare_claim_task`
-- `cex_welfare_claim_reward`
+- `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
+- `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Welfare query and claim access in the current Gate MCP deployment
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Welfare query and claim access in the current Gate MCP deployment
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's welfare workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's welfare workflow.
 
 - `SKILL.md` keeps routing, business intent mapping, and safety rules.
-- `references/mcp.md` is the authoritative MCP execution layer for identity gating, task lookup, task claim, reward claim, and degraded handling.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for identity gating, task lookup, task claim, reward claim, and degraded handling.
 
 ## Overview
 
@@ -92,7 +123,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **`code=1008`**: Not logged in
 
 ### Beginner task list semantics
-- The newcomer list is fetched from `cex_welfare_get_beginner_task_list`.
+- The newcomer list is fetched from `gate-cli cex welfare beginner-tasks`.
 - Registration tasks are returned before guidance tasks.
 - When the user has not yet received a download task and the system determines the app is not downloaded, the list may include a **download task** with **`task_type=23`** and **`status=0`**.
 - `task_desc` may contain simple HTML such as `<span>`; present the text content only, not raw tags.
@@ -101,19 +132,19 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **`task_type=10`**: Registration task
 - **`task_type=23`**: Download task
 - Guidance tasks may surface task-scene codes such as:
-  - **`1`**: KYC / identity verification
-  - **`2`**: Spot trading
-  - **`3`**: Futures trading
-  - **`8`**: First deposit
+ - **`1`**: KYC / identity verification
+ - **`2`**: Spot trading
+ - **`3`**: Futures trading
+ - **`8`**: First deposit
 - Some live payloads may use other supported task-scene values. Follow the real MCP payload instead of hardcoding assumptions beyond the documented mappings above.
 
 ### Status mapping
 
 | Status | Meaning | Handling |
 |--------|---------|----------|
-| `0` | Unclaimed / task can be claimed | Candidate for `cex_welfare_claim_task` |
+| `0` | Unclaimed / task can be claimed | Candidate for `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
 | `1` | Claimed / in progress | User should complete the task action |
-| `2` | Completed, reward claimable | Candidate for `cex_welfare_claim_reward` |
+| `2` | Completed, reward claimable | Candidate for `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
 | `3` | Reward distributing | Inform user reward is being processed |
 | `4` | Completed / settled | Inform user task is already finished |
 | `5` | Expired | Inform user task has expired |
@@ -143,7 +174,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Step 1: Determine user identity
 
-Call `cex_welfare_get_user_identity` first for every welfare intent.
+Call `gate-cli cex welfare identity` first for every welfare intent.
 
 Branch by `code`:
 - **`0`** → newcomer flow
@@ -156,39 +187,39 @@ Branch by `code`:
 **Trigger**: The user asks what newcomer welfare/tasks/rewards are available.
 
 Required flow:
-1. Call `cex_welfare_get_user_identity`.
-2. If `code=0`, call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity`.
+2. If `code=0`, call `gate-cli cex welfare beginner-tasks`.
 3. If list result is `code=1007` or the task list is empty, return the no-task fallback.
 4. Render every real task using:
-   - `task_name`
-   - `task_desc` with HTML tags removed
-   - `reward_num`
-   - `reward_unit`
-   - `status`
+ - `task_name`
+ - `task_desc` with HTML tags removed
+ - `reward_num`
+ - `reward_unit`
+ - `status`
 5. Map each task's next step from `status`:
-   - `0`: can be claimed
-   - `1`: complete the task action
-   - `2`: reward can be claimed
-   - `3`: reward is distributing
-   - `4`: already completed
-   - `5`: expired
+ - `0`: can be claimed
+ - `1`: complete the task action
+ - `2`: reward can be claimed
+ - `3`: reward is distributing
+ - `4`: already completed
+ - `5`: expired
 
 ### Case 1: Claim a single task
 
 **Trigger**: The user asks to claim a task, usually a download task.
 
 Required flow:
-1. Call `cex_welfare_get_user_identity`.
-2. Call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity`.
+2. Call `gate-cli cex welfare beginner-tasks`.
 3. Find claimable tasks with `status=0`.
 4. Resolve the target task:
-   - If the user names a task, match by `task_name`.
-   - If exactly one claimable task exists, use it.
-   - If multiple claimable tasks exist and intent is ambiguous, ask which task to claim.
-5. Call `cex_welfare_claim_task` with the selected `welfare_task_id`.
+ - If the user names a task, match by `task_name`.
+ - If exactly one claimable task exists, use it.
+ - If multiple claimable tasks exist and intent is ambiguous, ask which task to claim.
+5. Call `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with the selected `welfare_task_id`.
 6. On success, confirm the claimed task name and remind the user to complete it before claiming the reward.
 
-Do not call `cex_welfare_claim_task` for tasks whose status is not `0`.
+Do not call `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) for tasks whose status is not `0`.
 
 ### Case 2: Complete identity verification task
 
@@ -229,30 +260,30 @@ Required behavior:
 **Trigger**: The user only says "complete task" or equivalent.
 
 Required flow:
-1. Call `cex_welfare_get_user_identity`.
-2. Call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity`.
+2. Call `gate-cli cex welfare beginner-tasks`.
 3. Build an actionable task set from statuses `0` and `1`.
 4. If multiple actionable tasks exist, ask the user which task they want to complete.
 5. If exactly one actionable task exists:
-   - `status=0` → use **Case 1**
-   - task wording or `task_type` indicates KYC → use **Case 2**
-   - task wording or `task_type` indicates first deposit → use **Case 3**
-   - task wording or `task_type` indicates trading → use **Case 4**
-   - otherwise, provide general completion guidance and rewards-hub fallback
+ - `status=0` → use **Case 1**
+ - task wording or `task_type` indicates KYC → use **Case 2**
+ - task wording or `task_type` indicates first deposit → use **Case 3**
+ - task wording or `task_type` indicates trading → use **Case 4**
+ - otherwise, provide general completion guidance and rewards-hub fallback
 
 ### Case 6: Claim reward(s)
 
 **Trigger**: The user asks to claim reward / claim all rewards.
 
 Required flow:
-1. Call `cex_welfare_get_user_identity`.
-2. Call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity`.
+2. Call `gate-cli cex welfare beginner-tasks`.
 3. Filter tasks with `status=2`.
 4. If none exist, tell the user there are no currently claimable newcomer rewards.
-5. For general "claim reward" intent, iterate through all status=`2` tasks and call `cex_welfare_claim_reward` one by one.
+5. For general "claim reward" intent, iterate through all status=`2` tasks and call `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) one by one.
 6. For each successful claim:
-   - Prefer `coupon_full_name` from the claim response.
-   - If `coupon_full_name` is empty, fall back to the task's `reward_num` + `reward_unit`.
+ - Prefer `coupon_full_name` from the claim response.
+ - If `coupon_full_name` is empty, fall back to the task's `reward_num` + `reward_unit`.
 7. If a task returns `has_m_n_task=true`, **do not** complete reward distribution for that task. Instead guide the user to Gate web/App rewards hub for manual claiming.
 
 ---
@@ -271,10 +302,10 @@ Please visit Gate web at https://www.gate.com/zh/rewards_hub or open the Gate Ap
 Your newcomer welfare tasks:
 
 - {task_name}
-  Description: {task_desc_without_html}
-  Reward: {reward_num} {reward_unit}
-  Status: {mapped_status}
-  Next step: {claim task / complete task / claim reward / distributing / completed / expired}
+ Description: {task_desc_without_html}
+ Reward: {reward_num} {reward_unit}
+ Status: {mapped_status}
+ Next step: {claim task / complete task / claim reward / distributing / completed / expired}
 ```
 
 ### Task claim success
@@ -336,13 +367,13 @@ This reward must be claimed from Gate web at https://www.gate.com/zh/rewards_hub
 
 ## Safety Rules
 
-1. **Identity gate first**: Always call `cex_welfare_get_user_identity` before showing newcomer task details, claiming a task, or claiming a reward.
+1. **Identity gate first**: Always call `gate-cli cex welfare identity` before showing newcomer task details, claiming a task, or claiming a reward.
 2. **Allowed tools only**: Use only the four MCP tools documented in this skill.
 3. **Business code is authoritative**: Success/failure is determined by response `code`, not by HTTP `200` alone.
 4. **Real data only**: Never fabricate task names, descriptions, reward numbers, reward units, or reward titles.
 5. **Clean task descriptions**: Remove raw HTML tags from `task_desc` before presenting the text to the user.
-6. **Claim-task precondition**: Only call `cex_welfare_claim_task` for a task selected from the current task list with `status=0`.
-7. **Claim-reward precondition**: Only call `cex_welfare_claim_reward` for tasks currently shown as `status=2`.
+6. **Claim-task precondition**: Only call `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) for a task selected from the current task list with `status=0`.
+7. **Claim-reward precondition**: Only call `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) for tasks currently shown as `status=2`.
 8. **M-select-N handling**: If `has_m_n_task=true`, do not report the reward as claimed. Redirect the user to the official rewards hub/App.
 9. **No unrelated trading writes here**: Deposit execution and trading execution are outside this skill. Route them to the proper product skills.
 10. **Fallback safely**: If the MCP data is unavailable or inconsistent, guide the user to `https://www.gate.com/zh/rewards_hub` instead of guessing.

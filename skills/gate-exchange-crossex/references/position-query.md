@@ -6,7 +6,7 @@ Gate CrossEx position query scenarios, including current positions and history r
 
 ### Step 1: Resolve the requested position scope
 
-Call `cex_crx_get_crx_account` with:
+Call `gate-cli cex cross-ex account get` with:
 
 - no required parameters for the default account overview
 
@@ -18,7 +18,7 @@ Key data to extract:
 
 ### Step 2: Query futures positions when the request includes futures scope
 
-Call `cex_crx_list_crx_positions` with:
+Call `gate-cli cex cross-ex position list` with:
 
 - `symbol`: optional symbol filter
 - `exchange_type`: optional exchange filter
@@ -32,7 +32,7 @@ Key data to extract:
 
 ### Step 3: Query margin positions when the request includes margin scope
 
-Call `cex_crx_list_crx_margin_positions` with:
+Call `gate-cli cex cross-ex position margin-list` with:
 
 - `symbol`: optional symbol filter
 - `exchange_type`: optional exchange filter
@@ -46,7 +46,7 @@ Key data to extract:
 
 ### Step 4: Query historical position records when the user asks for history
 
-Call `cex_crx_list_crx_history_positions` with:
+Call `gate-cli cex cross-ex position history` with:
 
 - `symbol` when filtering by pair
 - `from`
@@ -103,13 +103,13 @@ Position Query Summary
 
 ### Data Sources
 
-- **Futures Positions**: Call `cex_crx_list_crx_positions` → Futures position list
-- **Margin Positions**: Call `cex_crx_list_crx_margin_positions` → Margin position list
-- **Account Assets**: Call `cex_crx_get_crx_account` → Asset overview
-- **Position History**: Call `cex_crx_list_crx_history_positions` → Historical position records
-- **Trade History**: Call `cex_crx_list_crx_history_trades` → Historical trade records
-- **Margin Interest**: Call `cex_crx_list_crx_history_margin_interests` → Interest history
-- **Account Ledger**: Call `cex_crx_list_crx_account_book` → Account ledger records
+- **Futures Positions**: Call `gate-cli cex cross-ex position list` → Futures position list
+- **Margin Positions**: Call `gate-cli cex cross-ex position margin-list` → Margin position list
+- **Account Assets**: Call `gate-cli cex cross-ex account get` → Asset overview
+- **Position History**: Call `gate-cli cex cross-ex position history` → Historical position records
+- **Trade History**: Call `gate-cli cex cross-ex order trades` → Historical trade records
+- **Margin Interest**: Call `gate-cli cex cross-ex position margin-interests` → Interest history
+- **Account Ledger**: Call `gate-cli cex cross-ex account book` → Account ledger records
 
 ### Query Response Fields
 
@@ -178,8 +178,8 @@ Position Query Summary
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_positions` to query futures positions
-2. Call `cex_crx_list_crx_margin_positions` to query margin positions
+1. Call `gate-cli cex cross-ex position list` to query futures positions
+2. Call `gate-cli cex cross-ex position margin-list` to query margin positions
 3. Display all positions uniformly
 
 **Report Template**:
@@ -219,7 +219,7 @@ Total Unrealized PnL: +160 USDT
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_positions` to query futures positions
+1. Call `gate-cli cex cross-ex position list` to query futures positions
 2. Filter and display contracts with positions
 
 **Report Template**:
@@ -250,7 +250,7 @@ Total Unrealized PnL: +150 USDT
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_margin_positions` to query margin positions
+1. Call `gate-cli cex cross-ex position margin-list` to query margin positions
 2. Filter and display pairs with positions
 
 **Report Template**:
@@ -281,7 +281,7 @@ Total Unrealized PnL: -10 USDT
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_positions` to query position history
+1. Call `gate-cli cex cross-ex position history` to query position history
 2. Parameters: `limit`, `page`, `from`, `to`
 3. Display recent position records
 

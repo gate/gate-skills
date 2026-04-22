@@ -117,21 +117,21 @@ Known fallback rules:
 
 ### 3.0.1 Spot microstructure tools
 
-- `cex_spot_get_spot_order_book`
-- `cex_spot_get_spot_candlesticks`
-- `cex_spot_get_spot_tickers`
-- `cex_spot_get_spot_trades`
+- `gate-cli cex spot market orderbook`
+- `gate-cli cex spot market candlesticks`
+- `gate-cli cex spot market tickers`
+- `gate-cli cex spot market trades`
 
 ### 3.0.2 Futures microstructure tools
 
-- `cex_fx_get_fx_contract`
-- `cex_fx_get_fx_order_book`
-- `cex_fx_get_fx_candlesticks`
-- `cex_fx_get_fx_tickers`
-- `cex_fx_get_fx_trades`
-- `cex_fx_get_fx_funding_rate`
-- `cex_fx_list_fx_liq_orders`
-- `cex_fx_get_fx_premium_index`
+- `gate-cli cex futures market contract`
+- `gate-cli cex futures market orderbook`
+- `gate-cli cex futures market candlesticks`
+- `gate-cli cex futures market tickers`
+- `gate-cli cex futures market trades`
+- `gate-cli cex futures market funding-rate`
+- `gate-cli cex futures market liquidations`
+- `gate-cli cex futures market premium`
 
 ### 3.1 Base mode (default)
 
@@ -176,15 +176,15 @@ Add:
 Recommended patterns:
 
 - spot liquidity / slippage
-  - `cex_spot_get_spot_order_book` -> `cex_spot_get_spot_tickers`
+  - `gate-cli cex spot market orderbook` -> `gate-cli cex spot market tickers`
 - spot momentum
-  - `cex_spot_get_spot_trades` -> `cex_spot_get_spot_tickers` -> `cex_spot_get_spot_candlesticks`
+  - `gate-cli cex spot market trades` -> `gate-cli cex spot market tickers` -> `gate-cli cex spot market candlesticks`
 - futures momentum
-  - `cex_fx_get_fx_trades` -> `cex_fx_get_fx_tickers` -> `cex_fx_get_fx_candlesticks` -> `cex_fx_get_fx_funding_rate`
+  - `gate-cli cex futures market trades` -> `gate-cli cex futures market tickers` -> `gate-cli cex futures market candlesticks` -> `gate-cli cex futures market funding-rate`
 - futures liquidation
-  - `cex_fx_list_fx_liq_orders` -> `cex_fx_get_fx_candlesticks` -> `cex_fx_get_fx_tickers`
+  - `gate-cli cex futures market liquidations` -> `gate-cli cex futures market candlesticks` -> `gate-cli cex futures market tickers`
 - futures basis / funding
-  - `cex_fx_get_fx_tickers` -> `cex_fx_get_fx_funding_rate` -> `cex_fx_get_fx_premium_index`
+  - `gate-cli cex futures market tickers` -> `gate-cli cex futures market funding-rate` -> `gate-cli cex futures market premium`
 
 Preferred sub-scenarios:
 

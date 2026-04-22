@@ -6,7 +6,7 @@ Static product rules and compliance-facing replies. **Often no MCP write** is re
 
 1. **Classify the question**: Investment currency limits, funding source / Simple Earn, post-stop holdings, region restriction, generic compliance, or create-plan compliance failure.
 2. **Answer from policy**: Use the sections below; do not invent product rules. Do not call write tools unless the user also requests a plan lifecycle action (then route to `autoinvest-plans.md`).
-3. **Optional read-only context**: If the user asks where funds are debited from, optionally use `cex_spot_get_spot_accounts` or `cex_earn_list_user_uni_lends` for balance context only, per **Funding source** section.
+3. **Optional read-only context**: If the user asks where funds are debited from, optionally use `gate-cli cex spot account get` or `gate-cli cex earn uni lends` for balance context only, per **Funding source** section.
 4. **API-aligned wording**: For compliance failures, prefer MCP/API messages; use **Report Template** samples when they match the situation.
 
 ## Report Template
@@ -45,7 +45,7 @@ Only USDT or BTC are supported as the investment currency (the amount debited ea
 **Expected Behavior**:
 1. Default: **spot** for debits unless the plan explicitly uses Simple Earn / Uni participation.
 2. If user enabled Simple Earn linkage, state that when visible from **plan detail** or product copy.
-3. Optionally cite `cex_spot_get_spot_accounts` vs `cex_earn_list_user_uni_lends` for **balance context** only—not as legal guarantee.
+3. Optionally cite `gate-cli cex spot account get` vs `gate-cli cex earn uni lends` for **balance context** only—not as legal guarantee.
 
 ---
 

@@ -11,7 +11,7 @@
 
 **Expected Behavior**:
 1. Classify goal as list-only or precursor to a later preview
-2. Call `cex_assetswap_list_asset_swap_assets` per MCP parameter documentation
+2. Call `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) per MCP parameter documentation
 3. Summarize count and key fields returned by the API (symbols, available balances, valuation if present)
 4. Offer next steps: load config, evaluate, or preview once the user selects assets and strategy
 
@@ -25,7 +25,7 @@
 - "What targets can I pick for conservative vs market-cap strategy?"
 
 **Expected Behavior**:
-1. Call `cex_assetswap_get_asset_swap_config`
+1. Call `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 2. Present allowed strategies and parameters using API field names and values
 3. Guide the user to choose parameters compatible with the next preview call
 
@@ -39,7 +39,7 @@
 
 **Expected Behavior**:
 1. Ensure Case 1 and Case 2 data are sufficient to build the evaluate payload
-2. Call `cex_assetswap_evaluate_asset_swap` with API-compliant body
+2. Call `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with API-compliant body
 3. Present evaluation output and caveats (estimates, not final execution)
 4. Offer to proceed to preview (Case 3b) when the user is ready
 
@@ -54,7 +54,7 @@
 
 **Expected Behavior**:
 1. Complete Case 1 and Case 2 as needed
-2. Call `cex_assetswap_preview_asset_swap_order_v1` with a valid payload
+2. Call `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with a valid payload
 3. Show preview results clearly and ask for explicit confirmation before any create call
 4. If preview indicates expiry or validation failure, explain and retry preview after user adjusts inputs
 
@@ -69,7 +69,7 @@
 
 **Expected Behavior**:
 1. Verify preview succeeded and user confirmation is explicit
-2. Call `cex_assetswap_create_asset_swap_order_v1` with required fields including any preview-bound tokens from the preview response
+2. Call `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with required fields including any preview-bound tokens from the preview response
 3. Return order id and status from the API
 4. Suggest querying order detail if the user wants child-order progress
 
@@ -83,7 +83,7 @@
 - "Do I have any pending portfolio optimization orders?"
 
 **Expected Behavior**:
-1. Call `cex_assetswap_list_asset_swap_orders_v1` with pagination parameters per API
+1. Call `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with pagination parameters per API
 2. Present a concise table: order id, status, time, summary fields returned by API
 3. Offer detail lookup for a specific id
 
@@ -98,7 +98,7 @@
 
 **Expected Behavior**:
 1. Extract order id from the user or from a prior list result
-2. Call `cex_assetswap_get_asset_swap_order_v1`
+2. Call `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 3. Present aggregate status and relevant child-order information from the response
 4. If not found, state clearly and suggest checking the id or list endpoint
 
@@ -125,7 +125,7 @@
 - "Optimize my spot bag toward ETH with the faith-style strategy"
 
 **Expected Behavior**:
-1. Map user language to strategy parameters from `cex_assetswap_get_asset_swap_config`
+1. Map user language to strategy parameters from `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 2. Follow Case 1 → 2 → 3b → 4 with explicit preview confirmation
 3. Avoid promising VIP or volume outcomes
 

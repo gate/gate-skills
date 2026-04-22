@@ -1,26 +1,61 @@
 ---
 name: gate-exchange-unified
-version: "2026.4.3-1"
-updated: "2026-04-03"
 description: "Gate unified account operations skill. Use when the user asks about unified account equity, margin borrowing, or leverage modes. Triggers on 'unified account', 'borrow limit', 'repay loan', 'switch margin mode'."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Unified:Read
-  - Unified:Write
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Unified Account Assistant
 
@@ -29,37 +64,31 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
+## Skill Dependencies
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Unified:Read, Unified:Write
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Unified:Read, Unified:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's unified-account routing.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's unified-account routing.
 
 - `SKILL.md` keeps scenario routing and confirmation policy.
-- `references/mcp.md` is the authoritative MCP execution layer for limits checks, mutation drafts, and post-state verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for limits checks, mutation drafts, and post-state verification.
 
 ## Domain Knowledge
 
@@ -88,14 +117,14 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Do not trim, shorten, or normalize decimal strings**. If API returns trailing zeros or long decimals, display the exact raw value string as returned.
 - When API returns timestamps, show both raw timestamp and human-readable time (local timezone).
 - For account-overview replies, always include account-level IMR/MMR using API fields:
-  - IMR: `totalInitialMarginRate`
-  - MMR: `totalMaintenanceMarginRate`
+ - IMR: `totalInitialMarginRate`
+ - MMR: `totalMaintenanceMarginRate`
 - When per-currency risk fields are present in `balances`, include `imr` and `mmr` for each reported currency (preserve original API numeric strings).
 - Unified mode display labels must use this mapping:
-  - `classic` -> `经典现货模式`
-  - `single_currency` -> `单币种保证金模式`
-  - `multi_currency` -> `跨币种保证金模式`
-  - `portfolio` -> `组合保证金模式`
+ - `classic` -> `经典现货模式`
+ - `single_currency` -> `单币种保证金模式`
+ - `multi_currency` -> `跨币种保证金模式`
+ - `portfolio` -> `组合保证金模式`
 - If unified account is not enabled/opened, place this warning at the top of the response: `⚠️ 当前账户未开通统一账户功能。`
 
 ### Risk-Sensitive Action Rules

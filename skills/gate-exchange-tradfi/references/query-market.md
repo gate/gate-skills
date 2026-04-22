@@ -13,10 +13,10 @@ Read-only: query category list, symbol list, ticker, and symbol kline. All tools
 
 ### Step 2: Call tools
 
-- **Category list**: Call `cex_tradfi_query_categories` with only MCP-documented parameters. Extract: category id, name, or fields as returned.
-- **Symbol list**: Call `cex_tradfi_query_symbols` with only MCP-documented parameters (e.g. category only if the MCP defines it). Extract: symbol and other fields as returned.
-- **Ticker(s)**: Call `cex_tradfi_query_symbol_ticker` with only MCP-documented parameters (e.g. symbol(s) if defined). Extract: last, 24h change, volume, etc.
-- **Symbol kline**: Call `cex_tradfi_query_symbol_kline` with only MCP-documented parameters (e.g. symbol, interval, limit only if defined). Extract: timestamp, open, high, low, close, volume.
+- **Category list**: Call `gate-cli cex tradfi market categories` with only MCP-documented parameters. Extract: category id, name, or fields as returned.
+- **Symbol list**: Call `gate-cli cex tradfi market symbols` with only MCP-documented parameters (e.g. category only if the MCP defines it). Extract: symbol and other fields as returned.
+- **Ticker(s)**: Call `gate-cli cex tradfi market ticker` with only MCP-documented parameters (e.g. symbol(s) if defined). Extract: last, 24h change, volume, etc.
+- **Symbol kline**: Call `gate-cli cex tradfi market kline` with only MCP-documented parameters (e.g. symbol, interval, limit only if defined). Extract: timestamp, open, high, low, close, volume.
 
 ### Step 3: Format response
 
@@ -64,7 +64,7 @@ Use the Report Template below. If no data, report "No categories" / "No symbols"
 - "List TradFi categories"
 
 **Expected Behavior**:
-1. Call `cex_tradfi_query_categories`.
+1. Call `gate-cli cex tradfi market categories`.
 2. Format as category table (id, name, or as returned).
 3. If empty, reply "No categories returned."
 
@@ -81,7 +81,7 @@ Use the Report Template below. If no data, report "No categories" / "No symbols"
 - "What symbols can I trade"
 
 **Expected Behavior**:
-1. Call `cex_tradfi_query_symbols` with only the parameters documented in the MCP (e.g. category only if the MCP defines that parameter).
+1. Call `gate-cli cex tradfi market symbols` with only the parameters documented in the MCP (e.g. category only if the MCP defines that parameter).
 2. Format as symbol table (symbol, category, status).
 3. If empty, reply "No symbols returned."
 
@@ -98,7 +98,7 @@ Use the Report Template below. If no data, report "No categories" / "No symbols"
 
 **Expected Behavior**:
 1. Extract symbol(s) from user message; if unclear, ask which symbol(s).
-2. Call `cex_tradfi_query_symbol_ticker` with the symbol(s).
+2. Call `gate-cli cex tradfi market ticker` with the symbol(s).
 3. Format as ticker table.
 4. If symbol not found, reply "Symbol not found" and suggest listing symbols.
 
@@ -114,6 +114,6 @@ Use the Report Template below. If no data, report "No categories" / "No symbols"
 - "Last 30 days 1d kline for XAUUSD"
 
 **Expected Behavior**:
-1. Call `cex_tradfi_query_symbol_kline` with only the parameters documented in the MCP (e.g. symbol, interval, limit only if defined).
+1. Call `gate-cli cex tradfi market kline` with only the parameters documented in the MCP (e.g. symbol, interval, limit only if defined).
 3. Show kline summary and optionally last N candles in a table.
 4. If no data, reply "No kline data for this symbol/interval."

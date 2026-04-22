@@ -9,7 +9,7 @@
   - `fee` → `gas_fee` + `transaction_fee` (two separate fee fields)
   - `fail_reason` → `failed_reason` (correct spelling)
   - Removed `finish_time` (field does not exist in API response)
-- Reverted tool name back to `cex_alpha_list_alpha_orders` (plural) based on actual MCP tool file verification (Lark doc was incorrect)
+- Reverted tool name back to `gate-cli cex alpha order list` (plural) based on actual `gate-cli` command file verification (Lark doc was incorrect)
 - Clarified `gas_mode="speed"` as default in quote workflow for both buy and sell operations
 
 ### Added
@@ -32,7 +32,7 @@
   - `market-viewing.md`: `marketCap` → `market_cap`
   - `token-discovery.md`: `amountPrecision` → `amount_precision`
   - `account-holdings.md`: `tokenAddress` → `token_address`
-- Corrected tool name: `cex_alpha_list_alpha_orders` → `cex_alpha_list_alpha_order` (per Lark doc binding)
+- Corrected tool name: `gate-cli cex alpha order list` → `gate-cli cex alpha order list` (per Lark doc binding)
 - Rewrote `SKILL.md` API Field Naming Conventions section with complete field list per endpoint
 
 ## [2026.3.17-2] - 2026-03-17
@@ -59,7 +59,7 @@
 
 ### Changed
 
-- Updated `SKILL.md`: expanded from 3 modules to 7 modules, added 5 new MCP tools (quote, place_order, get_order, list_orders, account_book), added trading domain knowledge, expanded error handling and safety rules.
+- Updated `SKILL.md`: expanded from 3 modules to 7 modules, added 5 new `gate-cli` commands (quote, place_order, get_order, list_orders, account_book), added trading domain knowledge, expanded error handling and safety rules.
 - Updated `README.md` with new architecture, tools, and usage examples.
 
 ## [2026.3.13-1] - 2026-03-13
@@ -67,7 +67,7 @@
 ### Added
 
 - Initialized `gate-exchange-alpha` skill with routing architecture.
-- Added `SKILL.md` with routing rules, MCP tool mapping, domain knowledge, and error handling.
+- Added `SKILL.md` with routing rules, `gate-cli` command mapping, domain knowledge, and error handling.
 - Added `references/token-discovery.md` covering 5 scenarios (Cases 1-5): browse currencies, filter by chain, filter by launch platform, look up by contract address, view token details.
 - Added `references/market-viewing.md` covering 2 scenarios (Cases 6-7): view all market tickers, view specific token price.
 - Added `references/account-holdings.md` covering 2 scenarios (Cases 14-15): view holdings, calculate portfolio market value.

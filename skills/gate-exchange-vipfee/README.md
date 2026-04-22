@@ -2,14 +2,14 @@
 
 ## Overview
 
-`gate-exchange-vipfee` is a read-only query Skill that helps users quickly check their Gate VIP tier and trading fee rates (spot and futures). It leverages Gate MCP tools to retrieve account profile and fee rate data, presenting results in a clean, structured format.
+`gate-exchange-vipfee` is a read-only query Skill that helps users quickly check their Gate VIP tier and trading fee rates (spot and futures). It leverages gate-cli tools to retrieve account profile and fee rate data, presenting results in a clean, structured format.
 
 ### Core Capabilities
 
-| Capability | Description | MCP Tool |
+| Capability | Description | `gate-cli` command |
 |------------|-------------|----------|
-| VIP Tier Query | Query the user's current VIP level | `cex_account_get_account_detail` |
-| Trading Fee Query | Query spot and futures maker/taker fee rates | `cex_wallet_get_wallet_fee` |
+| VIP Tier Query | Query the user's current VIP level | `gate-cli cex account detail` |
+| Trading Fee Query | Query spot and futures maker/taker fee rates | `gate-cli cex wallet market trade-fee` |
 | Combined Query | Return both VIP tier and fee rates in one response | Both tools |
 
 ## Architecture
@@ -32,9 +32,9 @@ User Request
     ↓
 Step 1: Identify query type (VIP / Fee / Combined)
     ↓
-Step 2: Query VIP tier via cex_account_get_account_detail (if needed)
+Step 2: Query VIP tier via `gate-cli cex account detail`
     ↓
-Step 3: Query fee rates via cex_wallet_get_wallet_fee (if needed)
+Step 3: Query fee rates via `gate-cli cex wallet market trade-fee`
     ↓
 Step 4: Format and return result
 ```
@@ -48,16 +48,16 @@ Trigger this Skill with prompts such as:
 - "Show me the spot and futures fees"
 - "What is my VIP level and fee rate?"
 
-## MCP Tools
+## gate-cli command index
 
 | Tool | Purpose | Auth Required |
 |------|---------|---------------|
-| `cex_account_get_account_detail` | Get account profile including VIP tier | Yes |
-| `cex_wallet_get_wallet_fee` | Get spot and futures trading fee rates | Yes |
+| `gate-cli cex account detail` | Get account profile including VIP tier | Yes |
+| `gate-cli cex wallet market trade-fee` | Get spot and futures trading fee rates | Yes |
 
 ## Authentication
 
-This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+This skill does **not** read secrets from chat. Configure **`gate-cli`** on the agent host with **`gate-cli config init`** or **`GATE_API_KEY`** / **`GATE_API_SECRET`**, with account/fee read permissions. See [gate-cli](https://github.com/gate/gate-cli) and run `sh ./setup.sh` from this skill directory for installation.
 
 ## Source
 

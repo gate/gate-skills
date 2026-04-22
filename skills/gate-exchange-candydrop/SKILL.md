@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-candydrop
-version: "2026.4.14-1"
-updated: "2026-04-14"
 description: "Gate CandyDrop activity operations guide. Use this skill whenever users want to browse CandyDrop activities, view activity rules, register for activities, check task completion progress, or query participation and airdrop records. Trigger phrases include: candydrop, candydrop activities, activity list, register for candydrop, task progress, participation records, airdrop records."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange CandyDrop
 
@@ -14,21 +66,12 @@ description: "Gate CandyDrop activity operations guide. Use this skill whenever 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required (public endpoints) |
-| Gate (trading) | ✅ Required (authenticated endpoints) |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only, Public)**
 
@@ -47,25 +90,24 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ### Authentication
 
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Launch:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Launch:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
 
-- Required: Gate (main), Gate (trading)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** Gate (main), Gate (trading); **`gate-cli`** when using CLI-backed flows (install via [`setup.sh`](./setup.sh) from this skill when applicable).
+- **Install (MCP / IDE):** Run installer skill for your environment — Cursor: `gate-mcp-cursor-installer`; Codex: `gate-mcp-codex-installer`; Claude: `gate-mcp-claude-installer`; OpenClaw: `gate-mcp-openclaw-installer`.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Before authenticated or mutating calls, confirm the runtime works (e.g. **`gate-cli --version`** or a read-only check appropriate to this skill); resolve credentials before registration or write operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's CandyDrop workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's CandyDrop workflow.
 
 - `SKILL.md` keeps routing and product semantics.
-- `references/mcp.md` is the authoritative MCP execution layer for activity/rule queries, registration confirmation gates, progress/record queries, and result verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for activity/rule queries, registration confirmation gates, progress/record queries, and result verification.
 
 ## Module overview
 
@@ -142,14 +184,14 @@ Activity query interfaces support locating an activity by **either** `activity_i
 
 | Module | MCP tool | Required params | Optional params |
 |--------|----------|-----------------|-----------------|
-| Activity List | `cex_launch_get_candy_drop_activity_list_v4` | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
-| Activity Rules | `cex_launch_get_candy_drop_activity_rules_v4` | `currency` **or** `activity_id` (at least one) | — |
-| Register | `cex_launch_register_candy_drop_v4` | `currency` | `activity_id` |
-| Task Progress | `cex_launch_get_candy_drop_task_progress_v4` | `currency` **or** `activity_id` (at least one) | — |
-| Participation Records | `cex_launch_get_candy_drop_participation_records_v4` | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
-| Airdrop Records | `cex_launch_get_candy_drop_airdrop_records_v4` | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
+| Activity List | `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
+| Activity Rules | `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` **or** `activity_id` (at least one) | — |
+| Register | `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` | `activity_id` |
+| Task Progress | `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` **or** `activity_id` (at least one) | — |
+| Participation Records | `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
+| Airdrop Records | `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
 
-- **Register**: Show registration preview, wait for confirmation, then call `cex_launch_register_candy_drop_v4`.
+- **Register**: Show registration preview, wait for confirmation, then call `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 - **Records**: Follow the **Timestamp strategy** in `references/records.md` for time parameter computation.
 
 ### 3. Format response
@@ -209,7 +251,7 @@ The API returns structured errors with a `label` field. Map them as follows:
 
 ### Confirmation required
 
-- **Register is a write operation.** Before calling `cex_launch_register_candy_drop_v4`, MUST show a registration preview and wait for explicit user confirmation.
+- **Register is a write operation.** Before calling `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), MUST show a registration preview and wait for explicit user confirmation.
 - Preview format: activity currency, activity ID (if known).
 - Ask user to reply "confirm" to proceed or "cancel" to abort.
 - Only call the API after receiving explicit confirmation.

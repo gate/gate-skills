@@ -6,13 +6,13 @@ A comprehensive skill for querying and executing staking operations on Gate's on
 
 ### Core Capabilities
 
-| Capability | Description | MCP Tools |
+| Capability | Description | `gate-cli` commands |
 |------------|-------------|-----------|
-| Query staking positions | View positions, available vs locked amounts, redeemable amounts | `cex_earn_asset_list`, `cex_earn_find_coin` |
-| Check staking rewards | Daily/cumulative rewards, earnings history | `cex_earn_award_list` |
-| Browse staking products | Discover products, compare APY, filter by coin | `cex_earn_find_coin` |
-| View transaction history | Staking/redemption history, filters, order status | `cex_earn_order_list` |
-| Stake / Redeem / Mint | Execute stake or redeem via swap (pid required); mint treated as immediate stake | `cex_earn_swap_staking_coin` |
+| Query staking positions | View positions, available vs locked amounts, redeemable amounts | `gate-cli cex earn staking assets`, `gate-cli cex earn staking find` |
+| Check staking rewards | Daily/cumulative rewards, earnings history | `gate-cli cex earn staking awards` |
+| Browse staking products | Discover products, compare APY, filter by coin | `gate-cli cex earn staking find` |
+| View transaction history | Staking/redemption history, filters, order status | `gate-cli cex earn staking orders` |
+| Stake / Redeem / Mint | Execute stake or redeem via swap (pid required); mint treated as immediate stake | `gate-cli cex earn staking swap` |
 
 ## Architecture
 
@@ -56,15 +56,15 @@ gate-exchange-staking/
 | 1 | Lock-up | Fixed-term staking with a defined lock period (redeemPeriod > 0) |
 | 2 | US Treasury Bond | Products backed by US Treasury bonds (e.g. GUSD) |
 
-## MCP Tools
+## gate-cli command index
 
 | Tool | Purpose | Auth Required |
 |------|---------|---------------|
-| `cex_earn_asset_list` | Query current staking positions | Yes |
-| `cex_earn_award_list` | Retrieve reward history | Yes |
-| `cex_earn_find_coin` | Discover available products and exchange rates | No |
-| `cex_earn_order_list` | View transaction history | Yes |
-| `cex_earn_swap_staking_coin` | Execute stake or redeem (requires pid, side) | Yes |
+| `gate-cli cex earn staking assets` | Query current staking positions | Yes |
+| `gate-cli cex earn staking awards` | Retrieve reward history | Yes |
+| `gate-cli cex earn staking find` | Discover available products and exchange rates | No |
+| `gate-cli cex earn staking orders` | View transaction history | Yes |
+| `gate-cli cex earn staking swap` | Execute stake or redeem (requires pid, side) | Yes |
 
 ## Safety & Compliance
 
@@ -93,7 +93,7 @@ The skill gracefully handles various error scenarios:
 
 ## Authentication
 
-This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+This skill does **not** read secrets from chat. Configure **`gate-cli`** on the agent host with **`gate-cli config init`** or **`GATE_API_KEY`** / **`GATE_API_SECRET`**, with staking/Earn-related API permissions. See [gate-cli](https://github.com/gate/gate-cli) and run `sh ./setup.sh` from this skill directory for installation.
 
 ## Source
 

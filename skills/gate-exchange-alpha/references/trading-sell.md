@@ -16,7 +16,7 @@ Classify the request into one of four cases:
 
 Before checking holdings, resolve the user's input to an exact currency symbol:
 
-1. **Check holdings first**: Call `cex_alpha_list_alpha_accounts` to get all user holdings.
+1. **Check holdings first**: Call `gate-cli cex alpha account balances` to get all user holdings.
 2. **Match against holdings**: Search for tokens in holdings whose `currency` contains the user's keyword (case-insensitive).
 3. **Handle results**:
    - **Single match in holdings**: Proceed with that currency symbol.
@@ -33,11 +33,11 @@ Before checking holdings, resolve the user's input to an exact currency symbol:
 
 All sell flows follow the same core pipeline:
 
-1. **Check holdings**: Call `cex_alpha_list_alpha_accounts` to get the `available` balance for the target currency. Verify `available >= sell_amount`.
-2. **Quote**: Call `cex_alpha_quote_alpha_order` with `currency`, `side="sell"`, `amount` (token quantity), `gas_mode="speed"` (default). Use `gas_mode="custom"` with `slippage` only if user specifies custom slippage.
+1. **Check holdings**: Call `gate-cli cex alpha account balances` to get the `available` balance for the target currency. Verify `available >= sell_amount`.
+2. **Quote**: Call `gate-cli cex alpha order quote` with `currency`, `side="sell"`, `amount` (token quantity), `gas_mode="speed"` (default). Use `gas_mode="custom"` with `slippage` only if user specifies custom slippage.
 3. **Confirm**: Present the quote details to the user and wait for explicit confirmation before proceeding.
-4. **Execute**: Call `cex_alpha_place_alpha_order` with `currency`, `side="sell"`, `amount`, `quote_id`, and optional `gas_mode`/`slippage`.
-5. **Track** (Case 13 only): Poll `cex_alpha_get_alpha_order` until a terminal status is reached.
+4. **Execute**: Call `gate-cli cex alpha order place` with `currency`, `side="sell"`, `amount`, `quote_id`, and optional `gas_mode`/`slippage`.
+5. **Track** (Case 13 only): Poll `gate-cli cex alpha order get` until a terminal status is reached.
 
 Key parameters:
 - `amount`: **Token quantity** when selling (NOT USDT). For full sell, use the entire `available` balance.
@@ -103,15 +103,15 @@ For order result:
 - "清仓 memeboxtrump"
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_accounts` to get the user's holdings.
+1. Call `gate-cli cex alpha account balances` to get the user's holdings.
 2. **Resolve currency symbol**:
    - Search holdings for tokens whose `currency` contains the user's keyword.
    - If multiple matches found, list candidates with their available balances and ask user to select.
    - If no match found, inform user they don't hold any matching token.
 3. Find the target currency and extract the `available` balance. If `available` is 0, inform the user they have no holdings to sell.
-4. Call `cex_alpha_quote_alpha_order` with `currency={resolved_symbol}`, `side="sell"`, `amount="{available}"`, `gas_mode="speed"`.
+4. Call `gate-cli cex alpha order quote` with `currency={resolved_symbol}`, `side="sell"`, `amount="{available}"`, `gas_mode="speed"`.
 5. Present the quote details (including the full sell quantity and available balance) to the user and ask for confirmation.
-6. Upon confirmation, call `cex_alpha_place_alpha_order` with `currency={resolved_symbol}`, `side="sell"`, `amount="{available}"`, `quote_id="{quote_id}"`, `gas_mode="speed"`.
+6. Upon confirmation, call `gate-cli cex alpha order place` with `currency={resolved_symbol}`, `side="sell"`, `amount="{available}"`, `quote_id="{quote_id}"`, `gas_mode="speed"`.
 7. Return the order result including order ID, status, and USDT received.
 
 ## Scenario 12: Partial Sell
@@ -124,7 +124,7 @@ For order result:
 - "卖掉 30% 的 memeboxtrump"
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_accounts` to get the user's holdings.
+1. Call `gate-cli cex alpha account balances` to get the user's holdings.
 2. **Resolve currency symbol** (same as Scenario 11 step 2).
 3. Find the target currency and extract the `available` balance.
 4. Calculate the sell quantity based on the user's instruction:
@@ -132,9 +132,9 @@ For order result:
    - Specific quantity → use the stated amount
    - Percentage → `available * percentage / 100`
 4. Verify the calculated quantity does not exceed `available`. If it does, inform the user and suggest the maximum sellable amount.
-5. Call `cex_alpha_quote_alpha_order` with `currency={resolved_symbol}`, `side="sell"`, `amount="{calculated_quantity}"`, `gas_mode="speed"`.
+5. Call `gate-cli cex alpha order quote` with `currency={resolved_symbol}`, `side="sell"`, `amount="{calculated_quantity}"`, `gas_mode="speed"`.
 6. Present the quote details to the user and ask for confirmation.
-7. Upon confirmation, call `cex_alpha_place_alpha_order` with the quote details.
+7. Upon confirmation, call `gate-cli cex alpha order place` with the quote details.
 8. Return the order result.
 
 ## Scenario 13: Sell and Track Result
@@ -148,7 +148,7 @@ For order result:
 
 **Expected Behavior**:
 1. Execute the full sell flow (same as Scenario 11 or 12 depending on the sell quantity).
-2. After placing the order, poll `cex_alpha_get_alpha_order` with `order_id` at 3-5 second intervals.
+2. After placing the order, poll `gate-cli cex alpha order get` with `order_id` at 3-5 second intervals.
 3. Continue polling until a terminal status is reached:
    - `2` = Success — report the completed order details including `usdt_amount` received.
    - `3` = Failed — report the failure reason.
@@ -167,7 +167,7 @@ For order result:
 - "给我alpha 持仓能卖的全部卖出"
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_accounts` to get all user holdings.
+1. Call `gate-cli cex alpha account balances` to get all user holdings.
 2. Filter holdings where `available > 0` to get the list of sellable tokens.
 3. If no sellable holdings, inform the user their Alpha account is empty.
 4. **Present summary for confirmation** (DO NOT call quote for all tokens at once):
@@ -185,9 +185,9 @@ For order result:
    ```
 5. **Upon user confirmation**, process tokens **one by one sequentially**:
    - For each token:
-     a. Call `cex_alpha_quote_alpha_order` with `currency={symbol}`, `side="sell"`, `amount="{available}"`, `gas_mode="speed"`.
+     a. Call `gate-cli cex alpha order quote` with `currency={symbol}`, `side="sell"`, `amount="{available}"`, `gas_mode="speed"`.
      b. Show brief quote info and ask for confirmation for THIS token.
-     c. Upon confirmation, call `cex_alpha_place_alpha_order`.
+     c. Upon confirmation, call `gate-cli cex alpha order place`.
      d. Report the result before moving to the next token.
 6. After all tokens are processed, present a summary:
    ```

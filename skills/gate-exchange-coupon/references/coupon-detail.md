@@ -9,7 +9,7 @@ Handles Case 3, Case 4, and Case 5.
 Before executing any scenario below:
 
 1. Extract `coupon_type` from the user's message using Coupon Types Reference in SKILL.md. If unclear, ask: "Which coupon are you referring to?"
-2. Call `cex_coupon_list_user_coupons` with `expired=0`, `coupon_type={matched_type}`, `limit=20`
+2. Call `gate-cli cex coupon list` with `expired=0`, `coupon_type={matched_type}`, `limit=20`
 3. If no coupon found of this type → "You currently have no {coupon_name} coupons. You can earn coupons by completing tasks, participating in activities, or inviting friends."
 4. If multiple coupons of the same type exist, present a numbered list and ask user to select:
    ```
@@ -17,7 +17,7 @@ Before executing any scenario below:
    1. {amount} {currency} — expires {date}
    2. ...
    ```
-5. Call `cex_coupon_get_user_coupon_detail` with:
+5. Call `gate-cli cex coupon detail` with:
    - `coupon_type`: matched type
    - `detail_id`: `details_id` for regular coupons (`is_task_coupon=0`); `id` for task coupons (`is_task_coupon=1`)
    - `is_task_coupon`: `0` or `1`

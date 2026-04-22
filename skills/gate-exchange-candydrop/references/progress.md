@@ -36,7 +36,7 @@ Query task completion progress for enrolled CandyDrop activities.
 ## Workflow
 
 1. **Parse parameters**: Extract `currency` or `activity_id` from user query. If neither, ask the user for `currency`.
-2. **Call tool**: Call `cex_launch_get_candy_drop_task_progress_v4` with the provided parameter(s).
+2. **Call tool**: Call `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with the provided parameter(s).
 3. **Key data to extract**: `currency`, `total_rewards`, `start_time`, `end_time`, and per task: `task_name`, `task_desc`, `value`.
 4. **Format response**: Show activity overview followed by task progress list. Use the Response Template from the matching scenario.
 
@@ -57,7 +57,7 @@ Show activity overview first, then task progress items.
 
 **Expected Behavior**:
 1. Extract `currency` from user query (e.g. "USDT").
-2. Call `cex_launch_get_candy_drop_task_progress_v4` with `currency={value}`.
+2. Call `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency={value}`.
 3. For each registered task display: `task_name`, `task_desc`, `value`.
 4. Show activity period info.
 
@@ -89,7 +89,7 @@ Total: {count} tasks in progress.
 
 **Expected Behavior**:
 1. Extract `activity_id` from user query (e.g. 12345).
-2. Call `cex_launch_get_candy_drop_task_progress_v4` with `activity_id={value}`.
+2. Call `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `activity_id={value}`.
 3. For each registered task display: `task_name`, `task_desc`, `value`.
 
 **Response Template**:

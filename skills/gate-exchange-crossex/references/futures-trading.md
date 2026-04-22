@@ -6,7 +6,7 @@ Gate CrossEx USDT perpetual contract trading scenarios and expected behaviors.
 
 ### Step 1: Validate the futures contract and trading limits
 
-Call `cex_crx_list_crx_rule_symbols` with:
+Call `gate-cli cex cross-ex market symbols` with:
 
 - `symbols`: target futures symbol when the user provides a contract
 
@@ -19,7 +19,7 @@ Key data to extract:
 
 ### Step 2: Check balance and current position state
 
-Call `cex_crx_list_crx_positions` with:
+Call `gate-cli cex cross-ex position list` with:
 
 - `symbol`: target futures symbol when filtering is needed
 
@@ -32,7 +32,7 @@ Key data to extract:
 
 ### Step 3: Resolve leverage before order placement
 
-Call `cex_crx_get_crx_positions_leverage` with:
+Call `gate-cli cex cross-ex position leverage` with:
 
 - `symbols`: target futures symbol when leverage is symbol-specific
 
@@ -44,7 +44,7 @@ Key data to extract:
 
 ### Step 4: Submit the futures order after confirmation
 
-Call `cex_crx_create_crx_order` with:
+Call `gate-cli cex cross-ex order create` with:
 
 - `symbol`
 - `side`
@@ -61,7 +61,7 @@ Key data to extract:
 
 ### Step 5: Verify the resulting position
 
-Call `cex_crx_list_crx_positions` with:
+Call `gate-cli cex cross-ex position list` with:
 
 - `symbol`: the traded futures symbol
 
@@ -114,18 +114,18 @@ Futures Operation Summary
 
 ### Data Sources
 
-- **Trading Pair Info**: Call `cex_crx_list_crx_rule_symbols` → `min_quote_amount`, `amount_precision`,
+- **Trading Pair Info**: Call `gate-cli cex cross-ex market symbols` → `min_quote_amount`, `amount_precision`,
   `quantity_precision`, `contract_size`
-- **Account Balance**: Call `cex_crx_get_crx_account` → `available`
-- **Futures Positions**: Call `cex_crx_list_crx_positions` → `size`, `leverage`, `entry_price`, `liquidation_price`
-- **Leverage Multiplier**: Call `cex_crx_get_crx_positions_leverage` → Current leverage
-- **Adjust Leverage**: Call `cex_crx_update_crx_positions_leverage` → Set new leverage
-- **Place Order**: Call `cex_crx_create_crx_order`
+- **Account Balance**: Call `gate-cli cex cross-ex account get` → `available`
+- **Futures Positions**: Call `gate-cli cex cross-ex position list` → `size`, `leverage`, `entry_price`, `liquidation_price`
+- **Leverage Multiplier**: Call `gate-cli cex cross-ex position leverage` → Current leverage
+- **Adjust Leverage**: Call `gate-cli cex cross-ex position set-leverage` → Set new leverage
+- **Place Order**: Call `gate-cli cex cross-ex order create`
 - **Size Calculation**: `calc_future_qty_by_value(symbol, value)` → Calculate size by value
 
 ### Pre-checks
 
-1. **Trading Pair Verification**: Call `cex_crx_list_crx_rule_symbols` to verify trading pair exists and is tradable
+1. **Trading Pair Verification**: Call `gate-cli cex cross-ex market symbols` to verify trading pair exists and is tradable
 2. **Balance Check**: Check if sufficient USDT in `available_balance` (as margin)
 3. **Leverage Check**: Query current leverage, adjust if user specifies
 4. **Position Check**: Check existing positions to avoid direction conflicts
@@ -145,8 +145,8 @@ Futures Operation Summary
 
 **Only adjust leverage when user explicitly specifies leverage.**
 
-- **Query Current Leverage**: Call `cex_crx_get_crx_positions_leverage`
-- **Set New Leverage**: Call `cex_crx_update_crx_positions_leverage`
+- **Query Current Leverage**: Call `gate-cli cex cross-ex position leverage`
+- **Set New Leverage**: Call `gate-cli cex cross-ex position set-leverage`
     - Parameters: `symbol` (trading pair), `leverage` (leverage multiplier)
 
 **⚠️ Note**:
@@ -182,10 +182,10 @@ Futures Operation Summary
 **Expected Behavior**:
 
 1. Parse parameters: Trading pair `GATE_FUTURE_BTC_USDT`, direction `BUY`, position side `LONG`, size `1`
-2. Check minimum size: Call `cex_crx_list_crx_rule_symbols` to query minimum size for this pair
-3. Query current leverage: Call `cex_crx_get_crx_positions_leverage`
+2. Check minimum size: Call `gate-cli cex cross-ex market symbols` to query minimum size for this pair
+3. Query current leverage: Call `gate-cli cex cross-ex position leverage`
 4. Display order summary (including estimated liquidation price) and require confirmation
-5. Call `cex_crx_create_crx_order`, parameters `side="BUY"`, `type="MARKET"`, `qty="1"`, `position_side="LONG"`
+5. Call `gate-cli cex cross-ex order create`, parameters `side="BUY"`, `type="MARKET"`, `qty="1"`, `position_side="LONG"`
 6. Verify position and output result
 
 **Report Template**:
@@ -230,9 +230,9 @@ Liquidation Price: 45000 USDT
 **Expected Behavior**:
 
 1. Parse parameters: Trading pair `GATE_FUTURE_SOL_USDT`, direction `SELL`, position side `SHORT`, value `100 USDT`
-2. Query current leverage: Call `cex_crx_get_crx_positions_leverage`
+2. Query current leverage: Call `gate-cli cex cross-ex position leverage`
 3. Display order summary and require confirmation
-4. Call `cex_crx_create_crx_order`, parameters `side="SELL"`, `type="MARKET"`, `qty="calculated size"`,
+4. Call `gate-cli cex cross-ex order create`, parameters `side="SELL"`, `type="MARKET"`, `qty="calculated size"`,
    `position_side="SHORT"`
 5. Verify position and output result
 
@@ -278,10 +278,10 @@ Liquidation Price: 12.00 USDT
 
 **Expected Behavior**:
 
-1. Query current futures positions: Call `cex_crx_list_crx_positions`
+1. Query current futures positions: Call `gate-cli cex cross-ex position list`
 2. Find corresponding long position
 3. Display close plan and require confirmation
-4. Call `cex_crx_create_crx_order`, parameters `side="SELL"`, `type="MARKET"`, `qty="close size"`,
+4. Call `gate-cli cex cross-ex order create`, parameters `side="SELL"`, `type="MARKET"`, `qty="close size"`,
    `position_side="LONG"`
 5. Verify remaining position and output result
 
@@ -326,7 +326,7 @@ Remaining Position: Cleared
 1. Parse parameters: Trading pair, leverage multiplier
 2. Check current leverage
 3. Display adjustment plan (including new liquidation price) and require confirmation
-4. Call `cex_crx_update_crx_positions_leverage`, parameter `leverage="50"` (as required)
+4. Call `gate-cli cex cross-ex position set-leverage`, parameter `leverage="50"` (as required)
 5. Verify leverage adjusted and output result
 
 **Report Template**:

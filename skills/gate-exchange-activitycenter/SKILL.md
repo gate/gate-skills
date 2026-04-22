@@ -1,25 +1,61 @@
 ---
 name: gate-exchange-activitycenter
-version: "2026.4.3-1"
-updated: "2026-04-03"
 description: "Gate platform activity and campaign hub skill. Use when the user asks about trading competitions, airdrops, or their enrolled activities. Triggers on 'recommend activities', 'trading competition', 'my activities', 'airdrop campaign'."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Activity:Read
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # gate-exchange-activitycenter
 
@@ -30,8 +66,7 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
 **Trigger Scenarios**: User mentions "recommend activities", "what activities", "airdrop activities", "trading competition", "VIP activities", "my activities", etc.
 
@@ -39,39 +74,37 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-## MCP Dependencies
+## Skill Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
 
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_activity_get_my_activity_entry
-- cex_activity_list_activities
-- cex_activity_list_activity_types
+- `gate-cli cex activity get-entry`
+- `gate-cli cex activity list`
+- `gate-cli cex activity types`
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Activity:Read
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Activity:Read
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's activity-center workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's activity-center workflow.
 
 - `SKILL.md` keeps routing and recommendation logic.
-- `references/mcp.md` is the authoritative MCP execution layer for entry/list/type queries, filter handling, and degraded output behavior.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for entry/list/type queries, filter handling, and degraded output behavior.
 
 ## Routing Rules
 
@@ -86,13 +119,13 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-## MCP Tools
+## gate-cli command index
 
 | MCP Tool | Purpose | action_type |
 |----------|---------|-------------|
-| `cex_activity_list_activity_types` | Get activity type list (id, name) for type filtering | query |
-| `cex_activity_list_activities` | Query activities by hot/type/scenario/keywords | info-card |
-| `cex_activity_get_my_activity_entry` | Get "My Activities" entry card | info-card |
+| `gate-cli cex activity types` | Get activity type list (id, name) for type filtering | query |
+| `gate-cli cex activity list` | Query activities by hot/type/scenario/keywords | info-card |
+| `gate-cli cex activity get-entry` | Get "My Activities" entry card | info-card |
 
 ### API Parameter Constraints
 
@@ -116,7 +149,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **API Call**:
 ```
-cex_activity_list_activities?recommend_type=hot&sort_by=default&page=1&page_size=3
+`gate-cli cex activity list`?recommend_type=hot&sort_by=default&page=1&page_size=3
 ```
 
 **Rules**:
@@ -130,7 +163,7 @@ cex_activity_list_activities?recommend_type=hot&sort_by=default&page=1&page_size
 **Trigger**: "airdrop activities" "trading competition" "VIP activities" "earn activities"
 
 **API Call Sequence**:
-1. `cex_activity_list_activity_types` → Get type list, match user's type name (case-insensitive)
+1. `gate-cli cex activity types` → Get type list, match user's type name (case-insensitive)
 2. `cex_activity_list_activities?recommend_type=type&type_ids=matched_id1,matched_id2&sort_by=time&page_size=3`
 
 **Keyword Extraction Examples**:
@@ -150,7 +183,7 @@ cex_activity_list_activities?recommend_type=hot&sort_by=default&page=1&page_size
 - If scenario/asset: Use `recommend_type=scenario` with `keywords`
 
 ```
-cex_activity_list_activities?recommend_type=scenario&keywords=GT&page_size=3
+`gate-cli cex activity list`?recommend_type=scenario&keywords=GT&page_size=3
 ```
 
 ---
@@ -161,7 +194,7 @@ cex_activity_list_activities?recommend_type=scenario&keywords=GT&page_size=3
 
 **API Call**:
 ```
-cex_activity_list_activities?recommend_type=scenario&keywords=test_activity&page=1&page_size=3
+`gate-cli cex activity list`?recommend_type=scenario&keywords=test_activity&page=1&page_size=3
 ```
 
 **Parameter Notes**:
@@ -180,7 +213,7 @@ cex_activity_list_activities?recommend_type=scenario&keywords=test_activity&page
 
 **API Call**:
 ```
-cex_activity_get_my_activity_entry
+`gate-cli cex activity get-entry`
 ```
 
 **Rules**:
@@ -194,11 +227,11 @@ cex_activity_get_my_activity_entry
 
 | Condition | Action |
 |-----------|--------|
-| User asks for hot/recommended activities | Call `cex_activity_list_activities` with `recommend_type=hot` directly |
-| User specifies activity type | First call `cex_activity_list_activity_types`, then `cex_activity_list_activities` with `recommend_type=type&type_ids=xxx` |
+| User asks for hot/recommended activities | Call `gate-cli cex activity list` with `recommend_type=hot` directly |
+| User specifies activity type | First call `gate-cli cex activity types`, then `gate-cli cex activity list` with `recommend_type=type&type_ids=xxx` |
 | User mentions asset/scenario (GT, futures) | Use `recommend_type=scenario` with `keywords` |
 | User searches by activity name | Use `recommend_type=scenario` with `keywords={activity_name}` |
-| User asks "my activities" | Call `cex_activity_get_my_activity_entry` |
+| User asks "my activities" | Call `gate-cli cex activity get-entry` |
 | Activity list returns empty | Use "No Results" template, do NOT use "filtered for you..." |
 
 ---
@@ -272,7 +305,7 @@ For all activity recommendation scenarios (1.1, 1.2, 1.3, 1.4), the response MUS
 | Activity Title | Activity Type | Activity Link |
 |----------------|---------------|---------------|
 | {master_one_line} | {type_name} | [View Details]({processed_url}) |
-| ... | ... | ... |
+|... |... |... |
 
 {Follow-up Prompt - see below}
 ```
@@ -328,12 +361,12 @@ Currently no [type/keyword] activities are in progress. You can:
 2. **No data fabrication**: Only show data returned by backend
 3. **Compliance check**: Do not show activities unavailable in user's region
 4. **No internal exposure**: Never mention technical details to users, including:
-   - API names (e.g., `cex_activity_list_activities`)
-   - Parameter names (e.g., `recommend_type`, `type_ids`)
-   - Internal IDs (e.g., `type_id=34`, `id=1499`)
-   - Error codes or technical error messages
-   - Example of **BAD** response: "No Alpha type activities found (type_id=34)"
-   - Example of **GOOD** response: "Currently no Alpha activities are in progress"
+ - API names (e.g., `gate-cli cex activity list`)
+ - Parameter names (e.g., `recommend_type`, `type_ids`)
+ - Internal IDs (e.g., `type_id=34`, `id=1499`)
+ - Error codes or technical error messages
+ - Example of **BAD** response: "No Alpha type activities found (type_id=34)"
+ - Example of **GOOD** response: "Currently no Alpha activities are in progress"
 
 ---
 

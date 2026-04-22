@@ -7,13 +7,13 @@ All notable changes to this skill will be documented in this file.
 ### Changed
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.23-1] - 2026-03-23
 
 ### Changed
 - Aligned runtime-rule references and documentation wording for ClawHub review.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.19-18] - 2026-03-19
 
@@ -46,6 +46,6 @@ All notable changes to this skill will be documented in this file.
 - Scenario 2: My Activities entry
 - Response templates for all scenarios
 - Error handling and safety rules
-- Support for 3 MCP tools: cex_activity_list_activity_types, cex_activity_list_activities, cex_activity_get_my_activity_entry
+- Support for 3 `gate-cli` commands: `gate-cli cex activity types`, `gate-cli cex activity list`, `gate-cli cex activity get-entry`
 - Fixed page_size=3 for all activity list queries
 - Case-insensitive type matching

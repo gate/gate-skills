@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-launchpool
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate LaunchPool staking and airdrop skill. Use when the user asks to browse LaunchPool, stake or redeem, or check airdrop rewards. Triggers on 'LaunchPool', 'launch pool airdrop', 'pledge redeem', 'LaunchPool rewards'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate LaunchPool Suite
 
@@ -12,50 +64,42 @@ description: "Gate LaunchPool staking and airdrop skill. Use when the user asks 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_launch_list_launch_pool_pledge_records
-- cex_launch_list_launch_pool_projects
-- cex_launch_list_launch_pool_reward_records
+- `gate-cli cex launch pledge-records`
+- `gate-cli cex launch projects`
+- `gate-cli cex launch reward-records`
 
 **Execution Operations (Write)**
 
-- cex_launch_create_launch_pool_order
-- cex_launch_redeem_launch_pool
+- `gate-cli cex launch pledge`
+- `gate-cli cex launch redeem`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Launch:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Launch:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's LaunchPool workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's LaunchPool workflow.
 
 - `SKILL.md` keeps routing and product semantics.
-- `references/mcp.md` is the authoritative MCP execution layer for project/record queries, stake-redeem confirmation gates, and result verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for project/record queries, stake-redeem confirmation gates, and result verification.
 
 ## Module overview
 
@@ -124,14 +168,14 @@ Project time fields (`start_timest`, `end_timest`) are internal data — do NOT 
 
 | Module | MCP tool | Required params | Optional params |
 |--------|----------|-----------------|-----------------|
-| Projects | `cex_launch_list_launch_pool_projects` | `page`, `page_size` | `status`, `sort_type`, `mortgage_coin`, `search_coin`, `limit_rule` |
-| Stake | `cex_launch_create_launch_pool_order` | `body` (JSON: pid, rid, amount) | — |
-| Redeem | `cex_launch_redeem_launch_pool` | `body` (JSON: pid, rid, amount) | — |
-| Pledge Records | `cex_launch_list_launch_pool_pledge_records` | — | `coin`, `type`, `start_time`, `end_time`, `page`, `page_size` |
-| Reward Records | `cex_launch_list_launch_pool_reward_records` | `page`, `page_size` | `coin`, `status`, `start_time`, `end_time` |
+| Projects | `gate-cli cex launch projects` | `page`, `page_size` | `status`, `sort_type`, `mortgage_coin`, `search_coin`, `limit_rule` |
+| Stake | `gate-cli cex launch pledge` | `body` (JSON: pid, rid, amount) | — |
+| Redeem | `gate-cli cex launch redeem` | `body` (JSON: pid, rid, amount) | — |
+| Pledge Records | `gate-cli cex launch pledge-records` | — | `coin`, `type`, `start_time`, `end_time`, `page`, `page_size` |
+| Reward Records | `gate-cli cex launch reward-records` | `page`, `page_size` | `coin`, `status`, `start_time`, `end_time` |
 
-- **Stake**: First call `cex_launch_list_launch_pool_projects` to identify the target project pid and reward pool rid, then show preview, wait for confirmation, then call `cex_launch_create_launch_pool_order`.
-- **Redeem**: Show preview of the redemption, wait for confirmation, then call `cex_launch_redeem_launch_pool`.
+- **Stake**: First call `gate-cli cex launch projects` to identify the target project pid and reward pool rid, then show preview, wait for confirmation, then call `gate-cli cex launch pledge`.
+- **Redeem**: Show preview of the redemption, wait for confirmation, then call `gate-cli cex launch redeem`.
 
 ### 3. Format response
 
@@ -186,7 +230,7 @@ The API returns structured errors with a `label` field. Map them as follows:
 
 ### Confirmation required
 
-- **Stake and Redeem are write operations.** Before calling `cex_launch_create_launch_pool_order` or `cex_launch_redeem_launch_pool`, MUST show an order preview and wait for explicit user confirmation.
+- **Stake and Redeem are write operations.** Before calling `gate-cli cex launch pledge` or `gate-cli cex launch redeem`, MUST show an order preview and wait for explicit user confirmation.
 - Preview format: project name, staking coin, amount, estimated APR (for stake), staking period.
 - Ask user to reply "confirm" to proceed or "cancel" to abort.
 - Only call the API after receiving explicit confirmation.

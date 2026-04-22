@@ -1,25 +1,61 @@
 ---
 name: gate-exchange-dual
-version: "2026.4.3-1"
-updated: "2026-04-03"
 description: "Gate dual investment skill. Use when the user asks about dual currency products, target price settlement, or placing dual orders. Triggers on 'dual investment', 'dual currency', 'target price', 'exercise price', 'dual orders', 'dual balance', 'sell-high', 'buy-low', 'place dual order', 'subscribe dual'."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Earn:Write
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Dual Investment Skill
 
@@ -28,51 +64,42 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
----
+## Skill Dependencies
 
-## MCP Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_earn_list_dual_balance
-- cex_earn_list_dual_investment_plans
-- cex_earn_list_dual_orders
+- `gate-cli cex earn dual balance`
+- `gate-cli cex earn dual plans`
+- `gate-cli cex earn dual orders`
 
 **Execution Operations (Write)**
 
-- cex_earn_place_dual_order
+- `gate-cli cex earn dual place`
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Earn:Write
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Earn:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's dual-investment workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's dual-investment workflow.
 
 - `SKILL.md` keeps routing and product semantics.
-- `references/mcp.md` is the authoritative MCP execution layer for plan lookup, confirmation-gated placement, and order verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for plan lookup, confirmation-gated placement, and order verification.
 
 ## Prerequisites
 
@@ -84,10 +111,10 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 | Tool | Auth | Description |
 |------|------|-------------|
-| `cex_earn_list_dual_investment_plans` | Yes | List available dual investment plans (optional param: plan_id) |
-| `cex_earn_list_dual_orders` | Yes | List dual investment orders. **`page` and `limit` are required**: always pass `page=1, limit=100`. Optional: `from`, `to`. **MUST loop all pages (increment page until returned rows < limit) before drawing any conclusion.** |
-| `cex_earn_list_dual_balance` | Yes | Get dual investment balance & interest stats |
-| `cex_earn_place_dual_order` | Yes | Place a dual investment order. Params: `plan_id` (required), `amount` (required), `text` (optional, must start with `t-`, max 28 bytes after prefix, alphanumeric/`_`/`-`/`.` only). |
+| `gate-cli cex earn dual plans` | Yes | List available dual investment plans (optional param: plan_id) |
+| `gate-cli cex earn dual orders` | Yes | List dual investment orders. **`page` and `limit` are required**: always pass `page=1, limit=100`. Optional: `from`, `to`. **MUST loop all pages (increment page until returned rows < limit) before drawing any conclusion.** |
+| `gate-cli cex earn dual balance` | Yes | Get dual investment balance & interest stats |
+| `gate-cli cex earn dual place` | Yes | Place a dual investment order. Params: `plan_id` (required), `amount` (required), `text` (optional, must start with `t-`, max 28 bytes after prefix, alphanumeric/`_`/`-`/`.` only). |
 
 ## Routing Rules
 
@@ -114,7 +141,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 1. Identify user intent from the Routing Rules table above.
 2. For Cases 1–6, 11–12: Read the corresponding sub-module document in `references/` and follow the Workflow.
 3. For Cases 7–10: Read `references/subscription.md` and follow the order placement Workflow.
-4. For Cases 15, 17: Read `references/subscription.md` and follow the compliance handling Workflow. These cases are triggered by `cex_earn_place_dual_order` error responses or by the user asking about region restrictions.
+4. For Cases 15, 17: Read `references/subscription.md` and follow the compliance handling Workflow. These cases are triggered by `gate-cli cex earn dual place` error responses or by the user asking about region restrictions.
 5. For Cases 13–14: Answer directly using Domain Knowledge below (no API call needed).
 6. If the user's intent is ambiguous, ask a clarifying question before routing.
 
@@ -129,7 +156,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Interest-guaranteed, not principal-protected**: Principal + interest are always received, but the settlement currency may change due to price movement.
 - The closer the target price is to the current price, the higher the APY, but also the higher the probability of currency conversion.
 - Once placed, dual investment orders cannot be cancelled. Settlement is automatic at delivery time.
-- **Order type derivation**: `cex_earn_list_dual_orders` has NO `type` field. Derive from `invest_currency`: crypto (BTC, ETH...) → Sell High (Call); stablecoin (USDT) → Buy Low (Put). Filter by coin using `invest_currency` or `exercise_currency` — there is NO `instrument_name`.
+- **Order type derivation**: `gate-cli cex earn dual orders` has NO `type` field. Derive from `invest_currency`: crypto (BTC, ETH...) → Sell High (Call); stablecoin (USDT) → Buy Low (Put). Filter by coin using `invest_currency` or `exercise_currency` — there is NO `instrument_name`.
 - **Order status values**: `INIT` (Pending), `PROCESSING` (In Position), `SETTLEMENT_SUCCESS` (Settled), `SETTLEMENT_PROCESSING` (Settling), `CANCELED` (Canceled), `FAILED` (Failed), `REFUND_SUCCESS` / `REFUND_PROCESSING` / `REFUND_FAILED` → display as "Early Redemption", never "Refund". Early-redeemed orders have zero yield.
 
 ### Settlement Rules (Gate Examples)
@@ -153,11 +180,11 @@ A: When settlement price ≥ target price, you successfully sell at the target p
 ## Safety Rules
 
 - **Timestamp fields (CRITICAL)**: All time fields (`delivery_time`, `create_time`, `complete_time`, `delivery_timest`) are Unix timestamps (seconds). Do NOT convert them to dates or display them to the user in any form. This includes: (1) Do NOT show timestamps as table columns. (2) Do NOT convert timestamps to dates and use them as section headers or grouping labels (e.g. "Delivery Time: 2026-03-17"). (3) Do NOT mention delivery dates in order confirmations. Simply omit all time-related information from user-facing output.
-- **APY display (CRITICAL — applies to ALL dual tools)**: Any APY/rate field (`apy`, `apy_display`, `apy_settlement`, `apyDisplay`, or any other rate field) returned by any dual investment tool is a **raw value — NOT a percentage**. You **MUST multiply by 100** then append `%` for display. **NEVER** display the raw value directly as a percentage. Common mistake: values like `1.1343` or `16.133` look like percentages but they are NOT — `1.1343` → **113.43%**, `16.133` → **1613.3%**. Another example: `0.0619` → **6.19%**, `2.7814` → **278.14%**. Use the raw value only in settlement formulas. This rule applies to ALL dual tools (`cex_earn_list_dual_investment_plans`, `cex_earn_list_dual_orders`, `cex_earn_list_dual_balance`, etc.).
+- **APY display (CRITICAL — applies to ALL dual tools)**: Any APY/rate field (`apy`, `apy_display`, `apy_settlement`, `apyDisplay`, or any other rate field) returned by any dual investment tool is a **raw value — NOT a percentage**. You **MUST multiply by 100** then append `%` for display. **NEVER** display the raw value directly as a percentage. Common mistake: values like `1.1343` or `16.133` look like percentages but they are NOT — `1.1343` → **113.43%**, `16.133` → **1613.3%**. Another example: `0.0619` → **6.19%**, `2.7814` → **278.14%**. Use the raw value only in settlement formulas. This rule applies to ALL dual tools (`gate-cli cex earn dual plans`, `gate-cli cex earn dual orders`, `gate-cli cex earn dual balance`, etc.).
 - **APY sanity check (MANDATORY before responding)**: After formatting ALL APY values, scan every value in your output. Typical correct ranges after ×100: crypto sell-high plans → 10%–2000%; stablecoin buy-low plans → 5%–1800%. **If you see any APY displayed as 0.05%–20% (single or low-double digits), you almost certainly forgot to multiply by 100. STOP, go back, and recompute ALL APY values before responding.** For example, if a raw value is `19.9378`, the correct display is `1993.78%` — NOT `19.94%`.
 - **No investment advice**: Do not recommend specific plans or predict prices. Present data and let the user decide.
 - **Non-principal-protected**: Always clearly communicate that dual investment is NOT principal-protected and the user may receive a different currency.
-- **Order placement confirmation**: Before calling `cex_earn_place_dual_order`, MUST show the user the full order details (plan, amount, target price, APY, settlement scenarios) and get **explicit user confirmation**. NEVER place an order without confirmation.
+- **Order placement confirmation**: Before calling `gate-cli cex earn dual place`, MUST show the user the full order details (plan, amount, target price, APY, settlement scenarios) and get **explicit user confirmation**. NEVER place an order without confirmation.
 - **Sensitive data**: Never expose API keys, internal endpoint URLs, or raw error traces to the user.
 
 ## Error Handling
@@ -165,12 +192,12 @@ A: When settlement price ≥ target price, you successfully sell at the target p
 | Condition | Response |
 |-----------|----------|
 | Auth endpoint returns "not login" | "Please log in to your Gate account first." |
-| `cex_earn_list_dual_investment_plans` returns empty | "No dual investment plans available at the moment." |
-| `cex_earn_list_dual_orders` returns empty | "No dual investment orders found for the specified criteria." |
-| `cex_earn_place_dual_order` returns region restriction error | See Case 15 in `references/subscription.md` |
-| `cex_earn_place_dual_order` returns other compliance error | See Case 17 in `references/subscription.md` |
-| `cex_earn_place_dual_order` returns insufficient balance | "Insufficient balance. Please ensure your account has enough funds and try again." |
-| `cex_earn_place_dual_order` returns other failure | Display the error message returned by the API to the user. |
+| `gate-cli cex earn dual plans` returns empty | "No dual investment plans available at the moment." |
+| `gate-cli cex earn dual orders` returns empty | "No dual investment orders found for the specified criteria." |
+| `gate-cli cex earn dual place` returns region restriction error | See Case 15 in `references/subscription.md` |
+| `gate-cli cex earn dual place` returns other compliance error | See Case 17 in `references/subscription.md` |
+| `gate-cli cex earn dual place` returns insufficient balance | "Insufficient balance. Please ensure your account has enough funds and try again." |
+| `gate-cli cex earn dual place` returns other failure | Display the error message returned by the API to the user. |
 
 ## Prompt Examples & Scenarios
 

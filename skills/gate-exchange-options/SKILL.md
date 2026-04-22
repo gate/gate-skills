@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-options
-version: "2026.3.11-4"
-updated: "2026-03-11"
 description: "Use this skill whenever you want to trade Gate options: place order (market/limit), close or reduce a position, cancel open orders, or amend open orders. Trigger phrases include: options, call, put, strike, expiration, mark IV, close option, cancel option order, amend option order."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 Read and follow [exchange-runtime-rules.md](../exchange-runtime-rules.md) first.
 
@@ -48,12 +100,24 @@ All options tools use the `cex_options_` prefix. See [gate-mcp tools](https://gi
 
 | Group | MCP tools |
 |-------|-----------|
-| Underlying & contracts | `cex_options_list_options_underlyings`, `cex_options_list_options_expirations`, `cex_options_list_options_contracts`, `cex_options_get_options_contract` |
-| Market data | `cex_options_list_options_order_book`, `cex_options_list_options_tickers` |
-| Account & positions | `cex_options_list_options_account`, `cex_options_list_options_positions` |
-| Orders | `cex_options_list_options_orders`, `cex_options_create_options_order`, `cex_options_cancel_options_order`, `cex_options_cancel_options_orders` |
-| Amend | `cex_options_amend_options_order` |
-| Trades | `cex_options_list_my_options_trades` |
+| Underlying & contracts | `gate-cli cex options market underlyings`, `gate-cli cex options market expirations`, `gate-cli cex options market contracts`, `gate-cli cex options market contract` |
+| Market data | `gate-cli cex options market order-book`, `gate-cli cex options market tickers` |
+| Account & positions | `gate-cli cex options account get`, `gate-cli cex options position list` |
+| Orders | `gate-cli cex options order list`, `gate-cli cex options order create`, `gate-cli cex options order cancel`, `gate-cli cex options order cancel-all` |
+| Amend | `gate-cli cex options order amend` |
+| Trades | `gate-cli cex options position my-trades` |
+
+### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Options:Write (and reads as required for quotes/positions); use least privilege consistent with this skill.
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
+
+### Installation Check
+- **Required:** `gate-cli` (install from [gate-cli releases](https://github.com/gate/gate-cli/releases) or via a Gate MCP / skills installer for your environment).
+- Add the directory containing **`gate-cli`** to **`PATH`** when invoking by name.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated or mutating calls until the CLI works as expected (e.g. **`gate-cli cex options market tickers`** or **`gate-cli --version`**); confirm credentials resolve before orders.
 
 ## Execution workflow
 
@@ -119,9 +183,9 @@ Close order submitted! As requested, you have closed {size} of your {long/short}
 ### Cancel orders (Case 4)
 
 **Tools**:
-- **Cancel all open option orders (one-click / all underlyings)**: `cex_options_cancel_options_orders()` with **no params**.
-- **Cancel a single order**: `cex_options_cancel_options_order(order_id)`.
-- **List open orders (to find order_id / confirm scope)**: `cex_options_list_options_orders(status=open, underlying?, contract?)`.
+- **Cancel all open option orders (one-click / all underlyings)**: `gate-cli cex options order cancel-all` with **no params**.
+- **Cancel a single order**: `gate-cli cex options order cancel`.
+- **List open orders (to find order_id / confirm scope)**: `gate-cli cex options order list`.
 
 ```
 Cancel successful! Your {specified/all} open order(s) have been cancelled. A total of {N} order(s) were cancelled, releasing {xxx} USDT margin.

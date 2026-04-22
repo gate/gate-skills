@@ -7,7 +7,7 @@
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
 - Excluded non-runtime documentation from the published bundle.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.25-1] - 2026-03-25
 
@@ -18,10 +18,10 @@
 ## [2026.3.24-1] - 2026-03-24
 
 ### Added
-- `README.md`: Overview, core capabilities, MCP tool table, architecture layout, authentication note.
+- `README.md`: Overview, core capabilities, `gate-cli` command table, architecture layout, authentication note.
 
 ### Changed
-- `SKILL.md`: General Rules — MCP tool allowlist bullet (aligned with `gate-exchange-crossex` template).
+- `SKILL.md`: General Rules — `gate-cli` command allowlist bullet (aligned with `gate-exchange-crossex` template).
 
 ## [2026.3.18-2] - 2026-03-18
 
@@ -30,8 +30,8 @@
 - **Safety Rules** section: No future timestamps, user_id usage, data scope, aggregation, sub-accounts.
 
 ### Changed
-- **MCP Dependencies**: Expanded with full tool table; document Call `tool_name` pattern; list `cex_rebate_get_partner_eligibility` and `cex_rebate_get_partner_application_recent`.
-- **Step 3 (Call Partner APIs)**: Added paragraph to call MCP tools by name when MCP is configured, fallback to API paths when not.
+- **`gate-cli` Dependencies**: Expanded with full tool table; document Call `tool_name` pattern; list `gate-cli cex rebate partner eligibility` and `gate-cli cex rebate partner application`.
+- **Step 3 (Call Partner APIs)**: Added paragraph to call `gate-cli` commands by name when `gate-cli` is configured, fallback to API paths when not.
 
 ## [2026.3.18-1] - 2026-03-18
 

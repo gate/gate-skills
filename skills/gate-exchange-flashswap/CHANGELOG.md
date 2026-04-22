@@ -25,7 +25,7 @@
 ## [2026.3.18-3] - 2026-03-18
 
 ### Added
-- MCP Tool Inventory table in Domain Knowledge section listing all 9 tools with type and description
+- `gate-cli` command Inventory table in Domain Knowledge section listing all 9 tools with type and description
 - Explicit "No write operations without confirmation" safety rule
 - Stale confirmation handling rule (auto re-preview if quote_id > 5 min old)
 
@@ -38,7 +38,7 @@
 ### Added
 - Pre-validation step: check sell_amount against sell_min_amount before calling preview API (Case 8)
 - One-click swap mode: auto preview + create without separate confirmation (Case 7)
-- Order result verification: check status after create and via `cex_fc_get_fc_order` (Case 9)
+- Order result verification: check status after create and via `gate-cli cex flash-swap order` (Case 9)
 - One-to-many split by ratio: auto-calculate per-target amounts from total + ratio (Case 10)
 - One-to-many with buy_amount: specify exact buy quantities, API calculates sell cost (Case 11)
 - Many-to-one asset consolidation: query balances, filter by min amounts, preview + create (Case 12)
@@ -58,9 +58,9 @@
 ## [2026.3.18-1] - 2026-03-18
 
 ### Added
-- One-to-one flash swap: preview via `cex_fc_preview_fc_order_v1`, create via `cex_fc_create_fc_order_v1`
-- One-to-many flash swap: preview via `cex_fc_preview_fc_multi_currency_one_to_many_order`, create via `cex_fc_create_fc_multi_currency_one_to_many_order`
-- Many-to-one flash swap: preview via `cex_fc_preview_fc_multi_currency_many_to_one_order`, create via `cex_fc_create_fc_multi_currency_many_to_one_order`
+- One-to-one flash swap: preview via `gate-cli cex flash-swap preview-v1`, create via `gate-cli cex flash-swap create-v1`
+- One-to-many flash swap: preview via `gate-cli cex flash-swap preview-one-to-many`, create via `gate-cli cex flash-swap create-one-to-many`
+- Many-to-one flash swap: preview via `gate-cli cex flash-swap preview-many-to-one`, create via `gate-cli cex flash-swap create-many-to-one`
 - Quote expiry handling (code 1052) with auto-retry guidance
 - Multi-currency failed item exclusion logic (prevent code 4 rejection)
 - Safety rule: always preview before creating, never skip confirmation
@@ -69,13 +69,13 @@
 
 ### Changed
 - Upgraded from query-only skill to full trading skill with preview-and-create workflow
-- Expanded from 3 MCP tools to 9 MCP tools
+- Expanded from 3 `gate-cli` commands to 9 `gate-cli` commands
 - Restructured workflow from 6 steps to 11 steps
 - Updated all report templates for swap operations
 
 ### Removed
-- Deprecated `cex_fc_preview_fc_order` (replaced by `cex_fc_preview_fc_order_v1`)
-- Deprecated `cex_fc_create_fc_order` (replaced by `cex_fc_create_fc_order_v1`)
+- Deprecated `cex_fc_preview_fc_order` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) (replaced by `gate-cli cex flash-swap preview-v1`)
+- Deprecated `cex_fc_create_fc_order` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) (replaced by `gate-cli cex flash-swap create-v1`)
 
 ## [2026.3.11-5] - 2026-03-11
 

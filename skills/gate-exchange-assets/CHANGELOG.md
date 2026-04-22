@@ -7,7 +7,7 @@
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
 - Excluded non-runtime documentation from the published bundle.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.25-1] - 2026-03-25
 
@@ -22,12 +22,12 @@
 ## [2026.3.12-2] - 2026-03-12
 
 - Removed deposit history and withdrawal history from skill scope.
-- Removed `cex_wallet_list_deposits` and `cex_wallet_list_withdrawals` from MCP tool mapping.
+- Removed `gate-cli cex wallet deposit list` and `gate-cli cex wallet deposit withdrawals` from `gate-cli` command mapping.
 - Removed Scenario 8 (Deposit History) and Scenario 9 (Withdrawal History) from scenarios.
 
 ## [2026.3.12-1] - 2026-03-12
 
-- Replaced REST API endpoints with Gate gate-mcp tool names: `cex_wallet_get_total_balance`, `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_dc_list_dc_accounts`, `cex_options_list_options_account`, `cex_margin_list_margin_accounts`, `cex_tradfi_query_user_assets`, `cex_earn_list_dual_balance`/`cex_earn_list_dual_orders`/`cex_earn_list_structured_orders`, `cex_spot_list_spot_account_book`.
+- Replaced REST API endpoints with Gate `gate-cli` command names: `gate-cli cex wallet balance total`, `gate-cli cex spot account get`, `gate-cli cex unified account get`, `gate-cli cex futures account get`, `gate-cli cex delivery account get`, `gate-cli cex options account get`, `gate-cli cex margin account list`, `gate-cli cex tradfi account assets`, `gate-cli cex earn dual balance`/`gate-cli cex earn dual orders`/`cex_earn_list_structured_orders` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二), `gate-cli cex spot account book`.
 - Added comprehensive cases from asset query skills (external) PDF specification.
 - **Case 1**: Total asset query (GET /wallet/total_balance) with account/coin distribution, TradFi/payment isolation.
 - **Case 2**: Specific currency query (concurrent multi-account aggregation).

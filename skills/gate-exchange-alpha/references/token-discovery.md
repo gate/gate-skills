@@ -16,9 +16,9 @@ Classify the request into one of five cases:
 ### Step 2: Call Tools and Extract Data
 
 Use the minimal tool set required:
-- All currencies list: `cex_alpha_list_alpha_currencies`
-- Token filtering (chain/platform/address): `cex_alpha_list_alpha_tokens`
-- Specific currency details: `cex_alpha_list_alpha_currencies` with `currency` parameter
+- All currencies list: `gate-cli cex alpha market currencies`
+- Token filtering (chain/platform/address): `gate-cli cex alpha market tokens`
+- Specific currency details: `gate-cli cex alpha market currencies` with `currency` parameter
 
 Key data to extract:
 - `currency`: token symbol
@@ -63,7 +63,7 @@ Present results in a clear table format with relevant fields.
 - "List available currencies."
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_currencies` with pagination (default `page=1`, `limit=20`).
+1. Call `gate-cli cex alpha market currencies` with pagination (default `page=1`, `limit=20`).
 2. Extract currency symbols, chains, contract addresses, and trading status.
 3. Present a paginated table of tradable currencies. If there are more pages, inform the user and offer to show the next page.
 
@@ -78,7 +78,7 @@ Present results in a clear table format with relevant fields.
 
 **Expected Behavior**:
 1. Normalize the chain name to the supported value (e.g., "Solana" → `solana`, "Ethereum" → `eth`, "BSC" → `bsc`).
-2. Call `cex_alpha_list_alpha_tokens` with `chain={normalized_chain}`.
+2. Call `gate-cli cex alpha market tokens` with `chain={normalized_chain}`.
 3. Present a filtered list of tokens on that chain with currency symbol, launch platform, and contract address.
 
 ## Scenario 3: Filter Tokens by Launch Platform
@@ -92,7 +92,7 @@ Present results in a clear table format with relevant fields.
 
 **Expected Behavior**:
 1. Normalize the platform name to the supported value (e.g., "pump" → `pump`, "Moonshot" → `moonshot`).
-2. Call `cex_alpha_list_alpha_tokens` with `launch_platform={normalized_platform}`.
+2. Call `gate-cli cex alpha market tokens` with `launch_platform={normalized_platform}`.
 3. Present a filtered list of tokens from that platform with currency symbol, chain, and contract address.
 
 ## Scenario 4: Look Up Token by Contract Address
@@ -105,7 +105,7 @@ Present results in a clear table format with relevant fields.
 - "Check this address for me: So11111..."
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_tokens` with `address={contract_address}`.
+1. Call `gate-cli cex alpha market tokens` with `address={contract_address}`.
 2. If found, return token details: currency symbol, chain, launch platform, and full contract address.
 3. If not found, inform the user that no token matches the given address on Gate Alpha.
 
@@ -119,7 +119,7 @@ Present results in a clear table format with relevant fields.
 - "Show me details for memeboxtrump."
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_currencies` with `currency={token_symbol}`.
+1. Call `gate-cli cex alpha market currencies` with `currency={token_symbol}`.
 2. Extract chain, contract address, precision, amount_precision, and status.
 3. Present a detailed summary including trading status interpretation (1 = actively trading, 2 = suspended, 3 = delisted).
 

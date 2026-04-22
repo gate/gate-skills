@@ -12,17 +12,17 @@
 | Team / subordinates | Subordinate list and customer counts |
 | Partner onboarding | Eligibility check and recent application status (last 30 days for application API) |
 
-### MCP Tools (when Gate MCP is configured)
+### gate-cli command index (when gate-cli is configured)
 
-| MCP tool | Purpose |
+| `gate-cli` command | Purpose |
 |----------|---------|
-| `cex_rebate_partner_transaction_history` | Referred users’ trading records |
-| `cex_rebate_partner_commissions_history` | Commission records |
-| `cex_rebate_partner_sub_list` | Subordinate list |
-| `cex_rebate_get_partner_eligibility` | Whether the user may apply for partner |
-| `cex_rebate_get_partner_application_recent` | Recent partner application record |
+| `gate-cli cex rebate partner transactions` | Referred users’ trading records |
+| `gate-cli cex rebate partner commissions` | Commission records |
+| `gate-cli cex rebate partner sub-list` | Subordinate list |
+| `gate-cli cex rebate partner eligibility` | Whether the user may apply for partner |
+| `gate-cli cex rebate partner application` | Recent partner application record |
 
-When MCP is not available, the skill documents equivalent REST paths under `GET /rebate/partner/*` in `SKILL.md`.
+When `gate-cli` is not available, the skill documents equivalent REST paths under `GET /rebate/partner/*` in `SKILL.md`.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ gate-exchange-affiliate/
 
 ## Authentication
 
-The skill does not embed credentials. The Gate MCP layer injects the user context (e.g. `X-Gate-User-Id`) when calling Partner APIs or MCP tools. Configure the Gate MCP server per your client (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup).
+The skill does not embed credentials. The gate-cli layer injects the user context (e.g. `X-Gate-User-Id`) when calling Partner APIs or `gate-cli` commands. Configure the gate-cli per your client (see [gate-cli](https://github.com/gate/gate-cli) for setup).
 
 ## Source
 

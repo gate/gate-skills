@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [2026.4.14-1] - 2026-04-14
 
 ### Changed
-- **Airdrop records** user-facing tables: **omit** the flash-convert **USDT** column (`convert_amount`); show **Project (currency)**, **Airdrop Time (UTC)**, and **Airdrop Rewards** (`{rewards} {currency}`) only (`references/records.md`, `SKILL.md`, `references/mcp.md`).
+- **Airdrop records** user-facing tables: **omit** the flash-convert **USDT** column (`convert_amount`); show **Project (currency)**, **Airdrop Time (UTC)**, and **Airdrop Rewards** (`{rewards} {currency}`) only (`references/records.md`, `SKILL.md`, `references/gate-cli.md`).
 
 ## [2026.4.13-5] - 2026-04-13
 
@@ -48,6 +48,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Query airdrop records (reward distribution history) by time and token
 - Compliance error handling for region restrictions
 - 17 scenarios across 5 sub-modules
-- Support for 6 MCP tools from gate-dev (public) and g-d-x (authenticated) services
+- Support for 6 `gate-cli` commands from gate-dev (public) and g-d-x (authenticated) services
 - Timestamp strategy for records queries (Strategy 1: relative time, Strategy 2: anchor table)
 - Dual-parameter resolution (currency vs activity_id)

@@ -48,8 +48,8 @@ This skill is for users who want one skill to handle the full trading workflow i
 This skill is designed to work even when installed alone:
 
 - It does not assume separate research or execution skills are installed
-- It includes **analysis-side MCP mapping**
-- It includes **execution-side MCP mapping**
+- It includes **analysis-side `gate-cli` mapping**
+- It includes **execution-side `gate-cli` mapping**
 - It defines a consistent intermediate artifact: **Trading Brief**
 - It defines a consistent execution gate: **Order Draft + explicit confirmation**
 
@@ -69,10 +69,10 @@ At the skill level, the key expectation is simple:
 
 Portable baseline mapping:
 
-- `info_*` tools should map to Gate Info MCP
-- `news_feed_*` tools should map to Gate News MCP
-- read-only `cex_spot_*` / `cex_fx_*` market-data tools may come from Gate public market MCP or a local combined Gate MCP runtime
-- private trading and account `cex_*` tools should map to authenticated Gate Exchange MCP or a local authenticated Gate MCP runtime
+- `info_*` tools should map to Gate Info `gate-cli`
+- `news_feed_*` tools should map to Gate News `gate-cli`
+- read-only `cex_spot_*` / `cex_fx_*` market-data tools may come from Gate public market `gate-cli` or a local combined gate-cli runtime
+- private trading and account `cex_*` tools should map to authenticated Gate Exchange `gate-cli` or a local authenticated gate-cli runtime
 
 The skill should not require `news_events_*` to be present, because those tools are not part of the documented baseline news surface.
 

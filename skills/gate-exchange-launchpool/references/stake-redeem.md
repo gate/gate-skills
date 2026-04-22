@@ -6,12 +6,12 @@ Stake tokens to LaunchPool projects and redeem staked assets.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_list_launch_pool_projects** | Find project pid and reward pool rid | `page`, `page_size` | `status`, `mortgage_coin`, `search_coin` |
-| **cex_launch_create_launch_pool_order** | Create staking order | `body` (JSON) | — |
-| **cex_launch_redeem_launch_pool** | Redeem staked assets | `body` (JSON) | — |
+| **`gate-cli cex launch projects`** | Find project pid and reward pool rid | `page`, `page_size` | `status`, `mortgage_coin`, `search_coin` |
+| **`gate-cli cex launch pledge`** | Create staking order | `body` (JSON) | — |
+| **`gate-cli cex launch redeem`** | Redeem staked assets | `body` (JSON) | — |
 
-- **cex_launch_create_launch_pool_order**: `body` is a JSON string: `{"pid": int, "rid": int, "amount": "string"}`. Returns `{"flow_id": integer}` on success.
-- **cex_launch_redeem_launch_pool**: `body` is a JSON string: `{"pid": int, "rid": int, "amount": "string"}`. Returns `{"success": boolean}` on success.
+- **`gate-cli cex launch pledge`**: `body` is a JSON string: `{"pid": int, "rid": int, "amount": "string"}`. Returns `{"flow_id": integer}` on success.
+- **`gate-cli cex launch redeem`**: `body` is a JSON string: `{"pid": int, "rid": int, "amount": "string"}`. Returns `{"success": boolean}` on success.
 - Both require API Key authentication.
 
 **API request — `CreateOrderV4` / `RedeemV4` fields:**
@@ -50,11 +50,11 @@ Stake tokens to LaunchPool projects and redeem staked assets.
 ## Workflow
 
 1. **Parse parameters**: Extract project name/coin, staking coin, and amount from user query.
-2. **Find project**: Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, and optional `search_coin` or `mortgage_coin` to identify the target project.
+2. **Find project**: Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, and optional `search_coin` or `mortgage_coin` to identify the target project.
 3. **Key data to extract**: From the project list, find the matching project's `pid` and the appropriate reward pool's `rid` based on the staking coin.
 4. **Show preview**: Display order preview with project name, staking coin, amount, estimated APR (`rate_year`), staking period. Ask user to confirm.
 5. **Wait for confirmation**: User must reply "confirm" to proceed or "cancel" to abort.
-6. **Execute stake**: Call `cex_launch_create_launch_pool_order` with `body` containing `pid`, `rid`, and `amount`.
+6. **Execute stake**: Call `gate-cli cex launch pledge` with `body` containing `pid`, `rid`, and `amount`.
 7. **Format response**: Show success or failure message.
 
 ## Report Template
@@ -74,10 +74,10 @@ Show a preview first, then the confirmation result. Include project name, stakin
 
 **Expected Behavior**:
 1. Extract: target project (e.g. "BTC"), staking coin (e.g. "USDT"), amount (e.g. "500")
-2. Call `cex_launch_list_launch_pool_projects` with `search_coin` or `mortgage_coin` to find the project
+2. Call `gate-cli cex launch projects` with `search_coin` or `mortgage_coin` to find the project
 3. Identify `pid` and `rid` from the matching project and reward pool
 4. Display order preview and ask for confirmation (show `name`, `coin`, `amount`, `rate_year` as percentage)
-5. On "confirm": call `cex_launch_create_launch_pool_order` with body `{"pid": {pid}, "rid": {rid}, "amount": "{amount}"}`
+5. On "confirm": call `gate-cli cex launch pledge` with body `{"pid": {pid}, "rid": {rid}, "amount": "{amount}"}`
 6. Display success with `flow_id`, or error with API error label
 
 **Response Template**:
@@ -111,7 +111,7 @@ Stake order submitted! Flow ID: {flow_id}. You have successfully staked {amount}
 1. Extract: target project, staking coin, redeem amount (or "all")
 2. Identify `pid` and `rid` for the project and reward pool
 3. Display redemption preview and ask for confirmation
-4. On "confirm": call `cex_launch_redeem_launch_pool` with body `{"pid": {pid}, "rid": {rid}, "amount": "{amount}"}`
+4. On "confirm": call `gate-cli cex launch redeem` with body `{"pid": {pid}, "rid": {rid}, "amount": "{amount}"}`
 5. Display success or error message
 
 **Response Template**:
@@ -137,10 +137,10 @@ Redeem successful! You have redeemed {amount} {coin} from the {name} LaunchPool 
 ## Workflow
 
 1. **Parse parameters**: Extract project name/coin, staking coin, and redeem amount from user query.
-2. **Identify project**: Determine `pid` and `rid` from user context or by calling `cex_launch_list_launch_pool_projects`.
+2. **Identify project**: Determine `pid` and `rid` from user context or by calling `gate-cli cex launch projects`.
 3. **Show preview**: Display redemption preview with project name, coin, amount, and early redemption warning.
 4. **Wait for confirmation**: User must reply "confirm" to proceed.
-5. **Execute redeem**: Call `cex_launch_redeem_launch_pool` with `body` containing `pid`, `rid`, and `amount`.
+5. **Execute redeem**: Call `gate-cli cex launch redeem` with `body` containing `pid`, `rid`, and `amount`.
 6. **Key data to extract**: Success/failure status, redeemed amount.
 7. **Format response**: Show confirmation result.
 

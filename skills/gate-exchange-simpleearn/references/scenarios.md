@@ -6,11 +6,11 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 
 | Purpose | MCP tool | Auth |
 |---------|----------|------|
-| Create lend or redeem | **cex_earn_create_uni_lend** | Yes |
-| Change min rate | **cex_earn_change_uni_lend** | Yes |
-| User lend list (positions) | **cex_earn_list_user_uni_lends** | Yes |
-| Single-currency total interest | **cex_earn_get_uni_interest** | Yes |
-| Estimated APY per currency | **cex_earn_list_uni_rate** | No |
+| Create lend or redeem | **`gate-cli cex earn uni lend`** | Yes |
+| Change min rate | **`gate-cli cex earn uni change`** | Yes |
+| User lend list (positions) | **`gate-cli cex earn uni lends`** | Yes |
+| Single-currency total interest | **`gate-cli cex earn uni interest`** | Yes |
+| Estimated APY per currency | **`gate-cli cex earn uni rate`** | No |
 
 ---
 
@@ -24,11 +24,11 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 **Expected Behavior**:
 1. Ask for missing inputs: currency, amount.
 2. If user provides `min_rate`, use it directly.
-3. If user does not provide `min_rate`, call `cex_earn_get_uni_currency(currency)` to fetch the currency's flexible `min_rate` and use it as default.
+3. If user does not provide `min_rate`, call `gate-cli cex earn uni currency` to fetch the currency's flexible `min_rate` and use it as default.
 4. Confirm details with the user (including the final `min_rate`).
-5. Call `cex_earn_create_uni_lend` with `type: lend`.
+5. Call `gate-cli cex earn uni lend` with `type: lend`.
 
-**MCP**: `cex_earn_create_uni_lend` (see `earn-uni-mcp-tools.md` §3).
+**MCP**: `gate-cli cex earn uni lend` (see `earn-uni-mcp-tools.md` §3).
 
 ---
 
@@ -42,9 +42,9 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 **Expected Behavior**:
 1. Ask for missing inputs: currency, amount.
 2. Confirm details with the user.
-3. Call `cex_earn_create_uni_lend` with `type: redeem`.
+3. Call `gate-cli cex earn uni lend` with `type: redeem`.
 
-**MCP**: `cex_earn_create_uni_lend` (see `earn-uni-mcp-tools.md` §3).
+**MCP**: `gate-cli cex earn uni lend` (see `earn-uni-mcp-tools.md` §3).
 
 ---
 
@@ -56,11 +56,11 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 - "My USDT Simple Earn position" / "How much BTC do I have in flexible earn?"
 
 **Expected Behavior**:
-1. Fetch data via `cex_earn_list_user_uni_lends(currency="USDT")`; from the returned list take **amount** (total position) for that currency.
+1. Fetch data via `gate-cli cex earn uni lends`; from the returned list take **amount** (total position) for that currency.
 2. No extra calculation; use the API-returned amount directly.
 3. Output success: Query submitted! Your current {currency} Simple Earn position is {amount}. Failure: Query submitted! {error toast}.
 
-**MCP** (see `earn-uni-mcp-tools.md` §4): **cex_earn_list_user_uni_lends**
+**MCP** (see `earn-uni-mcp-tools.md` §4): **`gate-cli cex earn uni lends`**
 
 ---
 
@@ -72,11 +72,11 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 - "My total Simple Earn positions" / "How much do I hold in flexible earn?"
 
 **Expected Behavior**:
-1. Fetch data via `cex_earn_list_user_uni_lends()` (no currency param) to get the full list of currencies.
+1. Fetch data via `gate-cli cex earn uni lends` (no currency param) to get the full list of currencies.
 2. From each record take **currency** and **amount**, format as a list.
 3. Output success: Query submitted! Your current Simple Earn positions: {list currency and amount per currency}. Failure: Query submitted! {error toast}.
 
-**MCP** (see `earn-uni-mcp-tools.md` §4): **cex_earn_list_user_uni_lends**
+**MCP** (see `earn-uni-mcp-tools.md` §4): **`gate-cli cex earn uni lends`**
 
 ---
 
@@ -88,11 +88,11 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 - "How much USDT interest have I received?" / "My BTC interest from flexible earn"
 
 **Expected Behavior**:
-1. Fetch data via `cex_earn_get_uni_interest(currency="USDT")`; use the returned **interest** field.
+1. Fetch data via `gate-cli cex earn uni interest`; use the returned **interest** field.
 2. No extra calculation; use the API-returned interest directly.
 3. Output success: Query submitted! Your current {currency} Simple Earn interest distributed is {interest}. Failure: Query submitted! {error toast}.
 
-**MCP** (see `earn-uni-mcp-tools.md` §7): **cex_earn_get_uni_interest**
+**MCP** (see `earn-uni-mcp-tools.md` §7): **`gate-cli cex earn uni interest`**
 
 ---
 
@@ -104,14 +104,14 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 - "Subscribe to the Simple Earn currency with highest APY" / "What's the highest APY in flexible earn? Subscribe to it"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_uni_rate()` to get estimated APY and find the highest currency.
+1. Call `gate-cli cex earn uni rate` to get estimated APY and find the highest currency.
 2. Ask for amount 
 3. If user provides `min_rate`, use it directly.
-4. If user does not provide `min_rate`, call `cex_earn_get_uni_currency(currency)` for that currency and use the returned flexible `min_rate` as default.
+4. If user does not provide `min_rate`, call `gate-cli cex earn uni currency` for that currency and use the returned flexible `min_rate` as default.
 5. Confirm details with the user (including the final `min_rate`).
-6. Call `cex_earn_create_uni_lend` with `type: lend`.
+6. Call `gate-cli cex earn uni lend` with `type: lend`.
 
-**MCP**: `cex_earn_list_uni_rate` then `cex_earn_create_uni_lend` (see `earn-uni-mcp-tools.md` §11, §3).
+**MCP**: `gate-cli cex earn uni rate` then `gate-cli cex earn uni lend` (see `earn-uni-mcp-tools.md` §11, §3).
 
 ---
 
@@ -125,9 +125,9 @@ Skill: Simple Earn (Uni) flexible. Scenarios map to **MCP tools**; for tool argu
 **Expected Behavior**:
 1. Ask for missing inputs: currency, min_rate.
 2. Confirm details with the user.
-3. Call `cex_earn_change_uni_lend`.
+3. Call `gate-cli cex earn uni change`.
 
-**MCP**: `cex_earn_change_uni_lend` (see `earn-uni-mcp-tools.md` §5).
+**MCP**: `gate-cli cex earn uni change` (see `earn-uni-mcp-tools.md` §5).
 
 ---
 
@@ -143,12 +143,12 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 | Purpose | MCP tool |
 |---------|----------|
-| List all fixed-term products | **cex_earn_list_earn_fixed_term_products** |
-| List fixed-term products by asset | **cex_earn_list_earn_fixed_term_products_by_asset** |
-| Create fixed-term subscribe | **cex_earn_create_earn_fixed_term_lend** |
-| Pre-redeem fixed-term order | **cex_earn_create_earn_fixed_term_pre_redeem** |
-| List user fixed-term positions | **cex_earn_list_earn_fixed_term_lends** |
-| Query fixed-term history | **cex_earn_list_earn_fixed_term_history** |
+| List all fixed-term products | **`gate-cli cex earn fixed products`** |
+| List fixed-term products by asset | **`gate-cli cex earn fixed products-asset`** |
+| Create fixed-term subscribe | **`gate-cli cex earn fixed create`** |
+| Pre-redeem fixed-term order | **`gate-cli cex earn fixed pre-redeem`** |
+| List user fixed-term positions | **`gate-cli cex earn fixed lends`** |
+| Query fixed-term history | **`gate-cli cex earn fixed history`** |
 
 ---
 
@@ -160,7 +160,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 - "Which Fixed Earn products are available?" / "Which fixed-term products can I subscribe to?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_earn_fixed_term_products` (gate-d-e) with **status=2 (subscribing)** and **show_status=2 (visible)**; only return products that are subscribable and visible. Paginate with `page` and `limit` as needed, and default `limit` to `10` when omitted.
+1. Call `gate-cli cex earn fixed products` (gate-d-e) with **status=2 (subscribing)** and **show_status=2 (visible)**; only return products that are subscribable and visible. Paginate with `page` and `limit` as needed, and default `limit` to `10` when omitted.
 2. Output: Query submitted! The Fixed Earn product list is as follows: then a table in the following format.
 
 **Output table format**: use the table title **"Fixed Earn products"** and the following column order (consistent with the frontend):
@@ -173,7 +173,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 - **Product type**：type 1→Normal，2→VIP。
 - **Early redemption / auto-compounding / maturity rollover**: fill Yes/No according to `pre_redeem`, `reinvest`, and `redeem_amount` (or `simple_earn`).
 
-**MCP** (see `fixed-earn-mcp-tools.md` §1): **cex_earn_list_earn_fixed_term_products**
+**MCP** (see `fixed-earn-mcp-tools.md` §1): **`gate-cli cex earn fixed products`**
 
 ---
 
@@ -186,11 +186,11 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 **Expected Behavior**:
 1. Extract asset (e.g. USDT) from user input; if missing, ask.
-2. Call `cex_earn_list_earn_fixed_term_products_by_asset` (gate-d-e) with `asset`; if the API supports it, pass **status=2** and **show_status=2** and only return subscribing and visible products.
+2. Call `gate-cli cex earn fixed products-asset` (gate-d-e) with `asset`; if the API supports it, pass **status=2** and **show_status=2** and only return subscribing and visible products.
 3. If the asset-scoped response does not include `Minimum subscription`, `Subscription limit`, `Remaining available amount`, or `Maturity rollover supported`, call the full product list with the same `asset` plus `status=2` and `show_status=2`, then use the matching product row to fill those fields.
 4. Output: Query submitted! The Fixed Earn USDT product list is as follows: then the same table structure as Scenario 1.
 
-**MCP** (see `fixed-earn-mcp-tools.md` §2): **cex_earn_list_earn_fixed_term_products_by_asset**
+**MCP** (see `fixed-earn-mcp-tools.md` §2): **`gate-cli cex earn fixed products-asset`**
 
 ---
 
@@ -203,10 +203,10 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 **Expected Behavior**:
 1. Extract or ask for the currency, amount, and term (e.g. 7 days); resolve to `product_id` (e.g. via the product list by asset + lock_up_period). **Only use products with status=2 (subscribing).**
-2. Call `cex_earn_create_earn_fixed_term_lend` (gate-d-e) with `product_id`, `amount`, `year_rate` (from product), and other required body fields.
+2. Call `gate-cli cex earn fixed create` (gate-d-e) with `product_id`, `amount`, `year_rate` (from product), and other required body fields.
 3. Output success: Subscription submitted! You have successfully subscribed to the {amount} {currency} Fixed Earn {lock_up_period}-day product {order_id}.
 
-**MCP** (see `fixed-earn-mcp-tools.md` §3): **cex_earn_create_earn_fixed_term_lend**
+**MCP** (see `fixed-earn-mcp-tools.md` §3): **`gate-cli cex earn fixed create`**
 
 ---
 
@@ -219,10 +219,10 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 **Expected Behavior**:
 1. Extract or ask: `order_id`.
-2. Call `cex_earn_create_earn_fixed_term_pre_redeem` (gate-d-e) with `order_id` (string).
+2. Call `gate-cli cex earn fixed pre-redeem` (gate-d-e) with `order_id` (string).
 3. Output success: Early redemption submitted! You have successfully early-redeemed the Fixed Earn {lock_up_period}-day product {order_id}; redeemed principal {principal}.
 
-**MCP** (see `fixed-earn-mcp-tools.md` §5): **cex_earn_create_earn_fixed_term_pre_redeem**
+**MCP** (see `fixed-earn-mcp-tools.md` §5): **`gate-cli cex earn fixed pre-redeem`**
 
 ---
 
@@ -234,7 +234,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 - "How many positions and how much amount are there in Fixed Earn?" / "What is the current total Fixed Earn position amount?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_earn_fixed_term_lends` (gate-d-e) with `order_type: "1"` (current orders), `page`, and `limit`; paginate if needed.
+1. Call `gate-cli cex earn fixed lends` (gate-d-e) with `order_type: "1"` (current orders), `page`, and `limit`; paginate if needed.
 2. Output: Query submitted! Your current Fixed Earn positions are as follows: then render the screenshot-style table below.
 
 **Output table format** (Fixed Earn total positions, screenshot style):
@@ -249,7 +249,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 - **Remaining days**: calculated from the maturity time and the current time.
 - **Early redemption / auto-compounding / maturity rollover**: fill Yes/No according to `product_info.pre_redeem`, `reinvest`, and `redeem_account` (1 → Yes, 0 → No).
 
-**MCP** (see `fixed-earn-mcp-tools.md` §4): **cex_earn_list_earn_fixed_term_lends**
+**MCP** (see `fixed-earn-mcp-tools.md` §4): **`gate-cli cex earn fixed lends`**
 
 ---
 
@@ -262,10 +262,10 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 **Expected Behavior**:
 1. Extract or ask: `order_id`.
-2. Call `cex_earn_list_earn_fixed_term_lends` (gate-d-e) with `order_type: "1"`, `order_id`, `page`, `limit`.
+2. Call `gate-cli cex earn fixed lends` (gate-d-e) with `order_type: "1"`, `order_id`, `page`, `limit`.
 3. Output: Query submitted! Your Fixed Earn position {order_id} is as follows: then render the same screenshot-style table, using the Scenario 5 column layout for the matching order.
 
-**MCP** (see `fixed-earn-mcp-tools.md` §4): **cex_earn_list_earn_fixed_term_lends**
+**MCP** (see `fixed-earn-mcp-tools.md` §4): **`gate-cli cex earn fixed lends`**
 
 ---
 
@@ -280,7 +280,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 
 **Expected Behavior**:
 1. Parse or ask time range (e.g. last 3 months, or start_at/end_at). Query the Fixed Earn transaction history via MCP; paginate or merge types as needed.
-2. Call `cex_earn_list_earn_fixed_term_history` with `type` (1=subscribe, 2=redeem, 3=interest, 4=extra bonus) and optionally `start_at`, `end_at`; may call multiple types and merge, or paginate.
+2. Call `gate-cli cex earn fixed history` with `type` (1=subscribe, 2=redeem, 3=interest, 4=extra bonus) and optionally `start_at`, `end_at`; may call multiple types and merge, or paginate.
 3. Output: **Query submitted! The Fixed Earn records are as follows** (if querying by time range, append "{start time} to {end time}"), then a table in the following format.
 
 **Output table format** (Fixed Earn records; subscribe/redeem/interest/extra bonus all use this table):
@@ -306,7 +306,7 @@ Skill: Fixed Earn. Nine cases map to **MCP tools**; for tool arguments and respo
 | Amount | **amount** | principal for subscribe/redeem, interest amount for interest |
 | Term (days) | **lock_up_period** | Term (days) |
 
-**MCP** (see `fixed-earn-mcp-tools.md` §6): **cex_earn_list_earn_fixed_term_history**
+**MCP** (see `fixed-earn-mcp-tools.md` §6): **`gate-cli cex earn fixed history`**
 
 ---
 

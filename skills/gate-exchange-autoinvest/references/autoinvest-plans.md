@@ -1,6 +1,6 @@
 # Gate Auto-Invest — Plan lifecycle (create, update, stop, top-up)
 
-Create, update, stop, and add-position workflows for fast auto-invest. Use the **write** tools in `SKILL.md` → **MCP tools**: `cex_earn_create_auto_invest_plan`, `cex_earn_update_auto_invest_plan`, `cex_earn_stop_auto_invest_plan`, `cex_earn_add_position_auto_invest_plan`.
+Create, update, stop, and add-position workflows for fast auto-invest. Use the **write** tools in `SKILL.md` → **MCP tools**: `gate-cli cex earn auto-invest create`, `gate-cli cex earn auto-invest update`, `gate-cli cex earn auto-invest stop`, `gate-cli cex earn auto-invest add-position`.
 
 ## ⚠️ Time Zone Handling (CRITICAL)
 
@@ -42,8 +42,8 @@ Map user intent to the **MCP tools** table in `SKILL.md`, then call the matching
 
 | Step | Tool |
 |------|------|
-| Check spot balance | `cex_spot_get_spot_accounts` |
-| Check Uni balance context | `cex_earn_list_user_uni_lends` (when relevant) |
+| Check spot balance | `gate-cli cex spot account get` |
+| Check Uni balance context | `gate-cli cex earn uni lends` (when relevant) |
 
 ---
 
@@ -54,20 +54,20 @@ Write operations (create, update, stop, top-up). Steps:
 1. **Schema check**: For the chosen write tool, confirm every **required** argument is available or has a documented default in the MCP schema; if not, **ask the user** to provide the missing value(s) (`SKILL.md` → **Error Handling** → **Parameter Hygiene**).
 2. **Parse**: invest currency (USDT/BTC only), targets, amount, cadence, optional plan name, optional fund flow.
 3. **Validate targets**:
-   - **Supported target coins** (creates, and updates that set or add targets): Call `cex_earn_list_auto_invest_coins` and verify every user-specified target symbol appears in the response. If any coin is missing from that list, **do not** proceed with the write; inform the user: "{SYMBOL} is not supported for auto-invest. Please remove it or choose a supported coin."
+   - **Supported target coins** (creates, and updates that set or add targets): Call `gate-cli cex earn auto-invest coins` and verify every user-specified target symbol appears in the response. If any coin is missing from that list, **do not** proceed with the write; inform the user: "{SYMBOL} is not supported for auto-invest. Please remove it or choose a supported coin."
    - **Multi-target plans only** — **Maximum targets**: A plan can have at most **10 target coins**
    - **Multi-target plans only** — **Minimum ratio per coin**: Each target coin must have at least **10% allocation**
    - If multi-target validation fails, reject and inform the user of these constraints
 4. **Validate amount** (for creates):
-   - Call `cex_earn_get_auto_invest_min_amount` to get minimum amount
-   - Call `cex_earn_list_auto_invest_config` to get maximum amount
+   - Call `gate-cli cex earn auto-invest min-amount` to get minimum amount
+   - Call `gate-cli cex earn auto-invest config` to get maximum amount
    - Verify user's amount is within [min, max] range; if not, reject and inform user
 5. **Validate execution time**: Ensure `plan_period_hour` is an integer 0-23 (only on-the-hour execution supported)
    - ⚠️ **IMPORTANT**: `plan_period_hour` uses **UTC time zone**. When user specifies a local time (e.g., "10:00 AM Beijing time"), you MUST convert it to UTC before passing to the API.
    - **Conversion example**: Beijing time 10:00 (UTC+8) → UTC 02:00 → pass `plan_period_hour: 2`
    - **Fallback**: If system time zone cannot be detected, use user's specified hour directly (e.g., user says "10:00" → use `plan_period_hour: 10`)
    - **Always clarify with user** in confirmation: show both local time and UTC time (if time zone detected), or note that time zone detection failed
-6. **`plan_period_day` (create plans only — required; must not be `0`)**: When calling `cex_earn_create_auto_invest_plan`, always pass **`plan_period_day`**. The value **must not be `0`**.
+6. **`plan_period_day` (create plans only — required; must not be `0`)**: When calling `gate-cli cex earn auto-invest create`, always pass **`plan_period_day`**. The value **must not be `0`**.
    - Meaning depends on **`plan_period_type`**:
      - **`monthly`**: Calendar day of the month, **1–30** (inclusive).
      - **`weekly`** or **`biweekly`**: Day of the week, **1–7**, where **1 = Monday** and **7 = Sunday**.
@@ -96,10 +96,10 @@ Write operations (create, update, stop, top-up). Steps:
 
 **Expected Behavior**:
 1. Validate amount range:
-   - Call `cex_earn_get_auto_invest_min_amount` with target coins
-   - Call `cex_earn_list_auto_invest_config` to get max amount
+   - Call `gate-cli cex earn auto-invest min-amount` with target coins
+   - Call `gate-cli cex earn auto-invest config` to get max amount
    - If user's amount is outside [min, max], reject and inform user of valid range
-2. `cex_spot_get_spot_accounts` (filter by invest currency) to check sufficiency for at least the first period.
+2. `gate-cli cex spot account get` (filter by invest currency) to check sufficiency for at least the first period.
 3. Set defaults if not provided:
    - `plan_period_hour`: default 10 (10:00 UTC, **NOT local time**)
    - `plan_period_day`: follow Workflow step 6 — use **`1`** for `daily` / `hourly` / `4-hourly`; for `monthly` use **1–30** from user intent; for `weekly` / `biweekly` use **1–7** (1 = Monday) from user intent (**never `0`**)
@@ -113,7 +113,7 @@ Write operations (create, update, stop, top-up). Steps:
    - `fund_flow: "auto_invest"` → Spot account (default)
    - `fund_flow: "earn"` → Simple Earn
 6. **Confirm**: Show an **Action Draft** (operation, amounts, targets, cadence, fund flow, UTC/local execution time); wait for explicit user confirmation per `SKILL.md` → **Safety Rules** and **Workflow** step 9 before calling the create tool.
-7. Call `cex_earn_create_auto_invest_plan` with parsed params.
+7. Call `gate-cli cex earn auto-invest create` with parsed params.
 8. On success, restate plan summary including fund flow destination (do **not** surface scheduled timing for the next automatic purchase).
 
 **Response Template**:
@@ -152,14 +152,14 @@ Write operations (create, update, stop, top-up). Steps:
    - Check that each coin's ratio ≥ 10 (10%)
    - If validation fails, reject immediately with clear explanation
 2. Validate amount range:
-   - Call `cex_earn_get_auto_invest_min_amount` with all target coins and their ratios
-   - Call `cex_earn_list_auto_invest_config` to get max amount
+   - Call `gate-cli cex earn auto-invest min-amount` with all target coins and their ratios
+   - Call `gate-cli cex earn auto-invest config` to get max amount
    - If amount is outside [min, max], reject with error message
 3. Verify total invest currency balance ≥ periodic total (per product rules).
 4. Set defaults for optional parameters (execution time, fund source, fund flow, **`plan_period_day`** per Workflow step 6 — never `0`).
    - **Note**: If user specifies execution time, remember to convert local time to UTC (see Time Zone Handling section)
 5. **Confirm**: Show an **Action Draft**; wait for explicit user confirmation per `SKILL.md` → **Safety Rules** before any create call.
-6. Call `cex_earn_create_auto_invest_plan` with multiple targets if product allows (e.g. max targets per MCP schema).
+6. Call `gate-cli cex earn auto-invest create` with multiple targets if product allows (e.g. max targets per MCP schema).
 
 **Response Template**:
 ```
@@ -184,7 +184,7 @@ Write operations (create, update, stop, top-up). Steps:
 - "Check if I have enough USDT for 200 biweekly into ETH, then create if ok."
 
 **Expected Behavior**:
-1. `cex_spot_get_spot_accounts` for USDT.
+1. `gate-cli cex spot account get` for USDT.
 2. If insufficient → **do not** create; explain shortfall.
 3. If sufficient → confirm once, then create.
 
@@ -203,7 +203,7 @@ Write operations (create, update, stop, top-up). Steps:
 2. Set `fund_flow: "earn"` in the create plan parameters
 3. Validate amount and balance (same as Scenario 1)
 4. Confirm with user, explicitly mentioning that purchased assets will auto-transfer to Simple Earn
-5. Call `cex_earn_create_auto_invest_plan` with `fund_flow: "earn"`
+5. Call `gate-cli cex earn auto-invest create` with `fund_flow: "earn"`
 6. On success, restate plan summary and confirm fund flow destination
 
 **Response Template**:
@@ -268,7 +268,7 @@ Write operations (create, update, stop, top-up). Steps:
 - "Show my ETH DCA plan details."
 
 **Expected Behavior**:
-1. Call `cex_earn_list_auto_invest_plans` if needed to resolve plan id; then `cex_earn_get_auto_invest_plan_detail`.
+1. Call `gate-cli cex earn auto-invest plans` if needed to resolve plan id; then `gate-cli cex earn auto-invest plan-detail`.
 2. Present invest currency, targets, amount, cadence, flags, execution counts (omit any field that only conveys **when the next automatic purchase will run**).
 
 ---
@@ -281,15 +281,15 @@ Write operations (create, update, stop, top-up). Steps:
 - "Stop my ETH auto-invest."
 
 **Expected Behavior**:
-1. **No stop MCP until a dedicated confirm reply**: **Do not** call `cex_earn_stop_auto_invest_plan` until the user has sent **one additional message after** the Action Draft (step 5), and that message is an unambiguous confirmation. Until then, you may use **read-only** MCP tools only (`cex_earn_list_auto_invest_plans`, `cex_earn_get_auto_invest_plan_detail`) to resolve the plan and build the draft.
-2. **Same-turn ban**: In the assistant turn where you **first** present the Action Draft for this stop request, **do not** call `cex_earn_stop_auto_invest_plan` — end that turn by asking the user to confirm. Even if the user already supplied a plan ID or name (e.g. "stop plan 12345"), you still **must** wait for their **next** message before calling the stop tool.
-3. If the user does not provide a plan ID, call `cex_earn_list_auto_invest_plans` to query all user plans.
+1. **No stop MCP until a dedicated confirm reply**: **Do not** call `gate-cli cex earn auto-invest stop` until the user has sent **one additional message after** the Action Draft (step 5), and that message is an unambiguous confirmation. Until then, you may use **read-only** MCP tools only (`gate-cli cex earn auto-invest plans`, `gate-cli cex earn auto-invest plan-detail`) to resolve the plan and build the draft.
+2. **Same-turn ban**: In the assistant turn where you **first** present the Action Draft for this stop request, **do not** call `gate-cli cex earn auto-invest stop` — end that turn by asking the user to confirm. Even if the user already supplied a plan ID or name (e.g. "stop plan 12345"), you still **must** wait for their **next** message before calling the stop tool.
+3. If the user does not provide a plan ID, call `gate-cli cex earn auto-invest plans` to query all user plans.
 4. Match by plan name:
    - If a match is found, use that plan's `id` for the stop call **only after** the confirming message (step 6).
    - If **multiple** plans share the same name, list the matching `id`s and ask the user to pick one before continuing.
    - If no name match is found, output all user plans and ask the user to specify which plan to stop.
 5. **Action Draft (turn 1)**: Present an **Action Draft** — plan `id`, name, summary (invest currency, amount per period, cadence as useful), and that **future automatic deductions will cease**. Ask clearly for a **reply** to proceed (e.g. reply **yes** or **confirm** to stop this plan). **Valid confirmation** in the **next** user message includes **confirm**, **yes**, **I confirm**, or another unambiguous equivalent. Do **not** treat vague replies as confirmation.
-6. **Only after** that **next** user message: If they explicitly confirm, call `cex_earn_stop_auto_invest_plan`. If they decline or are ambiguous, do **not** call the tool; clarify or re-show the draft as needed.
+6. **Only after** that **next** user message: If they explicitly confirm, call `gate-cli cex earn auto-invest stop`. If they decline or are ambiguous, do **not** call the tool; clarify or re-show the draft as needed.
 7. After success, explain holdings remain in spot unless product states otherwise.
 
 ---
@@ -304,17 +304,17 @@ Write operations (create, update, stop, top-up). Steps:
 - "Add another buy to my DCA"
 
 **Expected Behavior**:
-1. If the user does not provide a plan ID, call `cex_earn_list_auto_invest_plans` to query all user plans.
+1. If the user does not provide a plan ID, call `gate-cli cex earn auto-invest plans` to query all user plans.
 2. Match by plan name:
    - If a match is found, use that plan's ID.
    - If no name match is found, output all user plans and ask the user to specify which plan to top up.
 3. **Determine add position amount**:
    - If user specified an amount, use that amount.
-   - If user did NOT specify an amount (e.g., "add one more", "top up again"), call `cex_earn_get_auto_invest_plan_detail` to get the plan's `amount` field, and use that as the default add position amount.
+   - If user did NOT specify an amount (e.g., "add one more", "top up again"), call `gate-cli cex earn auto-invest plan-detail` to get the plan's `amount` field, and use that as the default add position amount.
    - Show the determined amount to the user for confirmation.
-4. `cex_spot_get_spot_accounts` to check balance sufficiency for the determined amount.
+4. `gate-cli cex spot account get` to check balance sufficiency for the determined amount.
 5. **Confirm with user**: Display add position details (plan name, amount, currency) and wait for explicit confirmation.
-6. **Call once only**: After user confirms, call `cex_earn_add_position_auto_invest_plan` **exactly once** with the plan ID and amount.
+6. **Call once only**: After user confirms, call `gate-cli cex earn auto-invest add-position` **exactly once** with the plan ID and amount.
 
 **Response Template**:
 ```
@@ -326,7 +326,7 @@ Write operations (create, update, stop, top-up). Steps:
 ```
 
 **Important**:
-- ⚠️ **Never call `cex_earn_add_position_auto_invest_plan` multiple times** for the same request
+- ⚠️ **Never call `gate-cli cex earn auto-invest add-position` multiple times** for the same request
 - Always confirm with user before executing
 - Default to plan's periodic amount when user doesn't specify
 
@@ -354,7 +354,7 @@ Use English for user-facing text. Per-scenario **Response Template** blocks appe
 
 | Condition | Action |
 |-----------|--------|
-| Unsupported target coin (not in `cex_earn_list_auto_invest_coins`) | Do not call the write tool; reject: "{SYMBOL} is not supported for auto-invest. Please remove it or choose a supported coin." |
+| Unsupported target coin (not in `gate-cli cex earn auto-invest coins`) | Do not call the write tool; reject: "{SYMBOL} is not supported for auto-invest. Please remove it or choose a supported coin." |
 | Too many target coins (> 10) | Reject immediately: "A plan can have at most 10 target coins. You specified {N} coins. Please reduce the number of targets." |
 | Coin ratio too small (< 10%) | Reject immediately: "Each target coin must have at least 10% allocation. Coin {X} has only {Y}%. Please adjust the ratios to ensure each coin has at least 10%." |
 | `plan_period_day` is `0` or out of range for `plan_period_type` | Do not call create; explain valid ranges (Workflow step 6): monthly **1–30**; weekly/biweekly **1–7** (1 = Monday); daily/hourly/4-hourly use **`1`**. |

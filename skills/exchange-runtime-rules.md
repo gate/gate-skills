@@ -1,6 +1,6 @@
 ---
-version: v1.1.0
-last_updated: 2026-03-17
+version: v1.1.3
+last_updated: 2026-04-22
 ---
 
 # Gate Skills Common Runtime Rules
@@ -74,3 +74,31 @@ CEX 有两种部署方式，授权方式不同：
 1. Never ask the user to paste secrets (Secret Key / mcp_token / API Key) directly into chat; prefer secure local configuration via environment variables or config files.
 2. After authorization is completed, automatically continue the original task — do not require the user to repeat their request.
 3. Display auth/setup URLs as plain text (no markdown link formatting, no brackets or quotes around URLs).
+
+---
+
+## 4. Resolving which `gate-cli` to run (`gate-exchange-*`, installers)
+
+When invoking **`gate-cli`** from a shell or script (the command name **`gate-cli`**), resolve the executable **strictly in this order**:
+
+1. **System / PATH:** If **`command -v gate-cli`** resolves to an executable **and** **`gate-cli --version`** exits successfully, use that binary for all documented **`gate-cli`** commands.
+
+2. **`${HOME}/.local/bin/gate-cli`:** If step 1 does **not** yield a usable CLI, **if** this path exists **and** is executable, treat **`gate-cli`** as shorthand for invoking **`"${HOME}/.local/bin/gate-cli"`** (always use this full path in automation when PATH is unreliable).
+
+3. **`${HOME}/.openclaw/skills/bin/gate-cli`:** If steps 1–2 do **not** yield a usable CLI, **if** this path exists **and** is executable, treat **`gate-cli`** as shorthand for **`"${HOME}/.openclaw/skills/bin/gate-cli"`**.
+
+Do **not** assume a single global install location; agents and scripts MUST follow this detection order.
+
+---
+
+## 5. `gate-cli cex …` execution flow (`gate-exchange-*`)
+
+For any **`gate-cli cex …`** leaf command on the host, **strictly**:
+
+1. Run **`gate-cli cex … --help`** first (same subcommand path, **`--help`** before other flags) to see if the CLI documents **required** flags or arguments.
+2. **If there are required fields** (e.g. `--currency`): gather values (never API secrets in chat), then run the real command **without** `--help`, e.g. `gate-cli cex spot account get --currency BTC`.
+3. **If there are no required fields** beyond auth: run **`gate-cli cex …`** directly (add only optional flags the task still needs).
+
+**Example:** `gate-cli cex spot account get` → `gate-cli cex spot account get --help` → if `--currency` is required, then `gate-cli cex spot account get --currency BTC`; otherwise `gate-cli cex spot account get` as documented.
+
+If `--help` is ambiguous, use a read-only probe or explicit user clarification—especially before writes.

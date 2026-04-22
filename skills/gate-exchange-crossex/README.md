@@ -51,7 +51,7 @@ Intents are routed to corresponding reference documents via keywords:
 | Order Management        | query orders, cancel order, amend order, list orders         | `references/order-management.md` |
 | Position Query          | query positions, check positions, positions                  | `references/position-query.md`   |
 | History Query           | history query, trade history, interest history, history      | `references/history-query.md`    |
-| Asset Query             | query assets, total assets, available margin, assets         | Call `cex_crx_get_crx_account`   |
+| Asset Query             | query assets, total assets, available margin, assets         | Call `gate-cli cex cross-ex account get`   |
 
 ---
 
@@ -59,8 +59,8 @@ Intents are routed to corresponding reference documents via keywords:
 
 ### Prerequisites
 
-- Gate MCP configured and connected
-- Gate API Key used by MCP must have **CrossEx** permission to operate on the CrossEx account. You use only a small amount of funds for testing.
+- gate-cli configured and connected
+- Gate API Key used by `gate-cli` must have **CrossEx** permission to operate on the CrossEx account. You use only a small amount of funds for testing.
 
 ### Example Prompts
 
@@ -98,7 +98,7 @@ gate-exchange-crossex/
 ├── SKILL.md
 ├── CHANGELOG.md
 └── references/
-    ├── runtime-rules.md  # Shared runtime rules (auth, MCP check, etc.)
+    ├── runtime-rules.md  # Shared runtime rules (auth, `gate-cli` check, etc.)
     ├── spot-trading.md            # Spot trading scenarios
     ├── margin-trading.md          # Margin trading scenarios
     ├── futures-trading.md         # Futures trading scenarios
@@ -127,11 +127,11 @@ Format: `{EXCHANGE}_{BUSINESS_TYPE}_{BASE}_{QUOTE}`
 
 ## Security
 
-- Only call `cex_crx_*` MCP functions
+- Only call `cex_crx_*` `gate-cli` functions
 - All trading operations require user confirmation before execution
 - Does not handle or store credentials in the skill
 - **No P2P transfer**: This skill does not support transfers between different users; only transfers within the user's own accounts (e.g., SPOT ↔ CROSSEX) are allowed.
-- **No Secret paste**: Never prompt the user to paste API Secret Key into chat; prefer secure local MCP configuration.
+- **No Secret paste**: Never prompt the user to paste API Secret Key into chat; prefer secure local `gate-cli` configuration.
 
 **⚠️ Important Notice**:
 > Never reveal your API Key or Secret to anyone (including customer support).

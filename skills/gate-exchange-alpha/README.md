@@ -20,7 +20,7 @@ A comprehensive skill for Gate Alpha platform covering token discovery, market v
 
 ```
 gate-exchange-alpha/
-├── SKILL.md              # Routing entry + MCP tools + domain knowledge
+├── SKILL.md              # Routing entry + `gate-cli` commands + domain knowledge
 ├── README.md             # Human-readable documentation
 ├── CHANGELOG.md          # Version history
 └── references/
@@ -33,19 +33,19 @@ gate-exchange-alpha/
     └── order-management.md   # Cases 18-21: Order queries and tracking
 ```
 
-## MCP Tools Used
+## gate-cli command index Used
 
 | Tool | Auth Required | Purpose |
 |------|--------------|---------|
-| `cex_alpha_list_alpha_currencies` | No | List tradable currencies with details |
-| `cex_alpha_list_alpha_tokens` | No | Filter tokens by chain, platform, or address |
-| `cex_alpha_list_alpha_tickers` | No | Get market tickers and prices |
-| `cex_alpha_list_alpha_accounts` | Yes | Query account balances |
-| `cex_alpha_quote_alpha_order` | Yes | Get price quote for buy/sell (quote_id valid 1 min) |
-| `cex_alpha_place_alpha_order` | Yes | Place buy/sell order with quote_id |
-| `cex_alpha_get_alpha_order` | Yes | Get single order details by order_id |
-| `cex_alpha_list_alpha_orders` | Yes | List orders with filters |
-| `cex_alpha_list_alpha_account_book` | Yes | Query transaction history by time range |
+| `gate-cli cex alpha market currencies` | No | List tradable currencies with details |
+| `gate-cli cex alpha market tokens` | No | Filter tokens by chain, platform, or address |
+| `gate-cli cex alpha market tickers` | No | Get market tickers and prices |
+| `gate-cli cex alpha account balances` | Yes | Query account balances |
+| `gate-cli cex alpha order quote` | Yes | Get price quote for buy/sell (quote_id valid 1 min) |
+| `gate-cli cex alpha order place` | Yes | Place buy/sell order with quote_id |
+| `gate-cli cex alpha order get` | Yes | Get single order details by order_id |
+| `gate-cli cex alpha order list` | Yes | List orders with filters |
+| `gate-cli cex alpha account book` | Yes | Query transaction history by time range |
 
 ## Usage Examples
 

@@ -37,4 +37,4 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Query airdrop reward records by time and coin
 - Compliance error handling for region restrictions
 - 16 scenarios across 3 sub-modules
-- Support for 5 MCP tools from gate-dev and g-d-x services
+- Support for 5 `gate-cli` commands from gate-dev and g-d-x services

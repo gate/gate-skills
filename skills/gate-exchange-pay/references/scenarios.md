@@ -6,7 +6,7 @@ This document defines behavior-oriented scenario templates for Gate Pay payment 
 
 ## Global Execution Gate (Mandatory)
 
-For every scenario that includes `cex_pay_create_ai_order_pay`:
+For every scenario that includes `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二):
 - Verify all payment inputs (order_id, amount, currency) are complete
 - Validate user has completed Gate payment authorization (guide auth flow if missing)
 - Confirm user payment intent is clear (e.g., "pay", "confirm payment", "checkout")
@@ -38,7 +38,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
    Amount due: {amount} {currency}
    Payment method: Gate Pay
    ```
-5. Call `cex_pay_create_ai_order_pay` with the extracted `order_id`, `amount`, and `currency`.
+5. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with the extracted `order_id`, `amount`, and `currency`.
 6. On success, output receipt in the user's language using those same values. Illustration when the first prompt shape was used (`ABC123`, `50 USDT`):
    ```
    ✅ Payment Success
@@ -66,7 +66,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 **Expected Behavior**:
 1. Verify payment inputs: order_id=ORDER123, amount=200, currency=USDT extracted.
 2. Check authorization status: detect authorization missing or incomplete.
-3. Do NOT call `cex_pay_create_ai_order_pay` yet.
+3. Do NOT call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) yet.
 4. Guide user to complete Gate payment authorization:
    ```
    Before proceeding with payment, you need to complete Gate payment authorization.
@@ -74,7 +74,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
    [Provide authorization link or instructions]
    ```
 5. After user completes authorization and confirms intent again (e.g., "OK, now pay"), repeat readiness checks.
-6. Call `cex_pay_create_ai_order_pay` and output success receipt (as in Scenario 1).
+6. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) and output success receipt (as in Scenario 1).
 
 **Unexpected Behavior**:
 1. Attempts to call payment API without authorization, resulting in API error.
@@ -93,7 +93,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 1. Detect user's language is Chinese from conversation context (or the payment-turn locale).
 2. Verify inputs: order_id=12345, amount=100, currency=USDT.
 3. Validate authorization and confirm intent.
-4. Call `cex_pay_create_ai_order_pay`.
+4. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 5. Output receipt in Chinese:
    ```
    ✅ 支付成功
@@ -122,7 +122,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 **Expected Behavior**:
 1. Verify inputs: order_id=LOW_BALANCE, amount=1000, currency=USDT.
 2. Validate authorization and confirm intent.
-3. Call `cex_pay_create_ai_order_pay`.
+3. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 4. API returns insufficient balance error.
 5. Output user-friendly error message in user's language:
    ```
@@ -146,7 +146,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Verify inputs complete.
-2. Attempt to call `cex_pay_create_ai_order_pay`.
+2. Attempt to call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. API returns authorization expired/invalid error.
 4. Output error explanation in user's language:
    ```
@@ -170,7 +170,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Verify inputs: order_id=INVALID_ORDER_ID extracted.
-2. Call `cex_pay_create_ai_order_pay`.
+2. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. API returns order not found error.
 4. Output error explanation:
    ```
@@ -194,7 +194,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Verify inputs: order_id=EXPIRED_ORDER.
-2. Call `cex_pay_create_ai_order_pay`.
+2. Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. API returns order expired error.
 4. Output error explanation:
    ```
@@ -217,7 +217,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Verify inputs complete.
-2. Attempt to call `cex_pay_create_ai_order_pay`.
+2. Attempt to call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. API call times out or returns system error (non-business error).
 4. Output neutral error message without exposing technical details:
    ```
@@ -244,7 +244,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Detect missing required fields: order_id, amount, or currency not extracted.
-2. Do NOT call `cex_pay_create_ai_order_pay`.
+2. Do NOT call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. Ask user to provide complete payment details:
    ```
    Payment cannot be processed: Some required information is missing.
@@ -270,7 +270,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Detect that order_id=DUP123 was already paid in current conversation context.
-2. Do NOT call `cex_pay_create_ai_order_pay` again.
+2. Do NOT call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) again.
 3. Inform user:
    ```
    This order (#DUP123) has already been paid in this session.
@@ -293,7 +293,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 
 **Expected Behavior**:
 1. Recognize this is a status query request, not a payment execution request.
-2. Do NOT call `cex_pay_create_ai_order_pay` as a substitute for querying status.
+2. Do NOT call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) as a substitute for querying status.
 3. Explain limitation:
    ```
    I cannot query payment status directly (no status query tool available).
@@ -317,7 +317,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 **Expected Behavior**:
 1. Initial inputs verified: order_id=CANCEL_ORDER, amount=50, currency=USDT.
 2. User cancels or declines before payment execution.
-3. Do NOT call `cex_pay_create_ai_order_pay`.
+3. Do NOT call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 4. Acknowledge cancellation:
    ```
    Payment cancelled. No charge has been made to your Gate Pay account.
@@ -342,7 +342,7 @@ If confirmation is missing/ambiguous or authorization is invalid, do not execute
 **Expected Behavior**:
 1. Detect the payment-turn locale (e.g., Chinese) from the user message or conversation context, even when the documentation example prompt is English.
 2. Verify inputs: order_id=LANG_SWITCH, amount=50, currency=USDT.
-3. Execute payment via `cex_pay_create_ai_order_pay`.
+3. Execute payment via `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 4. Output receipt in Chinese when that is the payment-turn locale:
    ```
    ✅ 支付成功

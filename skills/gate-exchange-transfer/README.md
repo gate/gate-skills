@@ -53,7 +53,7 @@ gate-exchange-transfer/
 
 ## Prerequisites
 
-- Gate MCP configured and connected
+- gate-cli configured and connected
 - Authentication (OAuth) required
 - Sufficient balance in source account
 

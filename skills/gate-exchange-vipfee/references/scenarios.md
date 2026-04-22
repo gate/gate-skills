@@ -12,7 +12,7 @@
 
 **Expected Behavior**:
 1. Identify query type as "vip"
-2. Call `cex_account_get_account_detail` to retrieve account profile
+2. Call `gate-cli cex account detail` to retrieve account profile
 3. Extract VIP level from the response
 4. Return VIP tier in the Report Template format
 
@@ -28,7 +28,7 @@
 
 **Expected Behavior**:
 1. Identify query type as "fee"
-2. Call `cex_wallet_get_wallet_fee` to retrieve fee rate data
+2. Call `gate-cli cex wallet market trade-fee` to retrieve fee rate data
 3. Extract spot maker/taker fee and futures maker/taker fee
 4. Return fee rates in the Report Template format with spot and futures categories
 
@@ -44,8 +44,8 @@
 
 **Expected Behavior**:
 1. Identify query type as "combined"
-2. Call `cex_account_get_account_detail` to retrieve VIP tier
-3. Call `cex_wallet_get_wallet_fee` to retrieve fee rates
+2. Call `gate-cli cex account detail` to retrieve VIP tier
+3. Call `gate-cli cex wallet market trade-fee` to retrieve fee rates
 4. Return combined result with both VIP tier and fee rate sections
 
 ## Scenario 4: Query Fee for Specific Trading Pair
@@ -59,7 +59,7 @@
 
 **Expected Behavior**:
 1. Identify query type as "fee" with `currency_pair` parameter
-2. Call `cex_wallet_get_wallet_fee` with `currency_pair` set to the specified pair
+2. Call `gate-cli cex wallet market trade-fee` with `currency_pair` set to the specified pair
 3. Extract fee rates for the specified pair
 4. Return fee rates in the Report Template format
 
@@ -74,6 +74,6 @@
 
 **Expected Behavior**:
 1. Identify query type as "fee" with `settle` parameter
-2. Call `cex_wallet_get_wallet_fee` with `settle` set to the specified currency (BTC / USDT / USD)
+2. Call `gate-cli cex wallet market trade-fee` with `settle` set to the specified currency (BTC / USDT / USD)
 3. Extract futures maker/taker fee rates
 4. Return futures fee rates in the Report Template format

@@ -29,14 +29,14 @@ User Query
           │
           ▼
 ┌─────────────────────┐
-│  Gate MCP Tools      │
+│  gate-cli commands      │
 │  (API v4 Endpoints)  │
 │                      │
-│  • cex_sa_get_sa     │
-│  • cex_sa_list_sas   │
-│  • cex_sa_create_sa  │
-│  • cex_sa_lock_sa    │
-│  • cex_sa_unlock_sa  │
+│  • `gate-cli cex sub-account get`     │
+│  • `gate-cli cex sub-account list`   │
+│  • `gate-cli cex sub-account create`  │
+│  • `gate-cli cex sub-account lock`    │
+│  • `gate-cli cex sub-account unlock`  │
 └─────────┬───────────┘
           │
           ▼
@@ -46,19 +46,19 @@ User Query
 └─────────────────────┘
 ```
 
-## MCP Tools
+## gate-cli command index
 
 | Tool | Method | Endpoint | Auth | Description |
 |------|--------|----------|------|-------------|
-| `cex_sa_get_sa` | GET | `/api/v4/sub_accounts/{user_id}` | Yes | Get sub-account details |
-| `cex_sa_list_sas` | GET | `/api/v4/sub_accounts` | Yes | List all sub-accounts |
-| `cex_sa_create_sa` | POST | `/api/v4/sub_accounts` | Yes | Create a new sub-account |
-| `cex_sa_lock_sa` | POST | `/api/v4/sub_accounts/{user_id}/lock` | Yes | Lock a sub-account |
-| `cex_sa_unlock_sa` | POST | `/api/v4/sub_accounts/{user_id}/unlock` | Yes | Unlock a sub-account |
+| `gate-cli cex sub-account get` | GET | `/api/v4/sub_accounts/{user_id}` | Yes | Get sub-account details |
+| `gate-cli cex sub-account list` | GET | `/api/v4/sub_accounts` | Yes | List all sub-accounts |
+| `gate-cli cex sub-account create` | POST | `/api/v4/sub_accounts` | Yes | Create a new sub-account |
+| `gate-cli cex sub-account lock` | POST | `/api/v4/sub_accounts/{user_id}/lock` | Yes | Lock a sub-account |
+| `gate-cli cex sub-account unlock` | POST | `/api/v4/sub_accounts/{user_id}/unlock` | Yes | Unlock a sub-account |
 
 ## Quick Start
 
-1. Install the [Gate MCP server](https://github.com/gate/gate-mcp)
+1. Install the [gate-cli](https://github.com/gate/gate-cli)
 2. Load this skill into your AI Agent (Claude, ChatGPT, etc.)
 3. Try: _"Show me all my sub-accounts"_
 

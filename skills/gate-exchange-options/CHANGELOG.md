@@ -34,7 +34,7 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 - **Close position**: Documented API semantics — full close uses `close: true`, `size: 0`; partial close uses `reduce_only: true` and size (negative for long, positive for short). Market = price `"0"`, tif `"ioc"`. Note on `order_size_min` for partial size.
 - **Place order**: Added contract name format; "strike at current price" resolution via underlying ticker and nearest strike; precision (order_size_min, order_price_round) from `get_options_contract`.
 - **Cancel order**: Documented single cancel by order_id vs batch cancel (DELETE with optional underlying, contract, side). Note on listing open orders first when user specifies strike/expiry without order_id.
-- **Amend order**: Clarified that amend may be backend-dependent (trading-api/MCP); if unsupported, prompt user to cancel and replace. Note on price/size precision.
+- **Amend order**: Clarified that amend may be backend-dependent (trading-api/`gate-cli`); if unsupported, prompt user to cancel and replace. Note on price/size precision.
 - **SKILL.md**: Execution workflow now includes contract format, disambiguation (expiration / strike), pre-checks (balance, order_size_min), and amend fallback. Safety rules extended with precision and amend-not-supported handling.
 
 ---

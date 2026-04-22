@@ -10,13 +10,13 @@ An AI Agent skill that enables Gate Simple Earn **flexible (Uni)** and **fixed-t
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **Subscribe (lend)** | Call `cex_earn_create_uni_lend` with `type: lend` after user confirmation | "Subscribe 100 USDT to Simple Earn" |
-| **Redeem** | Call `cex_earn_create_uni_lend` with `type: redeem` after user confirmation | "Redeem 100 USDT from Simple Earn" |
+| **Subscribe (lend)** | Call `gate-cli cex earn uni lend` with `type: lend` after user confirmation | "Subscribe 100 USDT to Simple Earn" |
+| **Redeem** | Call `gate-cli cex earn uni lend` with `type: redeem` after user confirmation | "Redeem 100 USDT from Simple Earn" |
 | **Single-currency position** | Query Simple Earn position for one currency | "My USDT Simple Earn position" |
 | **All positions** | Query all Simple Earn positions | "All Simple Earn positions" |
 | **Single-currency interest** | Query cumulative interest for one currency | "How much USDT interest" |
-| **Subscribe top APY** | Show top APY currency via `cex_earn_list_uni_rate`, confirm, then subscribe | "Subscribe to top APY currency" |
-| **Change min rate** | Call `cex_earn_change_uni_lend` after user confirmation | "Change min rate for USDT to 0.05" |
+| **Subscribe top APY** | Show top APY currency via `gate-cli cex earn uni rate`, confirm, then subscribe | "Subscribe to top APY currency" |
+| **Change min rate** | Call `gate-cli cex earn uni change` after user confirmation | "Change min rate for USDT to 0.05" |
 
 #### Fixed-term
 
@@ -43,7 +43,7 @@ User Query
           │
           ▼
 ┌─────────────────────┐
-│ Gate MCP Tools      │
+│ gate-cli commands      │
 │ (API v4 Endpoints)  │
 └─────────┬───────────┘
           │
@@ -54,42 +54,42 @@ User Query
 └─────────────────────┘
 ```
 
-## MCP Tools
+## gate-cli command index
 
 ### Flexible (Uni)
 
 | Tool | Method | Endpoint | Auth | Description |
 |------|--------|----------|------|-------------|
-| `cex_earn_list_uni_rate` | GET | `/api/v4/earn/uni/rate` | No | Estimated APY per currency (pair with get_uni_currency for min lend limits) |
-| `cex_earn_get_uni_currency` | GET | `/api/v4/earn/uni/currencies/{currency}` | No | Single-currency details (min_rate for subscribe) |
-| `cex_earn_create_uni_lend` | POST | `/api/v4/earn/uni/lends` | Yes | Subscribe (lend) or redeem |
-| `cex_earn_change_uni_lend` | PATCH | `/api/v4/earn/uni/lends` | Yes | Change min rate |
-| `cex_earn_list_user_uni_lends` | GET | `/api/v4/earn/uni/lends` | Yes | User positions (optional currency filter) |
-| `cex_earn_get_uni_interest` | GET | `/api/v4/earn/uni/interests/{currency}` | Yes | Single-currency cumulative interest |
-| `cex_earn_list_uni_rate` | GET | `/api/v4/earn/uni/rate` | No | Estimated APY per currency (for top APY) |
+| `gate-cli cex earn uni rate` | GET | `/api/v4/earn/uni/rate` | No | Estimated APY per currency (pair with get_uni_currency for min lend limits) |
+| `gate-cli cex earn uni currency` | GET | `/api/v4/earn/uni/currencies/{currency}` | No | Single-currency details (min_rate for subscribe) |
+| `gate-cli cex earn uni lend` | POST | `/api/v4/earn/uni/lends` | Yes | Subscribe (lend) or redeem |
+| `gate-cli cex earn uni change` | PATCH | `/api/v4/earn/uni/lends` | Yes | Change min rate |
+| `gate-cli cex earn uni lends` | GET | `/api/v4/earn/uni/lends` | Yes | User positions (optional currency filter) |
+| `gate-cli cex earn uni interest` | GET | `/api/v4/earn/uni/interests/{currency}` | Yes | Single-currency cumulative interest |
+| `gate-cli cex earn uni rate` | GET | `/api/v4/earn/uni/rate` | No | Estimated APY per currency (for top APY) |
 
 ### Fixed-term
 
 | Tool | Method | Endpoint | Auth | Description |
 |------|--------|----------|------|-------------|
-| `cex_earn_list_earn_fixed_term_products` | GET | `/api/product` | No | List all fixed-term products |
-| `cex_earn_list_earn_fixed_term_products_by_asset` | GET | `/api/product/{asset}/list` | No | List fixed-term products by currency |
-| `cex_earn_create_earn_fixed_term_lend` | POST | `/api/user/lend` | Yes | Subscribe to a fixed-term product |
-| `cex_earn_create_earn_fixed_term_pre_redeem` | POST | `/api/user/pre-redeem` | Yes | Early redeem a fixed-term order |
-| `cex_earn_list_earn_fixed_term_lends` | GET | `/api/user/lend` | Yes | Fixed-term positions and order detail |
-| `cex_earn_list_earn_fixed_term_history` | GET | `/api/user/history` | Yes | Fixed-term history records |
+| `gate-cli cex earn fixed products` | GET | `/api/product` | No | List all fixed-term products |
+| `gate-cli cex earn fixed products-asset` | GET | `/api/product/{asset}/list` | No | List fixed-term products by currency |
+| `gate-cli cex earn fixed create` | POST | `/api/user/lend` | Yes | Subscribe to a fixed-term product |
+| `gate-cli cex earn fixed pre-redeem` | POST | `/api/user/pre-redeem` | Yes | Early redeem a fixed-term order |
+| `gate-cli cex earn fixed lends` | GET | `/api/user/lend` | Yes | Fixed-term positions and order detail |
+| `gate-cli cex earn fixed history` | GET | `/api/user/history` | Yes | Fixed-term history records |
 
-MCP tool arguments and response: `references/earn-uni-mcp-tools.md`, `references/fixed-earn-mcp-tools.md`.
+Command arguments and response: `references/earn-uni-gate-cli-tools.md`, `references/fixed-earn-gate-cli-tools.md`.
 
 ## Quick Start
 
-1. Install the [Gate MCP server](https://github.com/gate/gate-mcp)
+1. Install the [gate-cli](https://github.com/gate/gate-cli)
 2. Load this skill into your AI Agent (Claude, Cursor, etc.)
 3. Try: _"My USDT Simple Earn position"_, _"Subscribe 100 USDT"_, _"Which Fixed Earn products are available for USDT?"_, or _"Check fixed-term order 5862443199"_
 
 ## Safety & Compliance
 
-- **Flexible (Uni) replies**: Do not show time-related fields from MCP (timestamps, chart times, history times); amounts/rates/status only.
+- **Flexible (Uni) replies**: Do not show time-related fields from `gate-cli` (timestamps, chart times, history times); amounts/rates/status only.
 - **Subscribe/redeem**: Always confirm currency/amount (and min_rate for flexible lend, or term/order_id for fixed-term) before calling.
 - No investment advice is provided; APY and rates are for reference only.
 - Sensitive user data (API keys, balances) is never logged or exposed in responses.
@@ -97,7 +97,7 @@ MCP tool arguments and response: `references/earn-uni-mcp-tools.md`, `references
 
 ## Authentication
 
-This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+This skill does **not** read secrets from chat. Configure **`gate-cli`** on the agent host with **`gate-cli config init`** or **`GATE_API_KEY`** / **`GATE_API_SECRET`**, with Earn-related API permissions. See [gate-cli](https://github.com/gate/gate-cli) and run `sh ./setup.sh` from this skill directory for installation.
 
 ## Source
 

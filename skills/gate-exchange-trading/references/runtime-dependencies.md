@@ -2,16 +2,6 @@
 
 This file defines the minimum runtime dependencies for `gate-exchange-trading`.
 
-## 1. Required MCP Surfaces
-
-The skill is portable only when the runtime exposes these baseline surfaces:
-
-- `info_*` from Gate Info MCP
-- `news_feed_*` from Gate News MCP
-- read-only `cex_spot_*` / `cex_fx_*` market-data tools from Gate public market MCP or a local combined Gate MCP runtime
-- private `cex_*` trading and account tools from authenticated Gate Exchange MCP or a local authenticated Gate MCP runtime
-
-Optional runtime extras may exist, but the skill must not depend on them for baseline scenarios.
 
 ## 2. Baseline Tool Families
 

@@ -15,8 +15,8 @@ Classify the request into one of four cases:
 ### Step 2: Call Tools and Extract Data
 
 Use the minimal tool set required:
-- Single order detail: `cex_alpha_get_alpha_order` with `order_id`
-- Order list with filters: `cex_alpha_list_alpha_orders` with optional `currency`, `side`, `status`, `from`, `to`, `page`, `limit`
+- Single order detail: `gate-cli cex alpha order get` with `order_id`
+- Order list with filters: `gate-cli cex alpha order list` with optional `currency`, `side`, `status`, `from`, `to`, `page`, `limit`
 
 Order status enumeration:
 - `0` = All (used as filter to return all statuses)
@@ -95,7 +95,7 @@ For order list:
 
 **Expected Behavior**:
 1. Obtain the `order_id` from the user. If the order was placed in the current conversation, use the order ID from the previous order response. If the user doesn't provide an order ID, ask for it.
-2. Call `cex_alpha_get_alpha_order` with `order_id={order_id}`.
+2. Call `gate-cli cex alpha order get` with `order_id={order_id}`.
 3. Present the full order detail including status, amounts, transaction hash, fees, and timestamps.
 4. Interpret the status for the user (e.g., "Your order was successful" for status 2, "Your order failed because..." for status 3).
 
@@ -110,7 +110,7 @@ For order list:
 
 **Expected Behavior**:
 1. Extract filter criteria from the user request: currency symbol, status (if specified).
-2. Call `cex_alpha_list_alpha_orders` with `side="buy"` and any additional filters:
+2. Call `gate-cli cex alpha order list` with `side="buy"` and any additional filters:
    - `currency={symbol}` if a specific token is mentioned
    - `status={status_code}` if a specific status is mentioned (e.g., "成功" → `status=2`)
    - Default `status=0` (all) if not specified
@@ -128,7 +128,7 @@ For order list:
 
 **Expected Behavior**:
 1. Extract filter criteria from the user request: currency symbol, status (if specified).
-2. Call `cex_alpha_list_alpha_orders` with `side="sell"` and any additional filters:
+2. Call `gate-cli cex alpha order list` with `side="sell"` and any additional filters:
    - `currency={symbol}` if a specific token is mentioned
    - `status={status_code}` if a specific status is mentioned
    - Default `status=0` (all) if not specified
@@ -147,6 +147,6 @@ For order list:
 **Expected Behavior**:
 1. Parse the user's time range and convert to Unix timestamps for `from` and optionally `to`.
 2. Extract any additional filters: `side` (buy/sell) and `currency` if mentioned.
-3. Call `cex_alpha_list_alpha_orders` with `from={start_timestamp}`, `to={end_timestamp}` (if specified), and any additional filters. Use `status=0` to include all statuses unless the user specifies otherwise.
+3. Call `gate-cli cex alpha order list` with `from={start_timestamp}`, `to={end_timestamp}` (if specified), and any additional filters. Use `status=0` to include all statuses unless the user specifies otherwise.
 4. Present the order list in a table sorted by creation time.
 5. If there are more pages, inform the user and offer to show the next page.

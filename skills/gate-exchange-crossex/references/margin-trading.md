@@ -6,7 +6,7 @@ Gate CrossEx margin trading scenarios and expected behaviors.
 
 ### Step 1: Validate symbol and leverage constraints
 
-Call `cex_crx_list_crx_rule_symbols` with:
+Call `gate-cli cex cross-ex market symbols` with:
 
 - `symbols`: target margin symbol when the user provides a specific pair
 
@@ -19,7 +19,7 @@ Key data to extract:
 
 ### Step 2: Check balances, current positions, and leverage
 
-Call `cex_crx_list_crx_margin_positions` with:
+Call `gate-cli cex cross-ex position margin-list` with:
 
 - `symbol`: target symbol when filtering is needed
 
@@ -31,7 +31,7 @@ Key data to extract:
 
 ### Step 3: Confirm leverage settings for the symbol
 
-Call `cex_crx_get_crx_margin_positions_leverage` with:
+Call `gate-cli cex cross-ex position margin-leverage` with:
 
 - `symbols`: target symbol when leverage is symbol-specific
 
@@ -43,7 +43,7 @@ Key data to extract:
 
 ### Step 4: Submit the margin order after confirmation
 
-Call `cex_crx_create_crx_order` with:
+Call `gate-cli cex cross-ex order create` with:
 
 - `symbol`
 - `side`
@@ -60,7 +60,7 @@ Key data to extract:
 
 ### Step 5: Verify the resulting margin position
 
-Call `cex_crx_list_crx_margin_positions` with:
+Call `gate-cli cex cross-ex position margin-list` with:
 
 - `symbol`: the traded symbol
 
@@ -114,17 +114,17 @@ Margin Operation Summary
 
 ### Data Sources
 
-- **Trading Pair Info**: Call `cex_crx_list_crx_rule_symbols` → `min_quote_amount`, `amount_precision`
-- **Account Balance**: Call `cex_crx_get_crx_account` → `available_balance`
-- **Margin Positions**: Call `cex_crx_list_crx_margin_positions` → `size`, `leverage`, `entry_price`
-- **Margin Leverage**: Call `cex_crx_get_crx_margin_positions_leverage` → Current leverage
-- **Adjust Leverage**: Call `cex_crx_update_crx_margin_positions_leverage` → Set new leverage
-- **Place Order**: Call `cex_crx_create_crx_order`
-- **Interest Rate Query**: Call `cex_crx_get_crx_interest_rate` → Interest rates for each coin
+- **Trading Pair Info**: Call `gate-cli cex cross-ex market symbols` → `min_quote_amount`, `amount_precision`
+- **Account Balance**: Call `gate-cli cex cross-ex account get` → `available_balance`
+- **Margin Positions**: Call `gate-cli cex cross-ex position margin-list` → `size`, `leverage`, `entry_price`
+- **Margin Leverage**: Call `gate-cli cex cross-ex position margin-leverage` → Current leverage
+- **Adjust Leverage**: Call `gate-cli cex cross-ex position set-margin-leverage` → Set new leverage
+- **Place Order**: Call `gate-cli cex cross-ex order create`
+- **Interest Rate Query**: Call `gate-cli cex cross-ex market interest-rate` → Interest rates for each coin
 
 ### Pre-checks
 
-1. **Trading Pair Verification**: Call `cex_crx_list_crx_rule_symbols` to verify trading pair exists and is tradable
+1. **Trading Pair Verification**: Call `gate-cli cex cross-ex market symbols` to verify trading pair exists and is tradable
 2. **Balance Check**:
     - Long: Check if sufficient USDT in `available` (as margin)
     - Short: Check if sufficient base coin in `available`
@@ -145,8 +145,8 @@ Margin Operation Summary
 
 **Only adjust leverage when user explicitly specifies leverage.**
 
-- **Query Current Leverage**: Call `cex_crx_get_crx_margin_positions_leverage`
-- **Set New Leverage**: Call `cex_crx_update_crx_margin_positions_leverage`
+- **Query Current Leverage**: Call `gate-cli cex cross-ex position margin-leverage`
+- **Set New Leverage**: Call `gate-cli cex cross-ex position set-margin-leverage`
     - Parameters: `symbol` (trading pair), `leverage` (leverage multiplier)
 
 **⚠️ Note**:
@@ -182,10 +182,10 @@ Margin Operation Summary
 **Expected Behavior**:
 
 1. Parse parameters: Trading pair `GATE_MARGIN_XRP_USDT`, direction `BUY`, position side `LONG`, amount `50 USDT`
-2. Check minimum amount: Call `cex_crx_list_crx_rule_symbols` to query minimum trading amount for this pair
+2. Check minimum amount: Call `gate-cli cex cross-ex market symbols` to query minimum trading amount for this pair
 3. Query current leverage, adjust if user specifies
 4. Display order summary (including leverage) and require confirmation
-5. Call `cex_crx_create_crx_order`, parameters `side="BUY"`, `type="MARKET"`, `quote_qty="50"`, `position_side="LONG"`
+5. Call `gate-cli cex cross-ex order create`, parameters `side="BUY"`, `type="MARKET"`, `quote_qty="50"`, `position_side="LONG"`
 6. Verify position and output result
 
 **Report Template**:
@@ -228,10 +228,10 @@ Margin: 5 USDT
 **Expected Behavior**:
 
 1. Parse parameters: Trading pair, direction `SELL`, position side `SHORT`, amount
-2. Check minimum amount: Call `cex_crx_list_crx_rule_symbols` to query minimum trading amount for this pair
-3. Query current leverage: Call `cex_crx_get_crx_margin_positions_leverage` to query current leverage
+2. Check minimum amount: Call `gate-cli cex cross-ex market symbols` to query minimum trading amount for this pair
+3. Query current leverage: Call `gate-cli cex cross-ex position margin-leverage` to query current leverage
 4. Display order summary and require confirmation
-5. Call `cex_crx_create_crx_order`, parameters `side="SELL"`, `type="MARKET"`, `quote_qty="100"`,
+5. Call `gate-cli cex cross-ex order create`, parameters `side="SELL"`, `type="MARKET"`, `quote_qty="100"`,
    `position_side="SHORT"`
 6. Verify position and output result
 
@@ -274,11 +274,11 @@ Margin: 20 USDT
 
 **Expected Behavior**:
 
-1. Query current margin positions: Call `cex_crx_list_crx_margin_positions` to query current margin positions
+1. Query current margin positions: Call `gate-cli cex cross-ex position margin-list` to query current margin positions
 2. Find corresponding long position
 3. Calculate close quantity
 4. Display close plan and require confirmation
-5. Call `cex_crx_create_crx_order`, parameters `side="SELL"`, `type="MARKET"`, `qty="25"`, `position_side="LONG"`
+5. Call `gate-cli cex cross-ex order create`, parameters `side="SELL"`, `type="MARKET"`, `qty="25"`, `position_side="LONG"`
 6. Verify remaining position and output result
 
 **Report Template**:
@@ -321,7 +321,7 @@ Remaining Position: 25 XRP (long)
 1. Parse parameters: Trading pair, leverage multiplier
 2. Check current leverage
 3. Display adjustment plan and require confirmation
-4. Call `cex_crx_update_crx_margin_positions_leverage`, parameter `leverage="20"`
+4. Call `gate-cli cex cross-ex position set-margin-leverage`, parameter `leverage="20"`
 5. Verify leverage adjusted and output result
 
 **Report Template**:
@@ -360,7 +360,7 @@ Status: Effective
 
 **Expected Behavior**:
 
-1. Call `cex_crx_get_crx_interest_rate` to query interest rates for each coin
+1. Call `gate-cli cex cross-ex market interest-rate` to query interest rates for each coin
 2. Display current rates and calculation examples
 
 **Report Template**:

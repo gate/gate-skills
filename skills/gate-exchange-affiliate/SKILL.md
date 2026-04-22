@@ -1,25 +1,61 @@
 ---
 name: gate-exchange-affiliate
-version: "2026.4.8-1"
-updated: "2026-04-08"
 description: "Gate partner affiliate data and application skill. Use when the user asks about partner commissions, referral volume, or applying for the affiliate program. Triggers on 'my affiliate data', 'partner earnings', 'apply for affiliate', 'commission'."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Rebate:Read
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Affiliate Program Assistant
 
@@ -30,47 +66,41 @@ Query and manage Gate Exchange affiliate/partner program data, including commiss
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
 
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_rebate_get_partner_application_recent
-- cex_rebate_get_partner_eligibility
-- cex_rebate_partner_commissions_history
-- cex_rebate_partner_sub_list
-- cex_rebate_partner_transaction_history
+- `gate-cli cex rebate partner application`
+- `gate-cli cex rebate partner eligibility`
+- `gate-cli cex rebate partner commissions`
+- `gate-cli cex rebate partner sub-list`
+- `gate-cli cex rebate partner transactions`
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Rebate:Read
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Rebate:Read
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's affiliate workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's affiliate workflow.
 
 - `SKILL.md` keeps routing and reporting policy.
-- `references/mcp.md` is the authoritative MCP execution layer for eligibility/application/commission query flow and degraded handling.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for eligibility/application/commission query flow and degraded handling.
 
 ## Important Notice
 
@@ -107,10 +137,10 @@ All query windows use the user's **current calendar date** in **UTC+8**. For rel
 ### Data Aggregation Rules
 - **DO NOT simply sum all values from API response lists**
 - Use custom aggregation logic that considers:
-  - Business rules and data relationships
-  - Asset type grouping
-  - Proper filtering and deduplication
-  - Time period boundaries
+ - Business rules and data relationships
+ - Asset type grouping
+ - Proper filtering and deduplication
+ - Time period boundaries
 - Raw summation may lead to incorrect results due to data structure complexities
 
 ## Safety Rules
@@ -162,7 +192,7 @@ Key data to extract:
 
 Based on query type, call the appropriate Partner APIs.
 
-When MCP is configured with Gate rebate tools, call the corresponding MCP tools by name (e.g. Call `cex_rebate_partner_transaction_history`, Call `cex_rebate_partner_commissions_history`, Call `cex_rebate_partner_sub_list`, Call `cex_rebate_get_partner_eligibility`, Call `cex_rebate_get_partner_application_recent`) with the parameters described in API Parameter Reference. When MCP is not available, use the API paths below.
+When MCP is configured with Gate rebate tools, call the corresponding MCP tools by name (e.g. Call `gate-cli cex rebate partner transactions`, Call `gate-cli cex rebate partner commissions`, Call `gate-cli cex rebate partner sub-list`, Call `gate-cli cex rebate partner eligibility`, Call `gate-cli cex rebate partner application`) with the parameters described in API Parameter Reference. When MCP is not available, use the API paths below.
 
 **CRITICAL REMINDER**: 
 - DO NOT use `user_id` parameter unless explicitly querying a specific trader's contribution
@@ -399,7 +429,7 @@ UID {user_id} contribution (last 7 days):
 
 👑 Top 5 Contributors
 1. UID XXXXX - Volume XXX,XXX USDT / Commission XX.X USDT
-2. ...
+2....
 ```
 
 ### Case 6: Affiliate Application Guidance
@@ -499,12 +529,12 @@ Parameters:
 - offset: integer (default 0) - pagination offset
 
 Response: {
-  total: number,
-  list: [{
-    transaction_time, user_id (trader), group_name, 
-    fee, fee_asset, currency_pair, 
-    amount, amount_asset, source
-  }]
+ total: number,
+ list: [{
+ transaction_time, user_id (trader), group_name, 
+ fee, fee_asset, currency_pair, 
+ amount, amount_asset, source
+ }]
 }
 ```
 
@@ -519,11 +549,11 @@ Parameters:
 - offset: integer (default 0)
 
 Response: {
-  total: number,
-  list: [{
-    commission_time, user_id (trader), group_name,
-    commission_amount, commission_asset, source
-  }]
+ total: number,
+ list: [{
+ commission_time, user_id (trader), group_name,
+ commission_amount, commission_asset, source
+ }]
 }
 ```
 
@@ -535,10 +565,10 @@ Parameters:
 - offset: integer (default 0)
 
 Response: {
-  total: number,
-  list: [{
-    user_id, user_join_time, type
-  }]
+ total: number,
+ list: [{
+ user_id, user_join_time, type
+ }]
 }
 Type: 1=Sub-agent, 2=Indirect customer, 3=Direct customer
 ```
@@ -549,11 +579,11 @@ GET /rebate/partner/eligibility
 Parameters: none (uses authenticated user)
 
 Response: {
-  data: {
-    eligible: boolean,
-    block_reasons: string[],
-    block_reason_codes: string[]
-  }
+ data: {
+ eligible: boolean,
+ block_reasons: string[],
+ block_reason_codes: string[]
+ }
 }
 block_reason_codes may include: user_not_exist, user_blacked, sub_account, already_agent, kyc_incomplete, in_agent_tree, ch_code_conflict
 ```
@@ -564,10 +594,10 @@ GET /rebate/partner/applications/recent
 Parameters: none (returns current user's recent application in last 30 days)
 
 Response: {
-  data: {
-    id, uid, audit_status, apply_msg, create_timest, update_timest,
-    proof_url, jump_url, proof_images_url_list, ...
-  } or empty
+ data: {
+ id, uid, audit_status, apply_msg, create_timest, update_timest,
+ proof_url, jump_url, proof_images_url_list,...
+ } or empty
 }
 audit_status: 0=Pending, 1=Approved, 2=Rejected
 ```
@@ -579,11 +609,11 @@ For complete data retrieval when total > limit:
 offset = 0
 all_data = []
 while True:
-    result = call_api(limit=100, offset=offset)
-    all_data.extend(result['list'])
-    if len(result['list']) < 100 or offset + 100 >= result['total']:
-        break
-    offset += 100
+ result = call_api(limit=100, offset=offset)
+ all_data.extend(result['list'])
+ if len(result['list']) < 100 or offset + 100 >= result['total']:
+ break
+ offset += 100
 
 # IMPORTANT: Apply custom aggregation logic after collecting all data
 # DO NOT simply sum values - consider business rules and data relationships
@@ -593,30 +623,30 @@ while True:
 
 - API accepts Unix timestamps in seconds (not milliseconds)
 - **⚠️ CRITICAL TIME CALCULATION RULES**:
-  - All query times are calculated based on the user's system current date (UTC+8 timezone)
-  - For any relative time description ("last 7 days", "last 30 days", "this week", "last month", etc.):
-    1. Get current system date in UTC+8 timezone
-    2. Calculate the start date by subtracting the requested days from current date
-    3. Convert both dates to UTC+8 00:00:00 (start of day) and 23:59:59 (end of day)
-    4. Convert these UTC+8 times to Unix timestamps
-    5. Use these timestamps for API calls
-  - **NEVER use future timestamps as query conditions**
-  - The `to` parameter must always be ≤ current Unix timestamp
-  - If user specifies a future date, reject the query and explain only historical data is available
+ - All query times are calculated based on the user's system current date (UTC+8 timezone)
+ - For any relative time description ("last 7 days", "last 30 days", "this week", "last month", etc.):
+ 1. Get current system date in UTC+8 timezone
+ 2. Calculate the start date by subtracting the requested days from current date
+ 3. Convert both dates to UTC+8 00:00:00 (start of day) and 23:59:59 (end of day)
+ 4. Convert these UTC+8 times to Unix timestamps
+ 5. Use these timestamps for API calls
+ - **NEVER use future timestamps as query conditions**
+ - The `to` parameter must always be ≤ current Unix timestamp
+ - If user specifies a future date, reject the query and explain only historical data is available
 
 - **Time Conversion Examples** (assuming current date is 2026-03-13 in UTC+8):
-  - "last 7 days" query:
-    - Start date: 2026-03-07 (7 days ago)
-    - from: 2026-03-07 00:00:00 UTC+8 → Unix timestamp
-    - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
-  - "last 30 days" query:
-    - Start date: 2026-02-12 (30 days ago)
-    - from: 2026-02-12 00:00:00 UTC+8 → Unix timestamp
-    - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
-  - "this week" query (assuming week starts Monday):
-    - Start date: 2026-03-09 (Monday of current week)
-    - from: 2026-03-09 00:00:00 UTC+8 → Unix timestamp
-    - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
+ - "last 7 days" query:
+ - Start date: 2026-03-07 (7 days ago)
+ - from: 2026-03-07 00:00:00 UTC+8 → Unix timestamp
+ - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
+ - "last 30 days" query:
+ - Start date: 2026-02-12 (30 days ago)
+ - from: 2026-02-12 00:00:00 UTC+8 → Unix timestamp
+ - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
+ - "this week" query (assuming week starts Monday):
+ - Start date: 2026-03-09 (Monday of current week)
+ - from: 2026-03-09 00:00:00 UTC+8 → Unix timestamp
+ - to: 2026-03-13 23:59:59 UTC+8 → Unix timestamp
 
 - Maximum 30 days per API request, split if needed
 
@@ -631,25 +661,25 @@ while True:
 ### Golden Queries (Test Cases)
 
 1. **Basic Overview**
-   - Query: "Show my affiliate data"
-   - Expected: Display last 7 days metrics
+ - Query: "Show my affiliate data"
+ - Expected: Display last 7 days metrics
 
 2. **Time Range**
-   - Query: "Commission for last 60 days"
-   - Expected: Split into 2x30-day requests, aggregate results
+ - Query: "Commission for last 60 days"
+ - Expected: Split into 2x30-day requests, aggregate results
 
 3. **Specific Metric**
-   - Query: "How many customers do I have?"
-   - Expected: Call sub_list, return total count
+ - Query: "How many customers do I have?"
+ - Expected: Call sub_list, return total count
 
 4. **User Contribution**
-   - Query: "UID 12345 trading volume this month"
-   - Expected: Call transaction_history with user_id filter
+ - Query: "UID 12345 trading volume this month"
+ - Expected: Call transaction_history with user_id filter
 
 5. **Error Case**
-   - Query: "Data for last 200 days"
-   - Expected: Error message about 180-day limit
+ - Query: "Data for last 200 days"
+ - Expected: Error message about 180-day limit
 
 6. **Application**
-   - Query: "How to become an affiliate?"
-   - Expected: Application guidance without API calls
+ - Query: "How to become an affiliate?"
+ - Expected: Application guidance without API calls

@@ -2,22 +2,22 @@
 
 This document defines the **MCP call order, parameters, required fields, and output format** for each scenario. Implementations must call Gate MCP in the order specified under each Case and produce reports according to the templates below.
 
-**MCP tool names (Gate MCP):** Spot market data use `cex_spot_get_spot_order_book`, `cex_spot_get_spot_candlesticks`, `cex_spot_get_spot_tickers`, `cex_spot_get_spot_trades`. Futures market data use `cex_fx_get_fx_contract`, `cex_fx_get_fx_order_book`, `cex_fx_get_fx_candlesticks`, `cex_fx_get_fx_tickers`, `cex_fx_get_fx_trades`. Futures funding/liquidation/premium use `cex_fx_get_fx_funding_rate`, `cex_fx_list_fx_liq_orders`, `cex_fx_get_fx_premium_index`. Call these exact tool names when invoking Gate MCP.
+**MCP tool names (Gate MCP):** Spot market data use `gate-cli cex spot market orderbook`, `gate-cli cex spot market candlesticks`, `gate-cli cex spot market tickers`, `gate-cli cex spot market trades`. Futures market data use `gate-cli cex futures market contract`, `gate-cli cex futures market orderbook`, `gate-cli cex futures market candlesticks`, `gate-cli cex futures market tickers`, `gate-cli cex futures market trades`. Futures funding/liquidation/premium use `gate-cli cex futures market funding-rate`, `gate-cli cex futures market liquidations`, `gate-cli cex futures market premium`. Call these exact tool names when invoking Gate MCP.
 
 | Case | Scenario | Core MCP Call Order |
 |------|----------|---------------------|
-| 1 | Liquidity analysis | cex_spot_get_spot_order_book → cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers (use futures APIs when user says perpetual/contract) |
-| 2 | Momentum (buy vs sell) | cex_spot_get_spot_trades → cex_spot_get_spot_tickers → cex_spot_get_spot_candlesticks → cex_spot_get_spot_order_book → cex_fx_get_fx_funding_rate (futures APIs when contract) |
-| 3 | Liquidation monitoring | cex_fx_list_fx_liq_orders → cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers |
-| 4 | Funding rate arbitrage | cex_fx_get_fx_tickers → cex_fx_get_fx_funding_rate → cex_spot_get_spot_tickers → cex_spot_get_spot_order_book |
-| 5 | Basis (spot vs futures) | cex_spot_get_spot_tickers(spot) → cex_fx_get_fx_tickers → cex_fx_get_fx_premium_index |
-| 6 | Manipulation risk | Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_tickers → cex_spot_get_spot_trades. When user says perpetual/contract: cex_fx_get_fx_order_book → cex_fx_get_fx_tickers → cex_fx_get_fx_trades |
-| 7 | Order book explainer | cex_spot_get_spot_order_book(limit=10) → cex_spot_get_spot_tickers |
-| 8 | Slippage simulation | Spot: cex_spot_get_spot_order_book → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_tickers |
-| 9 | K-line breakout / support–resistance | cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers (spot); cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers (futures) |
-| 10 | Liquidity + weekend vs weekday | cex_spot_get_spot_order_book → cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers (spot); cex_fx_get_fx_contract → cex_fx_get_fx_order_book → cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers (futures) |
-| 11 | Technical analysis / what to do (short + long timeframe, support/resistance, momentum, funding) | Spot: cex_spot_get_spot_candlesticks → cex_spot_get_spot_tickers. Futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_funding_rate (query both timeframes, give separate advice) |
-| 12 | Multi-asset buy analysis & allocation | Per asset: cex_spot_get_spot_candlesticks(7d) → cex_spot_get_spot_tickers → cex_spot_get_spot_order_book; futures: cex_fx_get_fx_candlesticks → cex_fx_get_fx_tickers → cex_fx_get_fx_order_book → cex_fx_get_fx_funding_rate |
+| 1 | Liquidity analysis | `gate-cli cex spot market orderbook` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers` |
+| 2 | Momentum (buy vs sell) | `gate-cli cex spot market trades` → `gate-cli cex spot market tickers` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market orderbook` → `gate-cli cex futures market funding-rate` |
+| 3 | Liquidation monitoring | `gate-cli cex futures market liquidations` → `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` |
+| 4 | Funding rate arbitrage | `gate-cli cex futures market tickers` → `gate-cli cex futures market funding-rate` → `gate-cli cex spot market tickers` → `gate-cli cex spot market orderbook` |
+| 5 | Basis (spot vs futures) | `gate-cli cex spot market tickers` → `gate-cli cex futures market tickers` → `gate-cli cex futures market premium` |
+| 6 | Manipulation risk | Spot: `gate-cli cex spot market orderbook` → `gate-cli cex spot market tickers` → `gate-cli cex spot market trades`. When user says perpetual/contract: `gate-cli cex futures market orderbook` → `gate-cli cex futures market tickers` → `gate-cli cex futures market trades` |
+| 7 | Order book explainer | `gate-cli cex spot market orderbook` → `gate-cli cex spot market tickers` |
+| 8 | Slippage simulation | Spot: `gate-cli cex spot market orderbook` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market contract` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market tickers` |
+| 9 | K-line breakout / support–resistance | `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`; `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` |
+| 10 | Liquidity + weekend vs weekday | `gate-cli cex spot market orderbook` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`; `gate-cli cex futures market contract` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` |
+| 11 | Technical analysis / what to do (short + long timeframe, support/resistance, momentum, funding) | Spot: `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`. Futures: `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` → `gate-cli cex futures market funding-rate` |
+| 12 | Multi-asset buy analysis & allocation | Per asset: `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers` → `gate-cli cex spot market orderbook`; futures: `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market funding-rate` |
 | 13 | Portfolio allocation review & adjustment | Same as Case 12: spot ticker + order book + 7d daily; futures add funding rate |
 
 ---
@@ -30,14 +30,14 @@ For liquidity analysis, **call Gate MCP in this order** and extract the listed f
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_spot_get_spot_order_book` (spot) | `currency_pair={BASE}_USDT`, `limit=20` | Number of ask/bid levels; top 10 bid/ask depth totals; bid1/ask1 (for spread and slippage) |
-| 2 | `cex_spot_get_spot_candlesticks` (spot) | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | Last 30 days volume (for 30d avg); latest candle for 24h volume reference |
-| 3 | `cex_spot_get_spot_tickers` (spot) | `currency_pair={BASE}_USDT` | `last`; `quoteVolume` 24h (USDT); `changePercentage` 24h; `high24h`/`low24h` |
-| 4 (optional) | `cex_spot_get_spot_trades` (spot) | `currency_pair={BASE}_USDT`, `limit=100` | Recent trade size distribution for "recent flow" and participation |
+| 1 | `gate-cli cex spot market orderbook` (spot) | `currency_pair={BASE}_USDT`, `limit=20` | Number of ask/bid levels; top 10 bid/ask depth totals; bid1/ask1 (for spread and slippage) |
+| 2 | `gate-cli cex spot market candlesticks` (spot) | `currency_pair={BASE}_USDT`, `interval=1d`, `limit=30` | Last 30 days volume (for 30d avg); latest candle for 24h volume reference |
+| 3 | `gate-cli cex spot market tickers` (spot) | `currency_pair={BASE}_USDT` | `last`; `quoteVolume` 24h (USDT); `changePercentage` 24h; `high24h`/`low24h` |
+| 4 (optional) | `gate-cli cex spot market trades` (spot) | `currency_pair={BASE}_USDT`, `limit=100` | Recent trade size distribution for "recent flow" and participation |
 
 **Calculation & judgment** (aligned with SKILL):
 
-- **API choice**: Use futures APIs (e.g. cex_fx_get_fx_order_book) when user says "perpetual" or "contract"; otherwise spot.
+- **API choice**: Use futures APIs (e.g. `gate-cli cex futures market orderbook`) when user says "perpetual" or "contract"; otherwise spot.
 - **Slippage** = `2×(ask1−bid1)/(bid1+ask1)×100%`; if > 0.5% → flag "high slippage risk".
 - **Depth**: asks/bids depth < 10 levels → flag "low liquidity".
 - **24h volume** < 30-day volume average → flag "cold pair".
@@ -55,7 +55,7 @@ For liquidity analysis, **call Gate MCP in this order** and extract the listed f
 - "How is ETH liquidity?"
 
 **Expected behavior**:
-1. Call in order per **MCP Call Spec**: `cex_spot_get_spot_order_book` → `cex_spot_get_spot_candlesticks` → `cex_spot_get_spot_tickers` (optional `cex_spot_get_spot_trades`).
+1. Call in order per **MCP Call Spec**: `gate-cli cex spot market orderbook` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers` (optional `gate-cli cex spot market trades`).
 2. From order book: level count, top 10 depth, bid1/ask1.
 3. From candlesticks: 30d avg volume, 24h volume.
 4. From tickers: last, 24h quote volume, change.
@@ -93,7 +93,7 @@ ETH liquidity is excellent, suitable for large size.
 - "How is BTC perpetual depth?"
 
 **Expected behavior**:
-1. Detect "perpetual/contract" and use **futures** MCP: `cex_fx_get_fx_order_book` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `cex_fx_get_fx_tickers`, `cex_fx_get_fx_candlesticks`(1d, 30).
+1. Detect "perpetual/contract" and use **futures** MCP: `gate-cli cex futures market orderbook` (`settle=usdt`, `contract=BTC_USDT`, `limit=20`) → optional `gate-cli cex futures market tickers`, `gate-cli cex futures market candlesticks`(1d, 30).
 2. Extract level count, top 10 depth, bid1/ask1; compute slippage.
 3. Output core metrics table + liquidity rating per liquidity criteria.
 
@@ -119,7 +119,7 @@ Liquidity rating: 5/5 ⭐
 - "How is XYZ liquidity?"
 
 **Expected behavior**:
-1. Still follow **Case 1 MCP Call Spec**: `cex_spot_get_spot_order_book` → `cex_spot_get_spot_candlesticks` → `cex_spot_get_spot_tickers`.
+1. Still follow **Case 1 MCP Call Spec**: `gate-cli cex spot market orderbook` → `gate-cli cex spot market candlesticks` → `gate-cli cex spot market tickers`.
 2. If depth < 10 levels, or 24h volume < 30d avg, or slippage > 0.5%, mark 🔴 in core metrics and output risk note + low liquidity rating.
 
 **Output**:
@@ -149,11 +149,11 @@ Liquidity rating: 5/5 ⭐
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_spot_get_spot_trades` (spot) / `cex_fx_get_fx_trades` (futures) | `currency_pair` or `contract`+`settle`, `limit=1000` | Buy/sell volume; buy share = buy_volume / total_volume |
-| 2 | `cex_spot_get_spot_tickers` (spot) / `cex_fx_get_fx_tickers` (futures) | Same pair | 24h volume, 24h change |
-| 3 | `cex_spot_get_spot_candlesticks` (spot) / `cex_fx_get_fx_candlesticks` (futures) | `interval=1d`, `limit=30` | 30-day average volume |
-| 4 | `cex_spot_get_spot_order_book` (spot) / `cex_fx_get_fx_order_book` (futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
-| 5 | `cex_fx_get_fx_funding_rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
+| 1 | `gate-cli cex spot market trades` (spot) / `gate-cli cex futures market trades` (futures) | `currency_pair` or `contract`+`settle`, `limit=1000` | Buy/sell volume; buy share = buy_volume / total_volume |
+| 2 | `gate-cli cex spot market tickers` (spot) / `gate-cli cex futures market tickers` (futures) | Same pair | 24h volume, 24h change |
+| 3 | `gate-cli cex spot market candlesticks` (spot) / `gate-cli cex futures market candlesticks` (futures) | `interval=1d`, `limit=30` | 30-day average volume |
+| 4 | `gate-cli cex spot market orderbook` (spot) / `gate-cli cex futures market orderbook` (futures) | `limit=20` | Top 10 bid/ask depth for long/short balance |
+| 5 | `gate-cli cex futures market funding-rate` or equivalent | When contract | Funding rate; positive → long bias, negative → short bias |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -173,7 +173,7 @@ Liquidity rating: 5/5 ⭐
 - "Is BTC more long or short in 24h, and is it sustainable?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_trades`/`cex_fx_get_fx_trades` → `cex_spot_get_spot_tickers`/`cex_fx_get_fx_tickers` → `cex_spot_get_spot_candlesticks`/`cex_fx_get_fx_candlesticks` → `cex_spot_get_spot_order_book`/`cex_fx_get_fx_order_book` → `cex_fx_get_fx_funding_rate` (futures when contract).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market trades`/`gate-cli cex futures market trades` → `gate-cli cex spot market tickers`/`gate-cli cex futures market tickers` → `gate-cli cex spot market candlesticks`/`gate-cli cex futures market candlesticks` → `gate-cli cex spot market orderbook`/`gate-cli cex futures market orderbook` → `gate-cli cex futures market funding-rate` (futures when contract).
 2. From trades: buy/sell volume, buy share; tickers: 24h volume and change; candlesticks: 30d avg; order book: top 10 long/short depth; funding rate for bias.
 3. Apply logic (buy > 70% → buy-side strong; 24h > 30d avg → active; funding + book → direction and sustainability).
 4. Output buy/sell table + direction + analysis per Report Template.
@@ -209,7 +209,7 @@ Buy share 65% but below 70% "strong" threshold; currently long-leaning but not o
 - "Is ETH buy side strong?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_trades`(ETH_USDT) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_candlesticks`.
+1. Call per **MCP Call Spec**: `gate-cli cex spot market trades`(ETH_USDT) → `gate-cli cex spot market tickers` → `gate-cli cex spot market candlesticks`.
 2. Compute buy/sell share; if buy > 70% mark as buy-side strong.
 3. Output buy/sell table + direction (buy-side strong).
 
@@ -241,7 +241,7 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 - "BTC contract momentum"
 
 **Expected behavior**:
-1. Detect "contract" and use **futures** MCP: `cex_fx_get_fx_trades` (`settle=usdt`, `contract=BTC_USDT`) → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_candlesticks`.
+1. Detect "contract" and use **futures** MCP: `gate-cli cex futures market trades` (`settle=usdt`, `contract=BTC_USDT`) → `gate-cli cex futures market tickers` → `gate-cli cex futures market candlesticks`.
 2. Extract buy/sell share, 24h volume, 30d avg per MCP Call Spec; same output structure, data from futures.
 
 ---
@@ -254,9 +254,9 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_fx_list_fx_liq_orders` | `settle=usdt`, time range (last 1h; optional 24h for daily baseline) | Liq volume by contract; long (size>0) / short (size<0); 1h total liq |
-| 2 | `cex_fx_get_fx_candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | Price during liq window, current price, recovery |
-| 3 | `cex_fx_get_fx_tickers` | `settle=usdt` (or specific contract) | Current price, 24h change |
+| 1 | `gate-cli cex futures market liquidations` | `settle=usdt`, time range (last 1h; optional 24h for daily baseline) | Liq volume by contract; long (size>0) / short (size<0); 1h total liq |
+| 2 | `gate-cli cex futures market candlesticks` | `settle=usdt`, `contract`, `interval=5m`, `limit=12` | Price during liq window, current price, recovery |
+| 3 | `gate-cli cex futures market tickers` | `settle=usdt` (or specific contract) | Current price, 24h change |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -276,7 +276,7 @@ Buy share 78%, well above 70% threshold; clear long-dominated tape. With volume 
 - "Recent liquidations?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_fx_list_fx_liq_orders` → `cex_fx_get_fx_candlesticks` → `cex_fx_get_fx_tickers`.
+1. Call per **MCP Call Spec**: `gate-cli cex futures market liquidations` → `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers`.
 2. Aggregate liq by contract; long/short share; if daily baseline available, compute 1h vs daily multiple.
 3. Apply logic: 1h liq > 3× daily → anomaly; one-sided > 80% → long/short squeeze; price recovered → wick.
 4. Output market overview table + anomaly contracts table.
@@ -315,7 +315,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Did BTC just wick?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_fx_list_fx_liq_orders`(1h, optional filter contract=BTC_USDT) → `cex_fx_get_fx_candlesticks`(BTC_USDT, 5m, 12) → `cex_fx_get_fx_tickers`.
+1. Call per **MCP Call Spec**: `gate-cli cex futures market liquidations`(1h, optional filter contract=BTC_USDT) → `gate-cli cex futures market candlesticks`(BTC_USDT, 5m, 12) → `gate-cli cex futures market tickers`.
 2. From liq: long/short share; from candlesticks: low, current price; recovery = (current − low) / (pre-spike high − low) or similar.
 3. If long-dominated liq and recovery > 80%, output wick analysis (liq table + low/current/recovery + wick conclusion).
 
@@ -352,10 +352,10 @@ Long liq 84%; current move is squeezing long leverage.
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_fx_get_fx_tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
-| 2 | `cex_fx_get_fx_funding_rate` or equivalent | For candidates / full market | Rate details |
-| 3 | `cex_spot_get_spot_tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
-| 4 | `cex_spot_get_spot_order_book` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
+| 1 | `gate-cli cex futures market tickers` | `settle=usdt` | All contracts' funding_rate, 24h volume |
+| 2 | `gate-cli cex futures market funding-rate` or equivalent | For candidates / full market | Rate details |
+| 3 | `gate-cli cex spot market tickers` (spot) | Per candidate `currency_pair={BASE}_USDT` | Spot last; spot–futures spread |
+| 4 | `gate-cli cex spot market orderbook` (spot) | For top candidates `currency_pair`, `limit=20` | Top 10 depth; exclude if depth too thin |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -375,7 +375,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Any arbitrage opportunities?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_fx_get_fx_tickers` → `cex_fx_get_fx_funding_rate` → `cex_spot_get_spot_tickers`(candidates) → `cex_spot_get_spot_order_book`(top candidates).
+1. Call per **MCP Call Spec**: `gate-cli cex futures market tickers` → `gate-cli cex futures market funding-rate` → `gate-cli cex spot market tickers`(candidates) → `gate-cli cex spot market orderbook`(top candidates).
 2. Logic: |rate|>0.05% and 24h vol>$10M → candidate; spot–futures spread>0.2% → bonus; thin depth → exclude.
 3. Output arbitrage table + strategy + risk note.
 
@@ -411,7 +411,7 @@ Long liq 84%; current move is squeezing long leverage.
 - "Which coins have extreme funding?"
 
 **Expected behavior**:
-1. Call `cex_fx_get_fx_tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
+1. Call `gate-cli cex futures market tickers`(settle=usdt); filter |funding_rate| > 0.001 (0.1%).
 2. Sort by |rate|; label severity (e.g. extreme positive, high negative).
 3. Output "Extreme funding" table (contract, rate, status).
 
@@ -438,9 +438,9 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_spot_get_spot_tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
-| 2 | `cex_fx_get_fx_tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
-| 3 | `cex_fx_get_fx_premium_index` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
+| 1 | `gate-cli cex spot market tickers` (spot) | `currency_pair={BASE}_USDT` | Spot `last` |
+| 2 | `gate-cli cex futures market tickers` | `settle=usdt`, optional `contract={BASE}_USDT` | Futures price, mark_price, index_price |
+| 3 | `gate-cli cex futures market premium` or equivalent | `settle=usdt`, `contract={BASE}_USDT` | premium_index; if history available, for mean and deviation |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -459,7 +459,7 @@ Positive rate > 0.1% means high cost to long; may signal short-term pullback ris
 - "What is BTC basis?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_tickers`(BTC_USDT) → `cex_fx_get_fx_tickers`(usdt, BTC_USDT) → optional `cex_fx_get_fx_premium_index`.
+1. Call per **MCP Call Spec**: `gate-cli cex spot market tickers`(BTC_USDT) → `gate-cli cex futures market tickers`(usdt, BTC_USDT) → optional `gate-cli cex futures market premium`.
 2. Compute basis, basis rate; if premium history available, historical mean.
 3. Output basis table + analysis + recommendation per Report Template.
 
@@ -492,7 +492,7 @@ Current basis rate 0.31%, above historical mean 0.15%; **elevated positive basis
 - "ETH spot–futures spread"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_tickers`(ETH_USDT) → `cex_fx_get_fx_tickers`(usdt, ETH_USDT) → optional `cex_fx_get_fx_premium_index`(settle=usdt, contract=ETH_USDT).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market tickers`(ETH_USDT) → `gate-cli cex futures market tickers`(usdt, ETH_USDT) → optional `gate-cli cex futures market premium`(settle=usdt, contract=ETH_USDT).
 2. Compute basis and basis rate; if premium index available, use for context; if negative, output basis table + ⚠️ negative basis warning (bearish / short crowding).
 
 **Output**:
@@ -527,9 +527,9 @@ Currently **negative basis** (futures below spot), which often indicates:
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
-| 1 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_order_book` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `limit=20` | Top 10 bid depth sum, top 10 ask depth sum |
-| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | 24h quote volume (quoteVolume) |
-| 3 | `cex_spot_get_spot_trades` | `cex_fx_get_fx_trades` or equivalent | Same pair; `limit=500` (or 24h window) | Trade size distribution; consecutive same-direction large orders |
+| 1 | `gate-cli cex spot market orderbook` | `gate-cli cex futures market orderbook` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `limit=20` | Top 10 bid depth sum, top 10 ask depth sum |
+| 2 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | 24h quote volume (quoteVolume) |
+| 3 | `gate-cli cex spot market trades` | `gate-cli cex futures market trades` or equivalent | Same pair; `limit=500` (or 24h window) | Trade size distribution; consecutive same-direction large orders |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -548,7 +548,7 @@ Currently **negative basis** (futures below spot), which often indicates:
 - "Is PEPE easy to manipulate?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book`(PEPE_USDT) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_trades`(limit=500).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook`(PEPE_USDT) → `gate-cli cex spot market tickers` → `gate-cli cex spot market trades`(limit=500).
 2. Compute depth ratio; from trades identify large and consecutive same-side.
 3. Output depth table + large order summary + risk conclusion per Report Template.
 
@@ -588,7 +588,7 @@ In last 500 trades:
 - "How is BTC depth vs volume?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book`(BTC_USDT) → `cex_spot_get_spot_tickers` → optional `cex_spot_get_spot_trades`.
+1. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook`(BTC_USDT) → `gate-cli cex spot market tickers` → optional `gate-cli cex spot market trades`.
 2. Compute depth ratio; if > 2% assess as good depth, low manipulation risk.
 3. Output depth table + risk conclusion (low).
 
@@ -622,7 +622,7 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 - "How is ETH perpetual depth vs volume?"
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `cex_fx_get_fx_contract`(settle=usdt, contract=BTC_USDT) → `cex_fx_get_fx_order_book`(settle=usdt, contract=BTC_USDT, limit=20) → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_trades` (or equivalent, limit=500).
+1. Detect "perpetual" or "contract" and use **futures** MCP: `gate-cli cex futures market contract`(settle=usdt, contract=BTC_USDT) → `gate-cli cex futures market orderbook`(settle=usdt, contract=BTC_USDT, limit=20) → `gate-cli cex futures market tickers` → `gate-cli cex futures market trades` (or equivalent, limit=500).
 2. Use `quanto_multiplier` from contract to convert order book size to notional; extract top 10 depth total and 24h volume; from futures trades detect consecutive same-direction large orders.
 3. Apply same judgment: depth ratio < 0.5% → thin; consecutive same-side large → possible manipulation.
 4. Output depth analysis table + large order summary + manipulation risk conclusion (same structure as 6.1/6.2, data from futures).
@@ -639,8 +639,8 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 
 | Step | MCP Tool | Parameters | Required Fields |
 |------|----------|------------|----------------|
-| 1 | `cex_spot_get_spot_order_book` (spot) / `cex_fx_get_fx_order_book` (futures) | `currency_pair` or `contract`+`settle`, `limit=10` | bids/asks sample (price and size per level) |
-| 2 | `cex_spot_get_spot_tickers` (spot) / `cex_fx_get_fx_tickers` (futures) | Same pair | `last` for spread explanation |
+| 1 | `gate-cli cex spot market orderbook` (spot) / `gate-cli cex futures market orderbook` (futures) | `currency_pair` or `contract`+`settle`, `limit=10` | bids/asks sample (price and size per level) |
+| 2 | `gate-cli cex spot market tickers` (spot) / `gate-cli cex futures market tickers` (futures) | Same pair | `last` for spread explanation |
 
 **Interpretation** (aligned with SKILL):
 
@@ -660,7 +660,7 @@ BTC has ample depth; large size would be needed to move price; manipulation risk
 - "Explain the order book"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book` (e.g. BTC_USDT, limit=10) → `cex_spot_get_spot_tickers`.
+1. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook` (e.g. BTC_USDT, limit=10) → `gate-cli cex spot market tickers`.
 2. Fill order book table and key metrics with live data; add tutorial text (Bids/Asks/Spread, what spread means).
 3. Output tutorial + live example + takeaways.
 
@@ -711,7 +711,7 @@ The order book is the exchange’s "list of orders":
 - "Show ETH order book"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book`(ETH_USDT, limit=10) → `cex_spot_get_spot_tickers`(ETH_USDT).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook`(ETH_USDT, limit=10) → `gate-cli cex spot market tickers`(ETH_USDT).
 2. Output ETH live table (asks/bids, price, size, cumulative) + last + spread and short comment (e.g. liquidity, support).
 
 **Output**:
@@ -754,9 +754,9 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when user says perpetual/contract) | Parameters | Required Fields |
 |------|-----------------|--------------------------------------------------------|------------|----------------|
-| 1 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_contract` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: asks (price, size), bid1/ask1. Futures: `quanto_multiplier` (contract size) for ladder notional |
-| 2 | — | `cex_fx_get_fx_order_book` | Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
-| 3 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
+| 1 | `gate-cli cex spot market orderbook` | `gate-cli cex futures market contract` | Spot: `currency_pair={BASE}_USDT`, `limit=50`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: asks (price, size), bid1/ask1. Futures: `quanto_multiplier` (contract size) for ladder notional |
+| 2 | — | `gate-cli cex futures market orderbook` | Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=50` | Asks (price, size) for ladder walk; bid1/ask1 |
+| 3 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | `last`, `lowestAsk` (or use ask1 from order book) |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -782,7 +782,7 @@ Spread: $1 (0.03%) — liquidity good. Bid depth heavier than asks; support belo
 **Expected behavior**:
 1. **Require pair and amount**: If the user did not specify a **currency pair** (e.g. ADA_USDT, ETH_USDT), prompt them to provide one; do not run the simulation or assume a default pair. If the user did not specify a **quote amount** (e.g. $10,000 USDT), prompt them to provide one; do not assume a default (e.g. do not default to $10K).
 2. Parse pair (e.g. ADA_USDT, ETH_USDT) and quote amount (e.g. $10,000 USDT) from the user.
-3. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book`(pair, limit=50) → `cex_spot_get_spot_tickers`(pair).
+3. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook`(pair, limit=50) → `gate-cli cex spot market tickers`(pair).
 4. Walk ask ladder until cumulative quote ≥ quote amount; compute total base filled, total cost, volume-weighted avg price.
 5. ask1 = first ask price from order book (or ticker lowestAsk). Slippage = avg_price − ask1 (points) and (avg_price − ask1)/ask1 × 100 (%).
 6. Output simulation inputs table + fill summary + slippage vs ask1 + conclusion.
@@ -830,7 +830,7 @@ For a $10K market buy, slippage vs best ask is about x.xx% (about x.xxxx points)
 
 **Expected behavior**:
 1. **Require pair**: If no contract/pair is specified (e.g. BTC_USDT), prompt the user to provide one; do not assume a default.
-2. Detect "perpetual" or "contract" and use **futures** MCP: `cex_fx_get_fx_contract`(settle=usdt, contract={pair}) → `cex_fx_get_fx_order_book`(settle=usdt, contract={pair}, limit=50) → `cex_fx_get_fx_tickers`(settle, contract).
+2. Detect "perpetual" or "contract" and use **futures** MCP: `gate-cli cex futures market contract`(settle=usdt, contract={pair}) → `gate-cli cex futures market orderbook`(settle=usdt, contract={pair}, limit=50) → `gate-cli cex futures market tickers`(settle, contract).
 3. Use `quanto_multiplier` from contract to convert order book size (contracts) to base notional; same ladder logic on **asks** for quote amount; compute avg price, slippage = avg_price − ask1 (points and %).
 4. **Output**: Same structure as Scenario 8.1; data source is futures order book + futures tickers.
 
@@ -871,8 +871,8 @@ Example: "ETH_USDT slippage for a $10K market buy" or "ADA_USDT perpetual, marke
 
 | Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
 |------|-----------------|--------------------|------------|-----------------|
-| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `interval=1d` (or 4h), `limit=30–90` | OHLC; volume; identify local highs/lows for support/resistance; trend structure |
-| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; `high24h`/`low24h` for momentum context |
+| 1 | `gate-cli cex spot market candlesticks` | `gate-cli cex futures market candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. `interval=1d` (or 4h), `limit=30–90` | OHLC; volume; identify local highs/lows for support/resistance; trend structure |
+| 2 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; `high24h`/`low24h` for momentum context |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -891,7 +891,7 @@ Example: "ETH_USDT slippage for a $10K market buy" or "ADA_USDT perpetual, marke
 - "Based on recent K-line chart, does SOL/USDT show signs of breaking out upward? Analyze support and resistance."
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_candlesticks`(SOL_USDT, interval=1d or 4h, limit=30–90) → `cex_spot_get_spot_tickers`(SOL_USDT).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market candlesticks`(SOL_USDT, interval=1d or 4h, limit=30–90) → `gate-cli cex spot market tickers`(SOL_USDT).
 2. From candlesticks: derive support (e.g. recent lows, swing lows) and resistance (e.g. recent highs, swing highs); note trend structure (higher highs/lows vs lower).
 3. From tickers: last, 24h volume, 24h change, high24h/low24h; use to assess momentum (e.g. volume confirmation, price relative to key levels).
 4. Output: K-line context + support/resistance levels + momentum summary + breakout assessment (e.g. clear / no clear signs of upward breakout; data-based, not investment advice).
@@ -938,7 +938,7 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 - "BTC contract: support and resistance from candlesticks?"
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `cex_fx_get_fx_candlesticks`(settle=usdt, contract=SOL_USDT, interval=1d, limit=30–90) → `cex_fx_get_fx_tickers`(settle=usdt, contract=SOL_USDT).
+1. Detect "perpetual" or "contract" and use **futures** MCP: `gate-cli cex futures market candlesticks`(settle=usdt, contract=SOL_USDT, interval=1d, limit=30–90) → `gate-cli cex futures market tickers`(settle=usdt, contract=SOL_USDT).
 2. Same logic: derive support/resistance from OHLC; use tickers for 24h price, volume, change; output same structure with futures data.
 
 ---
@@ -953,10 +953,10 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 
 | Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
 |------|-----------------|--------------------|------------|-----------------|
-| 1 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_contract` | Spot: `currency_pair={BASE}_USDT`, `limit=20`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: depth, bid1/ask1. Futures: `quanto_multiplier` for depth notional |
-| 2 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_order_book` | Spot: same pair, `interval=1d`, `limit=90`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=20` | Spot: daily OHLC, volume. Futures: depth levels; top 10 bid/ask totals; bid1/ask1 |
-| 3 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_candlesticks` | Same pair/contract; `interval=1d`, `limit=90` (or from/to for ~90 days) | Daily OHLC, volume, quote volume; tag weekend vs weekday |
-| 4 | — | `cex_fx_get_fx_tickers` | Same pair/contract | `last`; 24h volume; current context |
+| 1 | `gate-cli cex spot market orderbook` | `gate-cli cex futures market contract` | Spot: `currency_pair={BASE}_USDT`, `limit=20`. Futures: `settle=usdt`, `contract={BASE}_USDT` | Spot: depth, bid1/ask1. Futures: `quanto_multiplier` for depth notional |
+| 2 | `gate-cli cex spot market candlesticks` | `gate-cli cex futures market orderbook` | Spot: same pair, `interval=1d`, `limit=90`. Futures: `settle=usdt`, `contract={BASE}_USDT`, `limit=20` | Spot: daily OHLC, volume. Futures: depth levels; top 10 bid/ask totals; bid1/ask1 |
+| 3 | `gate-cli cex spot market tickers` | `gate-cli cex futures market candlesticks` | Same pair/contract; `interval=1d`, `limit=90` (or from/to for ~90 days) | Daily OHLC, volume, quote volume; tag weekend vs weekday |
+| 4 | — | `gate-cli cex futures market tickers` | Same pair/contract | `last`; 24h volume; current context |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -975,7 +975,7 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 - "Evaluate ETH liquidity on the exchange and compare weekend vs weekday."
 
 **Expected behavior**:
-1. Call per **MCP Call Spec**: `cex_spot_get_spot_order_book`(ETH_USDT, limit=20) → `cex_spot_get_spot_candlesticks`(ETH_USDT, interval=1d, limit=90 or from/to ~90 days) → `cex_spot_get_spot_tickers`(ETH_USDT).
+1. Call per **MCP Call Spec**: `gate-cli cex spot market orderbook`(ETH_USDT, limit=20) → `gate-cli cex spot market candlesticks`(ETH_USDT, interval=1d, limit=90 or from/to ~90 days) → `gate-cli cex spot market tickers`(ETH_USDT).
 2. From order book: depth levels, top 10 bid/ask totals, spread → current liquidity summary.
 3. From candlesticks: for each day (timestamp), classify weekend vs weekday; aggregate by group: e.g. avg daily volume, avg daily quote volume, avg absolute daily return or avg daily return; optionally count days.
 4. Compare: e.g. "Weekend avg volume vs weekday avg volume"; "Weekend vs weekday volatility/return."
@@ -1024,7 +1024,7 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 - "BTC perpetual: liquidity and weekend vs weekday comparison."
 
 **Expected behavior**:
-1. Detect "perpetual" or "contract" and use **futures** MCP: `cex_fx_get_fx_contract`(settle=usdt, contract=ETH_USDT) → `cex_fx_get_fx_order_book`(settle=usdt, contract=ETH_USDT, limit=20) → `cex_fx_get_fx_candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `cex_fx_get_fx_tickers`(settle=usdt, contract=ETH_USDT).
+1. Detect "perpetual" or "contract" and use **futures** MCP: `gate-cli cex futures market contract`(settle=usdt, contract=ETH_USDT) → `gate-cli cex futures market orderbook`(settle=usdt, contract=ETH_USDT, limit=20) → `gate-cli cex futures market candlesticks`(settle=usdt, contract=ETH_USDT, interval=1d, limit=90) → `gate-cli cex futures market tickers`(settle=usdt, contract=ETH_USDT).
 2. Use `quanto_multiplier` from contract to interpret order book depth in notional; same logic: order book for current depth; 90d candlesticks split weekend vs weekday for volume and return; output same structure with futures data.
 
 ---
@@ -1039,9 +1039,9 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 
 | Step | MCP Tool (spot) | MCP Tool (futures) | Parameters | Required Fields |
 |------|-----------------|--------------------|------------|-----------------|
-| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. Short & long: `interval=4h` and `1d`, `limit=30–90` | OHLC; volume; support/resistance (recent highs/lows); trend structure |
-| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; compare to history for momentum |
-| 3 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate; positive → long cost high / short bias; negative → short cost high / long bias |
+| 1 | `gate-cli cex spot market candlesticks` | `gate-cli cex futures market candlesticks` | Spot: `currency_pair={BASE}_USDT`. Futures: `settle=usdt`, `contract={BASE}_USDT`. Short & long: `interval=4h` and `1d`, `limit=30–90` | OHLC; volume; support/resistance (recent highs/lows); trend structure |
+| 2 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | `last`; 24h `quoteVolume`; `changePercentage`; compare to history for momentum |
+| 3 | — | `gate-cli cex futures market funding-rate` | `contract`+`settle` | Funding rate; positive → long cost high / short bias; negative → short cost high / long bias |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -1062,8 +1062,8 @@ Based on recent K-line and 24h data: [e.g. price near/above resistance with volu
 - "Technical analysis: what should I do with BTC now?"
 
 **Expected behavior**:
-1. **Spot**: Call per **MCP Call Spec**: `cex_spot_get_spot_candlesticks`(BTC_USDT, interval=4h and 1d, limit=30–90 each) → `cex_spot_get_spot_tickers`(BTC_USDT).
-2. **Futures**: Call per **MCP Call Spec**: `cex_fx_get_fx_candlesticks`(settle=usdt, contract=BTC_USDT, same timeframes) → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_funding_rate`(contract=BTC_USDT).
+1. **Spot**: Call per **MCP Call Spec**: `gate-cli cex spot market candlesticks`(BTC_USDT, interval=4h and 1d, limit=30–90 each) → `gate-cli cex spot market tickers`(BTC_USDT).
+2. **Futures**: Call per **MCP Call Spec**: `gate-cli cex futures market candlesticks`(settle=usdt, contract=BTC_USDT, same timeframes) → `gate-cli cex futures market tickers` → `gate-cli cex futures market funding-rate`(contract=BTC_USDT).
 3. From candlesticks: derive support/resistance; from ticker: current price, 24h volume, change; compare to history for momentum; from funding_rate: long/short bias.
 4. Output: K-line context + key levels (both timeframes) + momentum conclusion + funding long/short conclusion + short-term recommendation + long-term recommendation per Report Template.
 
@@ -1117,10 +1117,10 @@ Analysis is data-based, not investment advice.
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when needed) | Parameters | Required Fields |
 |------|-----------------|----------------------------------|------------|-----------------|
-| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: `settle=usdt`, `contract={BASE}_USDT`, same interval/limit | Last 7d daily OHLC; volume |
-| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | `last`; 24h volume; change; liquidity reference |
-| 3 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_order_book` | `limit=20` | Depth; bid-ask spread; large orders |
-| 4 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate; futures add long/short cost |
+| 1 | `gate-cli cex spot market candlesticks` | `gate-cli cex futures market candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: `settle=usdt`, `contract={BASE}_USDT`, same interval/limit | Last 7d daily OHLC; volume |
+| 2 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | `last`; 24h volume; change; liquidity reference |
+| 3 | `gate-cli cex spot market orderbook` | `gate-cli cex futures market orderbook` | `limit=20` | Depth; bid-ask spread; large orders |
+| 4 | — | `gate-cli cex futures market funding-rate` | `contract`+`settle` | Funding rate; futures add long/short cost |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -1140,8 +1140,8 @@ Analysis is data-based, not investment advice.
 - "I'm watching BTC, ETH and GT and want to buy; analyze these three and give investment advice; I have $5000, how should I allocate across them?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec** for each of BTC_USDT, ETH_USDT, GT_USDT: `cex_spot_get_spot_candlesticks`(interval=1d, limit=7) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_order_book`(limit=20).
-2. If futures view needed: for same contracts call `cex_fx_get_fx_candlesticks` → `cex_fx_get_fx_tickers` → `cex_fx_get_fx_order_book` → `cex_fx_get_fx_funding_rate`.
+1. Call per **MCP Call Spec** for each of BTC_USDT, ETH_USDT, GT_USDT: `gate-cli cex spot market candlesticks`(interval=1d, limit=7) → `gate-cli cex spot market tickers` → `gate-cli cex spot market orderbook`(limit=20).
+2. If futures view needed: for same contracts call `gate-cli cex futures market candlesticks` → `gate-cli cex futures market tickers` → `gate-cli cex futures market orderbook` → `gate-cli cex futures market funding-rate`.
 3. From ticker: price and 24h performance; from order book: depth and spread; from 7d daily: short-term trend; from futures: funding rate.
 4. Output: per-asset spot overview table + futures funding (if applicable) + allocation suggestion (e.g. BTC 40%, ETH 40%, GT 20% with brief rationale) per Report Template.
 
@@ -1188,10 +1188,10 @@ Analysis is data-based, not investment advice.
 
 | Step | MCP Tool (spot) | MCP Tool (futures, when needed) | Parameters | Required Fields |
 |------|-----------------|----------------------------------|------------|-----------------|
-| 1 | `cex_spot_get_spot_candlesticks` | `cex_fx_get_fx_candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: same contract + settle | Last 7d daily OHLC; volume |
-| 2 | `cex_spot_get_spot_tickers` | `cex_fx_get_fx_tickers` | Same pair / contract + settle | Current price; 24h volume; change |
-| 3 | `cex_spot_get_spot_order_book` | `cex_fx_get_fx_order_book` | `limit=20` | Depth; spread |
-| 4 | — | `cex_fx_get_fx_funding_rate` | `contract`+`settle` | Funding rate |
+| 1 | `gate-cli cex spot market candlesticks` | `gate-cli cex futures market candlesticks` | Spot: `currency_pair={BASE}_USDT`, `interval=1d`, `limit=7`. Futures: same contract + settle | Last 7d daily OHLC; volume |
+| 2 | `gate-cli cex spot market tickers` | `gate-cli cex futures market tickers` | Same pair / contract + settle | Current price; 24h volume; change |
+| 3 | `gate-cli cex spot market orderbook` | `gate-cli cex futures market orderbook` | `limit=20` | Depth; spread |
+| 4 | — | `gate-cli cex futures market funding-rate` | `contract`+`settle` | Funding rate |
 
 **Calculation & judgment** (aligned with SKILL):
 
@@ -1212,7 +1212,7 @@ Analysis is data-based, not investment advice.
 - "I hold 30% BTC, 30% ETH, 20% DOGE, 15% LTC, 5% USDT; is this allocation reasonable, how should I adjust my portfolio, and if I don’t need to change it what else can I buy?"
 
 **Expected behavior**:
-1. Call per **MCP Call Spec** for each of BTC, ETH, DOGE, LTC: `cex_spot_get_spot_candlesticks`(interval=1d, limit=7) → `cex_spot_get_spot_tickers` → `cex_spot_get_spot_order_book`(limit=20); if futures involved, also call candlesticks → tickers → order_book → funding_rate for the contracts.
+1. Call per **MCP Call Spec** for each of BTC, ETH, DOGE, LTC: `gate-cli cex spot market candlesticks`(interval=1d, limit=7) → `gate-cli cex spot market tickers` → `gate-cli cex spot market orderbook`(limit=20); if futures involved, also call candlesticks → tickers → order_book → funding_rate for the contracts.
 2. From 7d performance, liquidity, volatility and correlation per asset, assess user's allocation (e.g. majors 60%, alts 35%, cash 5% — risk acceptable or not).
 3. Output: per-asset spot overview → allocation assessment (reasonable / suggest adjustment) → concrete adjustment (what to reduce/add) → if no change, "other names to consider" per Report Template.
 

@@ -6,7 +6,7 @@ Gate CrossEx cross-exchange fund transfer scenarios.
 
 ### Step 1: Validate the asset and supported route
 
-Call `cex_crx_list_crx_transfer_coins` with:
+Call `gate-cli cex cross-ex market transfer-coins` with:
 
 - `coin`: target asset when the user specifies a coin
 
@@ -18,7 +18,7 @@ Key data to extract:
 
 ### Step 2: Check source account balance
 
-Call `cex_crx_get_crx_account` with:
+Call `gate-cli cex cross-ex account get` with:
 
 - no required parameters for the default account overview
 
@@ -30,7 +30,7 @@ Key data to extract:
 
 ### Step 3: Create the transfer after explicit confirmation
 
-Call `cex_crx_create_crx_transfer` with:
+Call `gate-cli cex cross-ex transfer create` with:
 
 - `from`
 - `to`
@@ -47,7 +47,7 @@ Key data to extract:
 
 ### Step 4: Verify transfer status or history
 
-Call `cex_crx_list_crx_transfers` with:
+Call `gate-cli cex cross-ex transfer list` with:
 
 - `coin` when the user wants a filtered history view
 - `order_id` when tracking a single transfer record
@@ -98,14 +98,14 @@ Transfer Summary
 
 ### Data Sources
 
-- **Supported Coins**: Call `cex_crx_list_crx_transfer_coins` → List of coins supporting cross-exchange transfer
-- **Account Balance**: Call `cex_crx_get_crx_account` → `available_balance`
-- **Create Transfer**: Call `cex_crx_create_crx_transfer` → Execute transfer
-- **Transfer History**: Call `cex_crx_list_crx_transfers` → Transfer records
+- **Supported Coins**: Call `gate-cli cex cross-ex market transfer-coins` → List of coins supporting cross-exchange transfer
+- **Account Balance**: Call `gate-cli cex cross-ex account get` → `available_balance`
+- **Create Transfer**: Call `gate-cli cex cross-ex transfer create` → Execute transfer
+- **Transfer History**: Call `gate-cli cex cross-ex transfer list` → Transfer records
 
 ### Pre-checks
 
-1. **Coin Verification**: Call `cex_crx_list_crx_transfer_coins` to verify coin support
+1. **Coin Verification**: Call `gate-cli cex cross-ex market transfer-coins` to verify coin support
 2. **Balance Check**: Confirm the source account has sufficient balance
 3. **Minimum Amount Check**: Validate transfer minimum and single-limit requirements
 4. **Route Check**: Confirm the requested source and destination exchanges are supported
@@ -143,11 +143,11 @@ Transfer Summary
 **Expected Behavior**:
 
 1. Parse parameters: Source exchange, destination exchange, currency, quantity.
-2. Check supported coins via `cex_crx_list_crx_transfer_coins`.
-3. Check source account balance via `cex_crx_get_crx_account`.
+2. Check supported coins via `gate-cli cex cross-ex market transfer-coins`.
+3. Check source account balance via `gate-cli cex cross-ex account get`.
 4. Display transfer plan and require confirmation.
-5. Call `cex_crx_create_crx_transfer` with the confirmed parameters.
-6. Query transfer status via `cex_crx_list_crx_transfers` and output the result.
+5. Call `gate-cli cex cross-ex transfer create` with the confirmed parameters.
+6. Query transfer status via `gate-cli cex cross-ex transfer list` and output the result.
 
 **Report Template**:
 
@@ -183,7 +183,7 @@ Transfer submitted.
 **Expected Behavior**:
 
 1. Identify the request as transfer history.
-2. Call `cex_crx_list_crx_transfers` with optional asset or record filters.
+2. Call `gate-cli cex cross-ex transfer list` with optional asset or record filters.
 3. Display recent transfer records in reverse chronological order.
 
 **Report Template**:
