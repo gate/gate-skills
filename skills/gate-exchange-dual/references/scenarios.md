@@ -11,7 +11,7 @@
 - "What dual investment options do you have?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_investment_plans()` to get the list
+1. Call `gate-cli cex earn dual plans` to get the list
 2. Group results by type: Call (Sell High) and Put (Buy Low)
 3. Display as comparison table. APY display as `apy_display × 100`%
 4. Append risk disclaimer
@@ -28,7 +28,7 @@
 - "What are the terms and target prices for BTC sell-high?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_investment_plans()` to get all plans, then filter locally by currency (e.g. `BTC`)
+1. Call `gate-cli cex earn dual plans` to get all plans, then filter locally by currency (e.g. `BTC`)
 2. Filter for matching type: sell-high → `call`, buy-low → `put`
 3. Display: target prices available, APY (`apy_display × 100`%)
 4. Do NOT display timestamp fields to the user
@@ -49,7 +49,7 @@
 - "Simulate the settlement for this dual plan"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_investment_plans()` to get plan details (`apy_display`, target price)
+1. Call `gate-cli cex earn dual plans` to get plan details (`apy_display`, target price)
 2. Display APY as `apy_display × 100`%. **NEVER** display the raw value directly as a percentage. Use raw `apy_display` value in formulas
 3. Calculate settlement scenarios:
    - **Sell High**: settlement price ≥ target → USDT payout = principal × target price × (1 + apy_display/365 × days); settlement price < target → crypto + interest
@@ -70,8 +70,8 @@
 - "What dual orders are still active?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_orders(page=1, limit=100)` to get active orders. **Must complete ALL pagination** (loop: increment `page` until returned rows < `limit`) before proceeding — do NOT answer based on partial data
-2. Call `cex_earn_list_dual_balance()` to get total asset overview
+1. Call `gate-cli cex earn dual orders` to get active orders. **Must complete ALL pagination** (loop: increment `page` until returned rows < `limit`) before proceeding — do NOT answer based on partial data
+2. Call `gate-cli cex earn dual balance` to get total asset overview
 3. Derive type from `invest_currency`: crypto (BTC, ETH, etc.) → Sell High; stablecoin (USDT) → Buy Low
 4. Show: `invest_currency`/`exercise_currency` (coin pair), type, `invest_amount`, `exercise_price` (target price), APY (`apy_display × 100`%)
 5. Show total locked amount from balance
@@ -91,7 +91,7 @@
 
 **Expected Behavior**:
 1. Parse time reference from user query (e.g. "last month" → calculate exact `from`/`to` Unix timestamps in seconds for that calendar month in UTC+0). **Must** pass correct `from`/`to` to the API — do NOT ignore the time range or return the most recent order instead
-2. Call `cex_earn_list_dual_orders(from, to, page=1, limit=100)`. **Must complete ALL pagination** (loop until returned rows < limit) before proceeding — do NOT answer based on partial data
+2. Call `gate-cli cex earn dual orders`. **Must complete ALL pagination** (loop until returned rows < limit) before proceeding — do NOT answer based on partial data
 3. After all pages are collected, if user mentions a coin (e.g. "BTC"), filter the **complete** result set locally — check if `invest_currency` or `exercise_currency` matches
 4. If multiple matching orders found: list all in a table, present all results to the user
 5. If no matching orders found: respond "No settled dual investment orders found in this time range."
@@ -115,10 +115,10 @@
 
 **Expected Behavior**:
 1. Parse user intent: extract coin (BTC), amount (0.1), target price (65000). Ask for missing params.
-2. Call `cex_earn_list_dual_investment_plans()` to find matching sell-high (type=call) plan for BTC with target price ~65000.
+2. Call `gate-cli cex earn dual plans` to find matching sell-high (type=call) plan for BTC with target price ~65000.
 3. If matching plan found, present order confirmation with full details: type, amount, target price, APY (`apy_display × 100`%), and both settlement scenarios with calculated amounts.
 4. **Wait for explicit user confirmation before proceeding.**
-5. On confirmation, call `cex_earn_place_dual_order(plan_id, amount)`.
+5. On confirmation, call `gate-cli cex earn dual place`.
 6. Success: "Order submitted! Your subscribed dual investment product: BTC (target price 65000, APY X%)."
 7. Failure: display error. If compliance error, route to Cases 15–17.
 
@@ -136,10 +136,10 @@
 
 **Expected Behavior**:
 1. Parse user intent: extract coin (BTC), USDT amount (1000), target price (58000). Ask for missing params.
-2. Call `cex_earn_list_dual_investment_plans()` to find matching buy-low (type=put) plan for BTC with target price ~58000.
+2. Call `gate-cli cex earn dual plans` to find matching buy-low (type=put) plan for BTC with target price ~58000.
 3. If matching plan found, present order confirmation with full details and both settlement scenarios.
 4. **Wait for explicit user confirmation before proceeding.**
-5. On confirmation, call `cex_earn_place_dual_order(plan_id, amount)`.
+5. On confirmation, call `gate-cli cex earn dual place`.
 6. Success: "Order submitted! Your subscribed dual investment product: BTC (target price 58000, APY X%)."
 7. Failure: display error. If compliance error, route to Cases 15–17.
 
@@ -156,7 +156,7 @@
 - "Is 5000U enough to buy dual?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_investment_plans()` to get plans for the target coin and type
+1. Call `gate-cli cex earn dual plans` to get plans for the target coin and type
 2. Compare user's amount against plan's `min_amount`
 3. If amount meets minimum: inform the user and offer to proceed with order placement (Case 7 or 8 workflow)
 4. If amount < `min_amount`: "Insufficient balance. The minimum subscription amount is {min_amount} {currency}."
@@ -175,7 +175,7 @@
 - "Is 50U enough for dual?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_investment_plans()` to get available plans
+1. Call `gate-cli cex earn dual plans` to get available plans
 2. List minimum investment amounts for available plans
 3. If user's amount < all minimums: "The minimum subscription amount for current dual investment products is {min_amount} {currency}. Your amount is below the minimum."
 4. If user's amount meets some plans: list those eligible plans and offer to proceed
@@ -193,7 +193,7 @@
 - "My dual order matured, what's the outcome?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_orders(from, to, page=1, limit=100)` to find settled orders. **Must complete ALL pagination** (loop until returned rows < limit) before proceeding
+1. Call `gate-cli cex earn dual orders` to find settled orders. **Must complete ALL pagination** (loop until returned rows < limit) before proceeding
 2. Derive type from `invest_currency`: crypto → Sell High; stablecoin → Buy Low. Explain settlement outcome:
    - Sell-high (invest_currency is crypto): settlement_price ≥ exercise_price → received USDT; < exercise_price → received crypto + interest
    - Buy-low (invest_currency is stablecoin): settlement_price ≤ exercise_price → received crypto; > exercise_price → received USDT + interest
@@ -215,7 +215,7 @@
 - "How much do I have in dual investments?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_dual_balance()` to get dual investment assets
+1. Call `gate-cli cex earn dual balance` to get dual investment assets
 2. Display total holdings in USDT and BTC, total interest earned
 3. Append risk disclaimer
 
@@ -261,7 +261,7 @@
 
 ## Scenario 15: Restricted Region
 
-**Context**: User asks about regional restrictions, or a `cex_earn_place_dual_order` call returns a region restriction error.
+**Context**: User asks about regional restrictions, or a `gate-cli cex earn dual place` call returns a region restriction error.
 
 **Prompt Examples**:
 - "I'm in [region], can I buy dual investment?"
@@ -271,7 +271,7 @@
 
 **Expected Behavior**:
 1. If triggered by user question (no order attempt): respond with compliance explanation.
-2. If triggered by `cex_earn_place_dual_order` error response: explain the restriction.
+2. If triggered by `gate-cli cex earn dual place` error response: explain the restriction.
 3. Response: "Dual investment requires meeting the platform's compliance requirements. Your region is currently not supported for this product. If you have any questions, please contact Gate support."
 
 ---
@@ -286,7 +286,7 @@
 - "Dual subscription failed, what happened?"
 
 **Expected Behavior**:
-1. Triggered by `cex_earn_place_dual_order` returning a compliance error.
+1. Triggered by `gate-cli cex earn dual place` returning a compliance error.
 2. Based on the specific error, respond accordingly:
    - OES / institutional / enterprise user: "Your account type does not currently support dual investment products."
    - Risk control blocklist: "Your account is currently unable to operate this product. Please contact Gate support for details."

@@ -1,33 +1,61 @@
 ---
 name: gate-exchange-assets
-version: "2026.4.8-1"
-updated: "2026-04-08"
 description: "Gate multi-account asset and balance query skill. Use when the user asks to check total assets, account balance, or specific coin holdings across all accounts. Triggers on 'total assets', 'my balance', 'how many BTC do I have'. Read-only."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Delivery:Read
-  - Earn:Read
-  - Fx:Read
-  - Margin:Read
-  - Options:Read
-  - Spot:Read
-  - Tradfi:Read
-  - Unified:Read
-  - Wallet:Read
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Assets Assistant
 
@@ -36,71 +64,65 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
 
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_dc_list_dc_accounts
-- cex_earn_list_dual_balance
-- cex_earn_list_dual_orders
+- `gate-cli cex delivery account get`
+- `gate-cli cex earn dual balance`
+- `gate-cli cex earn dual orders`
 - cex_earn_list_structured_orders
-- cex_fx_get_fx_accounts
-- cex_margin_list_margin_accounts
-- cex_options_list_options_account
-- cex_spot_get_spot_accounts
-- cex_spot_list_spot_account_book
-- cex_tradfi_query_user_assets
-- cex_unified_get_unified_accounts
-- cex_wallet_get_total_balance
+- `gate-cli cex futures account get`
+- `gate-cli cex margin account list`
+- `gate-cli cex options account get`
+- `gate-cli cex spot account get`
+- `gate-cli cex spot account book`
+- `gate-cli cex tradfi account assets`
+- `gate-cli cex unified account get`
+- `gate-cli cex wallet balance total`
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Delivery:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Tradfi:Read, Unified:Read, Wallet:Read
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Delivery:Read, Earn:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Tradfi:Read, Unified:Read, Wallet:Read
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's assets-query workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's assets-query workflow.
 
 - `SKILL.md` keeps intent routing and rendering rules.
-- `references/mcp.md` is the authoritative MCP execution layer for multi-account data collection, normalization, and degraded output handling.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for multi-account data collection, normalization, and degraded output handling.
 
 ## Domain Knowledge
 
-### MCP Tool Mapping (Gate gate-mcp)
+### Command mapping (`gate-cli`)
 
 | MCP Tool | Purpose | Key Fields |
 |----------|---------|------------|
-| `cex_wallet_get_total_balance` | Total balance (all sub-accounts, ~1min cache) | total.amount, details (spot/futures/delivery/finance/quant/meme_box/options/payment/margin/cross_margin) |
-| `cex_spot_get_spot_accounts` | Spot balance (filter by currency) | currency, available, locked |
-| `cex_unified_get_unified_accounts` | Unified account (single/cross/portfolio margin) | balances, unified_account_total, margin_mode |
-| `cex_fx_get_fx_accounts` | Perpetual (settle=usdt or btc) | total, unrealised_pnl, available, point, bonus |
-| `cex_dc_list_dc_accounts` | Delivery (settle=usdt) | total, unrealised_pnl, available |
-| `cex_options_list_options_account` | Options | total_value, unrealised_pnl, available |
-| `cex_margin_list_margin_accounts` | Isolated margin | currency_pair, mmr, base/quote (available/locked/borrowed/interest) |
-| `cex_tradfi_query_user_assets` | TradFi assets | USDx balance, margin |
-| `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders` | Finance | Flexible savings / Dual currency / Structured |
-| `cex_spot_list_spot_account_book` | Spot account book / ledger | ledger entries |
+| `gate-cli cex wallet balance total` | Total balance (all sub-accounts, ~1min cache) | total.amount, details (spot/futures/delivery/finance/quant/meme_box/options/payment/margin/cross_margin) |
+| `gate-cli cex spot account get` | Spot balance (filter by currency) | currency, available, locked |
+| `gate-cli cex unified account get` | Unified account (single/cross/portfolio margin) | balances, unified_account_total, margin_mode |
+| `gate-cli cex futures account get` | Perpetual (settle=usdt or btc) | total, unrealised_pnl, available, point, bonus |
+| `gate-cli cex delivery account get` | Delivery (settle=usdt) | total, unrealised_pnl, available |
+| `gate-cli cex options account get` | Options | total_value, unrealised_pnl, available |
+| `gate-cli cex margin account list` | Isolated margin | currency_pair, mmr, base/quote (available/locked/borrowed/interest) |
+| `gate-cli cex tradfi account assets` | TradFi assets | USDx balance, margin |
+| `gate-cli cex earn dual balance`, `gate-cli cex earn dual orders`, `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Finance | Flexible savings / Dual currency / Structured |
+| `gate-cli cex spot account book` | Spot account book / ledger | ledger entries |
 
 ### Account Name Mapping (details key → Display)
 
@@ -131,40 +153,40 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 | Case | Trigger Phrases | MCP Tool | Output |
 |------|-----------------|----------|--------|
-| 1 | "How much do I have", "Show my CEX total assets", "Account asset distribution", "Account overview", "Check my balance" | `cex_wallet_get_total_balance` currency=USDT | Total amount, account distribution, coin distribution; TradFi/payment listed separately if any |
+| 1 | "How much do I have", "Show my CEX total assets", "Account asset distribution", "Account overview", "Check my balance" | `gate-cli cex wallet balance total` currency=USDT | Total amount, account distribution, coin distribution; TradFi/payment listed separately if any |
 
 ### II. Specific Currency (Case 2)
 
 | Case | Trigger Phrases | MCP Tool | Output |
 |------|-----------------|----------|--------|
-| 2 | "How many BTC do I have", "How many USDT do I have" | Concurrent: `cex_spot_get_spot_accounts`, `cex_unified_get_unified_accounts`, `cex_fx_get_fx_accounts`, `cex_dc_list_dc_accounts`, `cex_margin_list_margin_accounts`, `cex_earn_list_dual_balance`, etc. | Total {COIN} held, distribution by account |
+| 2 | "How many BTC do I have", "How many USDT do I have" | Concurrent: `gate-cli cex spot account get`, `gate-cli cex unified account get`, `gate-cli cex futures account get`, `gate-cli cex delivery account get`, `gate-cli cex margin account list`, `gate-cli cex earn dual balance`, etc. | Total {COIN} held, distribution by account |
 
 ### III. Specific Account + Currency (Case 3)
 
 | Case | Trigger Phrases | MCP Tool | Output |
 |------|-----------------|----------|--------|
-| 3 | "How much USDT in my spot account", "How much BTC in my spot account" | `cex_spot_get_spot_accounts` currency={COIN} or `cex_unified_get_unified_accounts` currency={COIN} | Account name, total, available, locked |
+| 3 | "How much USDT in my spot account", "How much BTC in my spot account" | `gate-cli cex spot account get` currency={COIN} or `gate-cli cex unified account get` currency={COIN} | Account name, total, available, locked |
 
 ### IV. Sub-Account Queries (Case 4–15)
 
 | Case | Account | Trigger Phrases | MCP Tool |
 |------|---------|-----------------|----------|
-| 4 | Spot | "What's in my spot account", "Show my spot account assets" | `cex_spot_get_spot_accounts` or `cex_unified_get_unified_accounts` |
-| 5 | Futures | "How much in futures account", "USDT perpetual", "BTC perpetual", "Delivery" | `cex_fx_get_fx_accounts` settle=usdt/btc, `cex_dc_list_dc_accounts` |
-| 6 | Trading (Unified) | "How much in trading account", "How much in unified account" | `cex_unified_get_unified_accounts` |
-| 7 | Options | "How much in options account", "Show my options assets" | `cex_options_list_options_account` or `cex_unified_get_unified_accounts` |
-| 8 | Finance | "How much in finance account", "Show my finance account assets" | `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders` |
-| 9 | Alpha | "How much in Alpha account", "Show my Alpha assets" | `cex_wallet_get_total_balance` details.meme_box |
-| 12 | Isolated Margin | "How much in isolated margin account", "Show my isolated margin assets" | `cex_margin_list_margin_accounts` |
-| 15 | TradFi | "How much in TradFi account", "Show my TradFi assets" | `cex_tradfi_query_user_assets` |
+| 4 | Spot | "What's in my spot account", "Show my spot account assets" | `gate-cli cex spot account get` or `gate-cli cex unified account get` |
+| 5 | Futures | "How much in futures account", "USDT perpetual", "BTC perpetual", "Delivery" | `gate-cli cex futures account get` settle=usdt/btc, `gate-cli cex delivery account get` |
+| 6 | Trading (Unified) | "How much in trading account", "How much in unified account" | `gate-cli cex unified account get` |
+| 7 | Options | "How much in options account", "Show my options assets" | `gate-cli cex options account get` or `gate-cli cex unified account get` |
+| 8 | Finance | "How much in finance account", "Show my finance account assets" | `gate-cli cex earn dual balance`, `gate-cli cex earn dual orders`, `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| 9 | Alpha | "How much in Alpha account", "Show my Alpha assets" | `gate-cli cex wallet balance total` details.meme_box |
+| 12 | Isolated Margin | "How much in isolated margin account", "Show my isolated margin assets" | `gate-cli cex margin account list` |
+| 15 | TradFi | "How much in TradFi account", "Show my TradFi assets" | `gate-cli cex tradfi account assets` |
 
 ### V. Account Book (Legacy 5–7)
 
 | Case | Intent | MCP Tool |
 |------|--------|----------|
-| 5 | Account book for coin | `cex_spot_list_spot_account_book` |
-| 6 | Ledger + current balance | `cex_spot_list_spot_account_book` → `cex_spot_get_spot_accounts` |
-| 7 | Recent activity | `cex_spot_list_spot_account_book` |
+| 5 | Account book for coin | `gate-cli cex spot account book` |
+| 6 | Ledger + current balance | `gate-cli cex spot account book` → `gate-cli cex spot account get` |
+| 7 | Recent activity | `gate-cli cex spot account book` |
 
 ## Special Scenario Handling
 
@@ -227,7 +249,7 @@ Margin: {margin} USDx | Available margin: {available_margin} USDx | Margin ratio
 
 ## Cross-Skill Workflows
 
-- **Before trading**: User asks "Can I buy 100U BTC?" → This skill: `cex_spot_get_spot_accounts` currency=USDT → Route to `gate-exchange-spot` if sufficient.
+- **Before trading**: User asks "Can I buy 100U BTC?" → This skill: `gate-cli cex spot account get` currency=USDT → Route to `gate-exchange-spot` if sufficient.
 - **After transfer**: Route to this skill for updated balance when user asks.
 - **Transfer card**: When futures/options = 0, recommend [Transfer] and trigger transfer skill.
 

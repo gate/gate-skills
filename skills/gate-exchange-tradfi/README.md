@@ -2,7 +2,7 @@
 
 ## Overview
 
-AI Agent skill for querying Gate TradFi (traditional finance) data in read-only mode. All MCP tools used are prefixed with `cex_tradfi`. It supports four query areas: order list and order history, current and historical positions, market data (category list, symbol list, ticker, symbol kline), and user assets plus MT5 account info. **No order placement, fund transfer, or balance transfer.**
+AI Agent skill for querying Gate TradFi (traditional finance) data in read-only mode. All `gate-cli` commands used are prefixed with `cex_tradfi`. It supports four query areas: order list and order history, current and historical positions, market data (category list, symbol list, ticker, symbol kline), and user assets plus MT5 account info. **No order placement, fund transfer, or balance transfer.**
 
 ### Core Capabilities
 
@@ -17,18 +17,18 @@ AI Agent skill for querying Gate TradFi (traditional finance) data in read-only 
 
 This skill uses a **routing architecture**:
 
-- **SKILL.md** defines the four sub-modules, routing rules, MCP tool list (all `cex_tradfi_*`), and execution flow. Intent is mapped to one of the reference documents.
+- **SKILL.md** defines the four sub-modules, routing rules, `gate-cli` command list (all `cex_tradfi_*`), and execution flow. Intent is mapped to one of the reference documents.
 - **references/** holds one document per module:
   - `query-orders.md` — order list, order history
   - `query-positions.md` — current position list, position history
   - `query-market.md` — category list, symbol list, ticker, symbol kline
   - `query-assets.md` — user assets/balance, MT5 account info
 
-Each reference contains a Workflow (steps and tool calls), Report Template, and scenarios with Context, Prompt Examples, and Expected Behavior. The agent loads the matching reference and follows its workflow to call the appropriate `cex_tradfi_*` MCP tools and format the response.
+Each reference contains a Workflow (steps and tool calls), Report Template, and scenarios with Context, Prompt Examples, and Expected Behavior. The agent loads the matching reference and follows its workflow to call the appropriate `cex_tradfi_*` `gate-cli` commands and format the response.
 
 ## Prerequisites
 
-- Gate MCP configured and connected with TradFi tools (all prefixed with `cex_tradfi_`, e.g. `cex_tradfi_query_order_list`, `cex_tradfi_query_categories`, `cex_tradfi_query_mt5_account_info`). If your MCP uses different tool names, map them in SKILL.md or in the reference docs.
+- gate-cli configured and connected with TradFi tools (all prefixed with `cex_tradfi_`, e.g. `gate-cli cex tradfi order list`, `gate-cli cex tradfi market categories`, `gate-cli cex tradfi account info`). If your `gate-cli` uses different tool names, map them in SKILL.md or in the reference docs.
 
 ## Example Prompts
 
@@ -76,7 +76,7 @@ gate-exchange-tradfi/
 
 ## Authentication
 
-This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+This skill does **not** read secrets from chat. Configure **`gate-cli`** on the agent host with **`gate-cli config init`** or **`GATE_API_KEY`** / **`GATE_API_SECRET`**, with TradFi permissions. See [gate-cli](https://github.com/gate/gate-cli) and run `sh ./setup.sh` from this skill directory for installation.
 
 ## Source
 

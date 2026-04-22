@@ -70,7 +70,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 | [gate-exchange-referral](#-gate-exchange-referral) | 邀请好友：活动推荐与规则解读（Earn Together、助领券、超级返佣）等（只读） | `2026.3.26-1` | ✅ Active |
 | [gate-exchange-assets-manager](#-gate-exchange-assets-manager) | L2 账户资产管家：多账户概览、保证金/爆仓风险、理财/质押/联盟、统一账户借还抵押（读+写） | `2026.3.25-1` | ✅ Active |
 | [gate-info-research](#-gate-info-research) | L2 市场研究 Copilot：聚合 Gate-Info 与 Gate-News 只读研报、对比与风险检查 | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-welfare](#-gate-exchange-welfare) | 福利中心：新用户任务与奖励（MCP 查询，禁止编造奖励） | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-welfare](#-gate-exchange-welfare) | 福利中心：新客身份识别、任务列表、领取任务、领取奖励与完成任务引导（MCP 查询/执行，禁止编造奖励） | `2026.4.10-1` | ✅ Active |
 | [gate-exchange-launchpool](#-gate-exchange-launchpool) | LaunchPool：项目浏览、质押、赎回、质押记录、空投奖励 | `2026.3.23-1` | ✅ Active |
 | [gate-exchange-kyc](#-gate-exchange-kyc) | KYC：门户引导（仅官网完成身份验证） | `2026.3.23-1` | ✅ Active |
 | [gate-exchange-collateralloan](#-gate-exchange-collateralloan) | 多币抵押借贷：查询、还款、追加/赎回抵押品 | `2026.3.23-1` | ✅ Active |
@@ -669,10 +669,12 @@ Market Research Copilot — L2 复合技能，聚合 Gate-Info 与 Gate-News 只
 
 > **路径**: `skills/gate-exchange-welfare/`
 
-福利中心新用户任务与奖励，基于 MCP 真实数据，不得编造奖励金额；区分新老用户引导。
+福利中心新客流程技能：基于 MCP 完成身份识别、任务列表查询、单任务领取、奖励领取，以及 KYC / 首充 / 首次交易任务引导；不得编造奖励金额。
 
 **示例提示词**：
 - `有哪些福利任务可以做？`
+- `领取下载任务`
+- `领取我所有新手奖励`
 - `新用户奖励怎么领取？`
 - `新用户有什么福利？`
 

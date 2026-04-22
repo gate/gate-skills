@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-simpleearn
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate Simple Earn management skill. Use when the user asks about flexible or fixed-term savings products. Triggers on 'Simple Earn', 'flexible earn', 'subscribe to earn', 'redeem interest', 'top APY'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Simple Earn Skill
 
@@ -12,58 +64,49 @@ description: "Gate Simple Earn management skill. Use when the user asks about fl
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
 
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_earn_change_uni_lend
-- cex_earn_get_uni_currency
-- cex_earn_get_uni_interest
-- cex_earn_list_earn_fixed_term_history
-- cex_earn_list_earn_fixed_term_lends
-- cex_earn_list_earn_fixed_term_products
-- cex_earn_list_earn_fixed_term_products_by_asset
-- cex_earn_list_uni_rate
-- cex_earn_list_user_uni_lends
+- `gate-cli cex earn uni change`
+- `gate-cli cex earn uni currency`
+- `gate-cli cex earn uni interest`
+- `gate-cli cex earn fixed history`
+- `gate-cli cex earn fixed lends`
+- `gate-cli cex earn fixed products`
+- `gate-cli cex earn fixed products-asset`
+- `gate-cli cex earn uni rate`
+- `gate-cli cex earn uni lends`
 
 **Execution Operations (Write)**
 
-- cex_earn_create_earn_fixed_term_lend
-- cex_earn_create_earn_fixed_term_pre_redeem
-- cex_earn_create_uni_lend
+- `gate-cli cex earn fixed create`
+- `gate-cli cex earn fixed pre-redeem`
+- `gate-cli cex earn uni lend`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Earn:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Earn:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's Simple Earn workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's Simple Earn workflow.
 
 - `SKILL.md` keeps routing and business constraints.
-- `references/mcp.md` is the authoritative MCP execution layer for query/action separation, confirmation gates, and post-action verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for query/action separation, confirmation gates, and post-action verification.
 
 ## Trigger Conditions
 
@@ -97,24 +140,24 @@ Activate this skill when the user expresses any of the following intents:
 
 | Tool | Auth | Description | Reference |
 |------|------|-------------|-----------|
-| `cex_earn_list_uni_rate` | No | Estimated APY per currency (currency enumeration; use with get_uni_currency for limits) | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_get_uni_currency` | No | Single-currency details (min_rate for subscribe) | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_create_uni_lend` | Yes | Create lend (subscribe) or redeem | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_change_uni_lend` | Yes | Change min rate for lend | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_list_user_uni_lends` | Yes | User positions (optional currency filter) | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_get_uni_interest` | Yes | Single-currency cumulative interest | `references/earn-uni-mcp-tools.md` |
-| `cex_earn_list_uni_rate` | No | Estimated APY per currency (for top APY) | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni rate` | No | Estimated APY per currency (currency enumeration; use with get_uni_currency for limits) | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni currency` | No | Single-currency details (min_rate for subscribe) | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni lend` | Yes | Create lend (subscribe) or redeem | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni change` | Yes | Change min rate for lend | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni lends` | Yes | User positions (optional currency filter) | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni interest` | Yes | Single-currency cumulative interest | `references/earn-uni-mcp-tools.md` |
+| `gate-cli cex earn uni rate` | No | Estimated APY per currency (for top APY) | `references/earn-uni-mcp-tools.md` |
 
 ### Fixed-term
 
 | Tool | Auth | Description | Reference |
 |------|------|-------------|-----------|
-| `cex_earn_list_earn_fixed_term_products` | No | List all fixed-term products | `references/fixed-earn-mcp-tools.md` |
-| `cex_earn_list_earn_fixed_term_products_by_asset` | No | List fixed-term products by currency | `references/fixed-earn-mcp-tools.md` |
-| `cex_earn_create_earn_fixed_term_lend` | Yes | Create fixed-term lend (subscribe) | `references/fixed-earn-mcp-tools.md` |
-| `cex_earn_create_earn_fixed_term_pre_redeem` | Yes | Early redeem fixed-term order | `references/fixed-earn-mcp-tools.md` |
-| `cex_earn_list_earn_fixed_term_lends` | Yes | User fixed-term positions | `references/fixed-earn-mcp-tools.md` |
-| `cex_earn_list_earn_fixed_term_history` | Yes | Fixed-term history records | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed products` | No | List all fixed-term products | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed products-asset` | No | List fixed-term products by currency | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed create` | Yes | Create fixed-term lend (subscribe) | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed pre-redeem` | Yes | Early redeem fixed-term order | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed lends` | Yes | User fixed-term positions | `references/fixed-earn-mcp-tools.md` |
+| `gate-cli cex earn fixed history` | Yes | Fixed-term history records | `references/fixed-earn-mcp-tools.md` |
 
 ## Routing Rules
 
@@ -122,13 +165,13 @@ Activate this skill when the user expresses any of the following intents:
 
 | Case | User Intent | Signal Keywords | Action |
 |------|-------------|-----------------|--------|
-| 1 | Subscribe (lend) | "subscribe", "lend to Simple Earn" | Collect currency/amount/min_rate and confirm, then call `cex_earn_create_uni_lend` with `type: lend`. |
-| 2 | Redeem | "redeem", "redeem from Simple Earn" | Collect currency/amount and confirm, then call `cex_earn_create_uni_lend` with `type: redeem`. |
+| 1 | Subscribe (lend) | "subscribe", "lend to Simple Earn" | Collect currency/amount/min_rate and confirm, then call `gate-cli cex earn uni lend` with `type: lend`. |
+| 2 | Redeem | "redeem", "redeem from Simple Earn" | Collect currency/amount and confirm, then call `gate-cli cex earn uni lend` with `type: redeem`. |
 | 3 | Single-currency position | "my USDT Simple Earn", "position for one currency" | See `references/scenarios.md` flexible scenario section |
 | 4 | All positions | "all Simple Earn positions", "total positions" | See `references/scenarios.md` flexible scenario section |
 | 5 | Single-currency interest | "interest", "USDT interest" | See `references/scenarios.md` flexible scenario section |
-| 6 | Subscribe top APY | "top APY", "one-click subscribe top APY" | Show top APY via `cex_earn_list_uni_rate`, ask confirmation, then call `cex_earn_create_uni_lend`. |
-| 7 | Change lend settings (e.g. min rate) | "change min_rate", "change Simple Earn settings" | Collect currency/min_rate and confirm, then call `cex_earn_change_uni_lend`. |
+| 6 | Subscribe top APY | "top APY", "one-click subscribe top APY" | Show top APY via `gate-cli cex earn uni rate`, ask confirmation, then call `gate-cli cex earn uni lend`. |
+| 7 | Change lend settings (e.g. min rate) | "change min_rate", "change Simple Earn settings" | Collect currency/min_rate and confirm, then call `gate-cli cex earn uni change`. |
 | 8 | Auth failure (401/403) | MCP returns 401/403 | Do not expose keys; prompt user to configure Gate CEX API Key (earn). |
 
 ### Fixed-term requests
@@ -137,11 +180,11 @@ Activate this skill when the user expresses any of the following intents:
 |------|-------------|-----------------|--------|
 | 1 | All fixed-term products | "fixed-term products" | See `references/scenarios.md` fixed-term section 1 and `references/fixed-earn-mcp-tools.md` §1 |
 | 2 | Fixed-term products by currency | "USDT fixed-term products" | See `references/scenarios.md` fixed-term section 2 and `references/fixed-earn-mcp-tools.md` §2 |
-| 3 | Fixed-term subscribe | "subscribe 1 SOL fixed-term" | Collect currency/amount/term and confirm, then call `cex_earn_create_earn_fixed_term_lend`. |
-| 4 | Fixed-term early redeem | "redeem order 5862443199" | Collect `order_id` and confirm, then call `cex_earn_create_earn_fixed_term_pre_redeem`. |
-| 5 | Fixed-term total positions | "total fixed-term positions", "current total fixed-term position amount" | Call `cex_earn_list_earn_fixed_term_lends` with `order_type: "1"`, `page`, and `limit`. |
-| 6 | Single fixed-term order detail | "order 5862443199" | Call `cex_earn_list_earn_fixed_term_lends` with `order_type: "1"` and `order_id`. |
-| 7 | Fixed-term history | "subscription records", "redeem records", "interest records" | Call `cex_earn_list_earn_fixed_term_history` with `type`, `page`, `limit`, and optional time range. |
+| 3 | Fixed-term subscribe | "subscribe 1 SOL fixed-term" | Collect currency/amount/term and confirm, then call `gate-cli cex earn fixed create`. |
+| 4 | Fixed-term early redeem | "redeem order 5862443199" | Collect `order_id` and confirm, then call `gate-cli cex earn fixed pre-redeem`. |
+| 5 | Fixed-term total positions | "total fixed-term positions", "current total fixed-term position amount" | Call `gate-cli cex earn fixed lends` with `order_type: "1"`, `page`, and `limit`. |
+| 6 | Single fixed-term order detail | "order 5862443199" | Call `gate-cli cex earn fixed lends` with `order_type: "1"` and `order_id`. |
+| 7 | Fixed-term history | "subscription records", "redeem records", "interest records" | Call `gate-cli cex earn fixed history` with `type`, `page`, `limit`, and optional time range. |
 | 8 | Compliance / region restriction | region restriction questions | Return the standard compliance error message if the API rejects the request. |
 | 9 | Compliance check failure | compliance validation failed | Do not retry or expose internal logic; return the API error message when available. |
 

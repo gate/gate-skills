@@ -6,14 +6,14 @@ Gate futures amend-order scenarios and expected behavior.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_fx_amend_fx_order** | Amend one order | `settle`, `order_id` | `price`, `size`, `amend_text`, `text` |
+| **`gate-cli cex futures order amend`** | Amend one order | `settle`, `order_id` | `price`, `size`, `amend_text`, `text` |
 
 - Only **open** orders can be amended; finished or cancelled orders will error.
-- Before amending, you can call `cex_fx_get_fx_contract(settle, contract)` to check precision (`order_price_round`, `order_size_min`, etc.).
+- Before amending, you can call `gate-cli cex futures market contract` to check precision (`order_price_round`, `order_size_min`, etc.).
 
 ## Pre-amend confirmation
 
-Before calling `cex_fx_amend_fx_order`, show **current order** and **new parameters**, then ask user to confirm. Example: *"Change price from 49000 to 50000. Confirm?"*
+Before calling `gate-cli cex futures order amend`, show **current order** and **new parameters**, then ask user to confirm. Example: *"Change price from 49000 to 50000. Confirm?"*
 
 ---
 
@@ -28,9 +28,9 @@ Before calling `cex_fx_amend_fx_order`, show **current order** and **new paramet
 
 **Expected Behavior**:
 1. Parse order_id: `94294117235059656`, new_price: `50000`.
-2. (Optional) Call `cex_fx_get_fx_order(settle="usdt", order_id="94294117235059656")` and `cex_fx_get_fx_contract` for precision.
+2. (Optional) Call `gate-cli cex futures order get` and `gate-cli cex futures market contract` for precision.
 3. Show before/after (current price → new price), ask confirm.
-4. After confirm call `cex_fx_amend_fx_order(settle="usdt", order_id="94294117235059656", price="50000")`.
+4. After confirm call `gate-cli cex futures order amend`.
 5. Verify response price, output success.
 
 **Response Template**:
@@ -59,7 +59,7 @@ Status: open
 1. Parse order_id and new_size: `10`.
 2. (Optional) Get current order and contract precision.
 3. Show before/after size, ask confirm.
-4. Call `cex_fx_amend_fx_order(settle="usdt", order_id="94294117235059656", size="10")`.
+4. Call `gate-cli cex futures order amend`.
 5. Verify size, output success.
 
 **Response Template**:
@@ -87,7 +87,7 @@ Status: open
 **Expected Behavior**:
 1. Parse order_id, new_price: `51000`, new_size: `8`.
 2. (Optional) Get order and precision, show before/after, confirm.
-3. Call `cex_fx_amend_fx_order(..., price="51000", size="8")`.
+3. Call `gate-cli cex futures order amend`.
 4. Verify response, output success.
 
 **Response Template**:
@@ -112,9 +112,9 @@ Status: open
 - "Amend t-my-order-001 price 48000"
 
 **Expected Behavior**:
-1. If only text given: call `cex_fx_list_fx_orders(settle="usdt", status="open")` and match by `text` to get `order_id`.
+1. If only text given: call `gate-cli cex futures order list` and match by `text` to get `order_id`.
 2. Show current order and new params, confirm.
-3. Call `cex_fx_amend_fx_order(settle="usdt", order_id="<resolved_id>", price="48000")` (or pass text if API supports it).
+3. Call `gate-cli cex futures order amend` (or pass text if API supports it).
 4. Output success.
 
 **Response Template**:
@@ -137,7 +137,7 @@ Status: open
 - "Amend order 94294117235059656 price to 50000" (order already filled)
 
 **Expected Behavior**:
-1. Call `cex_fx_amend_fx_order(...)`.
+1. Call `gate-cli cex futures order amend`.
 2. API returns ORDER_NOT_FOUND, ORDER_FINISHED or similar.
 3. Output failure and possible reasons.
 
@@ -164,7 +164,7 @@ Possible reasons:
 - "Change order price to 50000.123456" (precision too fine)
 
 **Expected Behavior**:
-1. Call `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")` for `order_price_round`, validate before sending.
+1. Call `gate-cli cex futures market contract` for `order_price_round`, validate before sending.
 2. If invalid, suggest valid price (e.g. 50000.12); if still submitted, amend may return INVALID_PARAM_VALUE.
 3. Output precision error and contract rules.
 
@@ -217,6 +217,6 @@ Example: "Change price to 50000" or "Change size to 10"
 - "Change my order" (no ID)
 
 **Expected Behavior**:
-1. Call `cex_fx_list_fx_orders(settle="usdt", status="open")` and show list.
+1. Call `gate-cli cex futures order list` and show list.
 2. Ask user to pick order (by number or contract+side) or to provide order ID.
 3. Once order and new price/size are given, follow Scenario 1–3 (including confirm before amend).

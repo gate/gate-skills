@@ -4,7 +4,7 @@ Gate futures close-position scenarios and expected behavior.
 
 ## Position query (dual vs single mode)
 
-**In dual mode**, `cex_fx_get_fx_position(settle, contract)` fails (API returns an array). Use **`cex_fx_list_fx_positions(settle, holding=true)`** or **`cex_fx_get_fx_dual_position(settle, contract)`** when account is in dual mode (`cex_fx_get_fx_accounts` → `position_mode === "dual"` or `in_dual_mode === true`). In single mode use **`cex_fx_get_fx_position(settle, contract)`**.
+**In dual mode**, `gate-cli cex futures position get` fails (API returns an array). Use **`gate-cli cex futures position list`** or **`gate-cli cex futures position get`** when account is in dual mode (`gate-cli cex futures account get` → `position_mode === "dual"` or `in_dual_mode === true`). In single mode use **`gate-cli cex futures position get`**.
 
 ## Scenario 1: Close all (one-click)
 
@@ -17,10 +17,10 @@ Gate futures close-position scenarios and expected behavior.
 - "close all positions"
 
 **Expected Behavior**:
-1. Call `cex_fx_list_fx_positions(settle="usdt")` to get all positions.
+1. Call `gate-cli cex futures position list` to get all positions.
 2. Show position list and confirm: "Confirm close all positions?"
-3. After confirm, for each contract with position: call `cex_fx_create_fx_order(settle="usdt", contract=..., size=opposite size, reduce_only=true, ...)` market close (negative size to close long, positive to close short; tif="ioc", price="0").
-4. Query `cex_fx_list_fx_positions` again to verify no (or negligible) position left.
+3. After confirm, for each contract with position: call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` market close (negative size to close long, positive to close short; tif="ioc", price="0").
+4. Query `gate-cli cex futures position list` again to verify no (or negligible) position left.
 5. Output close result with realized PnL.
 
 **Response Template**:
@@ -54,7 +54,7 @@ No open positions.
 **Expected Behavior**:
 1. Query current position to verify sufficient size.
 2. Compute close size (negative for long, positive for short).
-3. Call `cex_fx_create_fx_order(size=-2, reduce_only=true, tif="ioc")` (or equivalent).
+3. Call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` (or equivalent).
 4. Verify remaining position.
 
 **Response Template**:
@@ -85,7 +85,7 @@ Close done; 3 long contracts remaining.
 **Expected Behavior**:
 1. Query position: size = 10.
 2. Half: close_size = 5.
-3. Call `cex_fx_create_fx_order(size=-5, reduce_only=true)`.
+3. Call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`.
 4. Verify remaining = 5.
 
 **Response Template**:
@@ -114,9 +114,9 @@ Close done; 50% position remaining.
 - "Close long open short"
 
 **Expected Behavior**:
-1. Query position via **position query** (dual: `cex_fx_list_fx_positions` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`): long +5.
+1. Query position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`): long +5.
 2. Show reverse plan and ask user to confirm (include estimated liq/margin).
-3. After confirm: first `cex_fx_create_fx_order(settle, contract, size="-5", reduce_only=true, price="0", tif="ioc")` to close long, then `cex_fx_create_fx_order(..., size="-5", price="0", tif="ioc")` to open 5 short (no reduce_only).
+3. After confirm: first `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` to close long, then `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` to open 5 short (no reduce_only).
 4. Verify new position via **position query** (same as above): short -5.
 
 **Response Template**:
@@ -144,8 +144,8 @@ Reversed from long to short.
 - "Close short open long"
 
 **Expected Behavior**:
-1. Query position via **position query** (dual: `cex_fx_list_fx_positions` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`): short -3.
-2. Show reverse plan; after confirm: first `cex_fx_create_fx_order(..., size="3", reduce_only=true, price="0", tif="ioc")` to close short, then `cex_fx_create_fx_order(..., size="3", price="0", tif="ioc")` to open 3 long.
+1. Query position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`): short -3.
+2. Show reverse plan; after confirm: first `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` to close short, then `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` to open 3 long.
 3. Verify new position: long +3.
 
 **Response Template**:

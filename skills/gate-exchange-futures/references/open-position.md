@@ -16,8 +16,8 @@ There are **two distinct intents** when user specifies USDT:
 
 ### Data sources
 
-- `cex_fx_get_fx_contract(settle, contract)` → `quanto_multiplier`, `order_size_min`
-- `cex_fx_get_fx_order_book(settle, contract, limit=1)` → `asks[0].p` (best ask), `bids[0].p` (best bid)
+- `gate-cli cex futures market contract` → `quanto_multiplier`, `order_size_min`
+- `gate-cli cex futures market orderbook` → `asks[0].p` (best ask), `bids[0].p` (best bid)
 - Position query → current leverage for the contract+side (**use this leverage in USDT cost formulas; do not change or override it unless the user explicitly specified a different leverage**)
 
 ### USDT Cost → contracts (margin-based)
@@ -53,36 +53,36 @@ The user specifies the notional value of the position in USDT.
 
 ## Position and leverage query (dual vs single mode)
 
-**Tool `get_position` does not exist.** Use the following by account mode (from **`cex_fx_get_fx_accounts(settle)`** → **`position_mode`** or **`in_dual_mode`**):
+**Tool `get_position` does not exist.** Use the following by account mode (from **`gate-cli cex futures account get`** → **`position_mode`** or **`in_dual_mode`**):
 
-- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): use **`cex_fx_list_fx_positions(settle, holding=true)`** or **`cex_fx_get_fx_dual_position(settle, contract)`** for position/leverage. Do **not** use `cex_fx_get_fx_position` in dual mode (API returns an array and causes parse error).
-- **Single mode**: use **`cex_fx_get_fx_position(settle, contract)`** for position/leverage.
+- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): use **`gate-cli cex futures position list`** or **`gate-cli cex futures position get`** for position/leverage. Do **not** use `gate-cli cex futures position get` in dual mode (API returns an array and causes parse error).
+- **Single mode**: use **`gate-cli cex futures position get`** for position/leverage.
 
 Same rule for **margin mode** (`pos_margin_mode`): get it from the position returned by the above query.
 
 ## Pre-Order Confirmation
 
-**Before opening**, show the **final order summary** and only call `cex_fx_create_fx_order` after user confirmation.
+**Before opening**, show the **final order summary** and only call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` after user confirmation.
 
-- **Leverage**: Query current leverage for **contract + side** via the **position query** above (dual: `cex_fx_list_fx_positions` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`).
+- **Leverage**: Query current leverage for **contract + side** via the **position query** above (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`).
 - **Summary**: Contract, side (long/short), size (contracts), price (limit or “market”), margin mode (cross/isolated), **leverage**, estimated margin and liquidation price; for market orders also mention slippage risk. **Do not** add text about mark price, limit protection, or suggesting to adjust price.
 - **Confirmation**: *“Please confirm the above and reply ‘confirm’ to place the order.”* Only after the user confirms (e.g. “confirm”, “yes”, “place”) execute the order.
 
-## Margin Mode Switch API (cex_fx_update_fx_dual_position_cross_mode)
+## Margin Mode Switch API (`gate-cli cex futures position update-cross-mode`)
 
 **Switch margin mode only when the user explicitly requests it**: switch to isolated only when user asks for isolated (e.g. "isolated"); switch to cross only when user asks for cross (e.g. "cross"). **If the user does not specify margin mode, do not switch — place the order in the current margin mode.**
 
-When switching cross/isolated margin, call MCP **`cex_fx_update_fx_dual_position_cross_mode`** with **`settle`**, **`contract`**, **`mode`**:
+When switching cross/isolated margin, call MCP **`gate-cli cex futures position update-cross-mode`** with **`settle`**, **`contract`**, **`mode`**:
 
 - **`mode`**: `"CROSS"` = cross margin, `"ISOLATED"` = isolated margin (required; do not use a `cross` boolean).
 - **`settle`**: Settlement currency, e.g. `"usdt"`.
 - **`contract`**: Contract name, e.g. `"BTC_USDT"`.
 
-Example: cross `cex_fx_update_fx_dual_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="CROSS")`; isolated `cex_fx_update_fx_dual_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="ISOLATED")`.
+Example: cross `gate-cli cex futures position update-cross-mode`; isolated `gate-cli cex futures position update-cross-mode`.
 
 ## Leverage Before Order
 
-If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `cex_fx_create_fx_order`. Use **`cex_fx_update_fx_dual_position_leverage(settle, contract, leverage)`** in dual mode; **`cex_fx_update_fx_position_leverage(settle, contract, leverage)`** in single mode. Do not use `cex_fx_update_fx_position_leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `cex_fx_update_fx_dual_position_leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
+If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`. Use **`gate-cli cex futures position update-leverage`** in dual mode; **`gate-cli cex futures position update-leverage`** in single mode. Do not use `gate-cli cex futures position update-leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `gate-cli cex futures position update-leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
 
 **If the user does not specify leverage, do not change it.** Use the current leverage from the position query for all calculations (including the USDT cost formula). Do not default to any standard leverage value (e.g. 10x). This is especially important when the user already has a position — changing leverage without explicit request would alter the existing position's risk parameters.
 
@@ -92,7 +92,7 @@ If the **user specifies leverage** and it **differs from current** for that cont
 
 When **target margin mode** is explicitly requested and **differs from** the **current margin mode** of the existing position for that contract, check **position mode** first:
 
-- **Position mode**: Call MCP **`cex_fx_get_fx_accounts(settle)`**. From **`position_mode`**: `single` = single position mode, `dual` = dual (hedge) position mode.
+- **Position mode**: Call MCP **`gate-cli cex futures account get`**. From **`position_mode`**: `single` = single position mode, `dual` = dual (hedge) position mode.
 - **Margin mode**: From **position** — use the **position query** per dual/single mode above and read `pos_margin_mode` (cross/isolated).
 
 **Branch logic** (target margin mode ≠ current position margin mode and contract already has a position):
@@ -112,12 +112,12 @@ When **target margin mode** is explicitly requested and **differs from** the **c
 - "limit buy 1 BTC_USDT futures at 65000"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")`
-2. Switch to cross via `cex_fx_update_fx_dual_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="CROSS")`
-3. Query leverage via **position query** (dual: `cex_fx_list_fx_positions` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`) for contract + long side
+1. Fetch contract via `gate-cli cex futures market contract`
+2. Switch to cross via `gate-cli cex futures position update-cross-mode`
+3. Query leverage via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`) for contract + long side
 4. **Show final order summary** (contract, side, size, price, mode, **leverage**, estimated liq/margin), ask user to confirm
-5. After confirm, place order via `cex_fx_create_fx_order(settle="usdt", contract="BTC_USDT", size="1", price="65000", tif="gtc")`
-6. Verify position via **position query** (dual: `cex_fx_list_fx_positions(holding=true)` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`)
+5. After confirm, place order via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
+6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
 7. Output open result
 
 **Response Template**:
@@ -146,12 +146,12 @@ Leverage: 10x (from position query)
 - "market sell 2 ETH_USDT futures with 10x leverage"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="ETH_USDT")`
-2. Switch to isolated via `cex_fx_update_fx_dual_position_cross_mode(settle="usdt", contract="ETH_USDT", mode="ISOLATED")`
-3. Set leverage via **`cex_fx_update_fx_dual_position_leverage`** (dual) or **`cex_fx_update_fx_position_leverage`** (single): `(settle="usdt", contract="ETH_USDT", leverage="10")`
+1. Fetch contract via `gate-cli cex futures market contract`
+2. Switch to isolated via `gate-cli cex futures position update-cross-mode`
+3. Set leverage via **`gate-cli cex futures position update-leverage`** (dual) or **`gate-cli cex futures position update-leverage`** (single): `(settle="usdt", contract="ETH_USDT", leverage="10")`
 4. **Show final order summary** (contract, side, size, market, mode, leverage, estimated liq/margin), ask user to confirm
-5. After confirm, place market order via `cex_fx_create_fx_order(settle="usdt", contract="ETH_USDT", size="-2", price="0", tif="ioc")`
-6. Verify position via **position query** (dual: `cex_fx_list_fx_positions(holding=true)` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`)
+5. After confirm, place market order via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
+6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
 7. Output fill and position info
 
 **Response Template**:
@@ -184,8 +184,8 @@ Current position:
 - "fill or kill buy 1 BTC_USDT at 65000"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")`
-2. Place FOK via `cex_fx_create_fx_order(settle="usdt", contract="BTC_USDT", size="1", price="65000", tif="fok")`
+1. Fetch contract via `gate-cli cex futures market contract`
+2. Place FOK via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
 3. If depth insufficient, return ORDER_FOK error
 4. If success, output full fill result
 
@@ -234,7 +234,7 @@ Suggestion: Adjust price within the range above.
 - "Open long 100 contracts BTC_USDT" (insufficient balance)
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")`
+1. Fetch contract via `gate-cli cex futures market contract`
 2. Place order → receive BALANCE_NOT_ENOUGH
 3. Output balance warning and suggestions
 
@@ -262,9 +262,9 @@ Suggestions:
 - "Cross margin long BTC_USDT" (currently isolated with position)
 
 **Expected Behavior**:
-1. Call `cex_fx_update_fx_dual_position_cross_mode(settle="usdt", contract="BTC_USDT", mode="CROSS")`
+1. Call `gate-cli cex futures position update-cross-mode`
 2. Receive POSITION_HOLDING (or similar; API returns this for mode switch with position)
-3. Query position via **position query** (dual: `cex_fx_list_fx_positions` or `cex_fx_get_fx_dual_position`; single: `cex_fx_get_fx_position`)
+3. Query position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
 4. Output failure and current position
 
 **Response Template**:
@@ -285,8 +285,8 @@ Suggestion: Close the position first, then switch margin mode.
 
 **Expected Behavior**:
 1. During open flow, detect target margin mode ≠ current `pos_margin_mode` and contract has a position.
-2. Call `cex_fx_get_fx_accounts(settle="usdt")`; if `position_mode === "dual"`.
-3. **Interrupt**: do not call `cex_fx_update_fx_dual_position_cross_mode`, do not place order.
+2. Call `gate-cli cex futures account get`; if `position_mode === "dual"`.
+3. **Interrupt**: do not call `gate-cli cex futures position update-cross-mode`, do not place order.
 4. Output: *"Please close the position first, then open a new one."*
 
 **Response Template**:
@@ -304,9 +304,9 @@ Please close the position first, then open a new one.
 
 **Expected Behavior**:
 1. Detect target margin mode ≠ current `pos_margin_mode` and contract has a position.
-2. Call `cex_fx_get_fx_accounts(settle="usdt")`; if `position_mode === "single"`.
+2. Call `gate-cli cex futures account get`; if `position_mode === "single"`.
 3. **Do not interrupt**. Prompt: *"You already have a {currency} position; switching margin mode will apply to this position too. Continue?"* (e.g. BTC_USDT → "You already have a BTC position...").
-4. After user confirms, call `cex_fx_update_fx_dual_position_cross_mode(settle, contract, mode="ISOLATED" or "CROSS")`, then continue leverage and place order.
+4. After user confirms, call `gate-cli cex futures position update-cross-mode`, then continue leverage and place order.
 
 **Response Template** (before confirm):
 ```
@@ -325,8 +325,8 @@ You already have a BTC position; switching margin mode will apply to this positi
 - "post only buy 1 BTC_USDT at 64000"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")`
-2. Place POC via `cex_fx_create_fx_order(settle="usdt", contract="BTC_USDT", size="1", price="64000", tif="poc")`
+1. Fetch contract via `gate-cli cex futures market contract`
+2. Place POC via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
 3. If order would immediately match, return ORDER_POC (or similar)
 4. If resting as Maker, output success
 
@@ -349,7 +349,7 @@ Note: This order will only fill as Maker (maker fee).
 
 ## Scenario 8: Top gainer/loser order (ticker-based)
 
-**Context**: User wants to open a position on the contract with the highest 24h gain or loss. The system discovers the contract automatically via `cex_fx_get_fx_tickers`.
+**Context**: User wants to open a position on the contract with the highest 24h gain or loss. The system discovers the contract automatically via `gate-cli cex futures market tickers`.
 
 **Trigger phrases**:
 - "top gainer long 10U"
@@ -358,17 +358,17 @@ Note: This order will only fill as Maker (maker fee).
 - "short 5U on the 24h biggest loser"
 
 **Expected Behavior**:
-1. Call `cex_fx_get_fx_tickers(settle="usdt")` to get all USDT-settled futures tickers.
+1. Call `gate-cli cex futures market tickers` to get all USDT-settled futures tickers.
 2. Sort by `changePercentage`:
    - **Top gainer**: sort descending, pick the contract with the highest positive `changePercentage`.
    - **Top loser**: sort ascending, pick the contract with the most negative `changePercentage`.
-3. With the identified contract (e.g. `PEPE_USDT`), call `cex_fx_get_fx_contract(settle="usdt", contract="PEPE_USDT")` for `mark_price`, `quanto_multiplier`, `order_size_min`.
+3. With the identified contract (e.g. `PEPE_USDT`), call `gate-cli cex futures market contract` for `mark_price`, `quanto_multiplier`, `order_size_min`.
 4. Convert USDT notional to contracts: `contracts = u ÷ mark_price ÷ quanto_multiplier` (or `u × leverage ÷ mark_price ÷ quanto_multiplier` if leverage specified). Round to meet `order_size_min`.
 5. **Show discovery result and order summary**, ask user to confirm:
    - Which contract was identified, 24h change percentage
    - Order details: contract, side, size (contracts + USDT equivalent), market/limit, mode, leverage
    - Risk warning for volatile coins
-6. After user confirms, place order via `cex_fx_create_fx_order(settle="usdt", contract=..., size=..., price="0", tif="ioc")` for market order.
+6. After user confirms, place order via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` for market order.
 7. Verify position and output result.
 
 **Response Template** (discovery + confirmation):
@@ -420,8 +420,8 @@ Mode: cross 20x
 - "spend 500U isolated 10x short ETH_USDT"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")` for `quanto_multiplier`.
-2. Fetch orderbook via `cex_fx_get_fx_order_book(settle="usdt", contract="BTC_USDT", limit=1)` for best ask (`asks[0].p`) and best bid (`bids[0].p`).
+1. Fetch contract via `gate-cli cex futures market contract` for `quanto_multiplier`.
+2. Fetch orderbook via `gate-cli cex futures market orderbook` for best ask (`asks[0].p`) and best bid (`bids[0].p`).
 3. Get current leverage from position query. **Use this leverage in the formula. Do not change leverage unless the user explicitly requests a different value.**
 4. Compute contracts:
    - **Open long**: `contracts = cost / (0.0015 + 1/leverage) / quanto_multiplier / order_price` (`order_price`: limit → specified; market → best ask)
@@ -455,8 +455,8 @@ Reply 'confirm' to place the order.
 - "market short 500 USDT value ETH_USDT"
 
 **Expected Behavior**:
-1. Fetch contract via `cex_fx_get_fx_contract(settle="usdt", contract="BTC_USDT")` for `quanto_multiplier`.
-2. Fetch orderbook via `cex_fx_get_fx_order_book(settle="usdt", contract="BTC_USDT", limit=1)` for best ask and best bid.
+1. Fetch contract via `gate-cli cex futures market contract` for `quanto_multiplier`.
+2. Fetch orderbook via `gate-cli cex futures market orderbook` for best ask and best bid.
 3. Compute contracts:
    - **Buy / open long**: `contracts = usdt_value / price / quanto_multiplier` (`price`: limit → specified; market → best ask)
    - **Sell / open short**: `contracts = usdt_value / max(best_bid, order_price) / quanto_multiplier` (`order_price`: limit → specified; market → best bid)

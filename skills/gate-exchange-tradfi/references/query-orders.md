@@ -11,8 +11,8 @@ Read-only: list order list and order history. No create/cancel/amend. **Use only
 
 ### Step 2: Call tools
 
-- **Order list (open orders)**: Call `cex_tradfi_query_order_list` with only the parameters defined in the MCP for this tool. Extract: symbol, side, size, price, status, time, and other fields as returned.
-- **Order history**: Call `cex_tradfi_query_order_history_list` with only the parameters defined in the MCP for this tool. Extract: same fields; indicate filled/cancelled where available.
+- **Order list (open orders)**: Call `gate-cli cex tradfi order list` with only the parameters defined in the MCP for this tool. Extract: symbol, side, size, price, status, time, and other fields as returned.
+- **Order history**: Call `gate-cli cex tradfi order history` with only the parameters defined in the MCP for this tool. Extract: same fields; indicate filled/cancelled where available.
 
 ### Step 3: Format response
 
@@ -50,7 +50,7 @@ Use the Report Template below. If the list is empty, report "No open orders" or 
 
 **Expected Behavior**:
 
-1. Call `cex_tradfi_query_order_list` with only the parameters supported by the MCP for this tool.
+1. Call `gate-cli cex tradfi order list` with only the parameters supported by the MCP for this tool.
 2. Format result as order list table.
 3. If empty, reply "No open orders."
 
@@ -68,7 +68,7 @@ Use the Report Template below. If the list is empty, report "No open orders" or 
 
 **Expected Behavior**:
 
-1. Call `cex_tradfi_query_order_history_list` with only the parameters documented in the MCP for this tool.
+1. Call `gate-cli cex tradfi order history` with only the parameters documented in the MCP for this tool.
 2. Format as order history table.
 3. If empty, reply "No orders in history."
 

@@ -9,7 +9,7 @@
 - "How do I claim newcomer rewards?"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity`.
+1. Call `gate-cli cex welfare identity`.
 2. If `code=1001`, do not call other welfare tools.
 3. Return rewards-hub guidance.
 
@@ -24,8 +24,8 @@
 - "Show my new user tasks"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity` and get `code=0`.
-2. Call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity` and get `code=0`.
+2. Call `gate-cli cex welfare beginner-tasks`.
 3. Render all real tasks with reward, cleaned description, and mapped status.
 
 ---
@@ -39,7 +39,7 @@
 - "Task list"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity`.
+1. Call `gate-cli cex welfare identity`.
 2. If `code=0`, enter the same flow as Scenario 2.
 
 ---
@@ -53,10 +53,10 @@
 - "Claim the download task"
 
 **Expected Behavior**:
-1. Call `cex_welfare_get_user_identity`.
-2. Call `cex_welfare_get_beginner_task_list`.
+1. Call `gate-cli cex welfare identity`.
+2. Call `gate-cli cex welfare beginner-tasks`.
 3. Find one task with `status=0`.
-4. Call `cex_welfare_claim_task` with its `welfare_task_id`.
+4. Call `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with its `welfare_task_id`.
 5. Reply that the task was claimed successfully and remind the user to complete it before claiming the reward.
 
 ---
@@ -70,7 +70,7 @@
 
 **Expected Behavior**:
 1. Call identity and task list.
-2. If no task with `status=0` exists, do not call `cex_welfare_claim_task`.
+2. If no task with `status=0` exists, do not call `cex_welfare_claim_task` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. Tell the user there is no currently claimable newcomer task.
 
 ---
@@ -144,7 +144,7 @@
 **Expected Behavior**:
 1. Call identity and task list.
 2. Filter tasks with `status=2`.
-3. Call `cex_welfare_claim_reward` for each status=`2` task.
+3. Call `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) for each status=`2` task.
 4. Summarize all successfully claimed rewards using `coupon_full_name` when available.
 
 ---
@@ -157,7 +157,7 @@
 - "Claim my reward"
 
 **Expected Behavior**:
-1. Call `cex_welfare_claim_reward`.
+1. Call `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 2. If `has_m_n_task=true`, do not describe the reward as claimed.
 3. Tell the user to claim it from Gate web `https://www.gate.com/zh/rewards_hub` or the Gate App.
 
@@ -172,7 +172,7 @@
 
 **Expected Behavior**:
 1. Call identity and task list.
-2. If no task with `status=2` exists, do not call `cex_welfare_claim_reward`.
+2. If no task with `status=2` exists, do not call `cex_welfare_claim_reward` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 3. Tell the user there are no currently claimable newcomer rewards.
 
 ---
@@ -199,7 +199,7 @@
 
 **Expected Behavior**:
 1. Identity succeeds with `code=0`.
-2. `cex_welfare_get_beginner_task_list` returns `code=1007` or an empty list.
+2. `gate-cli cex welfare beginner-tasks` returns `code=1007` or an empty list.
 3. Tell the user there are currently no active newcomer tasks and suggest the rewards hub.
 
 ---
@@ -212,7 +212,7 @@
 - "What welfare benefits do I have?"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1008`.
+1. `gate-cli cex welfare identity` returns `code=1008`.
 2. Tell the user to log in first.
 
 ---
@@ -225,7 +225,7 @@
 - "My welfare benefits"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1002`.
+1. `gate-cli cex welfare identity` returns `code=1002`.
 2. Return the risk-control guidance.
 
 ---
@@ -238,7 +238,7 @@
 - "Sub-account welfare"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1003`.
+1. `gate-cli cex welfare identity` returns `code=1003`.
 2. Tell the user to use the main account.
 
 ---
@@ -251,7 +251,7 @@
 - "Agent welfare benefits"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1004`.
+1. `gate-cli cex welfare identity` returns `code=1004`.
 2. Tell the user agent accounts cannot participate.
 
 ---
@@ -264,7 +264,7 @@
 - "Market maker welfare"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1005`.
+1. `gate-cli cex welfare identity` returns `code=1005`.
 2. Tell the user market maker accounts cannot participate.
 
 ---
@@ -277,5 +277,5 @@
 - "Enterprise welfare benefits"
 
 **Expected Behavior**:
-1. `cex_welfare_get_user_identity` returns `code=1006`.
+1. `gate-cli cex welfare identity` returns `code=1006`.
 2. Tell the user enterprise accounts cannot participate.

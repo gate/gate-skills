@@ -30,7 +30,7 @@ gate-exchange-coupon/
 
 ## Prerequisites
 
-- Gate MCP installed and configured with valid API Key
+- gate-cli installed and configured with valid API Key
 - User must be logged in (API Key with read permissions)
 
 ## Example Prompts
@@ -63,7 +63,7 @@ gate-exchange-coupon/
 ## Security
 
 - Read-only skill: no funds movement or order placement
-- Uses Gate MCP tools only
+- Uses gate-cli tools only
 - No credential handling or storage in this skill
 
 ## License

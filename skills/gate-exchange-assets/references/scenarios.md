@@ -8,7 +8,7 @@ This document defines behavior-oriented scenario templates for gate-exchange-ass
 
 Output templates must map to actual API response fields. Reference:
 
-### `cex_wallet_get_total_balance` (GET /wallet/total_balance)
+### `gate-cli cex wallet balance total` (GET /wallet/total_balance)
 
 | Response Path | Type | Output Template Mapping |
 |---------------|------|-------------------------|
@@ -21,7 +21,7 @@ Output templates must map to actual API response fields. Reference:
 
 **AccountBalance** structure: `{ amount, currency?, unrealised_pnl?, borrowed? }`
 
-### `cex_spot_get_spot_accounts` (GET /spot/accounts)
+### `gate-cli cex spot account get` (GET /spot/accounts)
 
 | Response Field | Type | Output Mapping |
 |----------------|------|----------------|
@@ -29,7 +29,7 @@ Output templates must map to actual API response fields. Reference:
 | `available` | string | Available balance |
 | `locked` | string | Locked balance |
 
-### `cex_fx_get_fx_accounts` (GET /futures/{settle}/accounts)
+### `gate-cli cex futures account get` (GET /futures/{settle}/accounts)
 
 | Response Field | Type | Output Mapping |
 |----------------|------|----------------|
@@ -40,7 +40,7 @@ Output templates must map to actual API response fields. Reference:
 | `bonus` | string? | Bonus (show when ≠ 0) |
 | `bonus_offset` | string? | Position bonus (show when ≠ 0) |
 
-### `cex_unified_get_unified_accounts` (UnifiedAccount)
+### `gate-cli cex unified account get` (UnifiedAccount)
 
 | Response Field | Type | Output Mapping |
 |----------------|------|----------------|
@@ -51,7 +51,7 @@ Output templates must map to actual API response fields. Reference:
 | `total_maintenance_margin_rate` | string | Maintenance margin rate (MMR) |
 | `balances` | dict(currency→UnifiedBalance) | Per-currency: available, freeze, borrowed |
 
-### `cex_options_list_options_account` (OptionsAccount)
+### `gate-cli cex options account get` (OptionsAccount)
 
 | Response Field | Type | Output Mapping |
 |----------------|------|----------------|
@@ -61,7 +61,7 @@ Output templates must map to actual API response fields. Reference:
 | `unrealised_pnl` | string | Unrealised PnL |
 | `position_value` | string | Position value |
 
-### `cex_margin_list_margin_accounts` (MarginAccount[])
+### `gate-cli cex margin account list` (MarginAccount[])
 
 | Response Field | Type | Output Mapping |
 |----------------|------|----------------|
@@ -81,7 +81,7 @@ Output templates must map to actual API response fields. Reference:
 
 **Trigger phrases**: "How much do I have", "Show my CEX total assets", "My account asset distribution", "Where are my assets", "Account overview", "Check my balance"
 
-**MCP Tool**: `cex_wallet_get_total_balance` currency=USDT
+**MCP Tool**: `gate-cli cex wallet balance total` currency=USDT
 
 **Output template**:
 ```
@@ -95,7 +95,7 @@ Spot ${details.spot.amount} | Futures ${details.futures.amount} | Delivery ${det
 - **Total < 10 USDT**: Show small-asset tip; recommend [Deposit] or [Dust conversion]
 
 **Expected behavior**:
-1. Call `cex_wallet_get_total_balance` with `currency=USDT`
+1. Call `gate-cli cex wallet balance total` with `currency=USDT`
 2. Parse `total.amount` and `details`; output account distribution (details keys: spot, futures, delivery, finance, quant, margin, cross_margin, etc.)
 
 **Unexpected behavior**:
@@ -111,13 +111,13 @@ Spot ${details.spot.amount} | Futures ${details.futures.amount} | Delivery ${det
 **Trigger phrases**: "How many BTC do I have", "How many USDT do I have"
 
 **MCP Tools** (concurrent queries, aggregate by currency):
-- `cex_spot_get_spot_accounts` currency={COIN} — Spot (non-unified / classic)
-- `cex_unified_get_unified_accounts` currency={COIN} — Unified (spot + USDT perpetual + options)
-- `cex_fx_get_fx_accounts` settle=usdt — USDT perpetual (non-unified)
-- `cex_fx_get_fx_accounts` settle=btc — BTC perpetual (when querying BTC)
-- `cex_dc_list_dc_accounts` settle=usdt — Delivery
-- `cex_margin_list_margin_accounts` — Isolated margin
-- `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders`, etc.
+- `gate-cli cex spot account get` currency={COIN} — Spot (non-unified / classic)
+- `gate-cli cex unified account get` currency={COIN} — Unified (spot + USDT perpetual + options)
+- `gate-cli cex futures account get` settle=usdt — USDT perpetual (non-unified)
+- `gate-cli cex futures account get` settle=btc — BTC perpetual (when querying BTC)
+- `gate-cli cex delivery account get` settle=usdt — Delivery
+- `gate-cli cex margin account list` — Isolated margin
+- `gate-cli cex earn dual balance`, `gate-cli cex earn dual orders`, `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), etc.
 
 **Output template** (aggregate from actual API response fields):
 ```
@@ -158,16 +158,16 @@ Isolated margin: {base.available} + {base.locked} or {quote.*} (cex_margin retur
 **Trigger phrases**: "How much USDT in my spot account", "How much BTC in my spot account"
 
 **MCP Tools**:
-- Non-unified / classic: `cex_spot_get_spot_accounts` currency={COIN} → available, locked
-- Unified advanced: `cex_unified_get_unified_accounts` currency={COIN} → available, freeze, borrowed
+- Non-unified / classic: `gate-cli cex spot account get` currency={COIN} → available, locked
+- Unified advanced: `gate-cli cex unified account get` currency={COIN} → available, freeze, borrowed
 
 **Output template**:
 ```
 Your {account_name} {COIN} holdings:
 🕒 Updated: {time} (UTC+8)
 💰 Asset details (from actual API response):
-Classic spot cex_spot_get_spot_accounts: available, locked
-Unified cex_unified_get_unified_accounts: balances[COIN].available, freeze, borrowed
+Classic spot `gate-cli cex spot account get`: available, locked
+Unified `gate-cli cex unified account get`: balances[COIN].available, freeze, borrowed
 Total: available + locked (or available + freeze)
 Available: {available} | Locked: {locked} (or freeze)
 ```
@@ -195,13 +195,13 @@ Available: {available} | Locked: {locked} (or freeze)
 **Trigger phrases**: "What's in my spot account", "Show my spot account assets"
 
 **MCP Tools**:
-- Non-unified / classic: `cex_spot_get_spot_accounts`
-- Unified advanced: `cex_unified_get_unified_accounts`
+- Non-unified / classic: `gate-cli cex spot account get`
+- Unified advanced: `gate-cli cex unified account get`
 
 **Output template**:
 ```
 Your spot account total valuation is ≈ ${total_val} USDT
-(Total = Σ(available+locked)×price; cex_spot_get_spot_accounts has no total field, must calculate)
+(Total = Σ(available+locked)×price; `gate-cli cex spot account get` has no total field, must calculate)
 🕒 Updated: {time} (UTC+8)
 🪙 Currency distribution (actual response fields):
 {currency}: available {available}, locked {locked}
@@ -211,7 +211,7 @@ Your spot account total valuation is ≈ ${total_val} USDT
 - **Unified advanced**: Inform spot merged into trading account; show trading account assets; "In single-currency margin mode, spot, USDT perpetual and options are unified in trading account"
 
 **Expected behavior**:
-1. Call `cex_spot_get_spot_accounts` or `cex_unified_get_unified_accounts` based on mode
+1. Call `gate-cli cex spot account get` or `gate-cli cex unified account get` based on mode
 2. Return total valuation, coin distribution (currency, available, locked)
 3. Output structured report
 
@@ -228,10 +228,10 @@ Your spot account total valuation is ≈ ${total_val} USDT
 **Trigger phrases**: "How much in my futures account", "Show my USDT perpetual assets", "Show my BTC perpetual assets", "Show my delivery contract assets", "Show my perpetual contract assets"
 
 **MCP Tools**:
-- USDT perpetual: `cex_fx_get_fx_accounts` settle=usdt
-- BTC perpetual: `cex_fx_get_fx_accounts` settle=btc
-- Delivery: `cex_dc_list_dc_accounts` settle=usdt
-- Unified advanced (with USDT perpetual): `cex_unified_get_unified_accounts`
+- USDT perpetual: `gate-cli cex futures account get` settle=usdt
+- BTC perpetual: `gate-cli cex futures account get` settle=btc
+- Delivery: `gate-cli cex delivery account get` settle=usdt
+- Unified advanced (with USDT perpetual): `gate-cli cex unified account get`
 
 **Field mapping**:
 | Field | Display |
@@ -243,7 +243,7 @@ Your spot account total valuation is ≈ ${total_val} USDT
 | bonus | Bonus (only if ≠ 0) |
 | bonus_offset | Position bonus (only if ≠ 0) |
 
-**Output template** (cex_fx_get_fx_accounts actual response):
+**Output template** (`gate-cli cex futures account get` actual response):
 ```
 Your futures account (USDT perpetual/BTC perpetual/delivery) total valuation ≈ ${total} {USDT/BTC}
 🕒 Updated: {time} (UTC+8)
@@ -261,7 +261,7 @@ Wallet: ${total} | Unrealised PnL: ${unrealised_pnl} | Available: ${available}
 - **Query "perpetual"**: Query and show BOTH USDT perpetual and BTC perpetual
 
 **Expected behavior**:
-1. Call `cex_fx_get_fx_accounts` or `cex_dc_list_dc_accounts` as needed
+1. Call `gate-cli cex futures account get` or `gate-cli cex delivery account get` as needed
 2. Handle unified vs non-unified mode
 3. Output structured report with field mapping
 
@@ -278,7 +278,7 @@ Wallet: ${total} | Unrealised PnL: ${unrealised_pnl} | Available: ${available}
 
 **Trigger phrases**: "How much in my trading account", "How much in my unified account"
 
-**MCP Tool**: `cex_unified_get_unified_accounts`
+**MCP Tool**: `gate-cli cex unified account get`
 
 **Output by margin_mode**:
 
@@ -304,7 +304,7 @@ Total liability: ${borrowed}
 **Note**: Use only "trading account" or "unified account"; never use "advanced mode", "S1/S2" or other internal terms.
 
 **Expected behavior**:
-1. Call `cex_unified_get_unified_accounts`
+1. Call `gate-cli cex unified account get`
 2. Branch by margin_mode
 3. Output structured report with MMR risk indicators
 
@@ -322,10 +322,10 @@ Total liability: ${borrowed}
 **Trigger phrases**: "How much in my options account", "Show my options assets"
 
 **MCP Tools**:
-- Non-unified / classic: `cex_options_list_options_account`
-- Unified advanced: `cex_unified_get_unified_accounts`
+- Non-unified / classic: `gate-cli cex options account get`
+- Unified advanced: `gate-cli cex unified account get`
 
-**Output template** (cex_options_list_options_account returns OptionsAccount):
+**Output template** (`gate-cli cex options account get` returns OptionsAccount):
 ```
 Your options account total valuation ≈ ${total} USDT
 🕒 Updated: {time} (UTC+8)
@@ -338,7 +338,7 @@ Balance: ${total} | Equity: ${equity} | Available: ${available} | Unrealised PnL
 - **Unified advanced**: Show trading account balance
 
 **Expected behavior**:
-1. Call `cex_options_list_options_account` or `cex_unified_get_unified_accounts` based on mode
+1. Call `gate-cli cex options account get` or `gate-cli cex unified account get` based on mode
 2. Return available, unrealised_pnl
 3. Handle zero-asset case per rules
 
@@ -355,17 +355,17 @@ Balance: ${total} | Equity: ${equity} | Available: ${available} | Unrealised PnL
 
 **Trigger phrases**: "How much in my finance account", "Show my finance account assets"
 
-**MCP Tools**: `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders` (Flexible savings/Dual currency/Structured)
+**MCP Tools**: `gate-cli cex earn dual balance`, `gate-cli cex earn dual orders`, `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Flexible savings/Dual currency/Structured)
 
 **Output template**:
 ```
 Your finance account total valuation ≈ ${total_val} USDT
 🕒 Updated: {time} (UTC+8)
-(Display actual fields from cex_earn_list_dual_balance, list_dual_orders, list_structured_orders; no preset structure)
+(Display actual fields from `gate-cli cex earn dual balance`, list_dual_orders, list_structured_orders; no preset structure)
 ```
 
 **Expected behavior**:
-1. Call `cex_earn_list_dual_balance`, `cex_earn_list_dual_orders`, `cex_earn_list_structured_orders`
+1. Call `gate-cli cex earn dual balance`, `gate-cli cex earn dual orders`, `cex_earn_list_structured_orders` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)
 2. Output structured report from actual API response
 
 **Unexpected behavior**:
@@ -380,7 +380,7 @@ Your finance account total valuation ≈ ${total_val} USDT
 
 **Trigger phrases**: "How much in my Alpha account", "Show my Alpha assets"
 
-**MCP Tool**: `cex_wallet_get_total_balance` (details.meme_box for Alpha)
+**MCP Tool**: `gate-cli cex wallet balance total` (details.meme_box for Alpha)
 
 **Output template**:
 ```
@@ -391,7 +391,7 @@ Your Alpha account effective valuation ≈ ${details.meme_box.amount} USDT
 **Note**: `details.meme_box` returns only AccountBalance { amount }, no per-coin breakdown
 
 **Expected behavior**:
-1. Call `cex_wallet_get_total_balance`, use `details.meme_box.amount`
+1. Call `gate-cli cex wallet balance total`, use `details.meme_box.amount`
 2. Output structured report
 
 **Unexpected behavior**:
@@ -406,9 +406,9 @@ Your Alpha account effective valuation ≈ ${details.meme_box.amount} USDT
 
 **Trigger phrases**: "How much in my isolated margin account", "Show my isolated margin assets"
 
-**MCP Tool**: `cex_margin_list_margin_accounts`
+**MCP Tool**: `gate-cli cex margin account list`
 
-**Output template** (cex_margin_list_margin_accounts returns MarginAccount[], no total per item, aggregate base+quote per pair):
+**Output template** (`gate-cli cex margin account list` returns MarginAccount[], no total per item, aggregate base+quote per pair):
 ```
 Your isolated margin account total valuation ≈ ${total_val} USDT
 (Total = Σ base+quote value per pair; API has no total field)
@@ -422,7 +422,7 @@ MMR: ${mmr}% 🟢/🟡/🔴 (>200% no risk, 130-200% medium risk, <130% high ris
 ```
 
 **Expected behavior**:
-1. Call `cex_margin_list_margin_accounts`
+1. Call `gate-cli cex margin account list`
 2. Return per-pair base/quote details with MMR
 3. Output structured report
 
@@ -439,12 +439,12 @@ MMR: ${mmr}% 🟢/🟡/🔴 (>200% no risk, 130-200% medium risk, <130% high ris
 
 **Trigger phrases**: "How much in my TradFi account", "Show my TradFi assets"
 
-**MCP Tool**: `cex_tradfi_query_user_assets`
+**MCP Tool**: `gate-cli cex tradfi account assets`
 
 **Output template**:
 ```
 Your TradFi account details:
-(Display actual fields from cex_tradfi_query_user_assets, common: net value, balance, unrealised PnL, margin, available margin, margin ratio, etc., in USDx)
+(Display actual fields from `gate-cli cex tradfi account assets`, common: net value, balance, unrealised PnL, margin, available margin, margin ratio, etc., in USDx)
 ⚠ Note: TradFi account is in USDx, 1:1 with USDT, not included in CEX total valuation.
 ```
 
@@ -453,7 +453,7 @@ Your TradFi account details:
 - AI transfer card is NOT supported for TradFi
 
 **Expected behavior**:
-1. Call `cex_tradfi_query_user_assets`
+1. Call `gate-cli cex tradfi account assets`
 2. Return all fields in USDx
 3. Always include disclaimer
 
@@ -470,21 +470,21 @@ Your TradFi account details:
 
 **Context**: User wants ledger/account book for a currency.
 **Prompt examples**: "Show my BTC account book.", "What changes happened to my ETH?"
-**MCP Tool**: `cex_spot_list_spot_account_book` currency=X
+**MCP Tool**: `gate-cli cex spot account book` currency=X
 **Expected**: Return recent ledger entries (actual API fields: id, timestamp, currency, change, total, balance, type, etc.).
 
 ### Scenario 6: Ledger + Current Balance
 
 **Context**: User wants both ledger flow and current balance.
 **Prompt examples**: "Check recent BTC account book and tell me how much BTC I have now."
-**MCP Tools**: `cex_spot_list_spot_account_book` + `cex_spot_get_spot_accounts`
+**MCP Tools**: `gate-cli cex spot account book` + `gate-cli cex spot account get`
 **Expected**: Summarize recent changes and reconcile to current balance.
 
 ### Scenario 7: Recent Account Activity
 
 **Context**: User wants summary of recent account activity.
 **Prompt examples**: "What's my recent account activity?"
-**MCP Tool**: `cex_spot_list_spot_account_book` for major currencies
+**MCP Tool**: `gate-cli cex spot account book` for major currencies
 **Expected**: Summarize recent buy/sell/fee/transfer effects.
 
 ---

@@ -1,30 +1,61 @@
 ---
 name: gate-exchange-transfer
-version: "2026.4.6-1"
-updated: "2026-04-06"
 description: "Gate Exchange same-UID internal transfer skill. Use when the user asks to move funds between their own Gate accounts. Triggers on 'transfer funds', 'move USDT to futures', 'internal transfer'."
-required_credentials:
-  - gate_api_key
-  - gate_api_secret
-required_env_vars:
-  - GATE_API_KEY
-  - GATE_API_SECRET
-required_permissions:
-  - Delivery:Read
-  - Fx:Read
-  - Margin:Read
-  - Options:Read
-  - Spot:Read
-  - Wallet:Write
+user-invocable: true
+disable-model-invocation: false
 metadata:
   openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
     requires:
+      bins:
+        - gate-cli
       env:
         - GATE_API_KEY
         - GATE_API_SECRET
-    primaryEnv: GATE_API_KEY
-    homepage: https://github.com/gate/gate-skills
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Transfer (Internal Transfer)
 
@@ -33,56 +64,52 @@ metadata:
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read `./references/gate-runtime-rules.md`
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
-Execute same-UID internal transfers between Gate trading accounts: **spot**, **isolated margin**, **perpetual**, **delivery**, and **options**. Single execution endpoint: `POST /wallet/transfers` (MCP: `cex_wallet_create_transfer`).
-
-**Scope (Phase 1)**  
-- Supported: internal transfer only (same UID, between account types above).  
+Execute same-UID internal transfers between Gate trading accounts: **spot**, **isolated margin**, **perpetual**, **delivery**, and **options**. Single execution endpoint: `POST /wallet/transfers` (MCP: `gate-cli cex wallet transfer create`).
+**Scope (Phase 1)** 
+- Supported: internal transfer only (same UID, between account types above).
 - Not supported: main-to-sub, sub-to-main, sub-to-sub.
 
 ---
 
-## MCP Dependencies
+## Skill Dependencies
 
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
 
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_dc_list_dc_account_book
-- cex_fx_list_fx_account_book
-- cex_margin_list_margin_account_book
-- cex_options_list_options_account_book
-- cex_spot_list_spot_account_book
+- `gate-cli cex delivery account book`
+- `gate-cli cex futures account book`
+- `gate-cli cex margin account book`
+- `gate-cli cex options account book`
+- `gate-cli cex spot account book`
 
 **Execution Operations (Write)**
 
-- cex_wallet_create_transfer
+- `gate-cli cex wallet transfer create`
 
 ### Authentication
-- Credentials Source: Local Gate MCP deployment (`GATE_API_KEY`, `GATE_API_SECRET`)
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
-- Permissions: Delivery:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Wallet:Write
-- Never ask the user to paste secrets into chat; rely on the configured MCP session only.
-- API Key Provisioning Reference: https://www.gate.com/myaccount/profile/api-key/manage (create or rotate keys outside the chat when the local MCP setup requires them).
+- **Permissions:** Delivery:Read, Fx:Read, Margin:Read, Options:Read, Spot:Read, Wallet:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Use the local Gate MCP installation flow for the current host IDE before continuing.
-- Continue only after the Gate MCP session is configured with the credentials listed above; do not switch to browser auth or ask the user to paste secrets into chat.
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's transfer workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's transfer workflow.
 
 - `SKILL.md` keeps transfer intent routing and account-type mapping.
-- `references/mcp.md` is the authoritative MCP execution layer for transfer pre-check, confirmation gate, execution, and ledger verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for transfer pre-check, confirmation gate, execution, and ledger verification.
 
 ## Preconditions
 
@@ -105,8 +132,8 @@ Every internal transfer is fully specified by four elements. The assistant must 
 | **Currency** | `currency` | Always | USDT, BTC, etc. (platform-supported). Missing → auto-complete by target (case2). |
 | **Amount** | `amount` | Always | String, > 0, up to 8 decimals. Missing → ask user (case8). |
 
-**Conditional params**  
-- **margin**: `currency_pair` required (e.g. `BTC_USDT`) when `from` or `to` is `margin`.  
+**Conditional params** 
+- **margin**: `currency_pair` required (e.g. `BTC_USDT`) when `from` or `to` is `margin`. 
 - **futures / delivery**: `settle` required (`usdt` \| `btc`) when `from` or `to` is `futures` or `delivery`.
 
 ---
@@ -123,7 +150,7 @@ Every internal transfer is fully specified by four elements. The assistant must 
 
 | Group | Tool (`jsonrpc: call.method`) |
 |-------|-------------------------------|
-| Main account internal transfer | `cex_wallet_create_transfer` |
+| Main account internal transfer | `gate-cli cex wallet transfer create` |
 
 ---
 
@@ -147,25 +174,24 @@ Every internal transfer is fully specified by four elements. The assistant must 
 
 ## Transfer Draft (Mandatory before execution)
 
-Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wait for explicit confirmation in the **immediately following** user turn.
+Before calling `gate-cli cex wallet transfer create`, output a **Transfer Draft** and wait for explicit confirmation in the **immediately following** user turn.
 
-**Draft contents**  
-- `from` (account name)  
-- `to` (account name)  
-- `currency`  
-- `amount`  
+**Draft contents** 
+- `from` (account name) 
+- `to` (account name) 
+- `currency` 
+- `amount` 
 - If applicable: `settle` (for futures/delivery), `currency_pair` (for margin)
 
-**Confirmation rule**  
-- Treat confirmation as **single-use**. If user changes amount, currency, or direction, show a new draft and re-confirm.  
+**Confirmation rule** 
+- Treat confirmation as **single-use**. If user changes amount, currency, or direction, show a new draft and re-confirm. 
 - If user does not clearly confirm (e.g. "Confirm", "Yes", "Proceed"), do **not** execute (case10).
-
 ---
 
 ## Transfer Result Report (After successful API call)
 
-- Confirm success: e.g. "Transfer successful. {amount} {currency} has arrived in your {to account name}."  
-- Optionally suggest next step by destination: Spot → spot trading; USDT perpetual → USDT-margined perpetual; etc.  
+- Confirm success: e.g. "Transfer successful. {amount} {currency} has arrived in your {to account name}." 
+- Optionally suggest next step by destination: Spot → spot trading; USDT perpetual → USDT-margined perpetual; etc. 
 - Mention transfer history: e.g. transfer/historyV2 or equivalent MCP tool.
 
 ---
@@ -174,17 +200,16 @@ Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wai
 
 ### case1: All four elements present
 
-**Trigger**  
+**Trigger** 
 "Transfer 100 USDT from my spot account to perpetual futures account" / "Transfer 1000 USDT from spot to USDT-margined futures" / "Transfer 0.5 BTC from coin-margined to spot"
 
-**Steps**  
-1. Resolve `from`, `to`, `currency`, `amount`; add `settle` or `currency_pair` if needed.  
-2. Pre-check: fetch source balance; if balance < amount → case4.  
-3. Output **Transfer Draft**.  
-4. Wait for explicit confirmation.  
-5. Call `cex_wallet_create_transfer`.  
+**Steps** 
+1. Resolve `from`, `to`, `currency`, `amount`; add `settle` or `currency_pair` if needed. 
+2. Pre-check: fetch source balance; if balance < amount → case4. 
+3. Output **Transfer Draft**. 
+4. Wait for explicit confirmation. 
+5. Call `gate-cli cex wallet transfer create`. 
 6. Output **Transfer Result Report** (case3).
-
 **Request mapping**
 
 | Intent | API parameter | Values |
@@ -200,10 +225,10 @@ Before calling `cex_wallet_create_transfer`, output a **Transfer Draft** and wai
 
 ### case2: Currency missing, auto-complete
 
-**Trigger**  
+**Trigger** 
 "Transfer 100 to my USDT-margined account" / "Transfer 500 to futures" / "Transfer 1000 to perpetual"
 
-**Logic**  
+**Logic** 
 Set `currency` by target account:
 
 | Target account | Default currency |
@@ -215,120 +240,116 @@ Set `currency` by target account:
 | Options | USDT |
 | Spot / margin | Infer from context or ask |
 
-**Steps**  
+**Steps** 
 Same as case1 after `currency` is set.
 
-**Output (draft)**  
+**Output (draft)** 
 "Detected transfer of {amount} to {to account name}. Based on account type, default currency is {currency}. Please confirm."
 
 ---
 
 ### case3: Transfer completed (API success)
 
-**Trigger**  
-User confirmed; `cex_wallet_create_transfer` returned success.
+**Trigger** 
+User confirmed; `gate-cli cex wallet transfer create` returned success.
 
-**Output**  
-- "Transfer successful. {amount} {currency} has arrived in your {to account name}."  
-- Optional: product suggestion by destination (spot / USDT perpetual / BTC perpetual / delivery / margin / TradFi / options).  
+**Output** 
+- "Transfer successful. {amount} {currency} has arrived in your {to account name}." 
+- Optional: product suggestion by destination (spot / USDT perpetual / BTC perpetual / delivery / margin / TradFi / options).
 - "Transfer history: transfer/historyV2" (or equivalent).
-
 ---
 
 ### case4: Insufficient balance
 
-**Trigger**  
+**Trigger** 
 Pre-check: source available balance < transfer amount.
 
-**Action**  
+**Action** 
 Do **not** call transfer API.
 
-**Output**  
+**Output** 
 "Your {from account name} has insufficient balance (available: {available} {currency}). Please adjust the amount or deposit first."
 
 ---
 
 ### case5: Missing from/to or ambiguous intent
 
-**Trigger**  
+**Trigger** 
 "Contract is about to be liquidated, transfer some funds for margin" / "Top up my futures margin" / "How do I adjust account funds"
 
-**Logic**  
-- If missing ≥ 2 of from, to, currency, amount: show **missing-info card** and ask user to provide.  
-- Defaults when only one side is clear:  
-  - Unified/trading account advanced mode: default from = Trading account, to = BTC perpetual.  
-  - Classic: default from = Spot, to = USDT perpetual.  
+**Logic** 
+- If missing ≥ 2 of from, to, currency, amount: show **missing-info card** and ask user to provide. 
+- Defaults when only one side is clear: 
+ - Unified/trading account advanced mode: default from = Trading account, to = BTC perpetual. 
+ - Classic: default from = Spot, to = USDT perpetual. 
 - Do **not** call API until four elements are clear.
 
-**Output**  
+**Output** 
 "I can help with margin top-up. Please specify: from account, to account, and currency (and amount if you know it)."
 
 ---
 
 ### case6: Account mode conflict
 
-**Trigger**  
+**Trigger** 
 User in **trading account advanced mode** asks to transfer to USDT perpetual. In this mode, direct transfer to USDT perpetual may be disallowed (path not available).
-
-**Output**  
+**Output** 
 "You are in trading account mode; direct transfer to USDT perpetual is not available. You can transfer to BTC perpetual (coin-margined) instead, or adjust account mode on the web."
 
 ---
 
 ### case7: Currency vs To account mismatch
 
-**Trigger**  
+**Trigger** 
 "Transfer some USDT to my BTC perpetual account"
 
-**Logic**  
-BTC perpetual settles in BTC; USDT is inconsistent.  
-- **Option A**: Correct to BTC amount (if user intent allows).  
-- **Option B**: Explain that BTC perpetual uses BTC; suggest transferring BTC or using USDT perpetual for USDT.  
+**Logic** 
+BTC perpetual settles in BTC; USDT is inconsistent. 
+- **Option A**: Correct to BTC amount (if user intent allows).
+- **Option B**: Explain that BTC perpetual uses BTC; suggest transferring BTC or using USDT perpetual for USDT. 
 - If user confirms a corrected draft (e.g. spot → BTC perpetual with BTC), proceed as case1.
 
-**Output**  
+**Output** 
 "BTC perpetual uses BTC settlement. I've corrected the transfer to use BTC (or: please specify amount in BTC). Please confirm." Or: "For USDT, use USDT perpetual account instead."
 
 ---
 
 ### case8: Amount missing
 
-**Trigger**  
+**Trigger** 
 "Transfer USDT from spot to futures" / "Move my USDT to perpetual" (no amount).
-
-**Action**  
+**Action** 
 Ask: "How much {currency} do you want to transfer from {from} to {to}?" After user provides amount, resolve currency if still missing (case2), then proceed to case1.
 
 ---
 
 ### case9: User cancels or declines
 
-**Trigger**  
+**Trigger** 
 After Transfer Draft, user says "No" / "Cancel" / "Don't do it" / "Never mind".
 
-**Action**  
+**Action** 
 Do **not** call API. Acknowledge: "Transfer cancelled. No changes made."
 
 ---
 
 ### case10: Confirmation ambiguous or stale
 
-**Trigger**  
+**Trigger** 
 After draft, user replies with something other than clear confirmation (e.g. new question, different amount, or vague "ok" in a long thread).
-
-**Action**  
+**Action** 
 Do **not** execute. Re-present the Transfer Draft and say: "To execute this transfer, please confirm explicitly (e.g. 'Confirm' or 'Yes')."
 
 ---
 
 ### case11: Rate limit or service error
 
-**Trigger**  
+**Trigger** 
 API returns `TOO_MANY_REQUESTS` or server/network error.
 
-**Action**  
-Do not retry automatically in the same turn.  
-**Output**  
+**Action** 
+Do not retry automatically in the same turn. 
+**Output** 
 "Request failed (rate limit / service error). Please try again later or use the web app to transfer."
 
 ---
@@ -353,12 +374,12 @@ Do not retry automatically in the same turn.
 
 ```json
 {
-  "currency": "USDT",
-  "from": "spot",
-  "to": "futures",
-  "amount": "100",
-  "currency_pair": "",
-  "settle": "usdt"
+ "currency": "USDT",
+ "from": "spot",
+ "to": "futures",
+ "amount": "100",
+ "currency_pair": "",
+ "settle": "usdt"
 }
 ```
 
@@ -391,11 +412,11 @@ After a transfer, user may ask for history. By account type:
 
 | Account | Query tool (if MCP provides) | Notes |
 |---------|------------------------------|--------|
-| Spot | `cex_spot_list_spot_account_book` | currency, time, limit |
-| Perpetual | `cex_fx_list_fx_account_book` | settle, type=dnw |
-| Delivery | `cex_dc_list_dc_account_book` | settle, type=dnw |
-| Margin | `cex_margin_list_margin_account_book` | currency_pair, time, limit |
-| Options | `cex_options_list_options_account_book` | per MCP docs |
+| Spot | `gate-cli cex spot account book` | currency, time, limit |
+| Perpetual | `gate-cli cex futures account book` | settle, type=dnw |
+| Delivery | `gate-cli cex delivery account book` | settle, type=dnw |
+| Margin | `gate-cli cex margin account book` | currency_pair, time, limit |
+| Options | `gate-cli cex options account book` | per MCP docs |
 
 REST: Delivery GET /delivery/{settle}/account_book?type=dnw; Perpetual GET /futures/{settle}/account_book?type=dnw; Margin GET /margin/account_book.
 
@@ -413,11 +434,11 @@ REST: Delivery GET /delivery/{settle}/account_book?type=dnw; Perpetual GET /futu
 
 ## Execution Rules (Summary)
 
-1. **Single endpoint**: Internal transfer only via `POST /wallet/transfers` (`cex_wallet_create_transfer`). No main-sub in Phase 1.  
-2. **Always show Transfer Draft** with from, to, currency, amount (and settle/currency_pair if needed).  
-3. **Require explicit confirmation** in the next user turn; single-use; re-confirm if params change.  
-4. **Pre-check balance** before calling API; on insufficient balance, follow case4 and do not call.  
-5. **Conditional params**: `currency_pair` for margin; `settle` for futures/delivery.  
-6. **Missing currency**: case2 default table. **Missing amount**: case8 ask.  
-7. **Account mode / currency mismatch**: case6 and case7; resolve or correct before executing.  
+1. **Single endpoint**: Internal transfer only via `POST /wallet/transfers` (`gate-cli cex wallet transfer create`). No main-sub in Phase 1. 
+2. **Always show Transfer Draft** with from, to, currency, amount (and settle/currency_pair if needed).
+3. **Require explicit confirmation** in the next user turn; single-use; re-confirm if params change. 
+4. **Pre-check balance** before calling API; on insufficient balance, follow case4 and do not call. 
+5. **Conditional params**: `currency_pair` for margin; `settle` for futures/delivery. 
+6. **Missing currency**: case2 default table. **Missing amount**: case8 ask. 
+7. **Account mode / currency mismatch**: case6 and case7; resolve or correct before executing. 
 8. **On cancel or ambiguous confirm**: case9/case10; do not execute.

@@ -2,7 +2,7 @@
 
 ## Overview
 
-An AI-powered payment execution skill for Gate Pay transactions. This skill enables users to complete merchant order payments using their Gate account balance in pay-first scenarios (such as HTTP 402 payment-required flows). The skill handles payment authorization validation, transaction execution via Exchange MCP, and localized receipt generation.
+An AI-powered payment execution skill for Gate Pay transactions. This skill enables users to complete merchant order payments using their Gate account balance in pay-first scenarios (such as HTTP 402 payment-required flows). The skill handles payment authorization validation, transaction execution via Exchange `gate-cli`, and localized receipt generation.
 
 ### Core Capabilities
 
@@ -17,7 +17,7 @@ An AI-powered payment execution skill for Gate Pay transactions. This skill enab
 
 ## Execution Guardrail (Mandatory)
 
-Before executing payment via `cex_pay_create_ai_order_pay`, the assistant must:
+Before executing payment via `cex_pay_create_ai_order_pay` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二), the assistant must:
 
 1. **Verify payment readiness**: All required parameters (order_id, amount, currency) are present and valid
 2. **Confirm user intent**: User has clearly expressed payment intent (e.g., "pay", "confirm payment", "checkout")
@@ -26,7 +26,7 @@ Before executing payment via `cex_pay_create_ai_order_pay`, the assistant must:
 5. **Execute only after clear intent**: Do not initiate payment without explicit user payment intent
 
 **Hard gate rules**:
-- NEVER call `cex_pay_create_ai_order_pay` without clear user payment intent in the current or immediately previous user turn
+- NEVER call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) without clear user payment intent in the current or immediately previous user turn
 - If parameters change (amount, order ID, merchant), re-confirm intent is required
 - If user asks "did I pay?" without query tool available, explain limitation—do not charge again to infer status
 - Authorization missing/expired → halt payment, guide auth flow first
@@ -83,7 +83,7 @@ Assistant: "I cannot query payment status directly (no status query tool availab
 
 **Data handling**:
 - This skill processes order information (order ID, amount, currency) and user payment authorization credentials
-- All data is transmitted exclusively to Gate API endpoints via MCP—no third-party services involved
+- All data is transmitted exclusively to Gate API endpoints via `gate-cli`—no third-party services involved
 - No user data is stored locally; payment records are maintained by Gate's infrastructure per platform policy
 - All transmissions use encrypted channels compliant with Gate's security standards
 

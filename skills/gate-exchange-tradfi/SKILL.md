@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-tradfi
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate TradFi (traditional finance) skill. Use when the user asks to query or trade traditional finance assets like forex or commodities on Gate. Triggers on 'TradFi orders', 'MT5 account', 'TradFi positions'. Do NOT use for fund transfer."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate TradFi Suite
 
@@ -12,122 +64,113 @@ description: "Gate TradFi (traditional finance) skill. Use when the user asks to
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
 
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
-
-### MCP Tools Used
+### gate-cli commands used
 
 **Query Operations (Read-only)**
 
-- cex_tradfi_query_categories
-- cex_tradfi_query_mt5_account_info
-- cex_tradfi_query_order_history_list
-- cex_tradfi_query_order_list
-- cex_tradfi_query_position_history_list
-- cex_tradfi_query_position_list
-- cex_tradfi_query_symbol_detail
-- cex_tradfi_query_symbol_kline
-- cex_tradfi_query_symbol_ticker
-- cex_tradfi_query_symbols
-- cex_tradfi_query_user_assets
+- `gate-cli cex tradfi market categories`
+- `gate-cli cex tradfi account info`
+- `gate-cli cex tradfi order history`
+- `gate-cli cex tradfi order list`
+- `gate-cli cex tradfi position history`
+- `gate-cli cex tradfi position list`
+- `gate-cli cex tradfi market symbol`
+- `gate-cli cex tradfi market kline`
+- `gate-cli cex tradfi market ticker`
+- `gate-cli cex tradfi market symbols`
+- `gate-cli cex tradfi account assets`
 
 **Execution Operations (Write)**
 
-- cex_tradfi_close_position
-- cex_tradfi_create_tradfi_order
-- cex_tradfi_delete_order
-- cex_tradfi_update_order
-- cex_tradfi_update_position
+- `gate-cli cex tradfi position close`
+- `gate-cli cex tradfi order create`
+- `gate-cli cex tradfi order cancel`
+- `gate-cli cex tradfi order update`
+- `gate-cli cex tradfi position update`
 
 ### Authentication
-- API Key Required: Yes (see skill doc/runtime MCP deployment)
-- Permissions: Tradfi:Write
-- Get API Key: https://www.gate.io/myaccount/profile/api-key/manage
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Tradfi:Write
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Do not proceed with authenticated calls until the CLI behaves as expected (e.g. **`gate-cli --version`** or a read-only **`gate-cli cex ...`** command from this skill); confirm credentials resolve before mutating operations.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's TradFi workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's TradFi workflow.
 
 - `SKILL.md` keeps routing and domain constraints.
-- `references/mcp.md` is the authoritative MCP execution layer for query/mutation separation, confirmation gates, and post-action verification.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for query/mutation separation, confirmation gates, and post-action verification.
 
 ## Sub-Modules
 
 
-| Module              | Description                                      | Trigger keywords                                                                               |
+| Module | Description | Trigger keywords |
 | ------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| **Query orders**    | Order list, order history                       | `orders`, `open orders`, `order history`                                                        |
-| **Query positions** | Current position list, position history          | `positions`, `my positions`, `position history`, `holdings`, `current position`                |
-| **Query market**    | Category list, symbol list, ticker, symbol kline | `category`, `categories`, `symbol list`, `symbols`, `ticker`, `kline`, `candlestick`, `market` |
-| **Query assets**    | User balance/asset info, MT5 account info        | `assets`, `balance`, `account`, `my funds`, `MT5`, `mt5 account`                               |
-| **Place order**     | Create new order (supports take-profit/stop-loss at creation) | `place order`, `create order`, `open order`, `buy`, `sell`, `long`, `short`, `take-profit`, `stop-loss` |
-| **Amend order**     | Change order price, take-profit, or stop-loss (size not supported) | `amend order`, `modify order`, `change price`, `take-profit`, `stop-loss`                        |
-| **Cancel order**    | Cancel one or more orders                       | `cancel order`, `revoke order`, `cancel`                                                            |
-| **Modify position** | Change position take-profit/stop-loss only (leverage, margin not supported) | `modify position`, `take-profit`, `stop-loss`, `change take-profit`, `change stop-loss`            |
-| **Close position**  | Full or partial close                           | `close position`, `close`, `close all`, `flat`                                                    |
+| **Query orders** | Order list, order history | `orders`, `open orders`, `order history` |
+| **Query positions** | Current position list, position history | `positions`, `my positions`, `position history`, `holdings`, `current position` |
+| **Query market** | Category list, symbol list, ticker, symbol kline | `category`, `categories`, `symbol list`, `symbols`, `ticker`, `kline`, `candlestick`, `market` |
+| **Query assets** | User balance/asset info, MT5 account info | `assets`, `balance`, `account`, `my funds`, `MT5`, `mt5 account` |
+| **Place order** | Create new order (supports take-profit/stop-loss at creation) | `place order`, `create order`, `open order`, `buy`, `sell`, `long`, `short`, `take-profit`, `stop-loss` |
+| **Amend order** | Change order price, take-profit, or stop-loss (size not supported) | `amend order`, `modify order`, `change price`, `take-profit`, `stop-loss` |
+| **Cancel order** | Cancel one or more orders | `cancel order`, `revoke order`, `cancel` |
+| **Modify position** | Change position take-profit/stop-loss only (leverage, margin not supported) | `modify position`, `take-profit`, `stop-loss`, `change take-profit`, `change stop-loss` |
+| **Close position** | Full or partial close | `close position`, `close`, `close all`, `flat` |
 
 
 ## Routing Rules
 
-| Intent              | Example phrases                                                                             | Route to                                                             |
+| Intent | Example phrases | Route to |
 | ------------------- | ------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **Query orders**    | "My TradFi orders", "order history", "show open orders", "order status"                     | Read `references/query-orders.md`                                    |
-| **Query positions** | "My positions", "position history", "current holdings", "what am I holding"                 | Read `references/query-positions.md`                                 |
-| **Query market**    | "TradFi categories", "category list", "symbol list", "ticker", "kline for X", "market data" | Read `references/query-market.md`                                    |
-| **Query assets**    | "My assets", "balance", "account balance", "MT5 account", "my MT5 info"                     | Read `references/query-assets.md`                                    |
-| **Place order**     | "Place order", "buy EURUSD", "sell XAUUSD 0.1", "open long", "order with take-profit/stop-loss" | Read `references/place-order.md`                                     |
-| **Amend order**     | "Amend order", "change price to X", "take-profit", "stop-loss"                             | Read `references/amend-order.md`                                     |
-| **Cancel order**    | "Cancel order", "cancel all orders", "revoke order"                                         | Read `references/cancel-order.md`                                    |
-| **Modify position** | "Modify position", "take-profit", "stop-loss", "change take-profit/stop-loss"               | Read `references/modify-position.md`                                 |
-| **Close position**  | "Close position", "close all", "close half", "flat"                                         | Read `references/close-position.md`                                  |
-| **Unclear**         | "TradFi", "show me my TradFi"                                                               | **Clarify**: list query and trading modules or ask which the user wants. |
+| **Query orders** | "My TradFi orders", "order history", "show open orders", "order status" | Read `references/query-orders.md` |
+| **Query positions** | "My positions", "position history", "current holdings", "what am I holding" | Read `references/query-positions.md` |
+| **Query market** | "TradFi categories", "category list", "symbol list", "ticker", "kline for X", "market data" | Read `references/query-market.md` |
+| **Query assets** | "My assets", "balance", "account balance", "MT5 account", "my MT5 info" | Read `references/query-assets.md` |
+| **Place order** | "Place order", "buy EURUSD", "sell XAUUSD 0.1", "open long", "order with take-profit/stop-loss" | Read `references/place-order.md` |
+| **Amend order** | "Amend order", "change price to X", "take-profit", "stop-loss" | Read `references/amend-order.md` |
+| **Cancel order** | "Cancel order", "cancel all orders", "revoke order" | Read `references/cancel-order.md` |
+| **Modify position** | "Modify position", "take-profit", "stop-loss", "change take-profit/stop-loss" | Read `references/modify-position.md` |
+| **Close position** | "Close position", "close all", "close half", "flat" | Read `references/close-position.md` |
+| **Unclear** | "TradFi", "show me my TradFi" | **Clarify**: list query and trading modules or ask which the user wants. |
 
 
-## MCP Tools
+## gate-cli command index
 
 **Query (read-only)** — use only MCP-documented parameters.
 
-| #  | Tool                                   | Purpose |
+| # | Tool | Purpose |
 | ---| --------------------------------------- | ------- |
-| 1  | `cex_tradfi_query_order_list`           | List open orders. |
-| 2  | `cex_tradfi_query_order_history_list`   | Query order history list (filled/cancelled). |
-| 3  | `cex_tradfi_query_position_list`       | List current positions. |
-| 4  | `cex_tradfi_query_position_history_list` | List historical positions/settlements. |
-| 5  | `cex_tradfi_query_categories`           | Query TradFi category list. |
-| 6  | `cex_tradfi_query_symbols`              | List symbols (by category if supported). |
-| 7  | `cex_tradfi_query_symbol_ticker`        | Get ticker(s) for symbol(s). |
-| 8  | `cex_tradfi_query_symbol_detail`        | Get symbol config (required before place order: leverages, min_order_volume, step_order_volume). If no result, symbol may not exist — do not place order. |
-| 9  | `cex_tradfi_query_symbol_kline`         | Get kline/candlestick for symbol. |
-| 10 | `cex_tradfi_query_user_assets`          | Get user account/balance (assets). |
-| 11 | `cex_tradfi_query_mt5_account_info`     | Get MT5 account info. |
+| 1 | `gate-cli cex tradfi order list` | List open orders. |
+| 2 | `gate-cli cex tradfi order history` | Query order history list (filled/cancelled). |
+| 3 | `gate-cli cex tradfi position list` | List current positions. |
+| 4 | `gate-cli cex tradfi position history` | List historical positions/settlements. |
+| 5 | `gate-cli cex tradfi market categories` | Query TradFi category list. |
+| 6 | `gate-cli cex tradfi market symbols` | List symbols (by category if supported). |
+| 7 | `gate-cli cex tradfi market ticker` | Get ticker(s) for symbol(s). |
+| 8 | `gate-cli cex tradfi market symbol` | Get symbol config (required before place order: leverages, min_order_volume, step_order_volume). If no result, symbol may not exist — do not place order. |
+| 9 | `gate-cli cex tradfi market kline` | Get kline/candlestick for symbol. |
+| 10 | `gate-cli cex tradfi account assets` | Get user account/balance (assets). |
+| 11 | `gate-cli cex tradfi account info` | Get MT5 account info. |
 
 **Trading (write)** — exact tool names and parameters must match the Gate TradFi MCP tool definition. Conditions and value limits (required/optional, ranges, allowed symbols) must be declared in the skill and in each reference; do not pass undocumented parameters.
 
-| #  | Tool (name per MCP)              | Purpose |
+| # | Tool (name per MCP) | Purpose |
 | ---| ---------------------------------| ------- |
-| 12 | `cex_tradfi_create_tradfi_order` | Place new order; supports take-profit/stop-loss. Before calling: use `cex_tradfi_query_symbol_detail` to validate symbol and get min_order_volume, step_order_volume, leverages. |
-| 13 | `cex_tradfi_update_order`        | Amend order price, take-profit, stop-loss only (size not supported). |
-| 14 | `cex_tradfi_delete_order`       | Cancel/delete one order. Does not support batch; one order per call. |
-| 15 | `cex_tradfi_update_position`    | Modify position take-profit/stop-loss price only (leverage, margin not supported). |
-| 16 | `cex_tradfi_close_position` (or MCP equivalent) | Close position (full or partial). Full close: position identifier only, do not pass size/close_volume. |
+| 12 | `gate-cli cex tradfi order create` | Place new order; supports take-profit/stop-loss. Before calling: use `gate-cli cex tradfi market symbol` to validate symbol and get min_order_volume, step_order_volume, leverages. |
+| 13 | `gate-cli cex tradfi order update` | Amend order price, take-profit, stop-loss only (size not supported). |
+| 14 | `gate-cli cex tradfi order cancel` | Cancel/delete one order. Does not support batch; one order per call. |
+| 15 | `gate-cli cex tradfi position update` | Modify position take-profit/stop-loss price only (leverage, margin not supported). |
+| 16 | `gate-cli cex tradfi position close` (or MCP equivalent) | Close position (full or partial). Full close: position identifier only, do not pass size/close_volume. |
 
 
 ## Parameter conditions and limits
@@ -166,22 +209,21 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 - **Query**: Use the sub-module Report Template (tables for orders/positions/tickers, assets).
 - **Trading**: Use the reference Report Template; include **parameter summary** (what was sent) and **result** (success or error).
-
 ## Domain Knowledge
 
 - **TradFi**: Gate’s traditional finance product set (e.g. FX, MT5). Symbols and categories are product-specific.
 - **Query**: Orders, positions, market, assets — use only MCP-documented parameters.
 - **Trading**: Place/amend/cancel orders and modify/close positions — use only MCP-documented tools and parameters; declare conditions/limits; require user confirmation before execution; explain parameters and outcome in the response.
-- **Order id for cancel/amend**: The order id used by `cex_tradfi_delete_order` and `cex_tradfi_update_order` **must** come from **`cex_tradfi_query_order_list`**. Do **not** use the `id` or `log_id` returned by `cex_tradfi_create_tradfi_order` for cancel or amend.
+- **Order id for cancel/amend**: The order id used by `gate-cli cex tradfi order cancel` and `gate-cli cex tradfi order update` **must** come from **`gate-cli cex tradfi order list`**. Do **not** use the `id` or `log_id` returned by `gate-cli cex tradfi order create` for cancel or amend.
 
 ## Error Handling
 
-| Situation                  | Action                                                                                                  |
+| Situation | Action |
 | -------------------------- | ------------------------------------------------------------------------------------------------------- |
-| Tool not found / 4xx/5xx   | Tell user the TradFi service or tool may be unavailable; suggest retry or check Gate MCP configuration. |
-| Empty list                 | Report "No open orders" / "No positions" / "No symbols" etc., and do not assume error.                  |
-| Invalid symbol / order not found | Report "Order not found" or "Symbol not found" and suggest checking symbol list.                       |
-| Auth / permission error    | Do not expose credentials; ask user to check API key or MCP auth for TradFi.                           |
+| Tool not found / 4xx/5xx | Tell user the TradFi service or tool may be unavailable; suggest retry or check Gate MCP configuration. |
+| Empty list | Report "No open orders" / "No positions" / "No symbols" etc., and do not assume error. |
+| Invalid symbol / order not found | Report "Order not found" or "Symbol not found" and suggest checking symbol list. |
+| Auth / permission error | Do not expose credentials; ask user to check API key or MCP auth for TradFi. |
 | Trading error (e.g. insufficient margin, invalid price) | Show the error message; in the response, restate the parameters that were sent and suggest correction. |
 
 

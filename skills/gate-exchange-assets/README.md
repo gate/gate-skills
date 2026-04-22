@@ -44,7 +44,7 @@ gate-exchange-assets/
 
 ## Prerequisites
 
-- Gate MCP configured and connected
+- gate-cli configured and connected
 - Authentication (OAuth) for balance and history queries
 
 ## Source

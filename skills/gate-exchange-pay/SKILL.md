@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-pay
-version: "2026.3.27-2"
-updated: "2026-03-27"
 description: "Gate Pay payment execution skill. Use when the user asks to pay with Gate Pay, complete a merchant charge, or satisfy pay-first flows (e.g. HTTP 402). Triggers on 'Gate Pay', 'complete payment', 'pay for order'. Requires prior Gate payment authorization."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # gate-exchange-pay — Gate Pay payment
 
@@ -12,12 +64,11 @@ description: "Gate Pay payment execution skill. Use when the user asks to pay wi
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
 ## Scope and audience
 
-This document is for end users and agents: in scenarios where payment is required first and the user has already chosen a payment method and selected Gate Pay, use this capability to complete the charge and output a receipt by calling Exchange MCP tool `cex_pay_create_ai_order_pay`.
+This document is for end users and agents: in scenarios where payment is required first and the user has already chosen a payment method and selected Gate Pay, use this capability to complete the charge and output a receipt by calling Exchange MCP tool `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
 
 Before invoking this Skill, the user must have completed Gate account payment-related authorization. If not, guide them through Gate account authorization before charging.
 
@@ -29,7 +80,7 @@ Use the user's language for receipts, pre-charge summaries, failures, and short 
 
 - The user has clearly expressed intent to pay (e.g. pay, confirm payment, checkout, pay for me).
 - Payment is required first (e.g. after HTTP 402 or an equivalent pay-first step when applicable), the user has selected Gate Pay as the payment method, and you are not substituting another channel.
-- All information required for the payment call is present and all required arguments for `cex_pay_create_ai_order_pay` are satisfied (per MCP `inputSchema`); if anything is missing, complete it before paying.
+- All information required for the payment call is present and all required arguments for `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) are satisfied (per MCP `inputSchema`); if anything is missing, complete it before paying.
 - This capability does not cover the first visit to a protected URL solely to obtain a 402; other parts of the conversation may handle that. Once the user has chosen Gate Pay and payment inputs are ready, use this capability to charge.
 
 ## When this does not apply
@@ -62,25 +113,33 @@ Gate Pay is Gate's digital asset payment solution that enables users to pay for 
 - This skill only handles Gate Pay payments; other payment methods (bank cards, other crypto wallets) are not in scope
 - Users must explicitly select Gate Pay as their payment method before this skill activates
 
-## MCP Tools
+## gate-cli command index
 
 | Tool name | Purpose | Type |
 |-----------|---------|------|
-| `cex_pay_create_ai_order_pay` | Debit the user's Gate Pay payment account for a merchant order | Write |
+| `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Debit the user's Gate Pay payment account for a merchant order | Write |
 
 ### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes
 - Additional Authorization Required: Yes, Gate Pay payment authorization must already be completed
 - Note: This skill executes a private payment action through authenticated Exchange MCP tooling. Payment authorization is required in addition to the runtime's API-key-backed execution capability.
 
 **Note**: If there is no order-status query tool available and the user only asks whether they paid, explain the limitation; do not charge again as a substitute for querying.
 
-## MCP Mode
+### Installation Check
+- **Required:** `gate-cli` when using CLI-backed flows (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Confirm the runtime and payment preconditions before executing charges; use **`gate-cli --version`** or deployment-specific checks as appropriate.
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's Gate Pay charge workflow.
+## Execution mode
+
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's Gate Pay charge workflow.
 
 - `SKILL.md` keeps payment intent routing, product boundaries, and user-facing policy.
-- `references/mcp.md` is the authoritative MCP execution layer for charge inputs, confirmation gates, and failure fallback.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for charge inputs, confirmation gates, and failure fallback.
 
 ## Workflow
 
@@ -126,9 +185,9 @@ Payment method: Gate Pay
 
 ### Step 3: Execute Payment
 
-**Action**: Call Exchange MCP tool `cex_pay_create_ai_order_pay` with validated parameters.
+**Action**: Call Exchange MCP tool `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with validated parameters.
 
-**Call `cex_pay_create_ai_order_pay` with**:
+**Call `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with**:
 - `order_id`: Merchant order identifier
 - `amount`: Payment amount
 - `currency`: Payment currency
@@ -154,7 +213,7 @@ Payment method: Gate Pay
 
 | Condition | Status | Meaning |
 |-----------|--------|---------|
-| Payment inputs complete + user selected Gate Pay + user intent clear + authorization valid | Execute | Proceed with payment execution via `cex_pay_create_ai_order_pay` |
+| Payment inputs complete + user selected Gate Pay + user intent clear + authorization valid | Execute | Proceed with payment execution via `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
 | Missing order_id, amount, or currency | Block | Ask user to provide complete payment details from merchant order page |
 | User has not selected Gate Pay | Block | This skill does not apply; other payment methods are out of scope |
 | User intent unclear or user declines | Block | Do not initiate payment; wait for clear confirmation or handle cancellation |
@@ -265,7 +324,7 @@ This skill follows a streamlined confirmation model for payment execution:
 
 ### Authorization Guards
 
-- **Pre-execution check**: Before calling `cex_pay_create_ai_order_pay`, verify user has completed Gate payment authorization
+- **Pre-execution check**: Before calling `cex_pay_create_ai_order_pay` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), verify user has completed Gate payment authorization
 - **Authorization validation**: If authorization is missing, expired, or invalid, halt payment and guide user through authorization flow
 - **No bypass**: Payment execution must not bypass authorization requirements under any circumstances
 

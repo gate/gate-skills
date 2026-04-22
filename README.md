@@ -10,7 +10,7 @@ Built by Gate. Built for the crypto community.
 
 Get started in seconds with our unified installer skill:
 
-- **All Platforms (Cursor / Claude Code / Codex / OpenClaw)**: Use `gate-mcp-installer` — one-click install all Gate MCP servers + Skills for your environment
+- **All Platforms (Cursor / Claude Code / Codex / OpenClaw)**: Use `gate-cli-installer` — one-click install all Gate MCP servers + Skills for your environment
 
 **Quick Start**: Just say to your AI assistant:
 
@@ -70,7 +70,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-referral](#-gate-exchange-referral) | Invite-friends campaigns and rules: Earn Together, Help & Get Coupons, Super Commission; read-only guidance | `2026.3.26-1` | ✅ Active |
 | [gate-exchange-assets-manager](#-gate-exchange-assets-manager) | L2 composite: multi-account assets, margin/liquidation risk, earn/staking/affiliate, unified borrow & collateral | `2026.3.25-1` | ✅ Active |
 | [gate-info-research](#-gate-info-research) | L2 Market Research Copilot: Gate-Info + Gate-News read-only briefs, comparisons, and risk checks | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-welfare](#-gate-exchange-welfare) | Welfare center new-user tasks and rewards (MCP-backed; no fabricated numbers) | `2026.3.23-1` | ✅ Active |
+| [gate-exchange-welfare](#-gate-exchange-welfare) | Welfare center newcomer tasks: identity, task list, task claim, reward claim, and completion guidance (MCP-backed; no fabricated numbers) | `2026.4.10-1` | ✅ Active |
 | [gate-exchange-launchpool](#-gate-exchange-launchpool) | LaunchPool: browse projects, stake/redeem, pledge records, airdrop reward history | `2026.3.23-1` | ✅ Active |
 | [gate-exchange-kyc](#-gate-exchange-kyc) | KYC portal guidance (complete verification on the official site only) | `2026.3.23-1` | ✅ Active |
 | [gate-exchange-collateralloan](#-gate-exchange-collateralloan) | Multi-collateral loan: query, repay, add collateral, redeem collateral | `2026.3.23-1` | ✅ Active |
@@ -669,10 +669,12 @@ Market Research Copilot — an L2 composite skill that combines Gate-Info and Ga
 
 > **Path**: `skills/gate-exchange-welfare/`
 
-Welfare center for new-user tasks and rewards using MCP data. Never fabricates reward amounts; guides new vs existing users.
+Welfare center newcomer workflow using MCP data: identity gate, newcomer task list, single task claim, reward claim, and completion guidance. Never fabricates reward amounts.
 
 **Example Prompts**:
 - `What welfare tasks can I do?`
+- `Claim the download task`
+- `Claim all my newcomer rewards`
 - `How do I claim new user rewards?`
 - `What benefits are available for new users?`
 

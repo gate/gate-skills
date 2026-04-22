@@ -15,8 +15,8 @@ Classify the request into one of three cases:
 
 Before validating and quoting, resolve the user's input to an exact currency symbol:
 
-1. **Try exact match first**: Call `cex_alpha_list_alpha_currencies` with `currency={user_input}`.
-2. **If no exact match**: Call `cex_alpha_list_alpha_currencies` without currency filter, then search results for tokens whose `currency` or `name` contains the user's keyword (case-insensitive).
+1. **Try exact match first**: Call `gate-cli cex alpha market currencies` with `currency={user_input}`.
+2. **If no exact match**: Call `gate-cli cex alpha market currencies` without currency filter, then search results for tokens whose `currency` or `name` contains the user's keyword (case-insensitive).
 3. **Handle results**:
    - **Single match**: Proceed with that currency symbol.
    - **Multiple matches**: Present a numbered list of candidates and ask the user to choose:
@@ -32,11 +32,11 @@ Before validating and quoting, resolve the user's input to an exact currency sym
 
 All buy flows follow the same core pipeline:
 
-1. **Validate**: Call `cex_alpha_list_alpha_currencies` with `currency={symbol}` to confirm the token exists and `status=1` (actively trading).
-2. **Quote**: Call `cex_alpha_quote_alpha_order` with `currency`, `side="buy"`, `amount` (USDT quantity), `gas_mode="speed"` (default). Use `gas_mode="custom"` with `slippage` only if user specifies custom slippage.
+1. **Validate**: Call `gate-cli cex alpha market currencies` with `currency={symbol}` to confirm the token exists and `status=1` (actively trading).
+2. **Quote**: Call `gate-cli cex alpha order quote` with `currency`, `side="buy"`, `amount` (USDT quantity), `gas_mode="speed"` (default). Use `gas_mode="custom"` with `slippage` only if user specifies custom slippage.
 3. **Confirm**: Present the quote details to the user and wait for explicit confirmation before proceeding.
-4. **Execute**: Call `cex_alpha_place_alpha_order` with `currency`, `side="buy"`, `amount`, `quote_id`, and optional `gas_mode`/`slippage`.
-5. **Track** (Case 10 only): Poll `cex_alpha_get_alpha_order` until a terminal status is reached.
+4. **Execute**: Call `gate-cli cex alpha order place` with `currency`, `side="buy"`, `amount`, `quote_id`, and optional `gas_mode`/`slippage`.
+5. **Track** (Case 10 only): Poll `gate-cli cex alpha order get` until a terminal status is reached.
 
 Key parameters:
 - `amount`: USDT quantity when buying (e.g., `"5"` means 5 USDT)
@@ -103,14 +103,14 @@ For order result:
 **Expected Behavior**:
 1. Extract the currency keyword and USDT amount from the user request.
 2. **Resolve currency symbol**:
-   - Call `cex_alpha_list_alpha_currencies` with `currency={keyword}` for exact match.
+   - Call `gate-cli cex alpha market currencies` with `currency={keyword}` for exact match.
    - If no result, search all currencies for tokens containing the keyword in `currency` or `name`.
    - If multiple matches found, list candidates and ask user to select.
    - If no match found, inform user and abort.
-3. Call `cex_alpha_list_alpha_currencies` with `currency={resolved_symbol}` to verify the token is actively trading (`status=1`).
-4. Call `cex_alpha_quote_alpha_order` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `gas_mode="speed"`.
+3. Call `gate-cli cex alpha market currencies` with `currency={resolved_symbol}` to verify the token is actively trading (`status=1`).
+4. Call `gate-cli cex alpha order quote` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `gas_mode="speed"`.
 5. Present the quote details to the user and ask for confirmation.
-6. Upon confirmation, call `cex_alpha_place_alpha_order` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `quote_id="{quote_id}"`, `gas_mode="speed"`.
+6. Upon confirmation, call `gate-cli cex alpha order place` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `quote_id="{quote_id}"`, `gas_mode="speed"`.
 7. Return the order result including order ID and status.
 
 ## Scenario 9: Custom Slippage Buy
@@ -125,10 +125,10 @@ For order result:
 **Expected Behavior**:
 1. Extract the currency keyword, USDT amount, and slippage percentage from the user request.
 2. **Resolve currency symbol** (same as Scenario 8 step 2).
-3. Call `cex_alpha_list_alpha_currencies` with `currency={resolved_symbol}` to verify the token is actively trading.
-4. Call `cex_alpha_quote_alpha_order` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `gas_mode="custom"`, `slippage="{slippage_pct}"`.
+3. Call `gate-cli cex alpha market currencies` with `currency={resolved_symbol}` to verify the token is actively trading.
+4. Call `gate-cli cex alpha order quote` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `gas_mode="custom"`, `slippage="{slippage_pct}"`.
 5. Present the quote details (including the custom slippage) to the user and ask for confirmation.
-6. Upon confirmation, call `cex_alpha_place_alpha_order` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `quote_id="{quote_id}"`, `gas_mode="custom"`, `slippage="{slippage_pct}"`.
+6. Upon confirmation, call `gate-cli cex alpha order place` with `currency={resolved_symbol}`, `side="buy"`, `amount="{usdt_amount}"`, `quote_id="{quote_id}"`, `gas_mode="custom"`, `slippage="{slippage_pct}"`.
 7. Return the order result including order ID and status.
 
 ## Scenario 10: Buy and Track Result
@@ -142,7 +142,7 @@ For order result:
 
 **Expected Behavior**:
 1. Execute the full buy flow (same as Scenario 8 or 9 depending on whether slippage is specified).
-2. After placing the order, poll `cex_alpha_get_alpha_order` with `order_id` at 3-5 second intervals.
+2. After placing the order, poll `gate-cli cex alpha order get` with `order_id` at 3-5 second intervals.
 3. Continue polling until a terminal status is reached:
    - `2` = Success — report the completed order details.
    - `3` = Failed — report the failure reason.

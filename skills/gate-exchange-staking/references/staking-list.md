@@ -6,13 +6,13 @@ Query staking/redemption order history and reward distribution records.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_earn_order_list** | Query stake/redeem orders | `status` | `coin`, `pid`, `type`, `page`, `limit` |
-| **cex_earn_award_list** | Query reward records | - | `coin`, `pid`, `page` |
+| **`gate-cli cex earn staking orders`** | Query stake/redeem orders | `status` | `coin`, `pid`, `type`, `page`, `limit` |
+| **`gate-cli cex earn staking awards`** | Query reward records | - | `coin`, `pid`, `page` |
 
 - **Order list**: Response has `page`, `pageSize`, `pageCount`, `totalCount`, and `list` (array). Each item in `list`: `pid`, `coin`, `amount`, `type` (0=stake, 1=redeem), `status`, `redeem_stamp`, `createStamp`, `exchange_amount`, `fee`. Filter by `coin`, `pid`, or `type`; use `page` for pagination.
 - **Reward list**: Response has `page`, `pageSize`, `pageCount`, `totalCount`, and `list` (array). Each item in `list`: `pid`, `mortgage_coin`, `amount`, `reward_coin`, `interest`, `fee`, `status`, `bonus_date`, `should_bonus_stamp`. Filter by coin or pid; use `page` for pagination.
 
-**cex_earn_order_list response (object):**
+**`gate-cli cex earn staking orders` response (object):**
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -31,7 +31,7 @@ Query staking/redemption order history and reward distribution records.
 | list[].exchange_amount | string | For **dynamic-rate** products (exchangeRate ≠ 1): received quote/reward coin amount. For **stake** display, show this when product is dynamic-rate; otherwise show amount. |
 | list[].fee | string | Fee |
 
-**cex_earn_award_list response (object):**
+**`gate-cli cex earn staking awards` response (object):**
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -57,14 +57,9 @@ Query staking/redemption order history and reward distribution records.
 ## Workflow
 
 1. **Parse parameters**: Extract `coin`, `pid`, `type` (0=stake, 1=redeem), `page` from user query.
-2. **Call tool**: Call `cex_earn_order_list` with `status="finished"` (required) and optional filters.
-<<<<<<< HEAD
-3. **Key data to extract**: From response object: `page`, `pageSize`, `pageCount`, `totalCount`. From each `list` item: `pid`, `coin`, `amount`, `exchange_amount`, `type`, `createStamp`, `redeem_stamp`, `status`, `fee`.
-4. **Format response**: Show as table or list; convert timestamps to dates; map type 0=Stake, 1=Redeem. **Dynamic-rate products** (exchangeRate ≠ 1 from `cex_earn_find_coin` for same pid): for **Stake** (type=0) show **exchange_amount** (what the user received); for **Redeem** (type=1) show **amount** (what the user received). When exchangeRate = 1, show amount for both.
-=======
+2. **Call tool**: Call `gate-cli cex earn staking orders` with `status="finished"` (required) and optional filters.
 3. **Key data to extract**: From response object: `page`, `pageSize`, `pageCount`, `totalCount`. From each `list` item: `pid`, `coin`, `amount`, `exchange_amount`, `type`, `status`, `fee`. Do not display `createStamp`, `redeem_stamp` or any timestamp formatting.
-4. **Format response**: Show as table or list; map type 0=Stake, 1=Redeem. **Do not display or format timestamp fields** (omit createStamp, redeem_stamp from output; see SKILL.md). **Dynamic-rate products** (exchangeRate ≠ 1 from `cex_earn_find_coin` for same pid): for **Stake** (type=0) show **exchange_amount** (what the user received); for **Redeem** (type=1) show **amount** (what the user received). When exchangeRate = 1, show amount for both.
->>>>>>> master
+4. **Format response**: Show as table or list; map type 0=Stake, 1=Redeem. **Do not display or format timestamp fields** (omit createStamp, redeem_stamp from output; see SKILL.md). **Dynamic-rate products** (exchangeRate ≠ 1 from `gate-cli cex earn staking find` for same pid): for **Stake** (type=0) show **exchange_amount** (what the user received); for **Redeem** (type=1) show **amount** (what the user received). When exchangeRate = 1, show amount for both.
 
 ## Report Template
 
@@ -87,7 +82,7 @@ Use the **Response Template** block from the scenario that matches the user inte
 - "Transaction history"
 
 **Expected Behavior**:
-1. Call `cex_earn_order_list(status="finished")`
+1. Call `gate-cli cex earn staking orders`
 2. Display recent orders first (API returns newest first)
 3. Show both stake and redeem orders
 4. Include pagination info
@@ -127,7 +122,7 @@ Showing: {current range} of {totalCount}
 
 **Expected Behavior**:
 1. Parse coin from request (e.g., "USDT")
-2. Call `cex_earn_order_list(status="finished", coin="USDT")`
+2. Call `gate-cli cex earn staking orders`
 3. Display filtered results
 4. Show stake vs redeem summary
 
@@ -169,7 +164,7 @@ Summary:
 
 **Expected Behavior**:
 1. Parse type from request (stake=0, redeem=1)
-2. Call `cex_earn_order_list(status="finished", type=0)` or `type=1`
+2. Call `gate-cli cex earn staking orders` or `type=1`
 3. Display filtered results
 4. Calculate totals
 
@@ -206,7 +201,7 @@ Total Orders: {totalCount}
 - "Today's transactions"
 
 **Expected Behavior**:
-1. Call `cex_earn_order_list(status="finished", page=1, limit=10)`
+1. Call `gate-cli cex earn staking orders`
 2. Focus on first page results
 3. Do not display or format timestamps (omit createStamp, redeem_stamp)
 
@@ -266,7 +261,7 @@ All orders shown have been successfully processed.
 ## Workflow
 
 1. **Parse parameters**: Extract `coin`, `pid`, `page` from user query.
-2. **Call tool**: Call `cex_earn_award_list` with optional filters.
+2. **Call tool**: Call `gate-cli cex earn staking awards` with optional filters.
 3. **Key data to extract**: From response: `page`, `pageSize`, `pageCount`, `totalCount`. From each `list` item: `pid`, `mortgage_coin`, `amount`, `reward_coin`, `interest`, `bonus_date`, `status`. Do not display `should_bonus_stamp` or any timestamp formatting.
 4. **Format response**: Group by reward_coin; sum interest; show daily/monthly views. Do not display or format timestamp fields.
 
@@ -291,7 +286,7 @@ Use the **Response Template** block from the scenario that matches the user inte
 - "All rewards"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Group by reward_coin
 3. Calculate total earnings
 4. Show recent distributions
@@ -333,7 +328,7 @@ Total Records: {totalCount}
 
 **Expected Behavior**:
 1. Parse coin from request
-2. Call `cex_earn_award_list(coin="USDT")`
+2. Call `gate-cli cex earn staking awards`
 3. Note this filters by mortgage_coin
 4. Calculate totals and averages
 
@@ -372,7 +367,7 @@ Summary:
 - "Recent earnings"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Filter results where bonus_date = yesterday
 3. If none, show most recent
 4. Calculate daily average
@@ -411,7 +406,7 @@ Daily Average: {calculate from recent data}
 - "Reward breakdown by product"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Group by pid and mortgage_coin
 3. Show which products generate which rewards
 4. Include reward frequency
@@ -448,7 +443,7 @@ Reward Coins: {unique reward_coins}
 - "Month to date rewards"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Filter by current month's bonus_date
 3. Group by reward_coin
 4. Compare to previous month
@@ -485,8 +480,8 @@ vs Last Month: {percentage change}
 - "Check real APY"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()` for rewards
-2. Call `cex_earn_asset_list()` for positions
+1. Call `gate-cli cex earn staking awards` for rewards
+2. Call `gate-cli cex earn staking assets` for positions
 3. Calculate actual APY from interest/principal/time
 4. Note this requires position data too
 
@@ -518,7 +513,7 @@ Would you like to see your current positions?
 - "Show my rewards" (when none exist)
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Receive empty list or totalCount=0
 3. Explain reward timing
 4. Suggest checking positions
@@ -549,7 +544,7 @@ To see available products: "show staking products"
 - "Reward type explanation"
 
 **Expected Behavior**:
-1. Call `cex_earn_award_list()`
+1. Call `gate-cli cex earn staking awards`
 2. Identify unique mortgage_coin → reward_coin pairs
 3. Explain common patterns
 4. Show examples from user's data

@@ -32,12 +32,12 @@ For **“Cancel all / one-click cancel”**, the implementation must be **exhaus
 2. For each underlying, call `list_options_orders(status=open, underlying=...)` (paginate / increase `limit` as needed) to fetch **all** open orders for that underlying.
 3. Merge results and then cancel each order by `cancel_options_order(order_id)`.
 
-If the backend supports **no-parameter batch cancel** (`cex_options_cancel_options_orders()`), that can be used as the preferred alternative; otherwise use the exhaustive fallback path above.
+If the backend supports **no-parameter batch cancel** (`gate-cli cex options order cancel-all`), that can be used as the preferred alternative; otherwise use the exhaustive fallback path above.
 
 ## Single Cancel Key Note (Case 4)
 
 For **single cancel**, the flow is:
 1. Identify the target order by `order_id`.
 2. Show scope and ask for confirmation.
-3. Call `cex_options_cancel_options_order(order_id)`.
+3. Call `gate-cli cex options order cancel`.
 

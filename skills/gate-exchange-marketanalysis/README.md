@@ -2,7 +2,7 @@
 
 ## Overview
 
-An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.com), covering ten scenarios: liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, order book explanation, slippage simulation, K-line breakout/support–resistance, and liquidity with weekend vs weekday. All scenarios use a defined **MCP call order and output format** in `references/scenarios.md`.
+An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.com), covering ten scenarios: liquidity, momentum, liquidation monitoring, funding rate arbitrage, basis (spot–futures) monitoring, manipulation risk, order book explanation, slippage simulation, K-line breakout/support–resistance, and liquidity with weekend vs weekday. All scenarios use a defined **`gate-cli` call order and output format** in `references/scenarios.md`.
 
 ---
 
@@ -29,23 +29,23 @@ An AI Agent skill that provides market tape analysis on [Gate](https://www.gate.
 
 ```
 Natural Language Input
-    ↓
+ ↓
 Intent Routing (Case 1–10, spot vs futures)
-    ↓
-Gate MCP Tools
-    ├── cex_spot_get_spot_order_book / cex_fx_get_fx_order_book
-    ├── cex_spot_get_spot_tickers / cex_fx_get_fx_tickers
-    ├── cex_spot_get_spot_candlesticks / cex_fx_get_fx_candlesticks
-    ├── cex_spot_get_spot_trades / cex_fx_get_fx_funding_rate
-    ├── cex_fx_list_fx_liq_orders (when available)
-    └── cex_fx_get_fx_premium_index
-    ↓
+ ↓
+gate-cli commands
+ ├── `gate-cli cex spot market orderbook` / `gate-cli cex futures market orderbook`
+ ├── `gate-cli cex spot market tickers` / `gate-cli cex futures market tickers`
+ ├── `gate-cli cex spot market candlesticks` / `gate-cli cex futures market candlesticks`
+ ├── `gate-cli cex spot market trades` / `gate-cli cex futures market funding-rate`
+ ├── `gate-cli cex futures market liquidations`
+ └── `gate-cli cex futures market premium`
+ ↓
 Analysis & Judgment Logic
-    ↓
+ ↓
 Structured Report → Natural language response
 ```
 
-**Sub-Modules:** `references/scenarios.md` — MCP call order, parameters, required fields, and report templates per case.
+**Sub-Modules:** `references/scenarios.md` — `gate-cli` call order, parameters, required fields, and report templates per case.
 
 ---
 
@@ -64,7 +64,7 @@ Trades → buy/sell share; tickers, candlesticks, order book top 10, funding rat
 ### 3. Liquidation monitoring
 > "Recent liquidations?"
 
-Liquidation orders (if MCP provides), candlesticks, tickers; anomaly and squeeze labels.
+Liquidation orders (if `gate-cli` provides), candlesticks, tickers; anomaly and squeeze labels.
 
 ### 4. Funding arbitrage scan
 > "Any arbitrage opportunities?"
@@ -89,7 +89,7 @@ Live order book (e.g. limit=10) + ticker; explain bids/asks, spread, depth.
 ### 8. Slippage simulation
 > "ADA_USDT slippage for a $10K market buy?"
 
-Requires pair and quote amount. Spot or futures: order book → tickers (futures: cex_fx_get_fx_contract first for quanto_multiplier). Walk ask ladder; report slippage vs best ask.
+Requires pair and quote amount. Spot or futures: order book → tickers (futures: `gate-cli cex futures market contract` first for quanto_multiplier). Walk ask ladder; report slippage vs best ask.
 
 ### 9. K-line breakout / support–resistance
 > "Does SOL/USDT show signs of breaking out? Analyze support and resistance."
@@ -99,7 +99,7 @@ Candlesticks → tickers; derive support/resistance from OHLC; use 24h price and
 ### 10. Liquidity + weekend vs weekday
 > "Evaluate ETH liquidity and compare weekend vs weekday."
 
-Order book + 90d candlesticks + tickers (futures: cex_fx_get_fx_contract first). Split days into weekend vs weekday; compare volume and return.
+Order book + 90d candlesticks + tickers (futures: `gate-cli cex futures market contract` first). Split days into weekend vs weekday; compare volume and return.
 
 ---
 
@@ -107,7 +107,7 @@ Order book + 90d candlesticks + tickers (futures: cex_fx_get_fx_contract first).
 
 ### Prerequisites
 
-1. Gate MCP configured and connected (use the `gate-mcp-installer` skill if needed).
+1. `gate-cli` installed and configured (`gate-cli config init` or `GATE_API_KEY` / `GATE_API_SECRET`). Install via `sh ./setup.sh` from this skill directory if needed.
 2. No extra dependencies.
 
 ### Example Prompts
@@ -145,7 +145,7 @@ Order book + 90d candlesticks + tickers (futures: cex_fx_get_fx_contract first).
 "Evaluate ETH contract liquidity and compare weekend vs weekday."
 ```
 
-See `references/scenarios.md` for full MCP call order and report templates.
+See `references/scenarios.md` for full `gate-cli` call order and report templates.
 
 ---
 
@@ -153,12 +153,12 @@ See `references/scenarios.md` for full MCP call order and report templates.
 
 ```
 gate-exchange-marketanalysis/
-├── README.md                          # This file
-├── SKILL.md                           # Skill routing and instructions
-├── CHANGELOG.md                       # Version history
+├── README.md # This file
+├── SKILL.md # Skill routing and instructions
+├── CHANGELOG.md # Version history
 └── references/
-    ├── scenarios.md                   # MCP call order, judgment logic, report templates per case
-    └── case-test-report.md            # Optional: simulation test summary
+ ├── scenarios.md # `gate-cli` call order, judgment logic, report templates per case
+ └── case-test-report.md # Optional: simulation test summary
 ```
 
 ---
@@ -166,15 +166,15 @@ gate-exchange-marketanalysis/
 ## Security
 
 - No external scripts or executable code
-- Uses Gate MCP tools only — no direct API calls
-- No credential handling or storage — authentication is managed by the Gate MCP platform layer (the MCP server holds the user's API key and injects it into API calls automatically; no environment variables or secrets are required by the skill itself)
+- Uses gate-cli tools only — no direct API calls
+- No credential handling in chat — configure **`gate-cli`** on the host (`gate-cli config init` or `GATE_API_KEY` / `GATE_API_SECRET`) for authenticated market reads where required
 - Read-only market data analysis, no trading operations
 - No file system writes
 - No data collection, telemetry, or analytics
 
 ## Authentication
 
-Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions). All MCP tools used by this skill access public market data and do **not** require authentication.
+Users should configure their Gate API key in the gate-cli settings (see [gate-cli](https://github.com/gate/gate-cli) for setup instructions). All `gate-cli` commands used by this skill access public market data and do **not** require authentication.
 
 ## Source
 

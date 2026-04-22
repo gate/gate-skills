@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-trading
-version: "2026.3.23-1"
-updated: "2026-03-23"
 description: "Gate Trading L2. Use when the user wants to execute complex trades, margin borrowing, or query positions and open orders. Triggers on 'market buy', 'margin borrow', 'TradFi', 'Alpha', or spot-plus-futures combos. Requires Action Draft."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Exchange Trading
 
@@ -18,28 +70,27 @@ It is neither a pure research skill nor a pure execution skill. Its purpose is t
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
 Before calling any named MCP tool, verify that the concrete tool name exists in the current runtime tool list. If a helper tool is absent, disclose the mismatch, use only the nearest valid fallback combination, and do not overclaim unavailable coverage such as rankings, macro breadth, or automated fund-flow tracing.
 
 Also validate that the returned payload is rich enough for the intended analytical claim. If a tool returns sparse metadata, empty structures, or requires missing disambiguation inputs, treat it as supporting context only rather than primary evidence.
 
-For portability across Gate MCP runtimes, treat the documented surfaces as the baseline:
+For portability across hosts, treat the documented `gate-cli cex …` commands as the baseline:
 
 - `info_*` -> Gate Info MCP
 - `news_feed_*` -> Gate News MCP
-- read-only `cex_spot_*` / `cex_fx_*` market-data calls -> Gate public market MCP or a local combined Gate MCP runtime
-- private order / account / position `cex_*` calls -> authenticated Gate Exchange MCP or a local authenticated Gate MCP runtime
+- read-only spot/futures market data -> `gate-cli cex spot market …` / `gate-cli cex futures market …` (public endpoints where applicable)
+- private order / account / position flows -> authenticated `gate-cli` (**`GATE_API_KEY`** / **`GATE_API_SECRET`** and/or **`gate-cli config init`**; when **both** env vars are set on the host, **`config init`** is not required)
 
 Do not make `news_events_*` a required dependency in scenario design, because it is not part of the documented baseline news surface.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's trading workflow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's trading workflow.
 
 - `SKILL.md` keeps composite routing, trade lifecycle policy, and guardrails.
-- `references/mcp.md` is the authoritative MCP orchestration layer for cross-domain tool sequencing, execution gates, and degradation.
+- `references/gate-cli.md` is the authoritative `gate-cli` orchestration contract for cross-domain tool sequencing, execution gates, and degradation.
 
 ---
 
@@ -51,10 +102,19 @@ Read `references/scenarios.md` for:
 
 ## Authentication
 
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Not always
-- Read-only analysis: public `info_*`, `news_feed_*`, and some public `cex_spot_*` / `cex_fx_*` market-data calls may work without authentication, depending on runtime
+- Read-only analysis: public `info_*`, `news_feed_*`, and some public `gate-cli cex spot market …` / `gate-cli cex futures market …` reads may work without authentication, depending on endpoint
 - Execution and private account actions: Yes, authenticated Exchange MCP tools with the required API key permissions are mandatory
 - Note: Do not block analysis-only use just because private execution tools are unavailable; only block when the requested action needs private trading/account access.
+
+### Installation Check
+
+- **Required:** `gate-cli` (install from [gate-cli releases](https://github.com/gate/gate-cli/releases) or via your environment’s Gate MCP / skills installer).
+- Add the directory containing **`gate-cli`** to **`PATH`** when invoking by name.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty and private execution is needed, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Confirm the CLI works (e.g. **`gate-cli --version`** or a public **`gate-cli cex spot market …`** / **`gate-cli cex futures market …`** read) before private trading steps.
 
 ## Positioning
 

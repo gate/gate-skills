@@ -12,7 +12,7 @@
 
 **Expected Behavior**:
 1. Set intent to `list`
-2. Call `cex_wallet_list_small_balance` with no required parameters
+2. Call `gate-cli cex wallet balance small` with no required parameters
 3. If the tool returns a nested array, use the **inner** list of rows (see SKILL.md **Payload note**)
 4. If that list is empty or missing, tell the user no eligible small-balance assets were found
 5. If non-empty, show a table using `currency`, `available_balance`, `estimated_as_btc`, `convertible_to_gt`
@@ -29,9 +29,9 @@
 
 **Expected Behavior**:
 1. Set intent to `convert_selected` and extract `currencies`
-2. Optionally call `cex_wallet_list_small_balance` to verify those tickers appear eligible (unwrap nested list per SKILL **Payload note**)
+2. Optionally call `gate-cli cex wallet balance small` to verify those tickers appear eligible (unwrap nested list per SKILL **Payload note**)
 3. Confirm with the user the exact currency list and that conversion is irreversible
-4. Call `cex_wallet_convert_small_balance` with non-empty `currencies` and `is_all: false`
+4. Call `gate-cli cex wallet balance convert-small` with non-empty `currencies` and `is_all: false`
 5. Report real API success or error; never fabricate GT amounts
 
 ## Scenario 3: Convert All Eligible Small Balances
@@ -45,9 +45,9 @@
 
 **Expected Behavior**:
 1. Set intent to `convert_all`
-2. Recommend listing first with `cex_wallet_list_small_balance` so the user sees scope
+2. Recommend listing first with `gate-cli cex wallet balance small` so the user sees scope
 3. Obtain explicit confirmation to convert **all** eligible assets and warn irreversibility
-4. Call `cex_wallet_convert_small_balance` with `is_all: true`
+4. Call `gate-cli cex wallet balance convert-small` with `is_all: true`
 5. Summarize the API outcome honestly
 
 ## Scenario 4: Small Balance Conversion History
@@ -61,7 +61,7 @@
 
 **Expected Behavior**:
 1. Set intent to `history` and extract optional `currency`, `page`, `limit`
-2. Call `cex_wallet_list_small_balance_history` with those optional filters
+2. Call `gate-cli cex wallet balance small-history` with those optional filters
 3. Parse the **nested** response: rows are in the **inner** array (`id`, `create_time`, `currency`, `amount`, `gt_amount`)
 4. Present a table; convert `create_time` from Unix seconds to a readable time for the user
 5. If the inner list is empty or missing, state that clearly
@@ -76,5 +76,5 @@
 
 **Expected Behavior**:
 1. Classify as `exclude` for this Skill
-2. Do not call `cex_wallet_convert_small_balance` for that goal
+2. Do not call `gate-cli cex wallet balance convert-small` for that goal
 3. Direct the user to the appropriate **spot trading** flow or Skill

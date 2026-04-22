@@ -2,46 +2,46 @@
 
 ## Overview
 
-AI Agent skill for **multi-collateral loan** on Gate: create current or fixed-term orders, repay, add/redeem collateral. Writes require user confirmation before MCP calls.
+AI Agent skill for **multi-collateral loan** on Gate: create current or fixed-term orders, repay, add/redeem collateral. Writes require user confirmation before `gate-cli` calls.
 
 ### Core Capabilities
 
 | Capability | Description | Example |
 |------------|-------------|---------|
-| **Create current loan** | `cex_mcl_create_multi_collateral` with `order` JSON (current) | "Pledge 100 USDT, borrow 7000 DOGE (current)" |
-| **Create fixed loan** | Fix rate from `cex_mcl_get_multi_collateral_fix_rate`, then create with `order` JSON | "Pledge 0.01 BTC, borrow 100 USDT for 7 days" |
-| **Repay** | `cex_mcl_repay_mcl` (`repay_loan` JSON) | "Repay order 123456 in full" |
-| **Add collateral** | `cex_mcl_operate_multi_collateral` (append) | "Order 123456 add collateral 100 USDT" |
-| **Redeem collateral** | `cex_mcl_operate_multi_collateral` (redeem) | "Order 123456 redeem 100 USDT collateral" |
-| **List / detail** | `cex_mcl_list_multi_collateral_orders`, `cex_mcl_get_multi_collateral_order_detail` | "My collateral loan orders" |
+| **Create current loan** | `gate-cli cex mcl create` with `order` JSON (current) | "Pledge 100 USDT, borrow 7000 DOGE (current)" |
+| **Create fixed loan** | Fix rate from `gate-cli cex mcl fix-rate`, then create with `order` JSON | "Pledge 0.01 BTC, borrow 100 USDT for 7 days" |
+| **Repay** | `gate-cli cex mcl repay` (`repay_loan` JSON) | "Repay order 123456 in full" |
+| **Add collateral** | `gate-cli cex mcl collateral` (append) | "Order 123456 add collateral 100 USDT" |
+| **Redeem collateral** | `gate-cli cex mcl collateral` (redeem) | "Order 123456 redeem 100 USDT collateral" |
+| **List / detail** | `gate-cli cex mcl orders`, `gate-cli cex mcl order` | "My collateral loan orders" |
 
 ## Architecture
 
 ```
-User Query → gate-exchange-collateralloan Skill → Gate MCP (cex_mcl_*) → Platform
+User Query → gate-exchange-collateralloan Skill → gate-cli (cex_mcl_*) → Platform
 ```
 
-## MCP Tools (summary)
+## gate-cli command index (summary)
 
 | Tool | Auth | Role |
 |------|------|------|
-| `cex_mcl_get_multi_collateral_fix_rate` | No | Fixed 7d/30d rates (list) |
-| `cex_mcl_get_multi_collateral_ltv` | No | LTV thresholds |
-| `cex_mcl_get_multi_collateral_current_rate` | No | Flexible borrow rates |
-| `cex_mcl_list_user_currency_quota` | Yes | Quota |
-| `cex_mcl_create_multi_collateral` | Yes | New loan (`order` JSON) |
-| `cex_mcl_list_multi_collateral_orders` | Yes | List |
-| `cex_mcl_get_multi_collateral_order_detail` | Yes | Detail |
-| `cex_mcl_repay_mcl` | Yes | Repay (`repay_loan` JSON) |
-| `cex_mcl_operate_multi_collateral` | Yes | Add/redeem (`collateral_adjust` JSON) |
-| `cex_mcl_list_multi_repay_records` | Yes | Repay history |
-| `cex_mcl_list_multi_collateral_records` | Yes | Collateral history |
+| `gate-cli cex mcl fix-rate` | No | Fixed 7d/30d rates (list) |
+| `gate-cli cex mcl ltv` | No | LTV thresholds |
+| `gate-cli cex mcl current-rate` | No | Flexible borrow rates |
+| `gate-cli cex mcl quota` | Yes | Quota |
+| `gate-cli cex mcl create` | Yes | New loan (`order` JSON) |
+| `gate-cli cex mcl orders` | Yes | List |
+| `gate-cli cex mcl order` | Yes | Detail |
+| `gate-cli cex mcl repay` | Yes | Repay (`repay_loan` JSON) |
+| `gate-cli cex mcl collateral` | Yes | Add/redeem (`collateral_adjust` JSON) |
+| `gate-cli cex mcl repay-records` | Yes | Repay history |
+| `gate-cli cex mcl records` | Yes | Collateral history |
 
-Full MCP arguments: **`references/mcl-mcp-tools.md`**. Scenarios: **`references/scenarios.md`**.
+Full `gate-cli` arguments: **`references/mcl-gate-cli-tools.md`**. Scenarios: **`references/scenarios.md`**.
 
 ## Quick Start
 
-1. Install [gate-mcp](https://github.com/gate/gate-mcp)
+1. Install [gate-cli](https://github.com/gate/gate-cli)
 2. Load this skill
 3. Example: _"Pledge 100 USDT, borrow 7000 DOGE (current)"_
 

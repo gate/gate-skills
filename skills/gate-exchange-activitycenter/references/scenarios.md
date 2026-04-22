@@ -26,7 +26,7 @@
 - "I'm a VIP, any exclusive activities"
 
 **Expected Behavior**:
-1. Call `cex_activity_list_activity_types` to get type list
+1. Call `gate-cli cex activity types` to get type list
 2. Match user's type name (case-insensitive): "airdrop" -> type_id, "VIP" -> type_id
 3. Call `cex_activity_list_activities?recommend_type=type&type_ids=[matched_ids]&sort_by=time&page_size=3`
 4. Output: Activity cards with "Filtered [type] activities for you. Click the card to view details and how to participate."
@@ -44,7 +44,7 @@
 
 **Expected Behavior**:
 1. Extract scenario/asset keywords: "GT", "futures", "spot"
-2. If mappable to type: Call `cex_activity_list_activity_types` then `cex_activity_list_activities` with `type_ids`
+2. If mappable to type: Call `gate-cli cex activity types` then `gate-cli cex activity list` with `type_ids`
 3. If scenario-based: Call `cex_activity_list_activities?recommend_type=scenario&keywords=["GT"]&page_size=3`
 4. Output: Activity cards with "Filtered activities related to [scenario/asset] for you. Click the card to view participation requirements and rewards."
 
@@ -76,7 +76,7 @@
 - "Activities I signed up for"
 
 **Expected Behavior**:
-1. Call `cex_activity_get_my_activity_entry`
+1. Call `gate-cli cex activity get-entry`
 2. Output: Entry card with "Click [My Activities] to view your enrolled and ongoing activities."
 
 ---
@@ -98,7 +98,7 @@
 **Example Output Format**:
 ```
 ## Step 1: Query Activity Type List
-Call cex_activity_list_activity_types to get all activity types...
+Call `gate-cli cex activity types` to get all activity types...
 [Display type list table]
 
 ## Step 2: Match Target Type
@@ -122,7 +122,7 @@ Filter activities with type_id = 4 from the activity list...
 - "Any Alpha activities" (no Alpha activities currently)
 
 **Expected Behavior**:
-1. Call `cex_activity_list_activities` with type filter
+1. Call `gate-cli cex activity list` with type filter
 2. Response: empty list
 3. Output "No Results" template:
 

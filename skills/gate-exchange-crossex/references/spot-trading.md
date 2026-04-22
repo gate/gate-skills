@@ -6,7 +6,7 @@ Gate CrossEx spot trading scenarios and expected behaviors.
 
 ### Step 1: Validate trading pair and order constraints
 
-Call `cex_crx_list_crx_rule_symbols` with:
+Call `gate-cli cex cross-ex market symbols` with:
 
 - `symbols`: target spot symbol when the user provides a specific pair
 
@@ -19,7 +19,7 @@ Key data to extract:
 
 ### Step 2: Check account balance before submission
 
-Call `cex_crx_get_crx_account` with:
+Call `gate-cli cex cross-ex account get` with:
 
 - no required parameters for the default account overview
 
@@ -31,7 +31,7 @@ Key data to extract:
 
 ### Step 3: Create the order after explicit confirmation
 
-Call `cex_crx_create_crx_order` with:
+Call `gate-cli cex cross-ex order create` with:
 
 - `symbol`
 - `side`
@@ -47,7 +47,7 @@ Key data to extract:
 
 ### Step 4: Verify the final order result
 
-Call `cex_crx_get_crx_order` with:
+Call `gate-cli cex cross-ex order get` with:
 
 - `order_id`: the order returned by the create step
 
@@ -99,16 +99,16 @@ Spot Order Summary
 
 ### Data Sources
 
-- **Trading Pair Info**: Call `cex_crx_list_crx_rule_symbols` → `min_quote_amount`, `amount_precision`,
+- **Trading Pair Info**: Call `gate-cli cex cross-ex market symbols` → `min_quote_amount`, `amount_precision`,
   `quantity_precision`
-- **Account Balance**: Call `cex_crx_get_crx_account` → `available_balance`
-- **Place Order**: Call `cex_crx_create_crx_order`
-- **Order Query**: Call `cex_crx_get_crx_order`
-- **Current Open Orders**: Call `cex_crx_list_crx_open_orders`
+- **Account Balance**: Call `gate-cli cex cross-ex account get` → `available_balance`
+- **Place Order**: Call `gate-cli cex cross-ex order create`
+- **Order Query**: Call `gate-cli cex cross-ex order get`
+- **Current Open Orders**: Call `gate-cli cex cross-ex order list`
 
 ### Pre-checks
 
-1. **Trading Pair Verification**: Call `cex_crx_list_crx_rule_symbols` to verify trading pair exists and is tradable
+1. **Trading Pair Verification**: Call `gate-cli cex cross-ex market symbols` to verify trading pair exists and is tradable
 2. **Balance Check**:
     - Buy: Check if sufficient USDT in `available`
     - Sell: Check if sufficient base coin in `available`
@@ -148,9 +148,9 @@ Spot Order Summary
 **Expected Behavior**:
 
 1. Parse parameters: Trading pair `GATE_SPOT_BTC_USDT`, direction `BUY`, amount `100 USDT`
-2. Check minimum amount: Call `cex_crx_list_crx_rule_symbols` to query minimum trading amount for this pair
+2. Check minimum amount: Call `gate-cli cex cross-ex market symbols` to query minimum trading amount for this pair
 3. Display order summary and require confirmation
-4. Call `cex_crx_create_crx_order`, parameters `side="BUY"`, `type="MARKET"`, `quote_qty="100"`
+4. Call `gate-cli cex cross-ex order create`, parameters `side="BUY"`, `type="MARKET"`, `quote_qty="100"`
 5. Verify order and output result
 
 **Report Template**:
@@ -191,9 +191,9 @@ Status: Filled
 
 1. Parse parameters: Trading pair `GATE_SPOT_BTC_USDT`, direction `SELL`, quantity `0.5 BTC`
 2. Check if balance is sufficient
-3. Check minimum notional value: Call `cex_crx_list_crx_rule_symbols` to query minimum trading amount for this pair
+3. Check minimum notional value: Call `gate-cli cex cross-ex market symbols` to query minimum trading amount for this pair
 4. Display order summary and require confirmation
-5. Call `cex_crx_create_crx_order`, parameters `side="SELL"`, `type="MARKET"`, `qty="0.5"`
+5. Call `gate-cli cex cross-ex order create`, parameters `side="SELL"`, `type="MARKET"`, `qty="0.5"`
 6. Verify order and output result
 
 **Report Template**:
@@ -235,7 +235,7 @@ Status: Filled
 1. Parse parameters: Trading pair, price, quantity
 2. Check if price is reasonable (not too far from market price)
 3. Display order summary (including limit price) and require confirmation
-4. Call `cex_crx_create_crx_order`, parameters `side="BUY"`, `type="LIMIT"`, `price="50000"`, `qty="0.002"`
+4. Call `gate-cli cex cross-ex order create`, parameters `side="BUY"`, `type="LIMIT"`, `price="50000"`, `qty="0.002"`
 5. Verify order and output result
 
 **Report Template**:
@@ -317,7 +317,7 @@ Reply 'confirm' to execute the above operation.
 
 **Expected Behavior**:
 
-1. Query account balance: Call `cex_crx_get_crx_account`
+1. Query account balance: Call `gate-cli cex cross-ex account get`
 2. Detect insufficient balance
 3. Display available balance and suggestions
 
@@ -361,7 +361,7 @@ Order Failed: Amount Below Minimum.
 Trading Pair: GATE_SPOT_BTC_USDT
 Your Amount: 3 USDT
 
-Suggestion: Call `cex_crx_list_crx_rule_symbols` to query the minimum trading amount for this pair, then adjust the order amount.
+Suggestion: Call `gate-cli cex cross-ex market symbols` to query the minimum trading amount for this pair, then adjust the order amount.
 ```
 
 ---
@@ -378,7 +378,7 @@ Suggestion: Call `cex_crx_list_crx_rule_symbols` to query the minimum trading am
 
 **Expected Behavior**:
 
-1. Call `cex_crx_get_crx_order` to query order details
+1. Call `gate-cli cex cross-ex order get` to query order details
 2. Display order status and execution information
 
 **Report Template**:

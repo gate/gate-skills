@@ -11,11 +11,11 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "DCA 50 USDT every day into ETH."
 
 **Expected Behavior**:
-1. Validate amount range via `cex_earn_get_auto_invest_min_amount` and `cex_earn_list_auto_invest_config`
-2. Check spot balance via `cex_spot_get_spot_accounts`
+1. Validate amount range via `gate-cli cex earn auto-invest min-amount` and `gate-cli cex earn auto-invest config`
+2. Check spot balance via `gate-cli cex spot account get`
 3. Set defaults if not provided (execution time, fund source, fund flow)
 4. Show **Action Draft** and obtain explicit user confirmation before any write (`SKILL.md` → **Execution**, **Safety Rules**)
-5. Call `cex_earn_create_auto_invest_plan` with parsed params
+5. Call `gate-cli cex earn auto-invest create` with parsed params
 6. On success, restate plan summary; full workflow and response templates in `autoinvest-plans.md` → Scenario 1
 
 ---
@@ -32,7 +32,7 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 2. Verify total invest currency balance
 3. Set defaults for optional parameters
 4. Show **Action Draft** and obtain explicit user confirmation before any write (`SKILL.md` → **Safety Rules**)
-5. Call `cex_earn_create_auto_invest_plan` with multiple targets; details in `autoinvest-plans.md` → Scenario 2
+5. Call `gate-cli cex earn auto-invest create` with multiple targets; details in `autoinvest-plans.md` → Scenario 2
 
 ---
 
@@ -44,7 +44,7 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "Check if I have enough USDT for 200 biweekly into ETH, then create if ok."
 
 **Expected Behavior**:
-1. Check balance via `cex_spot_get_spot_accounts`
+1. Check balance via `gate-cli cex spot account get`
 2. If insufficient → do not create; explain shortfall
 3. If sufficient → confirm once, then create (see `autoinvest-plans.md` → Scenario 3)
 
@@ -110,8 +110,8 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "Show my ETH DCA plan details."
 
 **Expected Behavior**:
-1. Call `cex_earn_list_auto_invest_plans` if needed to resolve plan id
-2. Call `cex_earn_get_auto_invest_plan_detail`
+1. Call `gate-cli cex earn auto-invest plans` if needed to resolve plan id
+2. Call `gate-cli cex earn auto-invest plan-detail`
 3. Present invest currency, targets, amount, cadence, flags, execution counts (`autoinvest-plans.md` → Scenario 8)
 
 ---
@@ -124,10 +124,10 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "Stop my ETH auto-invest."
 
 **Expected Behavior**:
-1. If no plan ID provided, call `cex_earn_list_auto_invest_plans` to query all plans
+1. If no plan ID provided, call `gate-cli cex earn auto-invest plans` to query all plans
 2. Match by plan name or ask user to specify; disambiguate duplicate names by plan `id`
-3. Show **Action Draft** and end the turn; **do not** call `cex_earn_stop_auto_invest_plan` in that same assistant turn (`SKILL.md` → **Mandatory Confirmation for Write Operations**)
-4. After the user's **next message** with explicit confirmation, call `cex_earn_stop_auto_invest_plan` (`autoinvest-plans.md` → Scenario 9)
+3. Show **Action Draft** and end the turn; **do not** call `gate-cli cex earn auto-invest stop` in that same assistant turn (`SKILL.md` → **Mandatory Confirmation for Write Operations**)
+4. After the user's **next message** with explicit confirmation, call `gate-cli cex earn auto-invest stop` (`autoinvest-plans.md` → Scenario 9)
 5. Explain holdings remain in spot unless product states otherwise
 
 ---
@@ -144,9 +144,9 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 **Expected Behavior**:
 1. If no plan ID provided, query all plans and match by name
 2. Determine add position amount (use plan's periodic amount if not specified)
-3. Check balance via `cex_spot_get_spot_accounts`
+3. Check balance via `gate-cli cex spot account get`
 4. Confirm with user
-5. Call `cex_earn_add_position_auto_invest_plan` EXACTLY ONCE (`autoinvest-plans.md` → Scenario 10)
+5. Call `gate-cli cex earn auto-invest add-position` EXACTLY ONCE (`autoinvest-plans.md` → Scenario 10)
 
 ---
 
@@ -159,7 +159,7 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "What target coins does auto-invest support?"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_auto_invest_coins`
+1. Call `gate-cli cex earn auto-invest coins`
 2. Return list of all coins that support auto-invest (`SKILL.md` → Query Function Usage → Scenario 1)
 
 ---
@@ -173,7 +173,7 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "What's the minimum amount when BTC is the investment currency?"
 
 **Expected Behavior**:
-1. Call `cex_earn_get_auto_invest_min_amount`
+1. Call `gate-cli cex earn auto-invest min-amount`
 2. Specify investment currency (USDT or BTC) and target coins
 3. Return minimum amount (`SKILL.md` → Query Function Usage → Scenario 2)
 
@@ -188,8 +188,8 @@ This document lists all auto-invest scenarios in validator-friendly form (`## Sc
 - "View the recent execution status of this plan"
 
 **Expected Behavior**:
-1. Call `cex_earn_list_auto_invest_plan_records` to view execution records
-2. Call `cex_earn_list_auto_invest_orders` to view specific order details
+1. Call `gate-cli cex earn auto-invest records` to view execution records
+2. Call `gate-cli cex earn auto-invest orders` to view specific order details
 3. Present execution count and latest execution info (`SKILL.md` → Query Function Usage → Scenario 3)
 
 ---

@@ -6,8 +6,8 @@ Query LaunchPool staking/redemption participation records and airdrop reward dis
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_list_launch_pool_pledge_records** | Query pledge/redeem records | — | `coin`, `type`, `start_time`, `end_time`, `page`, `page_size` |
-| **cex_launch_list_launch_pool_reward_records** | Query airdrop reward records | `page`, `page_size` | `coin`, `start_time`, `end_time` |
+| **`gate-cli cex launch pledge-records`** | Query pledge/redeem records | — | `coin`, `type`, `start_time`, `end_time`, `page`, `page_size` |
+| **`gate-cli cex launch reward-records`** | Query airdrop reward records | `page`, `page_size` | `coin`, `start_time`, `end_time` |
 
 **IMPORTANT — Time parameter format difference:**
 - **Pledge records**: `start_time` / `end_time` are **strings** in format `YYYY-MM-DD HH:MM:SS` (e.g. `"2026-03-17 00:00:00"`)
@@ -51,7 +51,7 @@ Note: The API does **not** return project name, pid, or staking coin. Use `coin`
 ## Workflow
 
 1. **Parse parameters**: Extract `coin` (staking coin), `type` (1=stake, 2=redeem), `start_time`, `end_time`, `page` from user query.
-2. **Call tool**: Call `cex_launch_list_launch_pool_pledge_records` with optional filters. Time parameters must be strings in `YYYY-MM-DD HH:MM:SS` format.
+2. **Call tool**: Call `gate-cli cex launch pledge-records` with optional filters. Time parameters must be strings in `YYYY-MM-DD HH:MM:SS` format.
 3. **Key data to extract**: From each record: `id`, `create_timest`, `reward_coin`, `coin`, `type`, `amount`.
 4. **Format response**: Map `type`: 1="Stake", 2="Redeem". Show as table with all fields. Use pagination info when relevant.
 
@@ -74,7 +74,7 @@ Use the **Response Template** block from the matching scenario. Show `create_tim
 
 **Expected Behavior**:
 1. Parse time range from user query (e.g. "last month" → calculate start_time and end_time)
-2. Call `cex_launch_list_launch_pool_pledge_records` with `start_time="{YYYY-MM-DD HH:MM:SS}"`, `end_time="{YYYY-MM-DD HH:MM:SS}"`, `page=1`
+2. Call `gate-cli cex launch pledge-records` with `start_time="{YYYY-MM-DD HH:MM:SS}"`, `end_time="{YYYY-MM-DD HH:MM:SS}"`, `page=1`
 3. For each record use: `create_timest`, `reward_coin`, `coin`, `amount`, `type`
 4. Map `type`: 1="Stake", 2="Redeem"
 
@@ -103,7 +103,7 @@ Total: {total} records.
 
 **Expected Behavior**:
 1. Extract staking coin from user query (e.g. "USDT"). Note: if user mentions a reward coin like "DOGE project", explain that the filter works on staking coin and suggest the correct coin.
-2. Call `cex_launch_list_launch_pool_pledge_records` with `coin={staking_coin}`, `page=1`
+2. Call `gate-cli cex launch pledge-records` with `coin={staking_coin}`, `page=1`
 3. For each record display: `create_timest`, `reward_coin`, `coin`, `amount`, `type`
 
 **Response Template**:
@@ -128,7 +128,7 @@ Total: {total} records for {coin}.
 - "Show my LaunchPool history" (when user has none)
 
 **Expected Behavior**:
-1. Call `cex_launch_list_launch_pool_pledge_records`
+1. Call `gate-cli cex launch pledge-records`
 2. Receive empty array with `total=0`
 3. Suggest browsing active projects
 
@@ -195,7 +195,7 @@ Example: "February 2026" → `start_time=1769904000`, `end_time=1772323200` (Mar
 
 1. **Determine strategy**: Check whether the user's time range includes the present moment (→ Strategy 1) or is a historical/absolute range (→ Strategy 2). See decision guide above.
 2. **Parse parameters**: Extract `coin` (reward coin), `page` from user query. For Strategy 2, compute `start_time`/`end_time` using the anchor table.
-3. **Call tool**: Call `cex_launch_list_launch_pool_reward_records` with `page=1` and optional filters. Do not pass `page_size` (API defaults to 10). For Strategy 1, omit time params; for Strategy 2, include them. **Fetch only ONE page per turn.**
+3. **Call tool**: Call `gate-cli cex launch reward-records` with `page=1` and optional filters. Do not pass `page_size` (API defaults to 10). For Strategy 1, omit time params; for Strategy 2, include them. **Fetch only ONE page per turn.**
 4. **Display current page immediately**: Show records to the user (Strategy 1: after discarding out-of-range records). If there may be more records (Strategy 1: returned count >= 10 and all within range; Strategy 2: `total` >= already shown count), append a pagination prompt and **STOP — wait for the user to confirm before fetching the next page**.
 5. **Key data to extract**: From each record: `reward_timest`, `coin`, `valid_mortgage_amount`, `amount_base`, `amount_ext`.
 6. **Format response**: Show as table with all fields. Append pagination prompt when applicable.
@@ -219,14 +219,14 @@ Use the **Response Template** block from the matching scenario. Show `reward_tim
 **Expected Behavior**:
 
 *If Strategy 1 (range includes present):*
-1. Call `cex_launch_list_launch_pool_reward_records` with `page=1` — do NOT pass `start_time`/`end_time` or `page_size`
+1. Call `gate-cli cex launch reward-records` with `page=1` — do NOT pass `start_time`/`end_time` or `page_size`
 2. Discard records whose `reward_timest` is outside the user's intended range
 3. **Immediately display** the remaining records to the user
 4. If returned count >= 10 and all are within range, append: "There may be more records. Reply 'next page' to continue." — then **STOP and wait**
 
 *If Strategy 2 (historical / absolute range):*
 1. Compute `start_time` and `end_time` as integers using the anchor table
-2. Call `cex_launch_list_launch_pool_reward_records` with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `page_size`
+2. Call `gate-cli cex launch reward-records` with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `page_size`
 3. **Immediately display** returned records
 4. If `total` >= already shown count, append: "There are more records ({total} total). Reply 'next page' to continue." — then **STOP and wait**
 
@@ -256,7 +256,7 @@ Showing {current_count} records.
 
 **Expected Behavior**:
 1. Extract reward coin from user query (e.g. "DOGE"). Note: the `coin` parameter here filters by **reward coin**, not staking coin.
-2. Call `cex_launch_list_launch_pool_reward_records` with `coin={reward_coin}`, `page=1`
+2. Call `gate-cli cex launch reward-records` with `coin={reward_coin}`, `page=1`
 3. For each record display: `reward_timest`, `coin`, `valid_mortgage_amount`, `amount_base`, `amount_ext`
 
 **Response Template**:
@@ -282,7 +282,7 @@ Showing {current_count} records for {coin}.
 - "Show my LaunchPool rewards" (when user has none)
 
 **Expected Behavior**:
-1. Call `cex_launch_list_launch_pool_reward_records` with `page=1`
+1. Call `gate-cli cex launch reward-records` with `page=1`
 2. Receive empty array with `total=0`
 3. Explain reward distribution timing and suggest participation
 

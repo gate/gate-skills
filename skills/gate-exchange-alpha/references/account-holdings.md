@@ -13,8 +13,8 @@ Classify the request into one of two cases:
 ### Step 2: Call Tools and Extract Data
 
 Use the minimal tool set required:
-- Account balances: `cex_alpha_list_alpha_accounts`
-- Market prices (for valuation): `cex_alpha_list_alpha_tickers`
+- Account balances: `gate-cli cex alpha account balances`
+- Market prices (for valuation): `gate-cli cex alpha market tickers`
 
 Key data to extract from accounts:
 - `currency`: token symbol
@@ -66,7 +66,7 @@ For portfolio valuation:
 - "What's in my Alpha account?"
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_accounts`.
+1. Call `gate-cli cex alpha account balances`.
 2. Extract all currency balances including available and locked amounts.
 3. Present a table of all holdings with currency symbol, available balance, locked balance, chain, and contract address.
 4. If no holdings exist, inform the user that their Alpha account is empty.
@@ -81,8 +81,8 @@ For portfolio valuation:
 - "Calculate my Alpha portfolio in USDT."
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_accounts` to get all holdings.
-2. Call `cex_alpha_list_alpha_tickers` to get latest prices for all held tokens.
+1. Call `gate-cli cex alpha account balances` to get all holdings.
+2. Call `gate-cli cex alpha market tickers` to get latest prices for all held tokens.
 3. For each holding, calculate value as `(available + locked) * last_price`.
 4. Sum all values to get total portfolio value in USDT.
 5. Present a per-token value breakdown table and the total portfolio value.

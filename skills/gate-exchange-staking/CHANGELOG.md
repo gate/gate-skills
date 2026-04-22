@@ -8,12 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [2026.3.16-1] - 2026-03-16
 
 ### Added
-- **GUSD / multi-currency coin selection**: When staking, redeeming, or minting GUSD (or any product with `currency` / `mortgage_coin` = `"USDT,USDC"`), the agent must prompt the user to choose **USDT** or **USDC** and pass the choice as the **`coin`** parameter to `cex_earn_swap_staking_coin`. Only USDT and USDC are supported.
+- **GUSD / multi-currency coin selection**: When staking, redeeming, or minting GUSD (or any product with `currency` / `mortgage_coin` = `"USDT,USDC"`), the agent must prompt the user to choose **USDT** or **USDC** and pass the choice as the **`coin`** parameter to `gate-cli cex earn staking swap`. Only USDT and USDC are supported.
 
 ### Changed
 - **SKILL.md**: New Domain Knowledge section "GUSD / multi-currency products (USDT or USDC)" with prompt wording and rule to not call the swap/mint tool until the user has selected a coin. Mint section notes that when mint is supported, the same `coin` rule applies.
 - **references/staking-swap.md**:
-  - MCP tools table: documented **`coin`** for `cex_earn_swap_staking_coin` (required for GUSD).
+  - `gate-cli` commands table: documented **`coin`** for `gate-cli cex earn staking swap` (required for GUSD).
   - Workflow **Stake**: New step for GUSD — ask "USDT or USDC?" and pass `coin`; single/multiple protocol steps updated to pass `coin` when product is GUSD.
   - Workflow **Redeem**: New step for GUSD — ask which coin to receive (USDT or USDC) and pass `coin` on swap call.
   - Error handling: New case for user choosing a coin other than USDT or USDC for GUSD → reply that only USDT and USDC are supported.
@@ -41,10 +41,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Natural language query processing
 
 ### Supported Operations
-- `cex_earn_asset_list`: Query current staking positions
-- `cex_earn_award_list`: Retrieve reward history
-- `cex_earn_find_coin`: Discover available products
-- `cex_earn_order_list`: View transaction history
+- `gate-cli cex earn staking assets`: Query current staking positions
+- `gate-cli cex earn staking awards`: Retrieve reward history
+- `gate-cli cex earn staking find`: Discover available products
+- `gate-cli cex earn staking orders`: View transaction history
 
 ### Security
 - Read-only access implementation

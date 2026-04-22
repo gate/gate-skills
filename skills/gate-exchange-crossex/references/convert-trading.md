@@ -6,7 +6,7 @@ Gate CrossEx flash convert scenarios.
 
 ### Step 1: Validate the convert request and balance
 
-Call `cex_crx_get_crx_account` with:
+Call `gate-cli cex cross-ex account get` with:
 
 - no required parameters for the default account overview
 
@@ -18,7 +18,7 @@ Key data to extract:
 
 ### Step 2: Request a convert quote
 
-Call `cex_crx_create_crx_convert_quote` with:
+Call `gate-cli cex cross-ex convert quote` with:
 
 - `exchange_type`
 - `from_coin`
@@ -34,7 +34,7 @@ Key data to extract:
 
 ### Step 3: Execute the convert after explicit confirmation
 
-Call `cex_crx_create_crx_convert_order` with:
+Call `gate-cli cex cross-ex convert create` with:
 
 - `quote_id`
 
@@ -46,7 +46,7 @@ Key data to extract:
 
 ### Step 4: Verify resulting balances
 
-Call `cex_crx_get_crx_account` with:
+Call `gate-cli cex cross-ex account get` with:
 
 - no required parameters for the default account overview
 
@@ -96,9 +96,9 @@ Convert Trading Summary
 
 ### Data Sources
 
-- **Account Balance**: Call `cex_crx_get_crx_account` → available balances
-- **Convert Quote**: Call `cex_crx_create_crx_convert_quote` → quoted rate and expected receive amount
-- **Execute Convert**: Call `cex_crx_create_crx_convert_order` → place the convert order
+- **Account Balance**: Call `gate-cli cex cross-ex account get` → available balances
+- **Convert Quote**: Call `gate-cli cex cross-ex convert quote` → quoted rate and expected receive amount
+- **Execute Convert**: Call `gate-cli cex cross-ex convert create` → place the convert order
 
 ### Pre-checks
 
@@ -139,11 +139,11 @@ Convert Trading Summary
 **Expected Behavior**:
 
 1. Parse parameters: source coin, target coin, amount, and exchange type.
-2. Check source balance via `cex_crx_get_crx_account`.
-3. Call `cex_crx_create_crx_convert_quote` to get a live quote.
+2. Check source balance via `gate-cli cex cross-ex account get`.
+3. Call `gate-cli cex cross-ex convert quote` to get a live quote.
 4. Display the convert summary and require confirmation.
-5. Call `cex_crx_create_crx_convert_order` with the returned `quote_id`.
-6. Verify balances via `cex_crx_get_crx_account` and output the result.
+5. Call `gate-cli cex cross-ex convert create` with the returned `quote_id`.
+6. Verify balances via `gate-cli cex cross-ex account get` and output the result.
 
 **Report Template**:
 

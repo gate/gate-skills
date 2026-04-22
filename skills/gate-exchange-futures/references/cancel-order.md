@@ -14,7 +14,7 @@ Gate futures cancel-order scenarios and expected behavior.
 
 **Expected Behavior**:
 1. Detect no order_id → query mode.
-2. Call `cex_fx_list_fx_orders(settle="usdt", status="open")`.
+2. Call `gate-cli cex futures order list`.
 3. Show order list with numbered options.
 4. Wait for user selection.
 5. Cancel based on selection.
@@ -49,7 +49,7 @@ Which order(s) do you want to cancel?
 **Expected Behavior**:
 1. Parse selection (one or more numbers).
 2. Map to order_id from the list.
-3. Call `cex_fx_cancel_fx_order` for each.
+3. Call `gate-cli cex futures order cancel` for each.
 4. Output result.
 
 **Response Template**:
@@ -78,7 +78,7 @@ Cancelled #1:
 
 **Expected Behavior**:
 1. Confirm: "Confirm cancel all orders?"
-2. Call `cex_fx_list_fx_orders(settle="usdt", status="open")` to get contracts with orders; for each, call `cex_fx_cancel_all_fx_orders(settle="usdt", contract=...)` (required: `settle`, `contract`).
+2. Call `gate-cli cex futures order list` to get contracts with orders; for each, call `gate-cli cex futures order cancel` (required: `settle`, `contract`).
 3. Output batch result.
 
 **Response Template**:
@@ -111,7 +111,7 @@ Batch cancel done.
 
 **Expected Behavior**:
 1. Parse contract: e.g. `BTC_USDT`.
-2. Call `cex_fx_cancel_all_fx_orders(settle="usdt", contract="BTC_USDT")` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`).
+2. Call `gate-cli cex futures order cancel` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`).
 3. Output result for that contract.
 
 **Response Template**:
@@ -138,7 +138,7 @@ All BTC_USDT orders cancelled:
 
 **Expected Behavior**:
 1. Parse order_id: `94294117235059656`.
-2. Call `cex_fx_cancel_fx_order(settle="usdt", order_id="94294117235059656")`.
+2. Call `gate-cli cex futures order cancel`.
 3. Verify `finish_as == "cancelled"`.
 4. Output result.
 
@@ -166,7 +166,7 @@ Result: Cancelled
 
 **Expected Behavior**:
 1. Detect order_id starts with `t-`, treat as text.
-2. Call `cex_fx_cancel_fx_order(settle="usdt", order_id="t-my-order-001")` (if API supports).
+2. Call `gate-cli cex futures order cancel` (if API supports).
 3. Output result.
 
 **Response Template**:
@@ -190,7 +190,7 @@ Result: Cancelled
 - "Cancel all orders"
 
 **Expected Behavior**:
-1. Call `cex_fx_list_fx_orders(settle="usdt", status="open")`.
+1. Call `gate-cli cex futures order list`.
 2. Get empty list.
 3. Inform user.
 
@@ -212,7 +212,7 @@ To place an order you can say:
 - "Cancel order 94294117235059656" (order already filled)
 
 **Expected Behavior**:
-1. Call `cex_fx_cancel_fx_order(settle="usdt", order_id="94294117235059656")`.
+1. Call `gate-cli cex futures order cancel`.
 2. Receive ORDER_NOT_FOUND (or similar).
 3. Output failure.
 
@@ -244,7 +244,7 @@ Check order history for status.
 
 **Expected Behavior**:
 1. Parse side: `bid` (buy) or `ask` (sell).
-2. For one contract use `cex_fx_cancel_all_fx_orders(settle="usdt", contract=..., side="bid")` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`). For "all contracts one side" list then cancel per contract with side.
+2. For one contract use `gate-cli cex futures order cancel` (required: `settle`, `contract`; optional: `side`, `exclude_reduce_only`, `text`). For "all contracts one side" list then cancel per contract with side.
 3. Output result.
 
 **Response Template**:

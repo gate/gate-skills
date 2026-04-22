@@ -1,19 +1,19 @@
 # Gate TradFi Amend Order
 
-Amend an existing TradFi order: **price** and/or **take-profit / stop-loss price** only. **Size is not supported** by `cex_tradfi_update_order`. Use only MCP-documented tool names and parameters.
+Amend an existing TradFi order: **price** and/or **take-profit / stop-loss price** only. **Size is not supported** by `gate-cli cex tradfi order update`. Use only MCP-documented tool names and parameters.
 
 ## MCP tools and parameters
 
 | Tool | Purpose | Parameters (declare per MCP) |
 | -----| --------| -----------------------------|
-| `cex_tradfi_update_order` | Amend one order | Supports **price** and **take-profit / stop-loss price** only. **Does not support changing size.** Required/optional from MCP: order_id, and at least one of new price, take-profit price, stop-loss price. Do not pass size or parameters not documented in the MCP. |
+| `gate-cli cex tradfi order update` | Amend one order | Supports **price** and **take-profit / stop-loss price** only. **Does not support changing size.** Required/optional from MCP: order_id, and at least one of new price, take-profit price, stop-loss price. Do not pass size or parameters not documented in the MCP. |
 
 - **Conditions and limits**: Only open orders can be amended. Value constraints (price step, etc.) must follow MCP or API rules. **Do not pass or prompt for size** — the tool does not support it.
-- **Order id source**: The order id for `cex_tradfi_update_order` **must** come from **`cex_tradfi_query_order_list`** (the open order list). **Do not use** the `id` or `log_id` returned by `cex_tradfi_create_tradfi_order` — those cannot be used for amend. Resolve from `cex_tradfi_query_order_list` if user refers to order by position or description.
+- **Order id source**: The order id for `gate-cli cex tradfi order update` **must** come from **`gate-cli cex tradfi order list`** (the open order list). **Do not use** the `id` or `log_id` returned by `gate-cli cex tradfi order create` — those cannot be used for amend. Resolve from `gate-cli cex tradfi order list` if user refers to order by position or description.
 
 ## Pre-execution confirmation
 
-Before calling `cex_tradfi_update_order`: **output all parameters** that will be sent (e.g. order_id, new price, take-profit price, stop-loss price). Show before/after if available. Ask the user to confirm. Do **not** call the tool until the user explicitly confirms.
+Before calling `gate-cli cex tradfi order update`: **output all parameters** that will be sent (e.g. order_id, new price, take-profit price, stop-loss price). Show before/after if available. Ask the user to confirm. Do **not** call the tool until the user explicitly confirms.
 
 ---
 
@@ -23,7 +23,7 @@ Before calling `cex_tradfi_update_order`: **output all parameters** that will be
 2. Determine what to change per user message: **price** and/or **take-profit price** and/or **stop-loss price** only. If the user asks to change size, tell them the tool does not support changing size.
 3. Build parameter set using **only MCP-documented parameters** (no size).
 4. **Output the full parameter set (and before/after) to the user and ask for confirmation.** Do not call the tool until user confirms.
-5. After confirmation, call `cex_tradfi_update_order`.
+5. After confirmation, call `gate-cli cex tradfi order update`.
 6. In the response: **explain the parameters that were used** and the outcome (success or error). Use the Report Template below.
 
 ## Report Template
@@ -47,7 +47,7 @@ After execution, include:
 **Expected Behavior**:
 1. Resolve order (by order_id or from list). Get current price.
 2. Build params: order_id, new price. Output for confirmation.
-3. After confirmation, call `cex_tradfi_update_order`.
+3. After confirmation, call `gate-cli cex tradfi order update`.
 4. Respond with parameters used and result.
 
 **Response Template**:
@@ -72,7 +72,7 @@ Result: Order amended. Price updated to 1.0600.
 
 **Expected Behavior**:
 1. Resolve order. Build params: order_id, and take-profit price and/or stop-loss price (per MCP). Output for confirmation.
-2. After confirmation, call `cex_tradfi_update_order`.
+2. After confirmation, call `gate-cli cex tradfi order update`.
 3. Respond with parameters used and result.
 
-**Note**: If the user asks to change **size**, reply that `cex_tradfi_update_order` does not support changing size; only price and take-profit/stop-loss price can be amended.
+**Note**: If the user asks to change **size**, reply that `gate-cli cex tradfi order update` does not support changing size; only price and take-profit/stop-loss price can be amended.

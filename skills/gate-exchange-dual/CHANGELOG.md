@@ -5,13 +5,13 @@
 ### Changed
 - Added packaged `metadata.openclaw` credential declarations for ClawHub review consistency.
 - Moved the mandatory runtime-rules reference into this skill bundle for publish-time auditability.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.23-1] - 2026-03-23
 
 ### Changed
 - Aligned runtime-rule references and documentation wording for ClawHub review.
-- No MCP workflow or business logic changes.
+- No execution workflow or business logic changes.
 
 ## [2026.3.18-1] - 2026-03-18
 
@@ -28,13 +28,13 @@
 ## [2026.3.17-1] - 2026-03-17
 
 ### Changed
-- Restored `cex_earn_place_dual_order` to Available MCP Tools — order placement is now supported
+- Restored `gate-cli cex earn dual place` to Available `gate-cli` commands — order placement is now supported
 - Cases 7-10 (subscription & order placement) now have full workflows via `references/subscription.md`
 - Re-created `references/subscription.md` with order placement workflows (Cases 7-10) and compliance handling (Cases 15-17)
 - Added Cases 15 (restricted region), 16 (KYC not met), 17 (general compliance failure) to routing rules
 - Updated SKILL.md Execution section to include order placement and compliance routing
-- Added order placement confirmation safety rule — explicit user confirmation required before calling `cex_earn_place_dual_order`
-- Added error handling entries for `cex_earn_place_dual_order` compliance and balance errors
+- Added order placement confirmation safety rule — explicit user confirmation required before calling `gate-cli cex earn dual place`
+- Added error handling entries for `gate-cli cex earn dual place` compliance and balance errors
 - Updated scenarios.md: Cases 7-10 now have full expected behaviors; added Scenarios 15-17
 - Total cases: 13 → 16 (added Cases 15, 16, 17; case numbering skips 2)
 
@@ -42,7 +42,7 @@
 
 ### Changed
 - Cases 7-10 (subscription & order placement) now reply "not supported yet" instead of calling order placement API
-- Removed `cex_earn_place_dual_order` from Available MCP Tools (order placement not supported yet)
+- Removed `gate-cli cex earn dual place` from Available `gate-cli` commands (order placement not supported yet)
 - Deleted `references/subscription.md` — Cases 7-10 no longer need a workflow, just a fixed reply
 - Removed write operation safety rules and place_dual_order error handling entries
 - Updated SKILL.md Execution section to include step for Cases 7-10 "not supported yet" reply
@@ -58,7 +58,7 @@
   - `settlement-assets.md` (Cases 11, 12) — settlement result query, asset briefing
 - Removed old per-API reference files: dual-investment-plan.md, dual-place-order.md, dual-orders.md, dual-balance.md
 - Removed all API URLs from all .md files (endpoint paths, base URLs)
-- Removed Method/Endpoint columns from MCP Tools tables
+- Removed Method/Endpoint columns from `gate-cli` commands tables
 - Updated SKILL.md routing table to reference new functional md files
 - Fixed README.md architecture diagram: 14 Cases → 13 Cases
 
@@ -77,7 +77,7 @@
 
 ### Changed
 - Expanded routing rules from 4 to 14 cases based on product requirement document
-- Added `currency` parameter support to `cex_earn_list_dual_investment_plans`
+- Added `currency` parameter support to `gate-cli cex earn dual plans`
 - Added settlement simulation workflow (Case 4) with calculation formulas
 - Split order placement into separate sell-high (Case 7) and buy-low (Case 8) workflows
 - Added insufficient balance handling (Case 9) and minimum amount check (Case 10)

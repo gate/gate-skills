@@ -2,7 +2,7 @@
 
 ## Overview
 
-Activity center aggregation platform for Gate Exchange campaigns. **Step 1**: Identify user intent (hot/type/scenario/name recommendation or my activities). **Step 2**: Call appropriate API (`cex_activity_list_activities` for recommendations, `cex_activity_get_my_activity_entry` for my activities). **Step 3**: Return activity cards. Use when user asks about platform activities, activity recommendations, or my activities. Read-only.
+Activity center aggregation platform for Gate Exchange campaigns. **Step 1**: Identify user intent (hot/type/scenario/name recommendation or my activities). **Step 2**: Call appropriate API (`gate-cli cex activity list` for recommendations, `gate-cli cex activity get-entry` for my activities). **Step 3**: Return activity cards. Use when user asks about platform activities, activity recommendations, or my activities. Read-only.
 
 ### Core Capabilities
 
@@ -26,9 +26,9 @@ Activity center aggregation platform for Gate Exchange campaigns. **Step 1**: Id
 
 - **Input**: User intent (recommendation type, activity type, keywords)
 - **Tools**: 
-  - `cex_activity_list_activity_types` — Get type list for filtering
-  - `cex_activity_list_activities` — Query activities by hot/type/scenario/keywords
-  - `cex_activity_get_my_activity_entry` — Get "My Activities" entry
+  - `gate-cli cex activity types` — Get type list for filtering
+  - `gate-cli cex activity list` — Query activities by hot/type/scenario/keywords
+  - `gate-cli cex activity get-entry` — Get "My Activities" entry
 - **Output**: Activity cards. **Decision Logic** (type matching), **Error Handling**, **Safety** (no investment advice) — see SKILL.md.
 
 ### Key Rules

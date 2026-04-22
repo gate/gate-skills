@@ -4,7 +4,7 @@ This document defines behavior-oriented scenario templates for gate-exchange-tra
 
 ## Global Execution Gate (Mandatory)
 
-For every scenario that includes `cex_wallet_create_transfer`, `cex_wallet_create_sub_account_transfer`, or `cex_wallet_create_sub_account_to_sub_account_transfer`:
+For every scenario that includes `gate-cli cex wallet transfer create`, `gate-cli cex wallet transfer to-sub`, or `gate-cli cex wallet transfer sub-to-sub`:
 - Verify source balance first
 - Present Transfer Draft (currency, amount, from, to)
 - Require explicit confirmation from the immediately previous user turn
@@ -24,7 +24,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 1. Call `get_spot_accounts` `currency=USDT` to verify available balance.
 2. If balance >= amount, output `Transfer Draft`: currency=USDT, amount, from=spot, to=futures, settle=USDT.
 3. Wait for user confirmation.
-4. Call `cex_wallet_create_transfer` with from=spot, to=futures, settle=USDT.
+4. Call `gate-cli cex wallet transfer create` with from=spot, to=futures, settle=USDT.
 5. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Executes without balance check.
@@ -40,7 +40,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 1. Call `get_futures_accounts` or equivalent to verify futures balance.
 2. Output `Transfer Draft` with from=futures, to=spot, settle=USDT.
 3. Wait for confirmation.
-4. Call `cex_wallet_create_transfer`.
+4. Call `gate-cli cex wallet transfer create`.
 5. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Transfers without verifying futures balance.
@@ -57,7 +57,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 2. Determine `currency_pair` (e.g. BTC_USDT) from user intent or ask.
 3. Output `Transfer Draft` with from=spot, to=margin, currency_pair.
 4. Wait for confirmation.
-5. Call `cex_wallet_create_transfer` with currency_pair.
+5. Call `gate-cli cex wallet transfer create` with currency_pair.
 6. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Omits currency_pair (required for margin).
@@ -72,7 +72,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 **Expected Behavior**:
 1. Output `Transfer Draft` with from=margin, to=spot, currency_pair.
 2. Wait for confirmation.
-3. Call `cex_wallet_create_transfer`.
+3. Call `gate-cli cex wallet transfer create`.
 4. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Omits currency_pair.
@@ -89,7 +89,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 1. Call `get_spot_accounts` to verify main account balance.
 2. Output `Transfer Draft`: currency, amount, direction=to, sub_account.
 3. Wait for confirmation.
-4. Call `cex_wallet_create_sub_account_transfer` with direction=to.
+4. Call `gate-cli cex wallet transfer to-sub` with direction=to.
 5. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Executes without sub_account UID.
@@ -102,10 +102,10 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 - "Transfer 500 USDT from sub-account to main."
 - "Move sub-account balance to main."
 **Expected Behavior**:
-1. Call `cex_wallet_list_sub_account_balances` to verify sub-account balance.
+1. Call `gate-cli cex wallet balance sub` to verify sub-account balance.
 2. Output `Transfer Draft` with direction=from, sub_account.
 3. Wait for confirmation.
-4. Call `cex_wallet_create_sub_account_transfer` with direction=from.
+4. Call `gate-cli cex wallet transfer to-sub` with direction=from.
 5. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Executes without verifying sub-account balance.
@@ -118,10 +118,10 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 - "Transfer 100 USDT from sub-account A to sub-account B."
 - "Move funds between my sub-accounts."
 **Expected Behavior**:
-1. Call `cex_wallet_list_sub_account_balances` to verify source sub-account balance.
+1. Call `gate-cli cex wallet balance sub` to verify source sub-account balance.
 2. Output `Transfer Draft`: currency, amount, sub_account_from, sub_account_to, types.
 3. Wait for confirmation.
-4. Call `cex_wallet_create_sub_account_to_sub_account_transfer`.
+4. Call `gate-cli cex wallet transfer sub-to-sub`.
 5. Output `Transfer Result Report`.
 **Unexpected Behavior**:
 1. Executes without both sub_account_from and sub_account_to.
@@ -136,7 +136,7 @@ If confirmation is missing/ambiguous/stale, do not execute any transfer.
 - "Check my transfer status."
 - "What's the status of my last transfer?"
 **Expected Behavior**:
-1. Call `cex_wallet_get_transfer_order_status` with client_order_id or tx_id if user provides.
+1. Call `gate-cli cex wallet transfer status` with client_order_id or tx_id if user provides.
 2. Output `Transfer Status Report`.
 **Unexpected Behavior**:
 1. Executes a new transfer instead of querying.

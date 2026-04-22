@@ -6,7 +6,7 @@ Find and compare available staking products on Gate.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_earn_find_coin** | Find staking products | - | `cointype` |
+| **`gate-cli cex earn staking find`** | Find staking products | - | `cointype` |
 
 - Returns all available products if no parameters provided
 - Filter by specific coin using the `cointype` parameter
@@ -24,7 +24,7 @@ Find and compare available staking products on Gate.
 | maxStakeAmount | string | Maximum stake amount |
 | protocolName | string | Protocol name |
 | redeemPeriod | string | Redemption period in days |
-| exchangeRate | string | Exchange rate — use for **redeemable** in positions: redeemable = mortgage_amount × exchangeRate (match by same pid and currency in cex_earn_asset_list) |
+| exchangeRate | string | Exchange rate — use for **redeemable** in positions: redeemable = mortgage_amount × exchangeRate (match by same pid and currency in `gate-cli cex earn staking assets`) |
 | exchangeRateReserve | string | Reverse exchange rate |
 | extraInterest | array | Extra rewards: start_time, end_time, reward_coin, segment_interest (money_min, money_max, money_rate) |
 | currencyRewards | array | Reward config per coin: apr, reward_coin, reward_delay_days (-1=pay on redeem), interest_delay_days |
@@ -34,7 +34,7 @@ Find and compare available staking products on Gate.
 ## Workflow
 
 1. **Parse parameters**: Extract `cointype` from user query if present (e.g. "BTC staking products" → cointype=BTC).
-2. **Call tool**: Call `cex_earn_find_coin` with optional `cointype`. No parameters returns all products.
+2. **Call tool**: Call `gate-cli cex earn staking find` with optional `cointype`. No parameters returns all products.
 3. **Key data to extract**: From each item: `pid`, `currency`, `protocolName`, `estimateApr`, `productType`, `redeemPeriod`, `minStakeAmount`, `maxStakeAmount`, `isDefi`, `currencyRewards`. Map productType: 0=Certificate, 1=Lock-up, 2=Treasury.
 4. **Format response**: Sort or group by estimateApr/productType; use the Response Template in the matching scenario below.
 
@@ -59,7 +59,7 @@ Use the **Response Template** block from the scenario that matches the user inte
 - "Available staking options"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()` without parameters
+1. Call `gate-cli cex earn staking find` without parameters
 2. For each item use: `currency`, `protocolName`, `estimateApr`, `productType`, `redeemPeriod`, `minStakeAmount`, `isDefi`
 3. Group by productType or estimateApr range
 4. Show variety of options
@@ -101,7 +101,7 @@ Total: 25 products (use array length)
 
 **Expected Behavior**:
 1. Parse coin from request (e.g., "BTC")
-2. Call `cex_earn_find_coin(cointype="BTC")`
+2. Call `gate-cli cex earn staking find`
 3. Filter/display items where `currency` contains the coin
 4. For each item show: `protocolName`, `pid`, `estimateApr`, `minStakeAmount`, `maxStakeAmount`, `redeemPeriod`, `productType`, `currencyRewards`
 
@@ -149,7 +149,7 @@ Recommendation: productType 0 for liquidity, redeemPeriod 30 for balance
 - "Top yield products"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()`
+1. Call `gate-cli cex earn staking find`
 2. Sort by `estimateApr` descending (parse as number)
 3. Show top 5-10 products with `protocolName`, `currency`, `estimateApr`, `redeemPeriod`, `minStakeAmount`, `isDefi`
 4. Include risk note (isDefi=1 = medium risk)
@@ -201,7 +201,7 @@ Note: Higher estimateApr may mean longer redeemPeriod or isDefi=1
 - "Instant redemption products"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()`
+1. Call `gate-cli cex earn staking find`
 2. Filter where `redeemPeriod` is 0 or "0" (no lock)
 3. Sort by `estimateApr` desc
 4. Display `protocolName`, `currency`, `estimateApr`, `minStakeAmount`
@@ -242,7 +242,7 @@ Perfect for: Active traders, uncertain markets
 - "High yield BTC staking"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()` (or with cointype)
+1. Call `gate-cli cex earn staking find` (or with cointype)
 2. If product not in list or no capacity, suggest alternatives from same response using `protocolName`, `currency`, `estimateApr`, `redeemPeriod`
 3. Sort alternatives by `estimateApr` desc
 
@@ -252,7 +252,7 @@ Perfect for: Active traders, uncertain markets
 
 The product you're interested in is not available or has no capacity.
 
-Alternatives from cex_earn_find_coin (high estimateApr):
+Alternatives from `gate-cli cex earn staking find`:
 
 1. pid: 201, protocolName: DOT 90-Day Lock
    - currency: DOT, estimateApr: 18%, redeemPeriod: 90, minStakeAmount: 10
@@ -278,7 +278,7 @@ Tip: Check back later or try another protocolName/currency from the list.
 - "Different lock period comparison"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin(cointype="ETH")`
+1. Call `gate-cli cex earn staking find`
 2. Group results by `redeemPeriod` (0, 30, 60, 90, etc.)
 3. For each group show `protocolName`, `estimateApr`, `currency`, `currencyRewards` (apr)
 4. Show redeemPeriod and estimateApr progression
@@ -323,7 +323,7 @@ Longer redeemPeriod generally higher estimateApr (productType 1).
 - "Minimum staking requirements"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()`
+1. Call `gate-cli cex earn staking find`
 2. Extract `minStakeAmount`, `currency`, `protocolName` from each item
 3. Sort by minStakeAmount (numeric) or group by approximate USD tier
 4. Show in user-friendly format
@@ -363,7 +363,7 @@ Tip: Filter by currency and compare minStakeAmount / maxStakeAmount.
 - "DeFi staking explanation"
 
 **Expected Behavior**:
-1. Call `cex_earn_find_coin()`
+1. Call `gate-cli cex earn staking find`
 2. Split by `isDefi`: isDefi=1 (DeFi) vs isDefi=0 (traditional)
 3. For each show `protocolName`, `currency`, `estimateApr`, `redeemPeriod`, `currencyRewards`
 4. Explain productType (0/1/2) and isDefi

@@ -6,13 +6,13 @@ Query current staking positions, balances, and rewards on Gate.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_earn_asset_list** | Query staking positions | - | `coin`, `pid` |
+| **`gate-cli cex earn staking assets`** | Query staking positions | - | `coin`, `pid` |
 
 - Returns an **array** of position records (one per product/pid)
 - Optional `coin`: filter by mortgage coin; `pid`: filter by product ID
 - Each record: `pid`, `mortgage_coin`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` / `yesterday_income_multi`, `reward_coins`, `defi_income`, `type`, `protocol_name`, `redeem_amount`, `createStamp`, `updateStamp`
 - **type**: 0 = Certificate, 1 = Lock-up, 2 = Treasury (GUSD)
-- **Redeemable amount**: **Not** `mortgage_amount` − `freeze_amount`. The actual redeemable = `mortgage_amount` × **exchange rate**. The exchange rate is obtained from **`cex_earn_find_coin`**: for the same coin (currency) and same **pid**, take the product item’s `exchangeRate` (or `exchangeRateReserve` as per API semantics). Use `redeem_amount` from the position response only when the API documents it as the final redeemable value.
+- **Redeemable amount**: **Not** `mortgage_amount` − `freeze_amount`. The actual redeemable = `mortgage_amount` × **exchange rate**. The exchange rate is obtained from **`gate-cli cex earn staking find`**: for the same coin (currency) and same **pid**, take the product item’s `exchangeRate` (or `exchangeRateReserve` as per API semantics). Use `redeem_amount` from the position response only when the API documents it as the final redeemable value.
 
 **API response (array item fields):**
 
@@ -39,14 +39,14 @@ Query current staking positions, balances, and rewards on Gate.
 ## Workflow
 
 1. **Parse parameters**: Extract `coin` or `pid` from user query if present (e.g. "USDT position" → coin=USDT).
-2. **Call positions**: Call `cex_earn_asset_list` with optional `coin` and/or `pid`. No parameters returns all positions.
-3. **Redeemable amount**: For each position item, **do not** use `mortgage_amount` − `freeze_amount`. To get redeemable: call **`cex_earn_find_coin`** (optionally with `cointype` matching the position’s `mortgage_coin`), find the product entry with the same **pid** and matching **currency** (coin). Use that product’s **exchangeRate** (or **exchangeRateReserve** as per API). Then **redeemable** = `mortgage_amount` × that exchange rate. If the API provides `redeem_amount` and it is documented as the final redeemable value, prefer it when present.
-4. **Key data to extract**: From each array item: `pid`, `mortgage_coin`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` or `yesterday_income_multi`, `protocol_name`, `type`, `reward_coins`, `defi_income`, `redeem_amount`. For redeemable, use the formula above with exchange rate from `cex_earn_find_coin` (same coin + pid). Do not display `createStamp`, `updateStamp` or any timestamp formatting (see SKILL.md). Do not display **status** (ignore status when showing positions).
+2. **Call positions**: Call `gate-cli cex earn staking assets` with optional `coin` and/or `pid`. No parameters returns all positions.
+3. **Redeemable amount**: For each position item, **do not** use `mortgage_amount` − `freeze_amount`. To get redeemable: call **`gate-cli cex earn staking find`** (optionally with `cointype` matching the position’s `mortgage_coin`), find the product entry with the same **pid** and matching **currency** (coin). Use that product’s **exchangeRate** (or **exchangeRateReserve** as per API). Then **redeemable** = `mortgage_amount` × that exchange rate. If the API provides `redeem_amount` and it is documented as the final redeemable value, prefer it when present.
+4. **Key data to extract**: From each array item: `pid`, `mortgage_coin`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` or `yesterday_income_multi`, `protocol_name`, `type`, `reward_coins`, `defi_income`, `redeem_amount`. For redeemable, use the formula above with exchange rate from `gate-cli cex earn staking find` (same coin + pid). Do not display `createStamp`, `updateStamp` or any timestamp formatting (see SKILL.md). Do not display **status** (ignore status when showing positions).
 5. **Format response**: Group by coin or show per-product; use the Response Template in the matching scenario below. Do not display or format timestamp fields in any result. Do not display status in position output.
 
 ## Report Template
 
-Use the **Response Template** block from the scenario that matches the user intent (all positions, specific coin, portfolio value). Show mortgage_coin, protocol_name, mortgage_amount, freeze_amount, **redeemable** (mortgage_amount × exchange rate from `cex_earn_find_coin` for same coin and pid), income_total, yesterday_income; for DeFi include defi_income and reward_coins. Do not show **status** (omit status field).
+Use the **Response Template** block from the scenario that matches the user intent (all positions, specific coin, portfolio value). Show mortgage_coin, protocol_name, mortgage_amount, freeze_amount, **redeemable** (mortgage_amount × exchange rate from `gate-cli cex earn staking find` for same coin and pid), income_total, yesterday_income; for DeFi include defi_income and reward_coins. Do not show **status** (omit status field).
 
 **Number formatting**: Apply 8 decimal places precision with trailing zeros removed for amounts (mortgage_amount, freeze_amount, income_total, etc.). For exchange rates, use appropriate precision as returned by the API.
 
@@ -63,24 +63,24 @@ Use the **Response Template** block from the scenario that matches the user inte
 - "Display all staking"
 
 **Expected Behavior**:
-1. Call `cex_earn_asset_list()` without parameters
-2. Optionally call `cex_earn_find_coin()` to get exchange rates per product (pid + currency)
+1. Call `gate-cli cex earn staking assets` without parameters
+2. Optionally call `gate-cli cex earn staking find` to get exchange rates per product (pid + currency)
 3. For each position item use: `mortgage_coin`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` or `yesterday_income_multi`, `protocol_name`, `type`
-4. **Redeemable** = mortgage_amount × exchange rate; exchange rate from `cex_earn_find_coin` entry with same **pid** and matching **currency** (coin). Do not use mortgage_amount − freeze_amount.
+4. **Redeemable** = mortgage_amount × exchange rate; exchange rate from `gate-cli cex earn staking find` entry with same **pid** and matching **currency** (coin). Do not use mortgage_amount − freeze_amount.
 5. Display formatted position summary
 
 **Response Template**:
 ```
 📊 Staking Positions
 
-[Per position from API array — mortgage_coin, protocol_name, mortgage_amount, freeze_amount, redeemable = mortgage_amount × exchange_rate (exchange_rate from cex_earn_find_coin same pid + currency), income_total, yesterday_income]
+[Per position from API array — mortgage_coin, protocol_name, mortgage_amount, freeze_amount, redeemable = mortgage_amount × exchange_rate (exchange_rate from `gate-cli cex earn staking find` same pid + currency), income_total, yesterday_income]
 
 Example (2 positions):
 
 Gate USD (pid 70) — mortgage_coin: USDT,USDC
 - Staked (mortgage_amount): 990.8323288 USDT
 - Locked (freeze_amount): 0
-- Redeemable: mortgage_amount × exchange_rate (from cex_earn_find_coin, same pid + currency)
+- Redeemable: mortgage_amount × exchange_rate (from `gate-cli cex earn staking find`, same pid + currency)
 - Total Rewards (income_total): 0.4580822 GUSD
 - Yesterday (yesterday_income): 0 GUSD
 - Type: Treasury (2)
@@ -88,7 +88,7 @@ Gate USD (pid 70) — mortgage_coin: USDT,USDC
 Compound V3 (pid 64) — mortgage_coin: USDT
 - Staked (mortgage_amount): 1 USDT
 - Locked (freeze_amount): 0
-- Redeemable: mortgage_amount × exchange_rate (from cex_earn_find_coin, same pid + currency)
+- Redeemable: mortgage_amount × exchange_rate (from `gate-cli cex earn staking find`, same pid + currency)
 - Total Rewards (income_total): 0 (rewards in reward_coins)
 - Defi Income (defi_income.total): COMP 0.00000762
 - Yesterday (yesterday_income_multi): []
@@ -112,10 +112,10 @@ Total Positions: 2 products
 
 **Expected Behavior**:
 1. Parse coin from request (e.g., "USDT")
-2. Call `cex_earn_asset_list(coin="USDT")`
+2. Call `gate-cli cex earn staking assets`
 3. Response array may contain multiple items where `mortgage_coin` equals or contains the coin
 4. For each item use: `pid`, `mortgage_coin`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` / `yesterday_income_multi`, `protocol_name`, `type`, `reward_coins`, `defi_income`
-5. **Redeemable** = mortgage_amount × exchange rate; get exchange rate from `cex_earn_find_coin` (same pid and matching currency). Do not use mortgage_amount − freeze_amount.
+5. **Redeemable** = mortgage_amount × exchange rate; get exchange rate from `gate-cli cex earn staking find` (same pid and matching currency). Do not use mortgage_amount − freeze_amount.
 6. Display per-product breakdown
 
 **Response Template**:
@@ -127,7 +127,7 @@ Total Positions: 2 products
 Product 1 — Gate USD (pid 70), mortgage_coin: USDT,USDC
 - Staked (mortgage_amount): 990.83232880 USDT
 - Locked (freeze_amount): 0
-- Redeemable: mortgage_amount × exchange_rate (cex_earn_find_coin, pid 70 + currency)
+- Redeemable: mortgage_amount × exchange_rate (`gate-cli cex earn staking find`, pid 70 + currency)
 - Total Rewards (income_total): 0.4580822000 GUSD
 - Yesterday (yesterday_income): 0 GUSD
 - Type: Treasury (2)
@@ -135,7 +135,7 @@ Product 1 — Gate USD (pid 70), mortgage_coin: USDT,USDC
 Product 2 — Compound V3 (pid 64), mortgage_coin: USDT
 - Staked (mortgage_amount): 1.0000000000 USDT
 - Locked (freeze_amount): 0
-- Redeemable: mortgage_amount × exchange_rate (cex_earn_find_coin, pid 64 + currency)
+- Redeemable: mortgage_amount × exchange_rate (`gate-cli cex earn staking find`, pid 64 + currency)
 - income_total: 0
 - defi_income.total: COMP 0.0000076200
 - reward_coins: USDT, COMP
@@ -157,8 +157,8 @@ Total: 2 products for USDT
 - "What's unlocked?"
 
 **Expected Behavior**:
-1. Call `cex_earn_asset_list()`
-2. Call `cex_earn_find_coin()` (or with cointype) to get exchange rate per product (pid + currency)
+1. Call `gate-cli cex earn staking assets`
+2. Call `gate-cli cex earn staking find` (or with cointype) to get exchange rate per product (pid + currency)
 3. For each array item: **redeemable** = `mortgage_amount` × exchange rate (from find_coin entry with same pid and matching currency). Do not use mortgage_amount − freeze_amount. Use `redeem_amount` only if API documents it as final redeemable.
 4. Show `mortgage_coin`, `protocol_name`, redeemable vs locked (`freeze_amount`)
 5. If `freeze_amount` > 0, show locked; optionally use `updateStamp` / product rules for unlock time
@@ -167,7 +167,7 @@ Total: 2 products for USDT
 ```
 💰 Available for Redemption
 
-[Per position: redeemable = mortgage_amount × exchange_rate; exchange_rate from cex_earn_find_coin for same pid + currency]
+[Per position: redeemable = mortgage_amount × exchange_rate; exchange_rate from `gate-cli cex earn staking find` for same pid + currency]
 
 Gate USD (pid 70) — mortgage_coin: USDT,USDC
 - mortgage_amount: 990.83232880 USDT
@@ -193,7 +193,7 @@ Total Redeemable: (sum of redeemable across positions, in each coin)
 - "Show my staking" (when user has none)
 
 **Expected Behavior**:
-1. Call `cex_earn_asset_list()`
+1. Call `gate-cli cex earn staking assets`
 2. Receive **empty array** `[]`
 3. Suggest available products
 4. Guide user to start staking
@@ -224,10 +224,10 @@ Popular options:
 - "Break down my ETH positions"
 
 **Expected Behavior**:
-1. Call `cex_earn_asset_list(coin="USDT")`
+1. Call `gate-cli cex earn staking assets`
 2. Response array may have multiple items with `mortgage_coin` containing USDT
 3. For each item show: `protocol_name`, `pid`, `mortgage_amount`, `freeze_amount`, `income_total`, `yesterday_income` / `yesterday_income_multi`, `type`, `defi_income` if present
-4. **Redeemable** per item = mortgage_amount × exchange rate (from `cex_earn_find_coin` same pid + currency). Do not use mortgage_amount − freeze_amount.
+4. **Redeemable** per item = mortgage_amount × exchange rate (from `gate-cli cex earn staking find` same pid + currency). Do not use mortgage_amount − freeze_amount.
 5. Sum mortgage_amount by coin for total
 
 **Response Template**:
@@ -265,7 +265,7 @@ Total income_total / defi_income by product as above
 - "Total staking value"
 
 **Expected Behavior**:
-1. Call `cex_earn_asset_list()`
+1. Call `gate-cli cex earn staking assets`
 2. Aggregate by `mortgage_coin`: sum `mortgage_amount` per coin (split by comma if mortgage_coin is "USDT,USDC")
 3. Get current prices for each coin (external or from context)
 4. Total value = sum(mortgage_amount × price); show income_total / defi_income where relevant

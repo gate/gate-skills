@@ -88,7 +88,7 @@ Error handling is embedded within the sub-module scenarios listed above. Key err
 
 ## Mint (treated as stake)
 
-**Mint** is supported and handled as **immediate stake**. Route to `references/staking-swap.md` and execute the **Stake** workflow: resolve product (pid), amount, and coin (for GUSD choose USDT or USDC); then call `cex_earn_swap_staking_coin` with **side=0**. Same behavior as "Stake" (e.g. "mint 100 USDT" → stake 100 USDT).
+**Mint** is supported and handled as **immediate stake**. Route to `references/staking-swap.md` and execute the **Stake** workflow: resolve product (pid), amount, and coin (for GUSD choose USDT or USDC); then call `gate-cli cex earn staking swap` with **side=0**. Same behavior as "Stake" (e.g. "mint 100 USDT" → stake 100 USDT).
 
 ## Unsupported operations
 

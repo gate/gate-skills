@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-autoinvest
-version: "2026.4.2-3"
-updated: "2026-04-02"
-description: The fast auto-invest function of Gate Exchange Earn. Use this skill whenever you need to create, update, stop, or top up invest plans and to query supported coins, minimum amounts, records, orders, and plan detail. Trigger phrases include "auto-invest", "DCA", "dollar cost averaging", "invest plan", or equivalent.
+description: "The fast auto-invest function of Gate Exchange Earn. Use this skill whenever you need to create, update, stop, or top up invest plans and to query supported coins, minimum amounts, records, orders, and plan detail. Trigger phrases include \"auto-invest\", \"DCA\", \"dollar cost averaging\", \"invest plan\", or equivalent."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # gate-exchange-autoinvest
 
@@ -14,7 +66,21 @@ The fast auto-invest (DCA) function of Gate Exchange Earn, supporting create, up
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) first (mirror: [`exchange-runtime-rules.md` on GitHub](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)).
-- **Only call MCP tools explicitly listed in this skill** (see **MCP tools** below: Auto-Invest Related Tools and Supporting Tools). Tools not documented here must NOT be called, even if they exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
+
+## Skill Dependencies
+
+### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
+- **Permissions:** Earn (auto-invest) access as required by your API key and deployment.
+- **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
+
+### Installation Check
+- **Required:** `gate-cli` (install from [gate-cli releases](https://github.com/gate/gate-cli/releases) or via your environment’s Gate MCP / skills installer).
+- Add the directory containing **`gate-cli`** to **`PATH`** when invoking by name.
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`**. When **both** are unset or empty, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Confirm the CLI works (e.g. **`gate-cli --version`** or a read-only earn/auto-invest query from this skill) before plan mutations.
 
 ## Risk Disclaimer
 
@@ -79,11 +145,11 @@ When you use this skill, your queries and account data are processed through AI 
   - **`daily`**, **`hourly`**, or **`4-hourly`**: Use **`1`**
 
 **Investment Amount Limits**:
-- **Minimum amount**: Must be ≥ the value returned by `cex_earn_get_auto_invest_min_amount`
-- **Maximum amount**: Must be ≤ the value returned by `cex_earn_list_auto_invest_config`
+- **Minimum amount**: Must be ≥ the value returned by `gate-cli cex earn auto-invest min-amount`
+- **Maximum amount**: Must be ≤ the value returned by `gate-cli cex earn auto-invest config`
 - Before creating a plan:
-  1. Call `cex_earn_get_auto_invest_min_amount` to query the minimum amount
-  2. Call `cex_earn_list_auto_invest_config` to query the maximum amount
+  1. Call `gate-cli cex earn auto-invest min-amount` to query the minimum amount
+  2. Call `gate-cli cex earn auto-invest config` to query the maximum amount
   3. Validate that the user's input amount is within the valid range
 
 **Target Coins Constraints** (for multi-target plans):
@@ -122,30 +188,30 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 - This function does not provide specific query for the next automatic purchase time
 - For this information, please visit Gate App or website
 
-## MCP tools
+## gate-cli command index
 
 ### Auto-Invest Related Tools (11 tools)
 
 | # | Tool Name | Type | Function |
 |---|-----------|------|----------|
-| 1 | `cex_earn_create_auto_invest_plan` | Write | Create a new auto-invest plan **(See Create Plan Constraints)** |
-| 2 | `cex_earn_update_auto_invest_plan` | Write | Update an existing plan |
-| 3 | `cex_earn_stop_auto_invest_plan` | Write | Stop a plan **(explicit user confirmation before call — same as other writes)** |
-| 4 | `cex_earn_add_position_auto_invest_plan` | Write ⚠️ | Add position immediately **(Call only once after confirmation, strictly no repeated calls)** |
-| 5 | `cex_earn_list_auto_invest_plans` | Query | List user's auto-invest plans |
-| 6 | `cex_earn_get_auto_invest_plan_detail` | Query | View single plan details |
-| 7 | `cex_earn_list_auto_invest_coins` | Query | Query supported target coins |
-| 8 | `cex_earn_get_auto_invest_min_amount` | Query | Query minimum investment amount |
-| 9 | `cex_earn_list_auto_invest_plan_records` | Query | Query plan execution records |
-| 10 | `cex_earn_list_auto_invest_orders` | Query | Query order details |
-| 11 | `cex_earn_list_auto_invest_config` | Query | Query auto-invest configuration options |
+| 1 | `gate-cli cex earn auto-invest create` | Write | Create a new auto-invest plan **(See Create Plan Constraints)** |
+| 2 | `gate-cli cex earn auto-invest update` | Write | Update an existing plan |
+| 3 | `gate-cli cex earn auto-invest stop` | Write | Stop a plan **(explicit user confirmation before call — same as other writes)** |
+| 4 | `gate-cli cex earn auto-invest add-position` | Write ⚠️ | Add position immediately **(Call only once after confirmation, strictly no repeated calls)** |
+| 5 | `gate-cli cex earn auto-invest plans` | Query | List user's auto-invest plans |
+| 6 | `gate-cli cex earn auto-invest plan-detail` | Query | View single plan details |
+| 7 | `gate-cli cex earn auto-invest coins` | Query | Query supported target coins |
+| 8 | `gate-cli cex earn auto-invest min-amount` | Query | Query minimum investment amount |
+| 9 | `gate-cli cex earn auto-invest records` | Query | Query plan execution records |
+| 10 | `gate-cli cex earn auto-invest orders` | Query | Query order details |
+| 11 | `gate-cli cex earn auto-invest config` | Query | Query auto-invest configuration options |
 
 ### Supporting Tools
 
 | Tool Name | Function |
 |-----------|----------|
-| `cex_spot_get_spot_accounts` | Query spot account balance |
-| `cex_earn_list_user_uni_lends` | Optional read-only context for Simple Earn / Uni balances when fund source or debits involve earn (see **Execution** → balance check) |
+| `gate-cli cex spot account get` | Query spot account balance |
+| `gate-cli cex earn uni lends` | Optional read-only context for Simple Earn / Uni balances when fund source or debits involve earn (see **Execution** → balance check) |
 
 ## Query Function Usage
 
@@ -153,13 +219,13 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 
 | User Request | Tool to Use |
 |--------------|-------------|
-| List my auto-invest plans | `cex_earn_list_auto_invest_plans` |
-| View single plan details | `cex_earn_get_auto_invest_plan_detail` |
-| Query supported coins | `cex_earn_list_auto_invest_coins` |
-| Query minimum investment amount | `cex_earn_get_auto_invest_min_amount` |
-| View plan execution records | `cex_earn_list_auto_invest_plan_records` |
-| View order details | `cex_earn_list_auto_invest_orders` |
-| Query auto-invest config | `cex_earn_list_auto_invest_config` |
+| List my auto-invest plans | `gate-cli cex earn auto-invest plans` |
+| View single plan details | `gate-cli cex earn auto-invest plan-detail` |
+| Query supported coins | `gate-cli cex earn auto-invest coins` |
+| Query minimum investment amount | `gate-cli cex earn auto-invest min-amount` |
+| View plan execution records | `gate-cli cex earn auto-invest records` |
+| View order details | `gate-cli cex earn auto-invest orders` |
+| Query auto-invest config | `gate-cli cex earn auto-invest config` |
 
 ### Common Query Scenarios
 
@@ -169,7 +235,7 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 - "Which coins can I auto-invest in?"
 - "What target coins does auto-invest support?"
 
-**Operation**: Use the `cex_earn_list_auto_invest_coins` tool to query, which will return a list of all coins that support auto-invest.
+**Operation**: Use the `gate-cli cex earn auto-invest coins` tool to query, which will return a list of all coins that support auto-invest.
 
 ---
 
@@ -179,7 +245,7 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 - "What's the minimum amount per period for USDT auto-invest?"
 - "What's the minimum amount when BTC is the investment currency?"
 
-**Operation**: Use the `cex_earn_get_auto_invest_min_amount` tool, need to specify the investment currency (USDT or BTC) and target coins.
+**Operation**: Use the `gate-cli cex earn auto-invest min-amount` tool, need to specify the investment currency (USDT or BTC) and target coins.
 
 ---
 
@@ -189,7 +255,7 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 - "How many times has my BTC auto-invest been executed recently?"
 - "View the recent execution status of this plan"
 
-**Operation**: Use `cex_earn_list_auto_invest_plan_records` to view execution records, use `cex_earn_list_auto_invest_orders` to view specific order details.
+**Operation**: Use `gate-cli cex earn auto-invest records` to view execution records, use `gate-cli cex earn auto-invest orders` to view specific order details.
 
 **Return Information Example**:
 ```
@@ -212,8 +278,8 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 
 ### Other Query Functions
 
-- **List all plans**: Use `cex_earn_list_auto_invest_plans` to view all your auto-invest plans
-- **Query configuration**: Use `cex_earn_list_auto_invest_config` to view available auto-invest settings and preset options
+- **List all plans**: Use `gate-cli cex earn auto-invest plans` to view all your auto-invest plans
+- **Query configuration**: Use `gate-cli cex earn auto-invest config` to view available auto-invest settings and preset options
 
 ## Sub-Modules
 
@@ -230,12 +296,12 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 | Update plan | `references/autoinvest-plans.md` | Modify existing plan parameters |
 | Stop plan | `references/autoinvest-plans.md` → Scenario 9 | Terminate automatic deductions |
 | Top-up / Add position | `references/autoinvest-plans.md` → Scenario 10 | One-off extra purchase |
-| Query plans | SKILL.md → Tool Mapping | `cex_earn_list_auto_invest_plans` |
-| Query plan detail | SKILL.md → Tool Mapping | `cex_earn_get_auto_invest_plan_detail` |
-| Query supported coins | SKILL.md → Scenario 1 | `cex_earn_list_auto_invest_coins` |
-| Query minimum amount | SKILL.md → Scenario 2 | `cex_earn_get_auto_invest_min_amount` |
-| Query execution records | SKILL.md → Scenario 3 | `cex_earn_list_auto_invest_plan_records` |
-| Query orders | SKILL.md → Tool Mapping | `cex_earn_list_auto_invest_orders` |
+| Query plans | SKILL.md → Tool Mapping | `gate-cli cex earn auto-invest plans` |
+| Query plan detail | SKILL.md → Tool Mapping | `gate-cli cex earn auto-invest plan-detail` |
+| Query supported coins | SKILL.md → Scenario 1 | `gate-cli cex earn auto-invest coins` |
+| Query minimum amount | SKILL.md → Scenario 2 | `gate-cli cex earn auto-invest min-amount` |
+| Query execution records | SKILL.md → Scenario 3 | `gate-cli cex earn auto-invest records` |
+| Query orders | SKILL.md → Tool Mapping | `gate-cli cex earn auto-invest orders` |
 | Ask about restrictions | `references/autoinvest-compliance.md` | Investment currency, region, funding |
 
 ## Execution
@@ -249,12 +315,12 @@ After creating a plan, purchased assets will flow to one of two destinations bas
    - For write operations: Validate investment currency (USDT/BTC only), amount range, execution time, and for **creates** `plan_period_day` per **Create Plan Constraints**
    - For queries: Extract required parameters from user request
 4. **Balance Check** (for write operations):
-   - Call `cex_spot_get_spot_accounts` to verify sufficient funds
-   - For Simple Earn fund source: Call `cex_earn_list_user_uni_lends` if applicable
+   - Call `gate-cli cex spot account get` to verify sufficient funds
+   - For Simple Earn fund source: Call `gate-cli cex earn uni lends` if applicable
 5. **Confirmation** (for write operations):
    - Display operation summary (Action Draft)
    - Wait for explicit user confirmation
-   - **Stop plan** (`cex_earn_stop_auto_invest_plan`): Show **Action Draft** and **stop** — do **not** call the tool in that same assistant turn. Call stop only after the user's **next message** contains explicit confirmation (`references/autoinvest-plans.md` → Scenario 9).
+   - **Stop plan** (`gate-cli cex earn auto-invest stop`): Show **Action Draft** and **stop** — do **not** call the tool in that same assistant turn. Call stop only after the user's **next message** contains explicit confirmation (`references/autoinvest-plans.md` → Scenario 9).
 6. **MCP Tool Call**:
    - Execute the corresponding tool from the **MCP tools** section (Auto-Invest Related Tools or Supporting Tools tables) only
    - Pass validated parameters
@@ -318,7 +384,7 @@ After creating a plan, purchased assets will flow to one of two destinations bas
 
 ### Default: no write without confirmation
 
-Until the user has given **explicit confirmation** for the **current** Action Draft, **do not** call any write tool (`cex_earn_create_auto_invest_plan`, `cex_earn_update_auto_invest_plan`, `cex_earn_stop_auto_invest_plan`, `cex_earn_add_position_auto_invest_plan`). **Only** read/query operations are allowed—for example: list/detail plans, supported coins, min/max config, execution records and orders, and supporting balance reads (`cex_spot_get_spot_accounts`, `cex_earn_list_user_uni_lends`).
+Until the user has given **explicit confirmation** for the **current** Action Draft, **do not** call any write tool (`gate-cli cex earn auto-invest create`, `gate-cli cex earn auto-invest update`, `gate-cli cex earn auto-invest stop`, `gate-cli cex earn auto-invest add-position`). **Only** read/query operations are allowed—for example: list/detail plans, supported coins, min/max config, execution records and orders, and supporting balance reads (`gate-cli cex spot account get`, `gate-cli cex earn uni lends`).
 
 ### Mandatory Confirmation for Write Operations
 
@@ -328,7 +394,7 @@ All write operations (create, update, stop, add position) **MUST** follow this c
 2. **Wait for Confirmation**: Explicitly ask user "Please confirm to proceed"
 3. **Execute Only After Confirmation**: Do not proceed without user's explicit agreement
 
-**Stop plan** (`cex_earn_stop_auto_invest_plan`): Show Action Draft (plan ID, name, effect: future deductions stop) and **end the turn** asking for confirmation. Call MCP **only** after the user's **following message** explicitly confirms — never call stop in the same assistant response as the first draft, even if the user already named a plan ID.
+**Stop plan** (`gate-cli cex earn auto-invest stop`): Show Action Draft (plan ID, name, effect: future deductions stop) and **end the turn** asking for confirmation. Call MCP **only** after the user's **following message** explicitly confirms — never call stop in the same assistant response as the first draft, even if the user already named a plan ID.
 
 ### Stale confirmation
 
@@ -336,7 +402,7 @@ If the user changes any material detail after seeing an Action Draft (amount, ta
 
 ### Add Position Safety (Critical)
 
-⚠️ **The `cex_earn_add_position_auto_invest_plan` tool is extremely sensitive**:
+⚠️ **The `gate-cli cex earn auto-invest add-position` tool is extremely sensitive**:
 
 - **Call EXACTLY ONCE** per user confirmation
 - **NEVER call multiple times** for the same request (causes duplicate deductions)
@@ -383,10 +449,10 @@ Before calling any write tool:
 |-----------------|-----------|----------|
 | **Too many target coins** | User specifies > 10 target coins | Reject immediately: "A plan can have at most 10 target coins. You specified {N} coins. Please reduce the number of targets." |
 | **Coin allocation too small** | Any target coin has ratio < 10 | Reject immediately: "Each target coin must have at least 10% allocation. Coin {X} has only {Y}%. Please adjust the ratios to ensure each coin has at least 10%." |
-| **Insufficient balance** | `cex_spot_get_spot_accounts` shows balance < amount | Do not proceed. Inform user of shortfall: "Your current balance is {X} {currency}, but {Y} {currency} is required. Please deposit more funds or reduce the investment amount." |
+| **Insufficient balance** | `gate-cli cex spot account get` shows balance < amount | Do not proceed. Inform user of shortfall: "Your current balance is {X} {currency}, but {Y} {currency} is required. Please deposit more funds or reduce the investment amount." |
 | **Invalid investment currency** | User specifies currency other than USDT/BTC | Reject immediately: "Only USDT or BTC are supported as investment currency. Please choose USDT or BTC." |
-| **Amount below minimum** | User amount < `cex_earn_get_auto_invest_min_amount` | Call min amount tool, then inform: "Minimum amount is {min} {currency}. Please increase your investment amount." |
-| **Amount above maximum** | User amount > `cex_earn_list_auto_invest_config` max | Call config tool, then inform: "Maximum amount is {max} {currency}. Please reduce your investment amount." |
+| **Amount below minimum** | User amount < `gate-cli cex earn auto-invest min-amount` | Call min amount tool, then inform: "Minimum amount is {min} {currency}. Please increase your investment amount." |
+| **Amount above maximum** | User amount > `gate-cli cex earn auto-invest config` max | Call config tool, then inform: "Maximum amount is {max} {currency}. Please reduce your investment amount." |
 | **Invalid execution time** | User specifies minutes/seconds or hour outside 0-23 | Reject: "Auto-invest only supports execution on the hour (0-23). Please choose an hour between 0 and 23." |
 | **Invalid `plan_period_day`** | `0` or out of range for `plan_period_type` on create | Do not call create; state valid ranges: monthly **1–30**; weekly/biweekly **1–7** (1 = Monday); daily/hourly/4-hourly use **`1`** (`references/autoinvest-plans.md` Workflow step 6) |
 | **Plan not found** | Query returns no matching plan | Inform: "No matching auto-invest plan found. You can create a new plan." (See Scenario 4) |
@@ -405,16 +471,16 @@ Before calling any write tool:
 
 | Condition | Action | Tool(s) to Use |
 |-----------|--------|----------------|
-| User wants to create plan | Route to `references/autoinvest-plans.md` Scenario 1/2 | Validate (incl. `plan_period_day`) → `cex_spot_get_spot_accounts` (and `cex_earn_list_user_uni_lends` if earn fund source) → `cex_earn_get_auto_invest_min_amount` → `cex_earn_list_auto_invest_config` → Confirm → `cex_earn_create_auto_invest_plan` |
-| User wants to update plan | Route to `references/autoinvest-plans.md` | `cex_earn_list_auto_invest_plans` (if no ID) → Confirm → `cex_earn_update_auto_invest_plan` |
-| User wants to stop plan | Route to `references/autoinvest-plans.md` Scenario 9 | `cex_earn_list_auto_invest_plans` (if no ID) → Action Draft (end turn) → user's **next** message confirms → `cex_earn_stop_auto_invest_plan` |
-| User wants to top-up (add position) | Route to `references/autoinvest-plans.md` Scenario 10 | `cex_earn_list_auto_invest_plans` (if no ID) → `cex_earn_get_auto_invest_plan_detail` (if no amount) → `cex_spot_get_spot_accounts` → Confirm → `cex_earn_add_position_auto_invest_plan` (ONCE ONLY) |
-| User wants to list plans | Direct query | `cex_earn_list_auto_invest_plans` |
-| User wants plan detail | Direct query | `cex_earn_get_auto_invest_plan_detail` |
-| User asks "which coins?" | Scenario 1 | `cex_earn_list_auto_invest_coins` |
-| User asks "minimum amount?" | Scenario 2 | `cex_earn_get_auto_invest_min_amount` |
-| User asks "execution history?" | Scenario 3 | `cex_earn_list_auto_invest_plan_records` |
-| User asks "order details?" | Direct query | `cex_earn_list_auto_invest_orders` |
+| User wants to create plan | Route to `references/autoinvest-plans.md` Scenario 1/2 | Validate (incl. `plan_period_day`) → `gate-cli cex spot account get` (and `gate-cli cex earn uni lends` if earn fund source) → `gate-cli cex earn auto-invest min-amount` → `gate-cli cex earn auto-invest config` → Confirm → `gate-cli cex earn auto-invest create` |
+| User wants to update plan | Route to `references/autoinvest-plans.md` | `gate-cli cex earn auto-invest plans` (if no ID) → Confirm → `gate-cli cex earn auto-invest update` |
+| User wants to stop plan | Route to `references/autoinvest-plans.md` Scenario 9 | `gate-cli cex earn auto-invest plans` (if no ID) → Action Draft (end turn) → user's **next** message confirms → `gate-cli cex earn auto-invest stop` |
+| User wants to top-up (add position) | Route to `references/autoinvest-plans.md` Scenario 10 | `gate-cli cex earn auto-invest plans` (if no ID) → `gate-cli cex earn auto-invest plan-detail` (if no amount) → `gate-cli cex spot account get` → Confirm → `gate-cli cex earn auto-invest add-position` (ONCE ONLY) |
+| User wants to list plans | Direct query | `gate-cli cex earn auto-invest plans` |
+| User wants plan detail | Direct query | `gate-cli cex earn auto-invest plan-detail` |
+| User asks "which coins?" | Scenario 1 | `gate-cli cex earn auto-invest coins` |
+| User asks "minimum amount?" | Scenario 2 | `gate-cli cex earn auto-invest min-amount` |
+| User asks "execution history?" | Scenario 3 | `gate-cli cex earn auto-invest records` |
+| User asks "order details?" | Direct query | `gate-cli cex earn auto-invest orders` |
 | User asks about investment currency restrictions | Route to `references/autoinvest-compliance.md` | Explain USDT/BTC only rule |
 | User asks about fund source | Route to `references/autoinvest-compliance.md` | Explain spot vs earn options |
 | Plan not found in query | Scenario 4 | Inform user, offer to create new plan |
@@ -486,7 +552,7 @@ You have no active auto-invest plans. Create one to start DCA investing.
 ```markdown
 📋 Supported Auto-Invest Coins
 
-{List coins returned by cex_earn_list_auto_invest_coins}
+{List coins returned by `gate-cli cex earn auto-invest coins`}
 
 You can use any of these coins as targets in your auto-invest plan.
 ```

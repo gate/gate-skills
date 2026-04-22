@@ -11,7 +11,7 @@
 ## [2026.3.11-1] - 2026-03-11
 
 ### Added
-- Initial version with VIP tier query via `cex_account_get_account_detail`
-- Trading fee rate query (spot and futures) via `cex_wallet_get_wallet_fee`
+- Initial version with VIP tier query via `gate-cli cex account detail`
+- Trading fee rate query (spot and futures) via `gate-cli cex wallet market trade-fee`
 - Support for combined VIP + fee queries
 - Standard architecture with complete Workflow, Judgment Logic Summary, and Report Template

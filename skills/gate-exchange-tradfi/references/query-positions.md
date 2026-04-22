@@ -11,8 +11,8 @@ Read-only: list current positions and position history. **Pass only parameters d
 
 ### Step 2: Call tools
 
-- **Current positions**: Call `cex_tradfi_query_position_list` with only MCP-documented parameters. Extract: symbol, side, size, entry price, margin, PnL if available, etc.
-- **Position history**: Call `cex_tradfi_query_position_history_list` with only MCP-documented parameters (e.g. limit or time range only if defined in the MCP). Extract: same fields plus close time / settlement info.
+- **Current positions**: Call `gate-cli cex tradfi position list` with only MCP-documented parameters. Extract: symbol, side, size, entry price, margin, PnL if available, etc.
+- **Position history**: Call `gate-cli cex tradfi position history` with only MCP-documented parameters (e.g. limit or time range only if defined in the MCP). Extract: same fields plus close time / settlement info.
 
 ### Step 3: Format response
 
@@ -45,7 +45,7 @@ Use the Report Template below. If the list is empty, report "No open positions" 
 - "Show my positions"
 
 **Expected Behavior**:
-1. Call `cex_tradfi_query_position_list`.
+1. Call `gate-cli cex tradfi position list`.
 2. Format result as current-positions table.
 3. If empty, reply "No open positions."
 
@@ -61,6 +61,6 @@ Use the Report Template below. If the list is empty, report "No open positions" 
 - "Closed positions"
 
 **Expected Behavior**:
-1. Call `cex_tradfi_query_position_history_list` with only the parameters documented in the MCP.
+1. Call `gate-cli cex tradfi position history` with only the parameters documented in the MCP.
 2. Format as position history table.
 3. If empty, reply "No position history."

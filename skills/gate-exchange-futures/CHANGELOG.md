@@ -18,7 +18,7 @@ Format: date-based versioning (`YYYY.M.DD`). Each release includes a sequential 
 
 ### Fixed
 
-- **conditional.md**: Corrected MCP tool names `get_futures_contract` → `cex_fx_get_fx_contract`, `list_futures_order_book` → `cex_fx_get_fx_order_book`
+- **conditional.md**: Corrected `gate-cli` command names `get_futures_contract` → `gate-cli cex futures market contract`, `list_futures_order_book` → `gate-cli cex futures market orderbook`
 
 ---
 
@@ -52,6 +52,6 @@ This skill supports **four operations only**: open position, close position, can
 
 ### Audit
 
-- Uses Gate MCP tools only
+- Uses gate-cli tools only
 - Open/close/cancel/amend require user confirmation before execution where applicable
 - No credential handling in this skill

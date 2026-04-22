@@ -28,7 +28,7 @@
 - Authorization validation with guidance flow for missing/expired authorization
 - Error handling mapping for common payment failures (insufficient balance, expired order, invalid authorization, order not found)
 - Domain knowledge section covering Gate Pay overview, authorization requirements, payment flow constraints
-- MCP tool integration: `cex_pay_create_ai_order_pay` for payment-account debiting
+- `gate-cli` command integration: `cex_pay_create_ai_order_pay` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) for payment-account debiting
 - Judgment logic table for routing decisions (execute, block, inform)
 - Report template with success receipt and failure explanation formats
 - Data privacy & collection statement compliant with Gate Privacy Policy
@@ -41,9 +41,9 @@
 
 ### Compliance
 
-- ✅ General Rules block includes canonical STOP line, runtime-rules link, and MCP allowlist wording (H1 adjacency finalized in [2026.3.27-1])
+- ✅ General Rules block includes canonical STOP line, runtime-rules link, and `gate-cli` allowlist wording (H1 adjacency finalized in [2026.3.27-1])
 - ✅ References canonical `gate-runtime-rules.md` from gate-skills repository
-- ✅ MCP tool allowlist constraint included (only documented tools may be called)
+- ✅ `gate-cli` command allowlist constraint included (only documented tools may be called)
 - ✅ Brand compliance: use **Gate** / **Gate.com** naming only (no legacy domain-as-brand spelling)
 - ✅ Naming convention: `gate-exchange-pay` matches `gate-{category}-{title}` pattern
 - ✅ Required files: SKILL.md, README.md, CHANGELOG.md, references/scenarios.md

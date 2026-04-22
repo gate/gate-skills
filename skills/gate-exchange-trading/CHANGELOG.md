@@ -15,11 +15,11 @@
 
 ### Changed
 
-- Rebased the skill's portable baseline on the documented Gate MCP surfaces from the official repo:
-  - `info_*` -> Gate Info MCP
-  - `news_feed_*` -> Gate News MCP
-  - read-only `cex_spot_*` / `cex_fx_*` market data -> Gate public market MCP or local combined Gate MCP
-  - private `cex_*` trading/account tools -> authenticated Gate Exchange MCP or local authenticated Gate MCP
+- Rebased the skill's portable baseline on the documented gate-cli surfaces from the official repo:
+  - `info_*` -> Gate Info `gate-cli`
+  - `news_feed_*` -> Gate News `gate-cli`
+  - read-only `cex_spot_*` / `cex_fx_*` market data -> Gate public market `gate-cli` or local combined gate-cli
+  - private `cex_*` trading/account tools -> authenticated Gate Exchange `gate-cli` or local authenticated gate-cli
 - Removed `news_events_*` as a required dependency from baseline scenarios and routing rules, so the skill stays portable across documented runtimes.
 - Updated scenario call patterns to use the documented news/feed and info tools with more portable example parameters.
 - Added `references/runtime-dependencies.md` so runtime requirements are now explicit inside the skill package.
@@ -31,7 +31,7 @@
 
 - Normalized `references/scenarios.md` prompt examples to English-only wording for release consistency.
 - Replaced relative Markdown links in `SKILL.md` and `README.md` with plain file-path references to reduce renderer and packaging ambiguity.
-- Aligned analysis-tool references with the currently exposed Gate MCP tool surface:
+- Aligned analysis-tool references with the currently exposed gate-cli tool surface:
   - replaced stale `info_marketsnapshot_get_market_overview` references with `info_marketsnapshot_get_market_snapshot`
   - removed stale `info_coin_get_coin_rankings` and `info_macro_get_macro_summary` assumptions
   - replaced stale `info_onchain_trace_fund_flow` references with available tx-level on-chain tools

@@ -6,7 +6,7 @@ Browse available LaunchPool projects with filtering and sorting.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_list_launch_pool_projects** | Query project list | `page`, `page_size` | `status`, `sort_type`, `mortgage_coin`, `search_coin`, `limit_rule` |
+| **`gate-cli cex launch projects`** | Query project list | `page`, `page_size` | `status`, `sort_type`, `mortgage_coin`, `search_coin`, `limit_rule` |
 
 - Returns a paginated array of `LaunchPoolV4Project` objects
 - No authentication required
@@ -55,7 +55,7 @@ This array defines tiered participation conditions based on the user's 60-day to
 ## Workflow
 
 1. **Parse parameters**: Extract filters from user query — `status`, `sort_type`, `mortgage_coin`, `search_coin`, `limit_rule`.
-2. **Call tool**: Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, and any optional filters.
+2. **Call tool**: Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, and any optional filters.
 3. **Key data to extract**: From each project: `pid`, `name`, `project_state`, `total_amount`, `days`. From each reward pool: `rid`, `coin`, `rate_year`, `already_buy_total_amount`, `personal_max_amount`, `personal_min_amount`, `transaction_config`. Note: `pid`, `rid`, `start_timest`, `end_timest` are internal — do NOT display them to the user.
 4. **Format response**: Map `project_state` to label. Format `rate_year` as "Estimated APR {value}%" with 2 decimals. Do NOT display `start_timest`/`end_timest` to the user. If a reward pool has `transaction_config`, display it as a tiered list showing base tier (below lowest threshold → limit 0, not eligible) and each tier with trading volume threshold (USD) → staking limit ({coin}). **All projects must use the same tiered list format for `transaction_config`** — do NOT compress into a single line for any project. Use the Response Template from the matching scenario below.
 
@@ -77,7 +77,7 @@ Use the **Response Template** block from the scenario that matches the user inte
 
 **Expected Behavior**:
 1. Map user intent to status: all=0, ongoing/in progress=1, warming up/upcoming=2, ended=3, ongoing+upcoming=4
-2. Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, `status={mapped_value}`
+2. Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, `status={mapped_value}`
 3. For each project use: `name`, `project_state`, `total_amount`, `days`, and nested `reward_pools` (do NOT display `pid`, `rid`, `start_timest`, or `end_timest` to user)
 4. Map `project_state` to status label (translate to user language): 1=in progress, 2=warming up, 3=ended
 5. Display formatted project list
@@ -116,7 +116,7 @@ Showing {count} projects total.
 
 **Expected Behavior**:
 1. Map user intent: highest/best=`sort_type=1` (descending), lowest=`sort_type=2` (ascending)
-2. Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, `sort_type={value}`
+2. Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, `sort_type={value}`
 3. For each project display: `name`, `project_state`, max `rate_year` across reward pools, `total_amount`
 4. Highlight the top estimated APR in each project
 
@@ -148,7 +148,7 @@ Showing {count} projects total.
 
 **Expected Behavior**:
 1. Extract the staking coin from user query (e.g. "USDT")
-2. Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, `mortgage_coin={coin}`
+2. Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, `mortgage_coin={coin}`
 3. For each project, highlight the matching reward pool where `coin` equals the user's staking coin
 4. Show `rid`, `rate_year`, `already_buy_total_amount`, `personal_max_amount`/`personal_min_amount` for the matching pool
 5. If no results, suggest trying other coins
@@ -188,7 +188,7 @@ Found {count} projects supporting {coin} staking.
 
 **Expected Behavior**:
 1. Map user intent: newbie/new users=`limit_rule=1`, normal/standard=`limit_rule=0`
-2. Call `cex_launch_list_launch_pool_projects` with `page=1`, `page_size=10`, `limit_rule={value}`
+2. Call `gate-cli cex launch projects` with `page=1`, `page_size=10`, `limit_rule={value}`
 3. Display matching projects with pool type highlighted
 4. If no results, suggest trying without the pool type filter
 
@@ -218,7 +218,7 @@ Found {count} projects with {pool_type} pool.
 - "Show LaunchPool projects" (when none available)
 
 **Expected Behavior**:
-1. Call `cex_launch_list_launch_pool_projects` with user's filters
+1. Call `gate-cli cex launch projects` with user's filters
 2. Receive empty array
 3. Suggest alternative filters or checking back later
 

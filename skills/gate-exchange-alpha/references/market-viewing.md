@@ -13,8 +13,8 @@ Classify the request into one of two cases:
 ### Step 2: Call Tools and Extract Data
 
 Use the minimal tool set required:
-- All tickers: `cex_alpha_list_alpha_tickers`
-- Specific token ticker: `cex_alpha_list_alpha_tickers` with `currency` parameter
+- All tickers: `gate-cli cex alpha market tickers`
+- Specific token ticker: `gate-cli cex alpha market tickers` with `currency` parameter
 
 Key data to extract:
 - `currency`: token symbol
@@ -62,7 +62,7 @@ For single token:
 - "What's the market like right now?"
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_tickers` with pagination (default `page=1`, `limit=20`).
+1. Call `gate-cli cex alpha market tickers` with pagination (default `page=1`, `limit=20`).
 2. Extract latest price (`last`), 24h change (`change`), and 24h volume (`volume`) for each token.
 3. Present a paginated market overview table sorted by default order. If there are more pages, inform the user.
 
@@ -76,7 +76,7 @@ For single token:
 - "Check the current price of memeboxtrump."
 
 **Expected Behavior**:
-1. Call `cex_alpha_list_alpha_tickers` with `currency={token_symbol}`.
+1. Call `gate-cli cex alpha market tickers` with `currency={token_symbol}`.
 2. Extract latest price (`last`), 24h change (`change`), volume, and market cap.
 3. Present a detailed market data card for the specific token.
-4. If the token is not found, suggest checking the token symbol via `cex_alpha_list_alpha_currencies`.
+4. If the token is not found, suggest checking the token symbol via `gate-cli cex alpha market currencies`.

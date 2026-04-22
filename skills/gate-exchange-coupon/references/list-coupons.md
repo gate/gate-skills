@@ -6,7 +6,7 @@ Handles Case 1 and Case 2.
 
 ## Workflow
 
-Both scenarios call `cex_coupon_list_user_coupons`. Key parameters:
+Both scenarios call `gate-cli cex coupon list`. Key parameters:
 - `expired=0` — valid coupons only
 - `coupon_type` — omit for all types (Scenario 1); set to matched enum value (Scenario 2)
 - `is_task_coupon` — omit for all; `0` = regular only; `1` = task only
@@ -55,7 +55,7 @@ Map status codes to human-readable text (no emoji):
 - "I want to check my coupons"
 
 **Expected Behavior**:
-1. Call `cex_coupon_list_user_coupons` with `expired=0`, `limit=20`
+1. Call `gate-cli cex coupon list` with `expired=0`, `limit=20`
 2. Split results into two groups by `is_task_coupon`: task coupons (`is_task_coupon=1`) and regular coupons (`is_task_coupon=0` or field absent)
 3. Output two sections in order: **Task Coupons** first, then **Regular Coupons**. Each section uses a single merged markdown table. If a section is empty, show "(None)" under the header.
 4. Use a single merged table per section — do NOT create one table per coupon.
@@ -73,7 +73,7 @@ Map status codes to human-readable text (no emoji):
 
 **Pagination** — when user replies "load more":
 1. Record `id` and `expire_time_order_by` of the last item in current list as `last_id` and `expire_time`
-2. Call `cex_coupon_list_user_coupons` again with same params + `last_id` and `expire_time`
+2. Call `gate-cli cex coupon list` again with same params + `last_id` and `expire_time`
 3. Append new results into the same two-section layout; repeat footer until `next_page=false`, then show: "All {N} coupon(s) loaded."
 
 **Response Template**:
@@ -123,7 +123,7 @@ You currently have **{N}** available coupon(s):
 
 **Expected Behavior**:
 1. Map user's natural language to the correct `coupon_type` enum value using Coupon Types Reference in SKILL.md
-2. Call `cex_coupon_list_user_coupons` with `expired=0`, `coupon_type={matched_type}`, `limit=20`
+2. Call `gate-cli cex coupon list` with `expired=0`, `coupon_type={matched_type}`, `limit=20`
 3. Split results into two groups by `is_task_coupon`: task coupons (`is_task_coupon=1`) and regular coupons (`is_task_coupon=0` or field absent)
 4. Use the same single merged table layout as Scenario 1 (same columns, same column rules). No emoji. Do NOT add a Notes column.
 

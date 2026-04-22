@@ -6,11 +6,11 @@ Product listing, eligibility check, settlement simulation, position summary, and
 
 | Tool | Auth | Description |
 |------|------|-------------|
-| `cex_earn_list_dual_investment_plans` | Yes | List dual investment plans (optional param: plan_id) |
-| `cex_earn_list_dual_orders` | Yes | List dual investment orders (see parameters below) |
-| `cex_earn_list_dual_balance` | Yes | Get dual investment balance & interest stats |
+| `gate-cli cex earn dual plans` | Yes | List dual investment plans (optional param: plan_id) |
+| `gate-cli cex earn dual orders` | Yes | List dual investment orders (see parameters below) |
+| `gate-cli cex earn dual balance` | Yes | Get dual investment balance & interest stats |
 
-### Parameters: `cex_earn_list_dual_orders`
+### Parameters: `gate-cli cex earn dual orders`
 
 | Param | Required | Type | Description |
 |-------|----------|------|-------------|
@@ -21,7 +21,7 @@ Product listing, eligibility check, settlement simulation, position summary, and
 
 > **Critical**: `page` and `limit` are **required** parameters. Always pass `page=1, limit=100` on the first call, then increment `page` until all data is fetched.
 
-### Response Fields: `cex_earn_list_dual_orders`
+### Response Fields: `gate-cli cex earn dual orders`
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -52,7 +52,7 @@ Product listing, eligibility check, settlement simulation, position summary, and
 
 To fetch all orders, loop with incrementing `page`:
 1. Set `limit=100`, `page=1`
-2. Call `cex_earn_list_dual_orders`
+2. Call `gate-cli cex earn dual orders`
 3. If returned rows < `limit` → all data fetched, stop
 4. If returned rows == `limit` → increment `page`, repeat from step 2
 
@@ -88,7 +88,7 @@ To fetch all orders, loop with incrementing `page`:
 
 ### Step 1: Fetch plans
 
-Call `cex_earn_list_dual_investment_plans` to get available plans.
+Call `gate-cli cex earn dual plans` to get available plans.
 
 ### Step 2: Transform raw data (MANDATORY before display)
 
@@ -110,7 +110,7 @@ Group results by `type`:
 
 ### Step 1: Fetch plans by currency
 
-Call `cex_earn_list_dual_investment_plans` to get all plans, then filter results locally by currency (e.g. `BTC`).
+Call `gate-cli cex earn dual plans` to get all plans, then filter results locally by currency (e.g. `BTC`).
 
 ### Step 2: Filter by type
 
@@ -130,7 +130,7 @@ Display:
 
 ### Step 1: Fetch plan details
 
-Call `cex_earn_list_dual_investment_plans` to get `apy_display`, `exercise_price`.
+Call `gate-cli cex earn dual plans` to get `apy_display`, `exercise_price`.
 
 > **Note**: `apy_display` is returned as a raw value (e.g. `2.7814` means 278.14%). Display as `apy_display × 100` + `%`. **NEVER** display the raw value directly with `%`. Use the raw value only in formulas.
 
@@ -155,13 +155,13 @@ Show calculated amounts for the user's specific scenario, clearly labeled.
 
 ### Step 1: Fetch ongoing orders
 
-Call `cex_earn_list_dual_orders` with `page=1`, `limit=100` to get active (not yet delivered) orders.
+Call `gate-cli cex earn dual orders` with `page=1`, `limit=100` to get active (not yet delivered) orders.
 
 > **Critical**: You MUST complete ALL pagination (loop: increment `page` until returned rows < `limit`) before presenting results. Do NOT answer based on partial data.
 
 ### Step 2: Fetch balance overview
 
-Call `cex_earn_list_dual_balance` to get total dual investment asset summary.
+Call `gate-cli cex earn dual balance` to get total dual investment asset summary.
 
 ### Step 3: Transform and present combined summary
 
@@ -199,13 +199,13 @@ Extract the time reference from the user's message and convert to `from`/`to` **
 
 ### Step 2: Fetch ALL matching orders (with pagination)
 
-Call `cex_earn_list_dual_orders` with `from`, `to`, `page=1`, `limit=100`.
+Call `gate-cli cex earn dual orders` with `from`, `to`, `page=1`, `limit=100`.
 
 > **Critical**: You MUST complete ALL pagination before drawing any conclusions. Do NOT answer the user based on partial data.
 
 Pagination loop:
 1. Set `page=1`, `limit=100`
-2. Call `cex_earn_list_dual_orders(from, to, page, limit)`
+2. Call `gate-cli cex earn dual orders`
 3. Collect all returned rows into a result set
 4. If returned rows == `limit` (100) → increment `page`, go to step 2
 5. If returned rows < `limit` → all data fetched, proceed to Step 3
@@ -287,7 +287,7 @@ Your Ongoing Dual Investments
 |---|-----------|------|----------|--------------|-----|
 | 1 | {invest_currency}/{exercise_currency} | {Sell-High/Buy-Low} | {invest_amount} {invest_currency} | {exercise_price} | {apy_display × 100}% |
 
-Total Locked: {balance summary from cex_earn_list_dual_balance}
+Total Locked: {balance summary from `gate-cli cex earn dual balance`}
 
 Dual investment is not principal-protected. Orders cannot be cancelled once placed.
 ```

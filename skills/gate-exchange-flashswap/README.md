@@ -6,14 +6,14 @@ Gate Flash Swap Skill provides comprehensive flash swap capabilities for the Gat
 
 ### Core Capabilities
 
-| Capability | Description | MCP Tools |
+| Capability | Description | `gate-cli` commands |
 |------------|-------------|-----------|
-| One-to-One Swap | Preview and execute a single currency swap (e.g. BTC → USDT) | `cex_fc_preview_fc_order_v1`, `cex_fc_create_fc_order_v1` |
-| One-to-Many Swap | Swap one currency into multiple targets (e.g. USDT → BTC + ETH + SOL) | `cex_fc_preview_fc_multi_currency_one_to_many_order`, `cex_fc_create_fc_multi_currency_one_to_many_order` |
-| Many-to-One Swap | Swap multiple currencies into one target (e.g. BTC + ETH + SOL → USDT) | `cex_fc_preview_fc_multi_currency_many_to_one_order`, `cex_fc_create_fc_multi_currency_many_to_one_order` |
-| Pair Query | Query supported flash swap currency pairs and limits | `cex_fc_list_fc_currency_pairs` |
-| Order History | Query flash swap order list with filters | `cex_fc_list_fc_orders` |
-| Order Detail | Query a single flash swap order by ID | `cex_fc_get_fc_order` |
+| One-to-One Swap | Preview and execute a single currency swap (e.g. BTC → USDT) | `gate-cli cex flash-swap preview-v1`, `gate-cli cex flash-swap create-v1` |
+| One-to-Many Swap | Swap one currency into multiple targets (e.g. USDT → BTC + ETH + SOL) | `gate-cli cex flash-swap preview-one-to-many`, `gate-cli cex flash-swap create-one-to-many` |
+| Many-to-One Swap | Swap multiple currencies into one target (e.g. BTC + ETH + SOL → USDT) | `gate-cli cex flash-swap preview-many-to-one`, `gate-cli cex flash-swap create-many-to-one` |
+| Pair Query | Query supported flash swap currency pairs and limits | `gate-cli cex flash-swap pairs` |
+| Order History | Query flash swap order list with filters | `gate-cli cex flash-swap orders` |
+| Order Detail | Query a single flash swap order by ID | `gate-cli cex flash-swap order` |
 
 ## Architecture
 
@@ -44,19 +44,19 @@ Trigger phrase examples:
 - "Query my flash swap orders"
 - "Check flash swap order 122136 details"
 
-## MCP Tools
+## gate-cli command index
 
 | Tool | Type | Auth Required | Description |
 |------|------|---------------|-------------|
-| `cex_fc_preview_fc_order_v1` | Preview | Yes | One-to-one swap quote preview |
-| `cex_fc_create_fc_order_v1` | Create | Yes | One-to-one swap order creation (requires `quote_id`) |
-| `cex_fc_preview_fc_multi_currency_one_to_many_order` | Preview | Yes | One-to-many swap quote preview |
-| `cex_fc_create_fc_multi_currency_one_to_many_order` | Create | Yes | One-to-many swap order creation |
-| `cex_fc_preview_fc_multi_currency_many_to_one_order` | Preview | Yes | Many-to-one swap quote preview |
-| `cex_fc_create_fc_multi_currency_many_to_one_order` | Create | Yes | Many-to-one swap order creation |
-| `cex_fc_list_fc_currency_pairs` | Query | No | List supported flash swap pairs and limits |
-| `cex_fc_list_fc_orders` | Query | Yes | Query flash swap order history |
-| `cex_fc_get_fc_order` | Query | Yes | Query single flash swap order by ID |
+| `gate-cli cex flash-swap preview-v1` | Preview | Yes | One-to-one swap quote preview |
+| `gate-cli cex flash-swap create-v1` | Create | Yes | One-to-one swap order creation (requires `quote_id`) |
+| `gate-cli cex flash-swap preview-one-to-many` | Preview | Yes | One-to-many swap quote preview |
+| `gate-cli cex flash-swap create-one-to-many` | Create | Yes | One-to-many swap order creation |
+| `gate-cli cex flash-swap preview-many-to-one` | Preview | Yes | Many-to-one swap quote preview |
+| `gate-cli cex flash-swap create-many-to-one` | Create | Yes | Many-to-one swap order creation |
+| `gate-cli cex flash-swap pairs` | Query | No | List supported flash swap pairs and limits |
+| `gate-cli cex flash-swap orders` | Query | Yes | Query flash swap order history |
+| `gate-cli cex flash-swap order` | Query | Yes | Query single flash swap order by ID |
 
 ## Safety & Compliance
 
@@ -69,7 +69,7 @@ Trigger phrase examples:
 
 ## Authentication
 
-This skill does **not** handle credentials directly. Authentication is managed by the Gate MCP platform layer — the MCP server holds the user's API key and injects it into API calls automatically. No environment variables or secrets are required by the skill itself. Users should configure their Gate API key in the MCP server settings (see [Gate MCP](https://github.com/gateio/gate-mcp) for setup instructions).
+This skill does **not** read secrets from chat. Configure **`gate-cli`** on the agent host with **`gate-cli config init`** or **`GATE_API_KEY`** / **`GATE_API_SECRET`**, with Flash Swap permissions. See [gate-cli](https://github.com/gate/gate-cli) and run `sh ./setup.sh` from this skill directory for installation.
 
 ## Source
 

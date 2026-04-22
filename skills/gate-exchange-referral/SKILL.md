@@ -1,9 +1,61 @@
 ---
 name: gate-exchange-referral
-version: "2026.3.26-1"
-updated: "2026-03-26"
 description: "Gate invite-friends and referral campaign skill. Use when the user asks about invitation rewards, referral links, or earn-together rules. Triggers on 'invite friends', 'referral reward', 'referral link', 'earn together'."
+user-invocable: true
+disable-model-invocation: false
+metadata:
+  openclaw:
+    emoji: "💱"
+    os:
+      - darwin
+      - linux
+    primaryEnv: GATE_API_KEY
+    requires:
+      bins:
+        - gate-cli
+      env:
+        - GATE_API_KEY
+        - GATE_API_SECRET
+
+    install:
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux x64)"
+      - kind: download
+        os:
+          - linux
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_linux_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (Linux arm64)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_amd64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Intel)"
+      - kind: download
+        os:
+          - darwin
+        url: "https://github.com/gate/gate-cli/releases/download/v0.6.2/gate-cli_0.6.2_darwin_arm64.tar.gz"
+        bins:
+          - gate-cli
+        targetDir: "bin"
+        label: "Download gate-cli (macOS Apple Silicon)"
 ---
+
+### Resolving `gate-cli` (binary path)
+
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+
 
 # Gate Invite Friends Activity Recommendation & Rule Interpretation
 
@@ -12,37 +64,29 @@ description: "Gate invite-friends and referral campaign skill. Use when the user
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
 → Read [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)
-- **Only call MCP tools explicitly listed in this skill.** Tools not documented here must NOT be called, even if they
-  exist in the MCP server.
+- **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
+## Skill Dependencies
 
----
-
-## MCP Dependencies
-
-### Required MCP Servers
-| MCP Server | Status |
-|------------|--------|
-| Gate (main) | ✅ Required |
 
 ### Authentication
+- **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
+- **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: May be required, depending on runtime and whether account-specific referral data is needed
 - Note: The main workflow in this skill is read-only guidance and rule interpretation. Account-scoped rebate or referral-detail queries may require authenticated Exchange MCP access in some deployments.
 
 ### Installation Check
-- Required: Gate (main)
-- Install: Run installer skill for your IDE
-  - Cursor: `gate-mcp-cursor-installer`
-  - Codex: `gate-mcp-codex-installer`
-  - Claude: `gate-mcp-claude-installer`
-  - OpenClaw: `gate-mcp-openclaw-installer`
+- **Required:** `gate-cli` (run `sh ./setup.sh` from this skill directory if missing; optional `GATE_CLI_SETUP_MODE=release`).
+- Add `$HOME/.openclaw/skills/bin` to **`PATH`** if you invoke `gate-cli` by name (or the directory where [`setup.sh`](./setup.sh) installs it).
+- **Credentials:** When **`GATE_API_KEY`** and **`GATE_API_SECRET`** are both set (non-empty) for the host, **do not** require **`gate-cli config init`** — that is equivalent valid config for `gate-cli`. When **both** are unset or empty and authenticated referral data is needed, **remind** the operator to run **`gate-cli config init`** **or** to configure **`GATE_API_KEY`** / **`GATE_API_SECRET`** in the **matching skill** from the skill library (never ask the user to paste secrets into chat).
+- **Sanity check:** Confirm the CLI works for this setup (e.g. **`gate-cli --version`** or a documented read in this skill) before relying on authenticated referral queries.
 
-## MCP Mode
+## Execution mode
 
-**Read and strictly follow** [`references/mcp.md`](./references/mcp.md), then execute this skill's recommendation/interpretation flow.
+**Read and strictly follow** [`references/gate-cli.md`](./references/gate-cli.md), then execute this skill's recommendation/interpretation flow.
 
 - `SKILL.md` keeps referral policy logic and decision tables.
-- `references/mcp.md` is the authoritative MCP execution layer for capability boundaries, fallback behavior, and output constraints.
+- `references/gate-cli.md` is the authoritative `gate-cli` execution contract for capability boundaries, fallback behavior, and output constraints.
 
 ## Domain Knowledge
 
@@ -60,41 +104,41 @@ When recommending activities, guiding users to check details, or mentioning the 
 
 - **Definition**: A limited-time invitation campaign (viral mechanism) where the inviter (M1) shares an exclusive link, the invitee (M2) registers via the link and completes tasks, and both parties receive random token rewards
 - **Activity Characteristics**:
-  - Time-limited: Each campaign has a clear start and end date
-  - Exclusive: Only one Earn Together campaign runs at a time
-  - Random rewards: Reward amounts are randomly generated within a configured range
+ - Time-limited: Each campaign has a clear start and end date
+ - Exclusive: Only one Earn Together campaign runs at a time
+ - Random rewards: Reward amounts are randomly generated within a configured range
 - **How to Participate**:
-  1. Inviter (M1) shares an exclusive link
-  2. Invitee (M2) registers via the link
-  3. M2 completes designated tasks (KYC, deposit, trading)
-  4. Both parties receive random cash vouchers
+ 1. Inviter (M1) shares an exclusive link
+ 2. Invitee (M2) registers via the link
+ 3. M2 completes designated tasks (KYC, deposit, trading)
+ 4. Both parties receive random cash vouchers
 - **Important Notes**:
-  - Specific task requirements (deposit amount, trading volume) vary by region; please check the activity page for details
-  - Rewards are subject to risk-control review and are typically distributed within 14 business days after claiming
+ - Specific task requirements (deposit amount, trading volume) vary by region; please check the activity page for details
+ - Rewards are subject to risk-control review and are typically distributed within 14 business days after claiming
 
 #### 2. Help & Get Coupons
 
 - **Definition**: Invite 2 friends to complete tasks and receive platform coupon rewards; suitable for users who want trial vouchers or discount coupons
 - **How to Participate**:
-  1. Share your exclusive invitation link
-  2. Invite 2 new users to register
-  3. New users complete the following tasks: deposit task, trading task
-  4. Receive coupon rewards (e.g., 200 USDT position trial voucher; rewards may be adjusted based on actual conditions)
+ 1. Share your exclusive invitation link
+ 2. Invite 2 new users to register
+ 3. New users complete the following tasks: deposit task, trading task
+ 4. Receive coupon rewards (e.g., 200 USDT position trial voucher; rewards may be adjusted based on actual conditions)
 - **Important Notes**:
-  - Assistance rewards are distributed to the Coupon Center with a 5-day validity period
-  - Coupons have usage rules and expiration restrictions
-  - Please check the activity page for detailed task requirements
+ - Assistance rewards are distributed to the Coupon Center with a 5-day validity period
+ - Coupons have usage rules and expiration restrictions
+ - Please check the activity page for detailed task requirements
 
 #### 3. Super Commission
 
 - **Definition**: A permanent invitation system that provides commission rebates based on friends' trading fees, generating continuous passive income
 - **How to Participate**:
-  1. Share your exclusive invitation link
-  2. Friends register via the link
-  3. Friends trade (Spot, Alpha, Futures, TradFi, etc.)
-  4. Both you and your friends receive trading fee rebates
+ 1. Share your exclusive invitation link
+ 2. Friends register via the link
+ 3. Friends trade (Spot, Alpha, Futures, TradFi, etc.)
+ 4. Both you and your friends receive trading fee rebates
 - **Important Notes**:
-  - Commission rates vary by trading type; please check the activity page for detailed rebate rules
+ - Commission rates vary by trading type; please check the activity page for detailed rebate rules
 
 ### Activity Constraints
 
@@ -138,8 +182,8 @@ Classify the request into one of the following categories:
 
 For activity recommendation requests:
 - Check whether there is an active Earn Together campaign
-  - If yes → Prioritize recommending Earn Together (1 activity)
-  - If no → Recommend Help & Get Coupons + Super Commission
+ - If yes → Prioritize recommending Earn Together (1 activity)
+ - If no → Recommend Help & Get Coupons + Super Commission
 
 ### Step 3: Respond by Scenario
 

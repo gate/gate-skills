@@ -13,7 +13,7 @@ Classify the request into one of two cases:
 ### Step 2: Call Tools and Extract Data
 
 Use the minimal tool set required:
-- Transaction history: `cex_alpha_list_alpha_account_book`
+- Transaction history: `gate-cli cex alpha account book`
 
 Key parameters:
 - `from` (required): start time as Unix timestamp in seconds
@@ -64,7 +64,7 @@ Present transaction history in a clear, chronological format.
 **Expected Behavior**:
 1. Determine the time range from the user's request. If unspecified, default to the last 7 days.
 2. Calculate the `from` Unix timestamp (e.g., current time - 7 * 86400 for 7 days).
-3. Call `cex_alpha_list_alpha_account_book` with `from={timestamp}`.
+3. Call `gate-cli cex alpha account book` with `from={timestamp}`.
 4. Present the transaction history in a chronological table with time, currency, change amount, and post-transaction balance.
 5. If there are more pages, inform the user and offer to show the next page.
 6. If no records are found, inform the user that there are no transactions in the specified period.
@@ -80,7 +80,7 @@ Present transaction history in a clear, chronological format.
 
 **Expected Behavior**:
 1. Parse the user's time range description and convert to Unix timestamps for `from` and `to`.
-2. Call `cex_alpha_list_alpha_account_book` with `from={start_timestamp}` and `to={end_timestamp}`.
+2. Call `gate-cli cex alpha account book` with `from={start_timestamp}` and `to={end_timestamp}`.
 3. Present the transaction history in a chronological table.
 4. If there are more pages, inform the user and offer to show the next page.
 5. If no records are found, inform the user that there are no transactions in the specified period.

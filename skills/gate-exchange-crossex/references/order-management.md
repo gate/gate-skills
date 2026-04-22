@@ -6,7 +6,7 @@ Gate CrossEx order query, cancel, and amend scenarios.
 
 ### Step 1: Identify the target order set
 
-Call `cex_crx_list_crx_open_orders` with:
+Call `gate-cli cex cross-ex order list` with:
 
 - `symbol`: optional filter when the user provides a symbol
 - `exchange_type`: optional filter when the user provides an exchange scope
@@ -19,7 +19,7 @@ Key data to extract:
 
 ### Step 2: Query a specific order before mutating it
 
-Call `cex_crx_get_crx_order` with:
+Call `gate-cli cex cross-ex order get` with:
 
 - `order_id`: the order to inspect
 
@@ -32,7 +32,7 @@ Key data to extract:
 
 ### Step 3: Cancel an order after confirmation
 
-Call `cex_crx_cancel_crx_order` with:
+Call `gate-cli cex cross-ex order cancel` with:
 
 - `order_id`: the order approved for cancellation
 
@@ -44,7 +44,7 @@ Key data to extract:
 
 ### Step 4: Amend an order after confirmation
 
-Call `cex_crx_update_crx_order` with:
+Call `gate-cli cex cross-ex order update` with:
 
 - `order_id`
 - `price` when updating price
@@ -59,7 +59,7 @@ Key data to extract:
 
 ### Step 5: Verify historical records when the user asks for past orders
 
-Call `cex_crx_list_crx_history_orders` with:
+Call `gate-cli cex cross-ex order history` with:
 
 - `symbol` when filtering by pair
 - `from`
@@ -122,17 +122,17 @@ Order Management Summary
 
 ### Data Sources
 
-- **Order Query**: Call `cex_crx_get_crx_order` → Order details
-- **Current Open Orders**: Call `cex_crx_list_crx_open_orders` → All open orders
-- **Order History**: Call `cex_crx_list_crx_history_orders` → Historical orders
-- **Cancel Order**: Call `cex_crx_cancel_crx_order` → Cancel result
-- **Batch Cancel**: Query open orders with `cex_crx_list_crx_open_orders`, then cancel each order via
-  `cex_crx_cancel_crx_order`
-- **Amend Order**: Call `cex_crx_update_crx_order` → Amend result
+- **Order Query**: Call `gate-cli cex cross-ex order get` → Order details
+- **Current Open Orders**: Call `gate-cli cex cross-ex order list` → All open orders
+- **Order History**: Call `gate-cli cex cross-ex order history` → Historical orders
+- **Cancel Order**: Call `gate-cli cex cross-ex order cancel` → Cancel result
+- **Batch Cancel**: Query open orders with `gate-cli cex cross-ex order list`, then cancel each order via
+  `gate-cli cex cross-ex order cancel`
+- **Amend Order**: Call `gate-cli cex cross-ex order update` → Amend result
 
 ### Pre-checks
 
-1. **Order Existence**: Call `cex_crx_get_crx_order` to verify order exists
+1. **Order Existence**: Call `gate-cli cex cross-ex order get` to verify order exists
 2. **Order Status**: Check if order can be cancelled or amended (only open orders can be operated)
 3. **Permission Verification**: Verify order belongs to current user
 4. **Amend Parameters**: Verify new price or new quantity comply with trading rules
@@ -174,7 +174,7 @@ Order Management Summary
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_open_orders` to query all open orders
+1. Call `gate-cli cex cross-ex order list` to query all open orders
 2. Display order list (including order ID, trading pair, direction, quantity, price)
 
 **Report Template**:
@@ -205,7 +205,7 @@ Total: 3 open orders
 
 **Expected Behavior**:
 
-1. Call `cex_crx_get_crx_order` to query order details
+1. Call `gate-cli cex cross-ex order get` to query order details
 2. Display complete order information
 
 **Report Template**:
@@ -240,9 +240,9 @@ Update Time: 10:30:25
 **Expected Behavior**:
 
 1. Parse order ID
-2. Call `cex_crx_get_crx_order` to query order details
+2. Call `gate-cli cex cross-ex order get` to query order details
 3. Display cancel plan and require confirmation
-4. Call `cex_crx_cancel_crx_order` to cancel order
+4. Call `gate-cli cex cross-ex order cancel` to cancel order
 5. Verify order cancelled and output result
 
 **Report Template**:
@@ -280,9 +280,9 @@ Status: Cancelled
 **Expected Behavior**:
 
 1. Parse order ID and new parameters
-2. Call `cex_crx_get_crx_order` to query current order details
+2. Call `gate-cli cex cross-ex order get` to query current order details
 3. Display amendment plan and require confirmation
-4. Call `cex_crx_update_crx_order` to amend order
+4. Call `gate-cli cex cross-ex order update` to amend order
 5. Verify order amended and output result
 
 **Report Template**:
@@ -320,7 +320,7 @@ Status: Open
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_orders` to query order history
+1. Call `gate-cli cex cross-ex order history` to query order history
 2. Parameters: `limit` (max 100), `page`, `from` (start timestamp), `to` (end timestamp)
 3. Display recent order records
 

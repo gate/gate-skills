@@ -7,7 +7,7 @@ account ledger.
 
 ### Step 1: Validate query type and time range
 
-Call `cex_crx_list_crx_rule_symbols` with:
+Call `gate-cli cex cross-ex market symbols` with:
 
 - `symbols`: target symbol when the user provides a pair that needs validation
 
@@ -19,7 +19,7 @@ Key data to extract:
 
 ### Step 2: Query order and trade history when requested
 
-Call `cex_crx_list_crx_history_orders` with:
+Call `gate-cli cex cross-ex order history` with:
 
 - `symbol` when filtering by pair
 - `from`
@@ -36,7 +36,7 @@ Key data to extract:
 
 ### Step 3: Query position and interest history when requested
 
-Call `cex_crx_list_crx_history_positions` with:
+Call `gate-cli cex cross-ex position history` with:
 
 - `symbol` when filtering by pair
 - `from`
@@ -53,7 +53,7 @@ Key data to extract:
 
 ### Step 4: Query ledger records when the user asks for account movements
 
-Call `cex_crx_list_crx_account_book` with:
+Call `gate-cli cex cross-ex account book` with:
 
 - `coin` when filtering by asset
 - `from`
@@ -111,12 +111,12 @@ History Query Summary
 
 | Query Type              | MCP TOOL                                    | Description              |
 |-------------------------|---------------------------------------------|--------------------------|
-| Order History           | `cex_crx_list_crx_history_orders`           | Historical order records |
-| Trade History           | `cex_crx_list_crx_history_trades`           | Historical trade records |
-| Position History        | `cex_crx_list_crx_history_positions`        | Futures position history |
-| Margin Position History | `cex_crx_list_crx_history_margin_positions` | Margin position history  |
-| Margin Interest History | `cex_crx_list_crx_history_margin_interests` | Margin interest records  |
-| Account Ledger          | `cex_crx_list_crx_account_book`             | Account ledger records   |
+| Order History           | `gate-cli cex cross-ex order history`           | Historical order records |
+| Trade History           | `gate-cli cex cross-ex order trades`           | Historical trade records |
+| Position History        | `gate-cli cex cross-ex position history`        | Futures position history |
+| Margin Position History | `gate-cli cex cross-ex position margin-history` | Margin position history  |
+| Margin Interest History | `gate-cli cex cross-ex position margin-interests` | Margin interest records  |
+| Account Ledger          | `gate-cli cex cross-ex account book`             | Account ledger records   |
 
 ### Response Field Descriptions
 
@@ -230,7 +230,7 @@ History Query Summary
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_orders` to query order history
+1. Call `gate-cli cex cross-ex order history` to query order history
 2. Parameters: `limit` (max 100), `page`, `from` (start timestamp), `to` (end timestamp)
 3. Display recent order records
 
@@ -265,7 +265,7 @@ Fill Rate: 66.7%
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_trades` to query trade history
+1. Call `gate-cli cex cross-ex order trades` to query trade history
 2. Display recent trade records
 
 **Report Template**:
@@ -298,7 +298,7 @@ Total Fees: 0.9
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_positions` to query position history
+1. Call `gate-cli cex cross-ex position history` to query position history
 2. Display recent position records
 
 **Report Template**:
@@ -331,7 +331,7 @@ Win Rate: 66.7% (2 wins, 1 loss)
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_history_margin_interests` to query interest history
+1. Call `gate-cli cex cross-ex position margin-interests` to query interest history
 2. Display interest records
 
 **Report Template**:
@@ -361,7 +361,7 @@ Total Interest: 0.02 USDT, 0.0003 ETH
 
 **Expected Behavior**:
 
-1. Call `cex_crx_list_crx_account_book` to query account ledger
+1. Call `gate-cli cex cross-ex account book` to query account ledger
 2. Display recent ledger records
 
 **Report Template**:
