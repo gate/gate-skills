@@ -55,7 +55,7 @@ The user specifies the notional value of the position in USDT.
 
 **Tool `get_position` does not exist.** Use the following by account mode (from **`gate-cli cex futures account get`** → **`position_mode`** or **`in_dual_mode`**):
 
-- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): use **`gate-cli cex futures position list`** or **`gate-cli cex futures position get`** for position/leverage. Do **not** use `gate-cli cex futures position get` in dual mode (API returns an array and causes parse error).
+- **Dual mode** (`position_mode === "dual"` or `in_dual_mode === true`): use **`gate-cli cex futures position list`** or **`gate-cli cex futures position get-dual`** for position/leverage. Do **not** use `gate-cli cex futures position get` in dual mode (that is the single-mode API and returns the wrong schema).
 - **Single mode**: use **`gate-cli cex futures position get`** for position/leverage.
 
 Same rule for **margin mode** (`pos_margin_mode`): get it from the position returned by the above query.
@@ -64,7 +64,7 @@ Same rule for **margin mode** (`pos_margin_mode`): get it from the position retu
 
 **Before opening**, show the **final order summary** and only call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` after user confirmation.
 
-- **Leverage**: Query current leverage for **contract + side** via the **position query** above (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`).
+- **Leverage**: Query current leverage for **contract + side** via the **position query** above (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get-dual`; single: `gate-cli cex futures position get`).
 - **Summary**: Contract, side (long/short), size (contracts), price (limit or “market”), margin mode (cross/isolated), **leverage**, estimated margin and liquidation price; for market orders also mention slippage risk. **Do not** add text about mark price, limit protection, or suggesting to adjust price.
 - **Confirmation**: *“Please confirm the above and reply ‘confirm’ to place the order.”* Only after the user confirms (e.g. “confirm”, “yes”, “place”) execute the order.
 
@@ -82,7 +82,7 @@ Example: cross `gate-cli cex futures position update-cross-mode`; isolated `gate
 
 ## Leverage Before Order
 
-If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`. Use **`gate-cli cex futures position update-leverage`** in dual mode; **`gate-cli cex futures position update-leverage`** in single mode. Do not use `gate-cli cex futures position update-leverage` in dual mode (API returns array and causes parse error). *Note:* In dual mode, `gate-cli cex futures position update-leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
+If the **user specifies leverage** and it **differs from current** for that contract/side, **first** set leverage, **then** call `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`. Use **`gate-cli cex futures position update-dual-leverage`** in dual mode; **`gate-cli cex futures position update-leverage`** in single mode. Do not use `gate-cli cex futures position update-leverage` in dual mode (that is the single-mode API and returns the wrong schema). *Note:* In dual mode, `gate-cli cex futures position update-dual-leverage` may return an MCP parse error (e.g. "expected record, received array") even when leverage was set successfully; if the call was made, proceed to place the order.
 
 **If the user does not specify leverage, do not change it.** Use the current leverage from the position query for all calculations (including the USDT cost formula). Do not default to any standard leverage value (e.g. 10x). This is especially important when the user already has a position — changing leverage without explicit request would alter the existing position's risk parameters.
 
@@ -114,10 +114,10 @@ When **target margin mode** is explicitly requested and **differs from** the **c
 **Expected Behavior**:
 1. Fetch contract via `gate-cli cex futures market contract`
 2. Switch to cross via `gate-cli cex futures position update-cross-mode`
-3. Query leverage via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`) for contract + long side
+3. Query leverage via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get-dual`; single: `gate-cli cex futures position get`) for contract + long side
 4. **Show final order summary** (contract, side, size, price, mode, **leverage**, estimated liq/margin), ask user to confirm
 5. After confirm, place order via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
-6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
+6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get-dual`; single: `gate-cli cex futures position get`)
 7. Output open result
 
 **Response Template**:
@@ -148,10 +148,10 @@ Leverage: 10x (from position query)
 **Expected Behavior**:
 1. Fetch contract via `gate-cli cex futures market contract`
 2. Switch to isolated via `gate-cli cex futures position update-cross-mode`
-3. Set leverage via **`gate-cli cex futures position update-leverage`** (dual) or **`gate-cli cex futures position update-leverage`** (single): `(settle="usdt", contract="ETH_USDT", leverage="10")`
+3. Set leverage via **`gate-cli cex futures position update-dual-leverage`** (dual) or **`gate-cli cex futures position update-leverage`** (single): `(settle="usdt", contract="ETH_USDT", leverage="10")`
 4. **Show final order summary** (contract, side, size, market, mode, leverage, estimated liq/margin), ask user to confirm
 5. After confirm, place market order via `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
-6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
+6. Verify position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get-dual`; single: `gate-cli cex futures position get`)
 7. Output fill and position info
 
 **Response Template**:
@@ -264,7 +264,7 @@ Suggestions:
 **Expected Behavior**:
 1. Call `gate-cli cex futures position update-cross-mode`
 2. Receive POSITION_HOLDING (or similar; API returns this for mode switch with position)
-3. Query position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get`; single: `gate-cli cex futures position get`)
+3. Query position via **position query** (dual: `gate-cli cex futures position list` or `gate-cli cex futures position get-dual`; single: `gate-cli cex futures position get`)
 4. Output failure and current position
 
 **Response Template**:
@@ -286,7 +286,7 @@ Suggestion: Close the position first, then switch margin mode.
 **Expected Behavior**:
 1. During open flow, detect target margin mode ≠ current `pos_margin_mode` and contract has a position.
 2. Call `gate-cli cex futures account get`; if `position_mode === "dual"`.
-3. **Interrupt**: do not call `gate-cli cex futures position update-cross-mode`, do not place order.
+3. **Interrupt**: do not call `gate-cli cex futures position update-dual-cross-mode`, do not place order.
 4. Output: *"Please close the position first, then open a new one."*
 
 **Response Template**:

@@ -67,7 +67,7 @@ No mandatory MCP Resource in futures skill.
 | `gate-cli cex futures market tickers` | `settle` | mark/last price, change stats | unavailable |
 | `gate-cli cex futures position list` | `settle`, optional holding | positions list | mode/empty |
 | `gate-cli cex futures position get` | `settle`, `contract` | single-mode position detail | invalid in dual mode |
-| `gate-cli cex futures position get` | `settle`, `contract` | dual-side position detail | invalid in single mode |
+| `gate-cli cex futures position get-dual` | `settle`, `contract` | dual-side position detail | invalid in single mode |
 | `gate-cli cex futures order list` | `settle`, filters | open/finished orders | filter mismatch |
 | `gate-cli cex futures order get` | `settle`, `order_id` | order detail/state | id not found |
 | `gate-cli cex futures price-trigger list` | `settle`, status | trigger order list | none found |
@@ -85,10 +85,10 @@ No mandatory MCP Resource in futures skill.
 | `gate-cli cex futures price-trigger cancel` | settle, order_id | cancel status | already done |
 | `gate-cli cex futures price-trigger cancel-all` | settle, optional contract | batch cancel summary | none open |
 | `gate-cli cex futures price-trigger update` | settle, order_id, update payload | updated trigger order | invalid transition |
-| `gate-cli cex futures position update-cross-mode` | settle, contract, mode | mode updated | has conflicting position |
-| `gate-cli cex futures position update-cross-mode` | settle, contract, mode | mode updated | invalid in dual mode |
-| `gate-cli cex futures position update-leverage` | settle, contract, leverage | leverage updated | invalid leverage |
-| `gate-cli cex futures position update-leverage` | settle, contract, leverage | leverage updated | invalid in dual mode |
+| `gate-cli cex futures position update-dual-cross-mode` | settle, contract, mode | mode updated (dual/hedge mode) | has conflicting position |
+| `gate-cli cex futures position update-cross-mode` | settle, contract, mode | mode updated (single/one-way mode) | invalid in dual mode |
+| `gate-cli cex futures position update-dual-leverage` | settle, contract, leverage | leverage updated (dual/hedge mode) | invalid leverage |
+| `gate-cli cex futures position update-leverage` | settle, contract, leverage | leverage updated (single/one-way mode) | invalid in dual mode |
 
 ## 6. Execution SOP (Non-Skippable)
 
