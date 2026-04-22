@@ -102,9 +102,9 @@ Never translate missing auth into a fake successful execution.
 | contract info | `gate-cli cex futures market contract` |
 | market data / order book | `gate-cli cex futures market orderbook`, `gate-cli cex futures market tickers` |
 | account / position mode | `gate-cli cex futures account get` |
-| position query | `gate-cli cex futures position list`, `gate-cli cex futures position get`, `gate-cli cex futures position get` |
-| margin-mode switching | `gate-cli cex futures position update-cross-mode`, `gate-cli cex futures position update-cross-mode` |
-| leverage update | `gate-cli cex futures position update-leverage`, `gate-cli cex futures position update-leverage` |
+| position query | `gate-cli cex futures position list`, `gate-cli cex futures position get-dual` (dual/hedge), `gate-cli cex futures position get` (single/one-way) |
+| margin-mode switching | `gate-cli cex futures position update-dual-cross-mode` (dual/hedge), `gate-cli cex futures position update-cross-mode` (single/one-way) |
+| leverage update | `gate-cli cex futures position update-dual-leverage` (dual/hedge), `gate-cli cex futures position update-leverage` (single/one-way) |
 | order placement | `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short` |
 | order query | `gate-cli cex futures order list`, `gate-cli cex futures order get` |
 | cancellation | `gate-cli cex futures order cancel`, `gate-cli cex futures order cancel` |
@@ -275,7 +275,7 @@ Rules:
 8. `gate-cli cex futures order add; gate-cli cex futures order close; gate-cli cex futures order long; gate-cli cex futures order remove; gate-cli cex futures order short`
 9. verify the position:
    - `gate-cli cex futures position list`
-   - or `gate-cli cex futures position get` / `gate-cli cex futures position get`
+   - or `gate-cli cex futures position get-dual` (dual/hedge) / `gate-cli cex futures position get` (single/one-way)
 
 #### Close / reverse
 
