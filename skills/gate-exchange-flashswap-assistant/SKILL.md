@@ -95,7 +95,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 - **Interactive file setup:** when **`GATE_API_KEY`** and **`GATE_API_SECRET`** are **not** both set on the host, run **`gate-cli config init`** to complete the wizard for API key, secret, profiles, and defaults (see [gate-cli](https://github.com/gate/gate-cli)).
 - **Env / flags:** **`gate-cli config init`** is **not** required when credentials are already supplied — e.g. **both** **`GATE_API_KEY`** and **`GATE_API_SECRET`** set on the host, or **`--api-key`** / **`--api-secret`** where supported — never ask the user to paste secrets into chat.
 - API Key Required: Yes (authenticated Gate Exchange MCP)
-- **Permissions:** Flash convert (`cex_fc_*`) write, spot account read, wallet small-balance read and convert as required by the gateway (configure keys with least privilege)
+- **Permissions:** Flash convert write (`gate-cli cex flash-swap preview` / `create` or `preview-v1` / `create-v1` / multi-currency variants; MCP `cex_fc_*` when using Exchange MCP), spot account read, wallet small-balance read and convert as required by the gateway (configure keys with least privilege)
 - **Portal:** create or rotate keys outside the chat: https://www.gate.com/myaccount/profile/api-key/manage
 
 ### Installation Check
@@ -182,7 +182,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 | # | User intent (paraphrase) | Signal | Atomic chain |
 |---|--------------------------|--------|----------------|
-| 14 | “Too small” / may be below flash min (e.g. PEPE) | S5 | **[P1]** `gate-cli cex flash-swap pairs`(asset) · `gate-cli cex spot account get`(asset) **→** If available &lt; `sell_min_amount`: **do not** call `cex_fc_preview_*`; show balance / min / gap **→** `gate-cli cex wallet balance small` **→** If asset in dust list: explain **S7** dust→GT path; else suggest accumulate or spot sell (trading copilot) **→** If available ≥ min: continue **scenario #1**-style S1 chain |
+| 14 | “Too small” / may be below flash min (e.g. PEPE) | S5 | **[P1]** `gate-cli cex flash-swap pairs`(asset) · `gate-cli cex spot account get`(asset) **→** If available &lt; `sell_min_amount`: **do not** call `gate-cli cex flash-swap preview` (or any preview variant); show balance / min / gap **→** `gate-cli cex wallet balance small` **→** If asset in dust list: explain **S7** dust→GT path; else suggest accumulate or spot sell (trading copilot) **→** If available ≥ min: continue **scenario #1**-style S1 chain |
 | 15 | Small total one-to-many (e.g. 30 USDT split across DOGE and SHIB) | S2 | **[P0]** Confirm per-leg USDT split with user if unclear **→** **[P1]** `gate-cli cex spot account get`(USDT) · `gate-cli cex flash-swap pairs`(each target) **→** Ensure each leg ≥ `sell_min_amount`; if not, ask to adjust **→** `gate-cli cex flash-swap preview-one-to-many` **→** Highlight failed legs; Action Draft **→** **[Confirm]** **→** **(W)** `gate-cli cex flash-swap create-one-to-many`(confirmed params) |
 | 16 | Single-asset amount exceeds `sell_max_amount` (must split batches) | S6 | **[P1]** `gate-cli cex spot account get`(asset) · `gate-cli cex flash-swap pairs`(asset) **→** Read `sell_max_amount`; plan batches each ≤ max **→** **For batch k:** `gate-cli cex flash-swap preview-v1` **→** Action Draft **→** **[Confirm]** **→** **(W)** `gate-cli cex flash-swap create-v1` **→** Verify `status` **→** **Re-query** `gate-cli cex spot account get` before batch k+1 **→** New preview (new `quote_id`) for next batch |
 | 17 | Several tickers → USDT; “swap everything that can” | N→1 | S3 | **[P1]** For each ticker: `gate-cli cex spot account get` · `gate-cli cex flash-swap pairs` (parallel per asset) **→** Build table **A** (execute: balance ≥ min and pair exists) and **B** (skip: zero / &lt; min / unsupported) **→** If A empty: stop with explanation **→** Else `gate-cli cex flash-swap preview-many-to-one`(A) **→** Action Draft (include B summary) **→** **[Confirm]** **→** **(W)** `gate-cli cex flash-swap create-many-to-one` **→** Verify each |
@@ -225,7 +225,7 @@ Key data to extract:
 - `available` balances
 - Whether each leg passes min gate **before** preview
 
-**S5 rule**: If `available` < `sell_min_amount` for a flash leg, **do not** call `cex_fc_preview_*` for that leg. Present a clear table (balance vs min gap) and optionally call `gate-cli cex wallet balance small` to see if **S7** applies.
+**S5 rule**: If `available` < `sell_min_amount` for a flash leg, **do not** call `gate-cli cex flash-swap preview` (or any preview variant) for that leg. Present a clear table (balance vs min gap) and optionally call `gate-cli cex wallet balance small` to see if **S7** applies.
 
 **S6 rule**: If amount > `sell_max_amount`, plan sequential batches; each batch needs its own preview, Action Draft, **Y**, create, and post-create balance refresh before the next preview. Cap planned batches at a reasonable maximum (for example 20) or stop if the user cancels — do not loop without bound.
 
@@ -373,7 +373,7 @@ Key data to extract:
 
 ### Confirmation
 
-- **No** `cex_fc_create_*` and **no** `gate-cli cex wallet balance convert-small` without prior Action Draft and explicit **Y**.
+- **No** `gate-cli cex flash-swap create` (or `create-v1` / multi-currency create variants) and **no** `gate-cli cex wallet balance convert-small` without prior Action Draft and explicit **Y**.
 - **Never** use an expired or stale `quote_id`; if the user delayed, re-preview.
 - **Never** call fc preview solely to mask a below-minimum balance.
 

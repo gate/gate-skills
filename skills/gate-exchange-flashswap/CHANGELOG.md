@@ -74,8 +74,7 @@
 - Updated all report templates for swap operations
 
 ### Removed
-- Deprecated `cex_fc_preview_fc_order` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) (replaced by `gate-cli cex flash-swap preview-v1`)
-- Deprecated `cex_fc_create_fc_order` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) (replaced by `gate-cli cex flash-swap create-v1`)
+- Legacy MCP identifiers `cex_fc_preview_fc_order` / `cex_fc_create_fc_order` map to `gate-cli cex flash-swap preview` / `gate-cli cex flash-swap create` (classic preview-id flow); JSON-body flows use `gate-cli cex flash-swap preview-v1` / `gate-cli cex flash-swap create-v1` instead
 
 ## [2026.3.11-5] - 2026-03-11
 

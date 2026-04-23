@@ -69,7 +69,7 @@ Format: version with date-based suffix (`YYYY.M.DD-N`). Each release uses a sequ
 
 ### Fixed
 
-- **`gate-cli` command names**: Corrected to actual Gate TradFi `gate-cli` names: `gate-cli cex tradfi order create` → `gate-cli cex tradfi order create`; `gate-cli cex tradfi order update` → `gate-cli cex tradfi order update`; `gate-cli cex tradfi position update` → `gate-cli cex tradfi position update`; cancel/delete uses `gate-cli cex tradfi order cancel` only (no `gate-cli cex tradfi order cancel` or `cex_tradfi_delete_orders` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二); no batch support). Updated in SKILL.md and all trading reference docs; cancel-order doc uses single tool `gate-cli cex tradfi order cancel`, batch scenario removed.
+- **`gate-cli` command names**: Corrected to actual Gate TradFi `gate-cli` names for create/update flows; cancel/delete uses **`gate-cli cex tradfi order cancel --id <order-id>`** (MCP name `cex_tradfi_delete_orders` maps to the same SDK `DeleteOrder` call; no batch cancel in CLI). Updated in SKILL.md and all trading reference docs; cancel-order doc uses a single cancel per order, batch scenario removed.
 
 ---
 

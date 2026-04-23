@@ -27,7 +27,7 @@ Out of scope:
 
 Detection:
 1. Verify CandyDrop endpoints are available on both Gate (main) and Gate (trading) servers.
-2. Probe with public activity listing endpoint (`cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二)).
+2. Probe with public activity listing endpoint (`gate-cli cex launch candy-drop activities`).
 
 Fallback:
 - If authenticated (trading) endpoints unavailable, keep read-only public mode (activity list + rules only).
@@ -57,12 +57,12 @@ No mandatory auxiliary resources.
 
 ## 5. `gate-cli` command specification
 
-- `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate main, public)
-- `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate main, public)
-- `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate trading, auth)
-- `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate trading, auth)
-- `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate trading, auth)
-- `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) (Gate trading, write)
+- `gate-cli cex launch candy-drop activities` (Gate main, public)
+- `gate-cli cex launch candy-drop rules` (Gate main, public)
+- `gate-cli cex launch candy-drop progress` (Gate trading, auth)
+- `gate-cli cex launch candy-drop participations` (Gate trading, auth)
+- `gate-cli cex launch candy-drop airdrops` (Gate trading, auth)
+- `gate-cli cex launch candy-drop register` (Gate trading, write)
 
 ## 6. Execution SOP (Non-Skippable)
 

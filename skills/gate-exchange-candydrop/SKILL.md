@@ -75,18 +75,18 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 **Query Operations (Read-only, Public)**
 
-- cex_launch_get_candy_drop_activity_list_v4
-- cex_launch_get_candy_drop_activity_rules_v4
+- `gate-cli cex launch candy-drop activities`
+- `gate-cli cex launch candy-drop rules`
 
 **Query Operations (Read-only, Auth Required)**
 
-- cex_launch_get_candy_drop_task_progress_v4
-- cex_launch_get_candy_drop_participation_records_v4
-- cex_launch_get_candy_drop_airdrop_records_v4
+- `gate-cli cex launch candy-drop progress`
+- `gate-cli cex launch candy-drop participations`
+- `gate-cli cex launch candy-drop airdrops`
 
 **Execution Operations (Write)**
 
-- cex_launch_register_candy_drop_v4
+- `gate-cli cex launch candy-drop register`
 
 ### Authentication
 
@@ -184,14 +184,14 @@ Activity query interfaces support locating an activity by **either** `activity_i
 
 | Module | MCP tool | Required params | Optional params |
 |--------|----------|-----------------|-----------------|
-| Activity List | `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
-| Activity Rules | `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` **or** `activity_id` (at least one) | — |
-| Register | `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` | `activity_id` |
-| Task Progress | `cex_launch_get_candy_drop_task_progress_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | `currency` **or** `activity_id` (at least one) | — |
-| Participation Records | `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
-| Airdrop Records | `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
+| Activity List | `gate-cli cex launch candy-drop activities` | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
+| Activity Rules | `gate-cli cex launch candy-drop rules` | `currency` **or** `activity_id` (at least one) | — |
+| Register | `gate-cli cex launch candy-drop register` | `currency` | `activity_id` |
+| Task Progress | `gate-cli cex launch candy-drop progress` | `currency` **or** `activity_id` (at least one) | — |
+| Participation Records | `gate-cli cex launch candy-drop participations` | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
+| Airdrop Records | `gate-cli cex launch candy-drop airdrops` | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
 
-- **Register**: Show registration preview, wait for confirmation, then call `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
+- **Register**: Show registration preview, wait for confirmation, then call `gate-cli cex launch candy-drop register`.
 - **Records**: Follow the **Timestamp strategy** in `references/records.md` for time parameter computation.
 
 ### 3. Format response
@@ -251,7 +251,7 @@ The API returns structured errors with a `label` field. Map them as follows:
 
 ### Confirmation required
 
-- **Register is a write operation.** Before calling `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), MUST show a registration preview and wait for explicit user confirmation.
+- **Register is a write operation.** Before calling `gate-cli cex launch candy-drop register`, MUST show a registration preview and wait for explicit user confirmation.
 - Preview format: activity currency, activity ID (if known).
 - Ask user to reply "confirm" to proceed or "cancel" to abort.
 - Only call the API after receiving explicit confirmation.

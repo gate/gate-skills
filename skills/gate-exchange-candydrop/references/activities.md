@@ -8,10 +8,10 @@ Browse available CandyDrop activities and view activity rules including prize po
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_get_candy_drop_activity_list_v4** | Query activity list | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
-| **cex_launch_get_candy_drop_activity_rules_v4** | Query activity rules & prize pools | `currency` **or** `activity_id` (at least one) | — |
+| **`gate-cli cex launch candy-drop activities`** | Query activity list | — | `currency`, `status`, `rule_name`, `register_status`, `limit`, `offset` |
+| **`gate-cli cex launch candy-drop rules`** | Query activity rules & prize pools | `currency` **or** `activity_id` (at least one) | — |
 
-- **cex_launch_get_candy_drop_activity_list_v4**: No authentication required (public endpoint).
+- **`gate-cli cex launch candy-drop activities`**: No authentication required (public endpoint).
   - `status`: `ongoing` (ongoing), `upcoming` (upcoming), `ended` (ended). Omit for all.
   - `rule_name`: Task type filter: `spot`, `futures`, `deposit`, `invite`, `trading_bot`, `simple_earn`, `first_deposit`, `alpha`, `flash_swap`, `tradfi`, `etf`.
   - `register_status`: `registered` (already registered), `unregistered` (not yet registered). Omit for all.
@@ -19,7 +19,7 @@ Browse available CandyDrop activities and view activity rules including prize po
   - `offset`: Offset for pagination, default 0.
   - `currency`: Filter by token name (e.g. "USDT").
 
-- **cex_launch_get_candy_drop_activity_rules_v4**: No authentication required (public endpoint).
+- **`gate-cli cex launch candy-drop rules`**: No authentication required (public endpoint).
   - Must provide at least one of `currency` or `activity_id`.
   - If `currency` is provided without `activity_id`, API auto-matches the nearest valid activity.
 
@@ -55,7 +55,7 @@ Each string is a **task category label**, not a currency ticker. When the user w
 | etf | ETF | ETF |
 
 - **List separator**: Use a locale-appropriate separator between types — e.g. ideographic comma **`、`** for zh-CN (example: `ETF、TradFi`), **`, `** for English.
-- **Tool calls**: When passing **`rule_name`** as a query parameter to `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二), keep using the API filter token (e.g. `futures`, `simple_earn`) — only **end-user visible** text is translated.
+- **Tool calls**: When passing **`rule_name`** as a query parameter to `gate-cli cex launch candy-drop activities`, keep using the API filter token (e.g. `futures`, `simple_earn`) — only **end-user visible** text is translated.
 
 **Activity list — answer directly, no filler (mandatory)**
 
@@ -100,14 +100,14 @@ If the user **explicitly** asks for explanations or mappings, keep answers **sho
 ### Activity List
 
 1. **Parse parameters**: Extract filters from user query — `status`, `currency`, `rule_name`, `register_status`, `limit`, `offset`.
-2. **Call tool**: Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with optional filters. Use `limit=10`, `offset=0` by default.
+2. **Call tool**: Call `gate-cli cex launch candy-drop activities` with optional filters. Use `limit=10`, `offset=0` by default.
 3. **Key data to extract**: From each activity: `currency`, `total_rewards`, `start_time`, `end_time`, `rule_name`, `participants`, `user_max_rewards`.
 4. **Format response**: Display activity list with all fields. Map `status` values to user-friendly labels if filtering. **Render `rule_name` in the user’s language** using the **Task types** table above (not raw English when the user is using Chinese, etc.). **Follow Activity list — answer directly** above: table first, no lecture. Use the Response Template from the matching scenario.
 
 ### Activity Rules
 
 1. **Parse parameters**: Extract `currency` or `activity_id` from user query. If neither is provided, ask the user for `currency`.
-2. **Call tool**: Call `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency` and/or `activity_id`.
+2. **Call tool**: Call `gate-cli cex launch candy-drop rules` with `currency` and/or `activity_id`.
 3. **Key data to extract**: `currency`, `total_rewards`, `start_time`, `end_time`, and per prize pool: `prize_all`, `prize_limit`, `tasks` (task_name, task_desc, exclusive_label).
 4. **Format response**: Show activity overview followed by prize pool details and task list. Use the Response Template from the matching scenario.
 
@@ -129,7 +129,7 @@ Use the **Response Template** block from the scenario that matches the user inte
 
 **Expected Behavior**:
 1. Map user intent to status: all=omit, ongoing=`ongoing`, upcoming=`upcoming`, ended=`ended`.
-2. Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `status={value}`, `limit=10`, `offset=0` (use `limit=30` if the user clearly wants “all” and status is narrow, within API max).
+2. Call `gate-cli cex launch candy-drop activities` with `status={value}`, `limit=10`, `offset=0` (use `limit=30` if the user clearly wants “all” and status is narrow, within API max).
 3. For each activity display: `currency`, `total_rewards`, `start_time`, `end_time`, `rule_name`, `participants`, `user_max_rewards`.
 4. Display formatted activity list **only** — **no** skill tutorial, **no** mapping tables; follow **Activity list — answer directly** above.
 
@@ -161,7 +161,7 @@ Showing {count} activities total.
 
 **Expected Behavior**:
 1. Extract the token name from user query (e.g. "USDT").
-2. Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency={token}`, `limit=10`, `offset=0`.
+2. Call `gate-cli cex launch candy-drop activities` with `currency={token}`, `limit=10`, `offset=0`.
 3. For each activity display all fields.
 4. If no results, suggest trying other tokens.
 
@@ -193,7 +193,7 @@ Found {count} activities for {currency}.
 
 **Expected Behavior**:
 1. Map user intent to `rule_name`: spot=`spot`, futures=`futures`, deposit=`deposit`, invite=`invite`, trading_bot=`trading_bot`, simple_earn=`simple_earn`, first_deposit=`first_deposit`, alpha=`alpha`, flash_swap=`flash_swap`, tradfi=`tradfi`, etf=`etf`.
-2. Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `rule_name={value}`, `limit=10`, `offset=0`.
+2. Call `gate-cli cex launch candy-drop activities` with `rule_name={value}`, `limit=10`, `offset=0`.
 3. For each activity display all fields.
 4. If no results, suggest trying other task types.
 
@@ -225,7 +225,7 @@ Found {count} activities with {task_type_label} tasks.
 
 **Expected Behavior**:
 1. Map user intent to `register_status`: registered=`registered`, unregistered=`unregistered`.
-2. Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `register_status={value}`, `limit=10`, `offset=0`.
+2. Call `gate-cli cex launch candy-drop activities` with `register_status={value}`, `limit=10`, `offset=0`.
 3. Note: This endpoint requires authentication for `register_status` filtering to work correctly.
 4. Display formatted activity list.
 
@@ -258,7 +258,7 @@ Showing {count} activities.
 
 **Expected Behavior**:
 1. Extract `currency` or `activity_id` from user query. If neither, ask the user.
-2. Call `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with the provided parameter(s).
+2. Call `gate-cli cex launch candy-drop rules` with the provided parameter(s).
 3. Display activity overview (currency, total rewards, period).
 4. For each prize pool display: `prize_all`, `prize_limit`, and the task list.
 5. For each task display: `task_name`, `task_desc`, `exclusive_label`.
@@ -292,7 +292,7 @@ Prize Pools:
 - "Show CandyDrop activities" (when none available)
 
 **Expected Behavior**:
-1. Call `cex_launch_get_candy_drop_activity_list_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with user's filters.
+1. Call `gate-cli cex launch candy-drop activities` with user's filters.
 2. Receive empty array.
 3. Suggest alternative filters or checking back later.
 

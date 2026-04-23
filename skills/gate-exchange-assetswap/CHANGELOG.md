@@ -12,7 +12,7 @@
 
 ### Changed
 
-- SKILL.md: documented mandatory **preview → create** construction — `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) **`from` / `to`** must use **`asset` + `amount`** from `data.order` (use `amount`, preserve `to` order); ratio-only create after ratio-based preview called out as a common quote-failure pattern
+- SKILL.md: documented mandatory **preview → create** construction — `gate-cli cex assetswap order create` **`from` / `to`** must use **`asset` + `amount`** from `data.order` (use `amount`, preserve `to` order); ratio-only create after ratio-based preview called out as a common quote-failure pattern
 - SKILL.md: Workflow Steps 5–6, Error Handling, Safety Rules, and Report Template updated for the above
 
 ## [2026.4.8-5] - 2026-04-08

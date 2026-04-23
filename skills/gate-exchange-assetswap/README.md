@@ -2,19 +2,19 @@
 
 ## Overview
 
-This skill covers **Asset Allocation Optimization** on Gate Exchange (internal product identifier may appear in APIs as `asset-swap` or similar): restructuring multiple **spot** holdings into a strategy-driven target using the published **allocation optimization** `gate-cli` commands (`cex_assetswap_*`). It is **not** the same as **spot grid trading** (bots), **manual single spot orders** (use the spot trading skill), or **instant pair conversion** products outside this allocation flow (route to the flash-swap or spot skill when appropriate).
+This skill covers **Asset Allocation Optimization** on Gate Exchange (internal product identifier may appear in APIs as `asset-swap` or similar): restructuring multiple **spot** holdings into a strategy-driven target using the published **allocation optimization** `gate-cli` commands under `gate-cli cex assetswap` (see the table below). It is **not** the same as **spot grid trading** (bots), **manual single spot orders** (use the spot trading skill), or **instant pair conversion** products outside this allocation flow (route to the flash-swap or spot skill when appropriate).
 
 ### Core Capabilities
 
 | Capability | Description | `gate-cli` commands |
 |------------|-------------|-----------|
-| Eligible assets | List spot balances and data available for portfolio optimization | `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Configuration | Strategy enums, targets, limits, precision | `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Evaluation | Optional pre-preview estimate for a candidate set and strategy | `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Preview | Trade-scoped preview of an optimization (slippage, risk hints) | `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Place order | Create optimization order after confirmed preview | `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Order list | Paginated history of allocation optimization orders | `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
-| Order detail | Single order with child order states | `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) |
+| Eligible assets | List spot balances and data available for portfolio optimization | `gate-cli cex assetswap assets` |
+| Configuration | Strategy enums, targets, limits, precision | `gate-cli cex assetswap config` |
+| Evaluation | Optional pre-preview estimate for a candidate set and strategy | `gate-cli cex assetswap evaluate` |
+| Preview | Trade-scoped preview of an optimization (slippage, risk hints) | `gate-cli cex assetswap order preview` |
+| Place order | Create optimization order after confirmed preview | `gate-cli cex assetswap order create` |
+| Order list | Paginated history of allocation optimization orders | `gate-cli cex assetswap order list` |
+| Order detail | Single order with child order states | `gate-cli cex assetswap order get` |
 
 ## Architecture
 
@@ -53,13 +53,13 @@ Example trigger phrases:
 
 | Tool | Type | Auth | Description |
 |------|------|------|-------------|
-| `cex_assetswap_list_asset_swap_assets` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Query | Yes | Eligible assets for optimization |
-| `cex_assetswap_get_asset_swap_config` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Query | Yes | Strategy and parameter configuration |
-| `cex_assetswap_evaluate_asset_swap` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Query | Yes | Optional valuation / estimate |
-| `cex_assetswap_preview_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Preview | Yes (trade) | Preview optimization before create |
-| `cex_assetswap_create_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Create | Yes (trade) | Submit optimization order |
-| `cex_assetswap_list_asset_swap_orders_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Query | Yes | Order history |
-| `cex_assetswap_get_asset_swap_order_v1` (no `gate-cli` mapping; see `gate-cli/cmd/cex/MCP_LEGACY_TOOL_RESOLUTION.md` §二) | Query | Yes | Single order detail |
+| `gate-cli cex assetswap assets` | Query | Yes | Eligible assets for optimization |
+| `gate-cli cex assetswap config` | Query | Yes | Strategy and parameter configuration |
+| `gate-cli cex assetswap evaluate` | Query | Yes | Optional valuation / estimate |
+| `gate-cli cex assetswap order preview` | Preview | Yes (trade) | Preview optimization before create |
+| `gate-cli cex assetswap order create` | Create | Yes (trade) | Submit optimization order |
+| `gate-cli cex assetswap order list` | Query | Yes | Order history |
+| `gate-cli cex assetswap order get` | Query | Yes | Single order detail |
 
 ## Safety and Compliance
 

@@ -6,9 +6,9 @@ Register for CandyDrop activities.
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_register_candy_drop_v4** | Register for a CandyDrop activity | `currency` | `activity_id` |
+| **`gate-cli cex launch candy-drop register`** | Register for a CandyDrop activity | `currency` | `activity_id` |
 
-- **cex_launch_register_candy_drop_v4**: Requires API Key authentication. State-changing write operation.
+- **`gate-cli cex launch candy-drop register`**: Requires API Key authentication. State-changing write operation.
 - `currency`: Token/project name (e.g. "USDT"). **Required** — the API will auto-match the nearest active activity for this token.
 - `activity_id`: Activity ID. Optional — can be used together with `currency` for precise targeting.
 
@@ -41,10 +41,10 @@ Register for CandyDrop activities.
 
 1. **Parse parameters**: Extract `currency` (required) and optional `activity_id` from user query.
 2. **Validate**: If `currency` is missing, ask the user to provide it.
-3. **Optional pre-check**: Call `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) to verify the activity exists and show details.
+3. **Optional pre-check**: Call `gate-cli cex launch candy-drop rules` to verify the activity exists and show details.
 4. **Show preview**: Display registration preview with currency and activity ID (if known). Ask user to confirm.
 5. **Wait for confirmation**: User must reply "confirm" to proceed or "cancel" to abort.
-6. **Execute registration**: Call `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency` and optional `activity_id`.
+6. **Execute registration**: Call `gate-cli cex launch candy-drop register` with `currency` and optional `activity_id`.
 7. **Format response**: Show success or failure message.
 
 ## Report Template
@@ -66,9 +66,9 @@ Show a preview first, then the confirmation result. Include currency and activit
 **Expected Behavior**:
 1. Extract: `currency` (e.g. "USDT"), optional `activity_id`.
 2. If `currency` is missing, ask the user to provide it.
-3. Optionally call `cex_launch_get_candy_drop_activity_rules_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) to verify the activity.
+3. Optionally call `gate-cli cex launch candy-drop rules` to verify the activity.
 4. Display registration preview and ask for confirmation.
-5. On "confirm": call `cex_launch_register_candy_drop_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency` and optional `activity_id`.
+5. On "confirm": call `gate-cli cex launch candy-drop register` with `currency` and optional `activity_id`.
 6. Display success or error with API error label.
 
 **Response Template**:

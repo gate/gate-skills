@@ -8,8 +8,8 @@ Query CandyDrop participation (registration) history and airdrop reward distribu
 
 | Tool | Purpose | Required | Optional |
 |------|---------|----------|----------|
-| **cex_launch_get_candy_drop_participation_records_v4** | Query participation records | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
-| **cex_launch_get_candy_drop_airdrop_records_v4** | Query airdrop records | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
+| **`gate-cli cex launch candy-drop participations`** | Query participation records | — | `currency`, `status`, `start_time`, `end_time`, `page`, `limit` |
+| **`gate-cli cex launch candy-drop airdrops`** | Query airdrop records | — | `currency`, `start_time`, `end_time`, `page`, `limit` |
 
 **IMPORTANT — Time parameter format:**
 - Both endpoints accept `start_time` / `end_time` as **integer unix timestamps (seconds)**.
@@ -111,7 +111,7 @@ Example: "February 2026" → `start_time=1769904000`, `end_time=1772323200` (Mar
 
 1. **Determine strategy**: Check whether the user's time range includes the present moment (→ Strategy 1) or is a historical/absolute range (→ Strategy 2). See decision guide above.
 2. **Parse parameters**: Extract `currency`, `status`, `page` from user query. For Strategy 2, compute `start_time`/`end_time` using the anchor table.
-3. **Call tool**: Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `page=1` and optional filters. Do not pass `limit` (API defaults to 10). For Strategy 1, omit time params; for Strategy 2, include them. **Fetch only ONE page per turn.**
+3. **Call tool**: Call `gate-cli cex launch candy-drop participations` with `page=1` and optional filters. Do not pass `limit` (API defaults to 10). For Strategy 1, omit time params; for Strategy 2, include them. **Fetch only ONE page per turn.**
 4. **Display current page immediately**: Show records to the user (Strategy 1: after discarding out-of-range records). If there may be more records (Strategy 1: returned count >= 10 and all within range; Strategy 2: total >= already shown count), append a pagination prompt and **STOP — wait for the user to confirm before fetching the next page**.
 5. **Key data to extract**: From each record: `id`, `currency`, `status`, `register_time`.
 6. **Format response**: Show as table with all fields. **Strip trailing `(UTC)` from `register_time` cells** when the column header includes `(UTC)` (see **UTC in header** above). Append pagination prompt when applicable.
@@ -134,14 +134,14 @@ Use the **Response Template** block from the matching scenario. Show `currency`,
 **Expected Behavior**:
 
 *If Strategy 1 (range includes present):*
-1. Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `page=1` — do NOT pass `start_time`/`end_time` or `limit`.
+1. Call `gate-cli cex launch candy-drop participations` with `page=1` — do NOT pass `start_time`/`end_time` or `limit`.
 2. Discard records whose `register_time` is outside the user's intended range.
 3. **Immediately display** the remaining records to the user.
 4. If returned count >= 10 and all are within range, append: "There may be more records. Reply 'next page' to continue." — then **STOP and wait**.
 
 *If Strategy 2 (historical / absolute range):*
 1. Compute `start_time` and `end_time` as integers using the anchor table.
-2. Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `limit`.
+2. Call `gate-cli cex launch candy-drop participations` with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `limit`.
 3. **Immediately display** returned records.
 4. If total >= already shown count, append: "There are more records ({total} total). Reply 'next page' to continue." — then **STOP and wait**.
 
@@ -172,7 +172,7 @@ Total: {total} records.
 
 **Expected Behavior**:
 1. Extract token name from user query (e.g. "USDT").
-2. Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency={token}`, `page=1`.
+2. Call `gate-cli cex launch candy-drop participations` with `currency={token}`, `page=1`.
 3. For each record display: `currency`, `status`, `register_time`.
 
 **Response Template**:
@@ -202,7 +202,7 @@ Total: {total} records for {currency}.
 
 **Expected Behavior**:
 1. Map user intent to status: won=`won`, not_win=`not_win`, ongoing=`ongoing`, awaiting_draw=`awaiting_draw`.
-2. Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `status={value}`, `page=1`.
+2. Call `gate-cli cex launch candy-drop participations` with `status={value}`, `page=1`.
 3. Display filtered records.
 
 **Response Template**:
@@ -229,7 +229,7 @@ Total: {total} records with status "{status_label}".
 - "Show my CandyDrop history" (when user has none)
 
 **Expected Behavior**:
-1. Call `cex_launch_get_candy_drop_participation_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二).
+1. Call `gate-cli cex launch candy-drop participations`.
 2. Receive empty array.
 3. Suggest browsing active activities.
 
@@ -250,7 +250,7 @@ To get started:
 
 1. **Determine strategy**: Same as Part 1 — check whether time range includes present (→ Strategy 1) or is historical (→ Strategy 2).
 2. **Parse parameters**: Extract `currency`, `page` from user query. For Strategy 2, compute `start_time`/`end_time` using the anchor table.
-3. **Call tool**: Call `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `page=1` and optional filters. Do not pass `limit` (API defaults to 10). **Fetch only ONE page per turn.**
+3. **Call tool**: Call `gate-cli cex launch candy-drop airdrops` with `page=1` and optional filters. Do not pass `limit` (API defaults to 10). **Fetch only ONE page per turn.**
 4. **Display current page immediately**: Same pagination rules as Part 1.
 5. **Key data to extract**: From each record: `currency`, `airdrop_time`, `rewards`.
 6. **Format response**: Show as table with those fields only. **Apply the mandatory unit rules** above for `rewards` in every cell (not raw API strings alone for amounts). **Strip trailing `(UTC)` from `airdrop_time` cells** when the column header includes `(UTC)`.
@@ -273,14 +273,14 @@ Use the **Response Template** block from the matching scenario. Show `currency`,
 **Expected Behavior**:
 
 *If Strategy 1 (range includes present):*
-1. Call `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `page=1` — do NOT pass `start_time`/`end_time` or `limit`.
+1. Call `gate-cli cex launch candy-drop airdrops` with `page=1` — do NOT pass `start_time`/`end_time` or `limit`.
 2. Discard records whose `airdrop_time` is outside the user's intended range.
 3. **Immediately display** the remaining records.
 4. If returned count >= 10 and all within range, append: "There may be more records. Reply 'next page' to continue." — then **STOP and wait**.
 
 *If Strategy 2 (historical / absolute range):*
 1. Compute `start_time` and `end_time` as integers using the anchor table.
-2. Call `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `limit`.
+2. Call `gate-cli cex launch candy-drop airdrops` with `start_time={timestamp}`, `end_time={timestamp}`, `page=1` — do NOT pass `limit`.
 3. **Immediately display** returned records.
 4. If total >= already shown count, append: "There are more records ({total} total). Reply 'next page' to continue." — then **STOP and wait**.
 
@@ -312,7 +312,7 @@ Showing {current_count} records.
 
 **Expected Behavior**:
 1. Extract token name from user query (e.g. "USDT").
-2. Call `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `currency={token}`, `page=1`.
+2. Call `gate-cli cex launch candy-drop airdrops` with `currency={token}`, `page=1`.
 3. For each record display: `currency`, `airdrop_time`, and **`{rewards} {currency}`** (with units).
 
 **Response Template**:
@@ -340,7 +340,7 @@ Showing {current_count} records for {currency}.
 - "Show my CandyDrop airdrop rewards" (when user has none)
 
 **Expected Behavior**:
-1. Call `cex_launch_get_candy_drop_airdrop_records_v4` (no `gate-cli` mapping in `gate-cli/cmd/cex`; see `MCP_LEGACY_TOOL_RESOLUTION.md` §二) with `page=1`.
+1. Call `gate-cli cex launch candy-drop airdrops` with `page=1`.
 2. Receive empty array.
 3. Explain reward distribution timing and suggest participation.
 
