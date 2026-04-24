@@ -21,7 +21,7 @@ description: "Packaged runtime rules for gate-exchange-spot so the published ski
 ## 2. Command scope
 
 - Use only the `gate-cli` commands documented in `SKILL.md` and `references/gate-cli.md`.
-- Before any documented **`gate-cli cex …`** invocation, follow **`references/gate-cli.md` §2.1** (`--help` first → required flags if any → then real run; see example `spot account get` there).
+- Before any documented **`gate-cli cex …`** invocation, follow **`references/gate-cli.md` §2.1** (`--help` first → required flags if any → then real run; see examples `spot account list` / `spot account get` there).
 - Do not call undocumented Gate tools, browser flows, or unrelated system tools.
 - If the user asks for futures, DEX, or analysis-only work, route to the appropriate skill instead of forcing spot-trading actions through this skill.
 

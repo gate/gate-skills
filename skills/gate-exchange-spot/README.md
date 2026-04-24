@@ -6,7 +6,7 @@ An integrated execution skill for Gate spot trading, covering buy/sell actions, 
 
 ### Core Capabilities
 
-- Buy and account queries (balance checks, full-balance buy, asset valuation, minimum order checks)
+- Buy and account queries (list spot balances via `account list`, per-coin balance checks, full-balance buy, asset valuation, minimum order checks)
 - Smart monitoring and trading (place limit orders by percentage/fixed price spread)
 - Trigger and TP/SL automation (price-triggered placement, dual-leg TP/SL setup, trigger progress checks, and single/batch trigger cancellations)
 - Order management and amendments (list open orders, amend orders, cancel orders)

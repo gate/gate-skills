@@ -1,6 +1,6 @@
 ---
 name: gate-exchange-spot
-description: "Gate spot trading and account operations skill. Use when the user asks to buy/sell crypto on spot, check account value, or place conditional/trigger orders. Triggers on 'buy coin', 'sell spot', 'take profit', 'stop loss', or 'cancel order'."
+description: "Gate spot trading and account operations skill. Use when the user asks to buy/sell crypto on spot, check account value, list spot balances, or place conditional/trigger orders. Triggers on 'buy coin', 'sell spot', 'take profit', 'stop loss', 'cancel order', 'my spot balance', '查看我的现货账户余额', or '现货账户余额'."
 user-invocable: true
 disable-model-invocation: false
 metadata:
@@ -52,11 +52,6 @@ metadata:
         label: "Download gate-cli (macOS Apple Silicon)"
 ---
 
-### Resolving `gate-cli` (binary path)
-
-Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
-
-
 # Gate Spot Trading Assistant
 
 ## General Rules
@@ -71,8 +66,6 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ## Skill Dependencies
 
-This skill depends on the **`gate-cli`** binary and the documented subcommands below. Command strings align with `gate-cli/cmd/cex/GATE_EXCHANGE_SKILLS_MCP_TO_GATE_CLI.md`.
-
 - **Before any `gate-cli` invocation:** ensure `gate-cli` is installed. Let `GATE_CLI_BIN="${GATE_OPENCLAW_SKILLS_BIN:-$HOME/.openclaw/skills/bin}/gate-cli"`. If **`[ ! -x "$GATE_CLI_BIN" ]`** (and `command -v gate-cli` also fails if you rely on `PATH`), **run** [`setup.sh`](./setup.sh) (e.g. `sh ./setup.sh` from this skill directory), then re-check. **Do not** continue with trading or account reads that require auth until `gate-cli` runs successfully (e.g. `gate-cli --version`).
 - **No MCP servers** are required for this skill; execution is **`gate-cli` only**.
 
@@ -82,6 +75,7 @@ This skill depends on the **`gate-cli`** binary and the documented subcommands b
 
 - `gate-cli cex spot market currency`
 - `gate-cli cex spot market pair`
+- `gate-cli cex spot account list`
 - `gate-cli cex spot account get`
 - `gate-cli cex spot account batch-fee`
 - `gate-cli cex spot market candlesticks`
@@ -131,7 +125,7 @@ This skill depends on the **`gate-cli`** binary and the documented subcommands b
 
 | Group | gate-cli commands |
 |------|------|
-| Account and balances | `gate-cli cex spot account get`, `gate-cli cex spot account book` |
+| Account and balances | `gate-cli cex spot account list` (all spot rows / 查看现货账户余额), `gate-cli cex spot account get` (one currency), `gate-cli cex spot account book` |
 | Place/cancel/amend orders | `gate-cli cex spot order buy` / `gate-cli cex spot order sell`, `gate-cli cex spot order batch-create`, `gate-cli cex spot order cancel`, `gate-cli cex spot order batch-cancel`, `gate-cli cex spot order amend`, `gate-cli cex spot order batch-amend` |
 | Trigger orders (price orders) | `gate-cli cex spot price-trigger create`, `gate-cli cex spot price-trigger list`, `gate-cli cex spot price-trigger get`, `gate-cli cex spot price-trigger cancel`, `gate-cli cex spot price-trigger cancel-all` |
 | Open orders and fills | `gate-cli cex spot order list`, `gate-cli cex spot order my-trades` |
@@ -169,7 +163,7 @@ When the user asks for any spot trading operation, follow this sequence.
 Classify the request into one of these six categories:
 1. Buy (market/limit/full-balance buy)
 2. Sell (full-position sell/conditional sell)
-3. Account query (total assets, balance checks, tradability checks)
+3. Account query (list spot balances / 查看现货账户余额, total assets, per-coin balance checks, tradability checks)
 4. Order management (list open orders, amend, cancel)
 5. Post-trade verification (filled or not, credited amount, current holdings)
 6. Combined actions (sell then buy, buy then place sell order, trend-based buy)
@@ -231,7 +225,9 @@ If user confirmation is missing, ambiguous, or negative:
 ### Step 4: Run commands by scenario
 
 Use only the minimal `gate-cli` command set required for the task:
-- Balance and available funds: `gate-cli cex spot account get`
+- **List all spot balances** (e.g. 查看我的现货账户余额、我的现货余额、列出现货账户有哪些币; default omits zero-balance currencies): `gate-cli cex spot account list` — add `--all` only if the user wants every currency including zeros
+- **Single-currency balance** (pre-trade check for one coin): `gate-cli cex spot account get --currency=…`
+- **General “available funds”** when a specific coin is not yet chosen: prefer `gate-cli cex spot account list` for a full table; use `gate-cli cex spot account get` when the workflow already names one `currency`
 - Rule validation: `gate-cli cex spot market pair`
 - Live price and moves: `gate-cli cex spot market tickers`
 - Order placement: `gate-cli cex spot order buy` / `gate-cli cex spot order sell` / `gate-cli cex spot order batch-create`
@@ -249,7 +245,7 @@ The response must include:
 - Core numbers (price, quantity, amount, balance change)
 - If condition not met, clearly explain why no order is placed now
 
-## Case Routing Map (1-36)
+## Case Routing Map (1-37)
 
 ### A. Buy and Account Queries (1-8)
 
@@ -259,7 +255,8 @@ The response must include:
 | 2 | Buy at target price | Create a `limit buy` order | `gate-cli cex spot account get` → `gate-cli cex spot order buy` / `gate-cli cex spot order sell` |
 | 3 | Buy with all balance | Use all available USDT balance to buy | `gate-cli cex spot account get` → `gate-cli cex spot order buy` / `gate-cli cex spot order sell` |
 | 4 | Buy readiness check | Currency status + min size + current unit price | `gate-cli cex spot market currency` → `gate-cli cex spot market pair` → `gate-cli cex spot market tickers` |
-| 5 | Asset summary | Convert all holdings to USDT value | `gate-cli cex spot account get` → `gate-cli cex spot market tickers` |
+| 5 | Asset summary | Convert all holdings to USDT value | `gate-cli cex spot account list` → `gate-cli cex spot market tickers` |
+| 37 | List spot balances / 查看现货账户余额 | Show all non-zero spot rows (table); use `--all` if user wants zero balances too | `gate-cli cex spot account list` |
 | 6 | Cancel all then check balance | Cancel all open orders for the user’s pair (`gate-cli cex spot order cancel` with `--all` on that `--pair`) and return balances | `gate-cli cex spot order cancel` → `gate-cli cex spot account get` |
 | 7 | Sell dust | Sell only if minimum size is met | `gate-cli cex spot account get` → `gate-cli cex spot market pair` → `gate-cli cex spot order buy` / `gate-cli cex spot order sell` |
 | 8 | Balance + minimum buy check | Place order only if account balance and `min_quote_amount` are both satisfied | `gate-cli cex spot account get` → `gate-cli cex spot market pair` → `gate-cli cex spot order buy` / `gate-cli cex spot order sell` |
@@ -316,7 +313,8 @@ The response must include:
 
 | Condition | Action |
 |-----------|--------|
-| User asks to check balance before buying | Must call `gate-cli cex spot account get` first; place order only if sufficient |
+| User asks to 查看/列出现货账户余额 or “my spot balance(s)” with no single coin named | Use `gate-cli cex spot account list` (add `--all` if they want zero-balance currencies) |
+| User asks to check balance before buying (pair/coin already known) | Must call `gate-cli cex spot account get` (named `currency`) or `gate-cli cex spot account list` as needed; place order only if sufficient |
 | User specifies buy/sell at target price | Use `type=limit` at user-provided price |
 | User asks for fastest fill at current market | Prefer `market`; if "fast limit" is requested, use best book price |
 | Market buy (`buy`) | Fill `amount` with USDT quote amount, not base quantity |

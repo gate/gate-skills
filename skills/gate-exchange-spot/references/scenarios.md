@@ -1,6 +1,6 @@
 # Scenarios
 
-This document defines behavior-oriented scenario templates for all 36 spot cases.
+This document defines behavior-oriented scenario templates for all 37 spot cases.
 
 ## Global Execution Gate (Mandatory)
 
@@ -77,13 +77,22 @@ If confirmation is missing/ambiguous/stale, do not execute any trading call.
 - "How much is my account worth now?"
 - "Give me my total USDT-equivalent value."
   **Expected Behavior**:
-1. Fetch data via `gate-cli cex spot account get` `currency=all` and `gate-cli cex spot market tickers` `currency_pair=*USDT`.
+1. Fetch data via `gate-cli cex spot account list` and `gate-cli cex spot market tickers` `currency_pair=*USDT`.
 2. Calculate per-asset USDT valuation and aggregate portfolio total.
 3. Output `Portfolio Valuation Report`.
    **Unexpected Behavior**:
 1. Excludes low-liquidity or non-USDT assets from total, materially understating account value.
 2. Uses stale or mismatched pair prices, producing unrealistic valuation output.
 3. Triggers trade-related tools in a portfolio-report-only task.
+
+## Scenario 37: List Spot Account Balances
+**Context**: User wants a tabular list of their spot account (available/locked) without naming a single currency — e.g. 查看我的现货账户余额, 我的现货有哪些币, list my spot balances.
+  **Expected Behavior**:
+1. Run `gate-cli cex spot account list` (default: non-zero balances). Add `--all` if the user explicitly wants every currency including zero balances.
+2. Present the result in a clear table or summary; no trading execution.
+   **Unexpected Behavior**:
+1. Uses `gate-cli cex spot account get` for a full-account view when the user did not ask for one coin (get requires `--currency` per CLI contract).
+2. Omits explaining that the default list hides zero-balance rows unless `--all` is used when the user asks to see all coins.
 
 ## Scenario 6: Cancel All Open Orders Then Recheck Balance
 **Context**: User wants all open orders canceled and updated balances.

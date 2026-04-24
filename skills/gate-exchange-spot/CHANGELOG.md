@@ -1,5 +1,9 @@
 # Changelog
 
+## [2026.4.24-1] - 2026-04-24
+
+- **Spot balance listing:** when the user asks to view or list spot account balances (e.g. 查看我的现货账户余额), route to `gate-cli cex spot account list` (optional `--all` for zero-balance rows). Documented in `SKILL.md`, `references/gate-cli.md`, and `references/scenarios.md` (Case 37 / Scenario 37). Case 5 valuation flow now starts from `account list` for consistency with the CLI.
+
 ## [2026.4.17-3] - 2026-04-17
 
 - **Skill Dependencies:** `gate-cli` only; if missing, run `setup.sh` before any invocations; removed **Required gate-cli**.

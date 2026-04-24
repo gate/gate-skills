@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-spot-gate-cli
-version: "2026.4.17-2"
-updated: "2026-04-17"
+version: "2026.4.24-1"
+updated: "2026-04-24"
 description: "gate-cli execution specification for Gate spot trading: order placement, trigger orders, query, amend/cancel, verification, and safety gates (aligned with gate-cli/cmd/cex/GATE_EXCHANGE_SKILLS_MCP_TO_GATE_CLI.md)."
 ---
 
@@ -37,7 +37,7 @@ Fallback:
 
 For every documented **`gate-cli cex …`** leaf command, **strictly** follow this order:
 
-1. **Preflight with `--help`:** Run the same command with **`--help`** immediately after the full `cex …` subcommand path (before any other flags), e.g. `gate-cli cex spot account get --help`, to see whether the CLI marks any flags or arguments as **required**.
+1. **Preflight with `--help`:** Run the same command with **`--help`** immediately after the full `cex …` subcommand path (before any other flags), e.g. `gate-cli cex spot account list --help` or `gate-cli cex spot account get --help`, to see whether the CLI marks any flags or arguments as **required**.
 2. **If `--help` lists required fields** (e.g. `--currency`): obtain values (ask the user only for non-secret business inputs such as symbol or amount; never ask for API secrets in chat), then run the **real** invocation **without** `--help`, including every required flag, e.g. `gate-cli cex spot account get --currency BTC`.
 3. **If `--help` shows no required fields** for that subcommand: you may run the bare **`gate-cli cex …`** (only add optional flags the task still needs for correct semantics).
 
@@ -62,7 +62,8 @@ No bundled auxiliary resources are required for this skill.
 
 | Command | Required inputs | Key return fields | Common errors |
 |---|---|---|---|
-| `gate-cli cex spot account get` | optional `currency` | available/locked balances | auth, currency invalid |
+| `gate-cli cex spot account list` | optional `--all` (include zero balances) | all spot balances (default: non-zero only) | auth |
+| `gate-cli cex spot account get` | required `currency` | available/locked for one coin | auth, currency invalid |
 | `gate-cli cex spot market currency` | `currency` | chain/tradability metadata | currency not found |
 | `gate-cli cex spot market pair` | `currency_pair` | min size, precision, tradable status | pair invalid |
 | `gate-cli cex spot market tickers` | optional pair | last, ask, bid, 24h stats | market unavailable |
