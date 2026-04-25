@@ -116,4 +116,4 @@ This service is not available in your region at the moment. Please try again lat
 | Region | Service may be unavailable; no circumvention |
 | Create plan — compliance validation failed | Prefer API/MCP wording; if region: use sample output above |
 | Generic | Summarize API message |
-| Auth | [`exchange-runtime-rules.md`](../../exchange-runtime-rules.md) |
+| Auth | [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) |

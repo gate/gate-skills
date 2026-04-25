@@ -360,4 +360,4 @@ Use English for user-facing text. Per-scenario **Response Template** blocks appe
 | `plan_period_day` is `0` or out of range for `plan_period_type` | Do not call create; explain valid ranges (Workflow step 6): monthly **1–30**; weekly/biweekly **1–7** (1 = Monday); daily/hourly/4-hourly use **`1`**. |
 | Insufficient balance | Do not create/top-up; suggest top-up or lower amount |
 | Autoinvest tools missing | Explain MCP update needed; no simulated execution |
-| 401/403 | API key / permissions per [`exchange-runtime-rules.md`](../../exchange-runtime-rules.md) |
+| 401/403 | API key / permissions per [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) |

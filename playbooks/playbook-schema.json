@@ -1,0 +1,8 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://local.gate-cli-skills/playbook",
+  "title": "gate-cli-skills playbook (permissive)",
+  "description": "Allows any properties so IDE YAML validation does not reject custom keys like description, slot_registry, playbooks.",
+  "type": "object",
+  "additionalProperties": true
+}

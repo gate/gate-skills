@@ -1,42 +1,25 @@
-# Changelog
+# Changelog — gate-info-research
 
-All notable changes to the **gate-info-research** (Market Research Copilot) skill are documented here.
-
----
-
-## [2026.3.22-2] - 2026-03-22
-
-### Changed
-
-- **SKILL.md**: Step 2 signal table and **Signal Routing Examples** are **English-only** (no embedded non-English trigger lists); routing remains **intent-based** for user queries in any language.
-- **references/scenarios.md**: All **Prompt Examples** and maintainer notes translated to English; Scenario 7 expected-behavior steps use English only.
+**Note**: Dates follow the same `YYYY.M.D-N` format the legacy `gate-info-business-skills` project uses. Bump `version` + `updated` in `SKILL.md` frontmatter and in [playbooks/gate-info-research.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-research.yaml) together when this file receives a new entry.
 
 ---
 
-## [2026.3.22-1] - 2026-03-22
+## [2026.4.18-1] - 2026-04-18 — Initial release
 
 ### Added
 
-- **SKILL.md**: Bilingual **Trigger Keywords** (English and Simplified Chinese) for S1–S5; expanded **Screening mode** cues in both languages (e.g. screen, rank, screening, leaderboard, highest-potential picks); **Signal Routing Examples** table extended with paired English and Chinese examples (daily brief, top-gainer screen, DeFi leader, long-hold compare, sentiment rebound, etc.).
-- **references/scenarios.md**: One **Simplified-Chinese prompt example** per scenario; Scenario 7 adds **HTML #2** line (top 5 gainers + potential deep-dive); Context / Expected Behavior updated for screening (rank by 24h gain vs oversold/RSI paths).
-- **README.md**: **Support** section (support@gate.com, business@gate.com, Help Center, GitHub Issues).
-- **Safety Rules** (#9–#10): Age restriction (18+); data-flow declaration (Gate MCP → Gate API only, no third-party user-data transfer).
+- **Skill**: Research-oriented primary skill covering single-coin analysis, market overview, multi-coin comparison, trend / technical analysis, macro impact, and research-plus-news synthesis. Consolidates the legacy `gate-info-coinanalysis`, `gate-info-marketoverview`, `gate-info-coincompare`, `gate-info-trendanalysis`, `gate-info-macroimpact` into one unified 6-section report.
+- **SKILL.md**: Steps 0-3 + cross-skill routing; references shared modules under [skills/_shared/](https://github.com/gate/gate-skills/tree/master/skills/_shared) for preflight, routing, report style.
+- **Playbook**: [playbooks/gate-info-research.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-research.yaml) — six playbooks (`single_coin`, `market_overview`, `multi_coin`, `trend`, `macro`, `research_plus_news`) with real `gate-cli v0.5.2` lower-level commands.
+- **References**: [references/scenarios.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/scenarios.md), [references/cli-reference.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/cli-reference.md), [references/troubleshooting.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/troubleshooting.md).
+- **Scripts**: `scripts/update-skill.sh`, `scripts/update-skill.ps1` — mirror of the legacy Trigger-update flow.
 
-### Changed
+### CLI baseline
 
-- **SKILL.md**: `references/scenarios.md` cross-link under **Workflow**; user-facing output rules tightened (no internal tool or field names in reports); frontmatter description trimmed / neutral wording for multi-dimensional queries.
-
----
-
-## [2026.3.20-1] - 2026-03-20 — Initialization
-
-### Added
-
-- **Skill**: Market Research Copilot (L2 composite). Orchestrates 12 read-only MCP tools across Gate-Info (8) and Gate-News (4) for structured market intelligence. Covers: market overview, single-coin deep dive, multi-coin comparison, technical trend, event attribution, risk check, and screening mode.
-- **SKILL.md**: 5-dimension signal detection (S1 Market/Macro, S2 Fundamentals, S3 Technicals, S4 News/Sentiment, S5 Security), parallel/serial execution model, 5 report templates (Market Brief, Single-Coin, Multi-Coin, Event Attribution, Risk Check), judgment logic, error handling, cross-skill routing, safety rules. Parameter notes for `source=spot` constraint on `get_kline` and `get_market_snapshot`.
-- **README.md**: Overview, 7 core capabilities, routing table, architecture description, MCP service dependencies, signal-to-tool mapping.
-- **references/scenarios.md**: 9 scenario definitions covering low/medium/high complexity use cases with tool call chains.
+- Aligned to `gate-cli v0.5.2` as of `gate-cli info list` / `gate-cli news list`.
+- No aggregate shortcuts (`info +coin-overview`, `news +brief`, ...) are assumed; every command referenced is verified present.
 
 ### Audit
 
-- Read-only; all 12 tools are public read, no authentication required. No trading, swaps, staking, or fund-moving operations.
+- Read-only; no trade execution.
+- No investment advice emitted; strongest phrasing is `偏强 / 偏弱 / 需继续观察`.

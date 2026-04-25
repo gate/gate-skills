@@ -54,7 +54,7 @@ metadata:
 
 ### Resolving `gate-cli` (binary path)
 
-Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](../gate-runtime-rules.md) §4).
+Resolve **`gate-cli`** in order: **(1)** **`command -v gate-cli`** and **`gate-cli --version`** succeeds; **(2)** **`${HOME}/.local/bin/gate-cli`** if executable; **(3)** **`${HOME}/.openclaw/skills/bin/gate-cli`** if executable. Canonical rules: [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) §4 (or [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) §4).
 
 
 # gate-exchange-autoinvest
@@ -65,7 +65,7 @@ The fast auto-invest (DCA) function of Gate Exchange Earn, supporting create, up
 
 ⚠️ STOP — You MUST read and strictly follow the shared runtime rules before proceeding.
 Do NOT select or call any tool until all rules are read. These rules have the highest priority.
-→ Read [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) first (mirror: [`exchange-runtime-rules.md` on GitHub](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)).
+→ Read [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) first (mirror: [`exchange-runtime-rules.md` on GitHub](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md)).
 - **Only use the `gate-cli` commands explicitly listed in this skill.** Commands not documented here must NOT be run for these workflows, even if other interfaces expose them.
 
 ## Skill Dependencies
@@ -457,7 +457,7 @@ Before calling any write tool:
 | **Invalid `plan_period_day`** | `0` or out of range for `plan_period_type` on create | Do not call create; state valid ranges: monthly **1–30**; weekly/biweekly **1–7** (1 = Monday); daily/hourly/4-hourly use **`1`** (`references/autoinvest-plans.md` Workflow step 6) |
 | **Plan not found** | Query returns no matching plan | Inform: "No matching auto-invest plan found. You can create a new plan." (See Scenario 4) |
 | **MCP tool missing** | Required tool not available in MCP service | Explain: "Auto-invest feature requires updated MCP service. Please ensure gate-mcp is properly configured." |
-| **API error (401/403)** | Authentication failure | Guide: "Authentication error. Please check your API key permissions include Earn (auto-invest) access." See [`exchange-runtime-rules.md`](../exchange-runtime-rules.md) for auth handling. |
+| **API error (401/403)** | Authentication failure | Guide: "Authentication error. Please check your API key permissions include Earn (auto-invest) access." See [`exchange-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/exchange-runtime-rules.md) for auth handling. |
 | **API error (4xx/5xx)** | Other API errors | Report error message and suggest retry or contact support |
 | **Missing required parameter** | Tool schema requires param with no default | **Do not guess**. Ask user: "Please specify {parameter_name} (e.g., {example})." |
 

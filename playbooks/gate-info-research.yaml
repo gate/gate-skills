@@ -1,0 +1,207 @@
+# Machine-readable execution contract for the gate-info-research primary skill.
+# Every command below MUST exist in `gate-cli v0.5.2`
+# (verified via `gate-cli info list` / `gate-cli news list` / `--help`).
+# Aspirational aggregate shortcuts (e.g. `info +coin-overview`) are NOT used.
+
+name: gate-info-research
+version: "2026.4.18-1"
+updated: "2026-04-18"
+cli_baseline: "gate-cli v0.5.2"
+description: >
+  Research-oriented skill covering single-coin analysis, market overview,
+  multi-coin comparison, trend/technical analysis, macro impact, and research +
+  news / sentiment synthesis. Primary CLI domain: info. Auxiliary CLI domain:
+  news. Report has 6 fixed sections (see SKILL.md).
+
+slot_registry:
+  symbol:       { type: string,       description: "Coin ticker, e.g. BTC, ETH, SOL." }
+  symbols:      { type: string_array, description: "List of coin tickers (>=2, <=20)." }
+  time_range:   { type: string,       description: "News/sentiment window. PER-COMMAND ENUM NARROWING — the universal super-set is 1h|24h|7d|30d, but each command's `arg_enums` below is the authoritative allowed set. Orchestrator MUST clamp any user-supplied value against the target command's `arg_enums` before invoking the CLI (see CLAUDE.md rule 9). Narrow ones: news feed get-social-sentiment and news events get-latest-events accept ONLY 1h|24h|7d; coin get-coin-rankings accepts ONLY 1h|24h|7d. search-news accepts 1h|24h|7d|30d. search-ugc accepts 1h|24h|7d|30d|all. Defaults in `{slot|default}` templates are pre-validated against each command's enum." }
+  period:       { type: string,       description: "Analysis window for markettrend get-technical-analysis / get-kline. Server enum: 1h|4h|24h|3d|5d|7d|10d|all. Default 3d. NOTE: 1d and 1w are INVALID — substitute 24h and 7d respectively." }
+  timeframe:    { type: string,       description: "K-line granularity. For get-kline enum is 1m|5m|15m|1h|4h|1d (required). For get-market-snapshot / get-indicator-history enum narrows to 15m|1h|4h|1d (no 1m/5m)." }
+  indicators:   { type: string_array, description: "ES _source field names for get-indicator-history, lowercase ONLY. Server-populated: rsi, macd, macd_difference, ma7, ma30, ma120, ma200, ema7, ema30, ema200, boll_upper_band, boll_middle_band, boll_lower_band. Uppercase (RSI/MACD) returns empty rows silently; unsupported windows (MA20/MA50) also return empty rows." }
+  country:      { type: string,       description: "Macro indicator country (US, CN, EU, JP ...)." }
+  indicator:    { type: string,       description: "Macro indicator id: CPI, PPI, NFP, FEDRATE, UNEMP." }
+  start_date:   { type: string,       description: "YYYY-MM-DD; economic-calendar lower bound." }
+  end_date:     { type: string,       description: "YYYY-MM-DD; economic-calendar upper bound." }
+
+playbooks:
+
+  single_coin:
+    intent_keywords: ["analyze", "分析", "how is", "怎么样", "worth", "look at", "fundamentals"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    commands:
+      - id: coin_info
+        cmd: gate-cli info coin get-coin-info
+        args: { query: "{symbol}", scope: "full", format: "json" }
+        parallel_group: A
+      - id: market_snapshot
+        cmd: gate-cli info marketsnapshot get-market-snapshot
+        args: { symbol: "{symbol}", scope: "full", format: "json" }
+        parallel_group: A
+      - id: technical_analysis
+        cmd: gate-cli info markettrend get-technical-analysis
+        args: { symbol: "{symbol}", format: "json" }
+        parallel_group: A
+    news_addons:
+      - id: news_brief
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 5, sort-by: "importance", time-range: "{time_range|24h}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d], sort-by: [time, importance, similarity_score] }
+        optional: true
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — no 30d
+        optional: true
+    cli_future_shortcut: "gate-cli info +coin-overview --symbol {symbol}"   # not shipped yet
+
+  market_overview:
+    intent_keywords: ["market", "大盘", "现在市场怎么样", "overall market", "dominance", "Fear and Greed"]
+    required_slots: []
+    optional_slots: []
+    commands:
+      - id: market_overview
+        cmd: gate-cli info marketsnapshot get-market-overview
+        args: { format: "json" }
+        parallel_group: A
+      - id: popular_board
+        cmd: gate-cli info coin get-coin-rankings
+        args: { ranking-type: "popular", limit: 20, format: "json" }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing] }
+        parallel_group: A
+      - id: gainers_board
+        cmd: gate-cli info coin get-coin-rankings
+        args: { ranking-type: "top_gainers", time-range: "24h", limit: 10, format: "json" }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing], time-range: [1h, 24h, 7d] }
+        parallel_group: A
+      - id: losers_board
+        cmd: gate-cli info coin get-coin-rankings
+        args: { ranking-type: "top_losers", time-range: "24h", limit: 10, format: "json" }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing], time-range: [1h, 24h, 7d] }
+        parallel_group: A
+    cli_future_shortcut: "gate-cli info +market-overview"
+
+  multi_coin:
+    intent_keywords: ["compare", "对比", "vs", "哪个更", "which is better"]
+    required_slots: [symbols]
+    optional_slots: []
+    guards:
+      - "len(symbols) >= 2"
+      - "len(symbols) <= 20"
+    commands:
+      - id: batch_snapshot
+        cmd: gate-cli info marketsnapshot batch-market-snapshot
+        args: { symbols: "{symbols}", scope: "full", format: "json" }
+        parallel_group: A
+    per_symbol_commands:                       # one invocation per symbol, parallel
+      - id: coin_info_each
+        cmd: gate-cli info coin get-coin-info
+        args: { query: "{symbol}", scope: "basic", format: "json" }
+      - id: technical_each
+        cmd: gate-cli info markettrend get-technical-analysis
+        args: { symbol: "{symbol}", format: "json" }
+        optional: true
+
+  trend:
+    intent_keywords: ["technical", "技术分析", "RSI", "MACD", "走势", "trend"]
+    required_slots: [symbol]
+    optional_slots: [period, timeframe, indicators]
+    commands:
+      - id: technical_analysis
+        cmd: gate-cli info markettrend get-technical-analysis
+        args: { symbol: "{symbol}", period: "{period|3d}", format: "json" }
+        arg_enums: { period: [1h, 4h, 24h, 3d, 5d, 7d, 10d, all] }   # no 1d / 1w — aliases to 24h / 7d
+        parallel_group: A
+      - id: kline
+        cmd: gate-cli info markettrend get-kline
+        args: { symbol: "{symbol}", timeframe: "{timeframe|1d}", size: 120, with-indicators: true, format: "json" }
+        arg_enums: { timeframe: [1m, 5m, 15m, 1h, 4h, 1d], period: [1h, 4h, 24h, 3d, 5d, 7d, 10d, all] }
+        parallel_group: A
+      - id: indicator_history
+        cmd: gate-cli info markettrend get-indicator-history
+        args: { symbol: "{symbol}", timeframe: "{timeframe|1d}", indicators: "{indicators|rsi,macd,ma30,ma200}", limit: 120, format: "json" }
+        arg_enums: { timeframe: [15m, 1h, 4h, 1d] }   # NARROW — no 1m / 5m
+        # indicators is NOT a closed server enum — any ES _source field name works; use lowercase.
+        # Server-populated: rsi, macd, macd_difference, ma7, ma30, ma120, ma200, ema7, ema30, ema200, boll_upper_band, boll_middle_band, boll_lower_band, adx, cci, sar, wr, di_plus, di_minus.
+        parallel_group: A
+
+  macro:
+    intent_keywords: ["macro", "宏观", "CPI", "NFP", "非农", "fed", "interest rate", "利率", "影响"]
+    required_slots: []
+    optional_slots: [symbol, country, indicator, start_date, end_date]
+    commands:
+      - id: macro_summary
+        cmd: gate-cli info macro get-macro-summary
+        args: { format: "json" }
+        parallel_group: A
+      - id: economic_calendar
+        cmd: gate-cli info macro get-economic-calendar
+        args: { start-date: "{start_date|TODAY}", end-date: "{end_date|TODAY+14D}", importance: "high", format: "json" }
+        parallel_group: A
+      - id: macro_indicator
+        cmd: gate-cli info macro get-macro-indicator
+        args: { indicator: "{indicator|CPI}", country: "{country|US}", mode: "series", size: 12, format: "json" }
+        parallel_group: A
+        optional: true
+    coin_addon:                                # only when {symbol} is supplied
+      - id: coin_snapshot
+        cmd: gate-cli info marketsnapshot get-market-snapshot
+        args: { symbol: "{symbol}", scope: "basic", format: "json" }
+
+  research_plus_news:
+    intent_keywords: ["research and news", "分析 并 看看新闻", "research + sentiment", "帮我分析 顺便看看"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    extends: single_coin                       # inherits all single_coin commands
+    additional_commands:
+      - id: news_brief
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 10, sort-by: "importance", time-range: "{time_range|24h}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d], sort-by: [time, importance, similarity_score] }
+        parallel_group: B
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — orchestrator MUST clamp user `time_range` to this set before sending
+        parallel_group: B
+      - id: ugc_scan
+        cmd: gate-cli news feed search-ugc
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", platform: "all", limit: 20, format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d, all], platform: [all, discord, reddit, telegram, youtube], sort-by: [recent, relevance, upvotes], quality-tier: [A, B, all], domain: [ai_agent, all, crypto, defi, finance, macro, web3_dev] }
+        parallel_group: B
+        optional: true
+      - id: latest_events
+        cmd: gate-cli news events get-latest-events
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 15, format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — orchestrator MUST clamp; for 30d / 90d windows fall back to --start-time/--end-time (unix-ms)
+        parallel_group: B
+        optional: true
+
+failure_policy:
+  # If any optional command fails, mark the section "暂无数据" in the final
+  # report and continue. If any required command fails, abort the playbook and
+  # surface the error to the user with the actionable CLI message.
+  required_failure: abort_with_error
+  optional_failure: mark_section_missing
+
+report_sections:
+  - id: summary
+    title: "结论摘要"
+    source_commands: [coin_info, market_snapshot, technical_analysis, news_brief, social_sentiment]
+  - id: fundamentals
+    title: "基本面与市场地位"
+    source_commands: [coin_info, market_snapshot]
+  - id: market_and_trend
+    title: "行情与趋势判断"
+    source_commands: [market_snapshot, technical_analysis, kline, indicator_history, market_overview, popular_board, gainers_board, losers_board, batch_snapshot, technical_each, macro_summary, economic_calendar, macro_indicator, coin_snapshot]
+  - id: news_and_sentiment
+    title: "近期新闻与市场情绪"
+    source_commands: [news_brief, social_sentiment, ugc_scan, latest_events]
+  - id: risks
+    title: "风险提示"
+    source_commands: [coin_info, market_snapshot, technical_analysis, latest_events]
+  - id: watchpoints
+    title: "后续值得跟踪的观察点"
+    source_commands: [coin_info, economic_calendar, latest_events, technical_analysis]

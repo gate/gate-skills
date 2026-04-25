@@ -1,7 +1,7 @@
 # Info & News Common Runtime Rules
 
 > Shared runtime rules for all `gate-info-*` and `gate-news-*` skills.
-> Each skill's SKILL.md should include: Read and follow `../info-news-runtime-rules.md` first (path relative to `skills/<skill-name>/SKILL.md`; use inline code, not a relative markdown link — Skills Hub cannot resolve repo-relative links).
+> Each skill's SKILL.md should include: Read and follow [`info-news-runtime-rules.md` on GitHub](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) first (use this URL or inline code with the same path so single-skill installs can fetch the canonical rules; avoid repo-relative links on Skills Hub).
 
 ---
 
@@ -33,7 +33,37 @@ Before using MCP-dependent capabilities, check whether the required Gate MCP Ser
 
 ---
 
-## 3. Tool Degradation & Fault Tolerance
+## 3. Legacy Wrapper Routing
+
+Some legacy `gate-info-*` / `gate-news-*` skills may be converted into
+compatibility wrappers that delegate to primary CLI skills in the separate
+`gate-cli-skills` repository.
+
+Wrapper rules:
+
+- Run a deterministic shell probe **before** Trigger update, MCP tool selection,
+  or any legacy Execution Workflow.
+- The probe checks:
+  1. `gate-cli` exists on `$PATH`
+  2. The mapped primary skill is installed in at least one known scan root
+- The probe MUST emit exactly one stdout token:
+  - `__ROUTE_CLI__` → stop the legacy path and delegate to the mapped primary
+    skill in `gate-cli-skills`
+  - `__FALLBACK__` → continue the current legacy MCP workflow in this skill
+- Do **not** invent pseudo binaries or pseudo commands (for example
+  `gate-news-risk`). The CLI path is always the mapped primary skill plus real
+  `gate-cli` commands documented there.
+- When the wrapper emitted `__ROUTE_CLI__`, the sections below in the current
+  legacy skill (`MCP Dependencies`, `Execution Workflow`, `Report Template`,
+  etc.) are **not** executed.
+- **Mapping:** there is no separate routing file. Each wrapper `SKILL.md`
+  must inline the mapped primary skill, where to read its `SKILL.md` (e.g. a
+  path under the same `skills/` tree or install root), and the minimum
+  context to carry over.
+
+---
+
+## 4. Tool Degradation & Fault Tolerance
 
 When an MCP Tool is unavailable or returns an error:
 
@@ -52,7 +82,7 @@ When an MCP Tool is unavailable or returns an error:
 
 ---
 
-## 4. Report Output Standards
+## 5. Report Output Standards
 
 All reports must follow these conventions:
 
@@ -67,7 +97,7 @@ All reports must follow these conventions:
 
 ---
 
-## 5. Security & Privacy
+## 6. Security & Privacy
 
 - Do not expose user API Keys, Secret Keys, or credentials in conversation.
 - If API Key setup is needed, guide the user to configure locally:
@@ -79,7 +109,7 @@ All reports must follow these conventions:
 
 ---
 
-## 6. Cross-Skill Routing
+## 7. Cross-Skill Routing
 
 When user intent exceeds the current Skill's scope, proactively route to the appropriate Skill.
 
@@ -116,7 +146,7 @@ Before routing, check if the target Skill is available:
 
 ---
 
-## 7. Error & Authorization Handling
+## 8. Error & Authorization Handling
 
 When an error occurs, read documentation and try known solutions before asking the user.
 
