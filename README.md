@@ -18,6 +18,8 @@ Get started in seconds with our unified installer skill:
 
 Or run the install script directly from the repository.
 
+Chinese users can also search and install skills through [Skills宝](https://skilery.com).
+
 ### Framework Compatibility
 
 These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into Gate crypto intelligence with minimal configuration.
