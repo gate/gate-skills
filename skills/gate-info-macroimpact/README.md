@@ -42,8 +42,8 @@ An AI Agent skill for **macro-driven crypto context** using **Gate-Info** and **
 
 | URL / pattern | Purpose |
 |---------------|---------|
-| Local file `../gate-runtime-rules.md` | Runtime rules (**General Rules**). |
-| Local file `../info-news-runtime-rules.md` | Info/news runtime rules. |
+| [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) | Runtime rules (**General Rules**). |
+| [`info-news-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) | Info/news runtime rules. |
 | `https://raw.githubusercontent.com/gate/gate-skills/master/skills/<skill-name>/SKILL.md` | Version **check** vs remote `SKILL.md`. |
 | `https://github.com/gate/gate-skills` | Repo / install references. |
 

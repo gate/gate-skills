@@ -82,7 +82,7 @@ Gate Verify is a **second HTTP MCP** on the same host as remote DEX, used only f
 | Wallet / DEX tools | **`gate-dex`** → `https://api.gatemcp.ai/mcp/dex` (headers per fragment) |
 | Gate Verify | **`gate-dex-sec`** → `https://api.gatemcp.ai/mcp/dex/sec` (URL-only / `streamable-http`; **no** wallet HTTP headers on this entry) |
 
-This installer **adds the Verify MCP whenever `--mcp dex` is included** (default full install includes it). Agents call **`tx_checkin`** or **`/v1/tx/checkin`** on the Verify server with **`authorization`** = the same **`mcp_token`** as wallet MCP tool args — see [gate-dex-wallet `references/tx-checkin.md`](../gate-dex-wallet/references/tx-checkin.md). Staged swap specifics: **gate-dex-trade** skill.
+This installer **adds the Verify MCP whenever `--mcp dex` is included** (default full install includes it). Agents call **`tx_checkin`** or **`/v1/tx/checkin`** on the Verify server with **`authorization`** = the same **`mcp_token`** as wallet MCP tool args — see [gate-dex-wallet `references/tx-checkin.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-dex-wallet/references/tx-checkin.md). Staged swap specifics: **gate-dex-trade** skill.
 
 ---
 
@@ -166,7 +166,7 @@ mcporter call gate-dex.list_balances
 - **API Key**: https://www.gate.com/myaccount/profile/api-key/manage for local `Gate (main)` trading.
 - **gate-cex-ex**: OAuth2 when the client prompts; OpenClaw: `mcporter auth gate-cex-ex`.
 - **gate-dex**: https://web3.gate.com/ for wallet; complete OAuth if tools require it.
-- **Gate Verify (`gate-dex-sec`)**: merged with **`dex`**; before signing or **`dex_tx_x402_fetch`**, call **`tx_checkin`** / **`/v1/tx/checkin`** on this MCP with **`authorization`** = wallet **`mcp_token`** (tool argument, not copied HTTP headers) — **gate-dex-wallet** [`references/tx-checkin.md`](../gate-dex-wallet/references/tx-checkin.md).
+- **Gate Verify (`gate-dex-sec`)**: merged with **`dex`**; before signing or **`dex_tx_x402_fetch`**, call **`tx_checkin`** / **`/v1/tx/checkin`** on this MCP with **`authorization`** = wallet **`mcp_token`** (tool argument, not copied HTTP headers) — **gate-dex-wallet** [`references/tx-checkin.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-dex-wallet/references/tx-checkin.md).
 - **gatepay-local-mcp**: stdio Gate Pay x402; set **`env`** placeholders in the client config to real values only locally — see **gate-pay-x402** (`PLUGIN_WALLET_TOKEN`, **`EVM_PRIVATE_KEY`**, **`SVM_PRIVATE_KEY`**, optional **`PAYMENT_METHOD_PRIORITY`**).
 - **gatepay-merchant-discovery**: remote URL only (no secrets in installer); lists payable resources — confirm tool name (**`discoveryResource`**) in the live tool list (**gate-pay-x402**). If connect fails, adjust **`transport`** in JSON per your host (fragment uses `streamable-http` like other Gate HTTP MCPs).
 

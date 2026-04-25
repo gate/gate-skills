@@ -281,8 +281,8 @@ gate-dex-wallet/
 
 ## 🔗 Related Skills
 
-- [gate-dex-trade](../gate-dex-trade/) — Trade/DEX trading and swap
-- [gate-dex-market](../gate-dex-market/) — Market data and token information queries
+- [gate-dex-trade](https://github.com/gate/gate-skills/tree/master/skills/gate-dex-trade) — Trade/DEX trading and swap
+- [gate-dex-market](https://github.com/gate/gate-skills/tree/master/skills/gate-dex-market) — Market data and token information queries
 
 ## 📖 Detailed Documentation
 

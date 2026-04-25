@@ -45,8 +45,8 @@ Agents may retrieve documentation or version metadata over HTTPS. Review against
 
 | URL / pattern | Purpose |
 |---------------|---------|
-| Local file `../gate-runtime-rules.md` | Shared runtime rules (**General Rules**). |
-| Local file `../info-news-runtime-rules.md` | Info/news runtime rules (version check UX, MCP install, degradation). |
+| [`gate-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) | Shared runtime rules (**General Rules**). |
+| [`info-news-runtime-rules.md`](https://github.com/gate/gate-skills/blob/master/skills/info-news-runtime-rules.md) | Info/news runtime rules (version check UX, MCP install, degradation). |
 | `https://raw.githubusercontent.com/gate/gate-skills/master/skills/<skill-name>/SKILL.md` | `update-skill` **check** compares local vs remote skill head. |
 | `https://github.com/gate/gate-skills` | Canonical repo / skill tree references in runtime rules. |
 

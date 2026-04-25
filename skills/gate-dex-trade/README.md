@@ -86,5 +86,5 @@ gate-dex-trade/
 
 ## Related Skills
 
-- **[gate-dex-wallet](../gate-dex-wallet/)** — Wallet (authentication, assets, transfers, DApp)
-- **[gate-dex-market](../gate-dex-market/)** — Market data queries (quotes, rankings, audits)
+- **[gate-dex-wallet](https://github.com/gate/gate-skills/tree/master/skills/gate-dex-wallet)** — Wallet (authentication, assets, transfers, DApp)
+- **[gate-dex-market](https://github.com/gate/gate-skills/tree/master/skills/gate-dex-market)** — Market data queries (quotes, rankings, audits)

@@ -1,0 +1,183 @@
+# Machine-readable execution contract for the gate-news-intel primary skill.
+# News / events / exchange intel / UGC / X / Reddit / YouTube / social sentiment.
+# gate-cli v0.5.2 — verify with `gate-cli news list` / `gate-cli info list`.
+# Do NOT depend on unshipped shortcuts: `news +brief`, `news +event-explain`,
+# `news +community-scan`, `info +market-overview`, `info +coin-overview`.
+# Use the lower-level recipes below; record aspirational shortcuts under `cli_future_shortcut`.
+
+name: gate-news-intel
+version: "2026.4.20-2"
+updated: "2026-04-20"
+cli_baseline: "gate-cli v0.5.2"
+description: >
+  Primary news and intelligence skill: briefings, event narratives, exchange
+  listings and announcements, UGC and multi-platform social scan (including X),
+  sentiment, and optional info-backed market or coin context. Primary domain:
+  news; auxiliary: info when the playbook explicitly adds market/coin background.
+  Report has 5 fixed sections (see SKILL.md).
+
+slot_registry:
+  symbol:       { type: string,       description: "Coin ticker, e.g. BTC, ETH, SOL." }
+  time_range:   { type: string,       description: "Window: 24h / 7d / 30d." }
+  event_id:     { type: string,       description: "Event id for get-event-detail when the user references one event." }
+  topic_query:  { type: string,       description: "Open-topic or market-wide search query." }
+
+playbooks:
+
+  news_brief:
+    intent_keywords: ["what happened", "最近发生了什么", "news brief", "headlines", "快讯"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    commands:
+      - id: search_news
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 12, sort-by: "importance", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+      - id: latest_events
+        cmd: gate-cli news events get-latest-events
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", limit: 20, format: "json" }
+        parallel_group: A
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+    cli_future_shortcut: "gate-cli news +brief --coin {symbol} --time-range {time_range|24h} --format json"
+
+  event_explain:
+    intent_keywords: ["why did", "为什么", "暴跌", "crash", "event explain", "原因", "因果"]
+    required_slots: [symbol]
+    optional_slots: [time_range, event_id]
+    commands:
+      - id: latest_events
+        cmd: gate-cli news events get-latest-events
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 25, format: "json" }
+        parallel_group: A
+      - id: search_news
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 15, sort-by: "importance", time-range: "{time_range|7d}", format: "json" }
+        parallel_group: A
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+      - id: event_detail
+        cmd: gate-cli news events get-event-detail
+        args: { event-id: "{event_id}", format: "json" }
+        parallel_group: B
+        optional: true
+    notes:
+      - "Run `event_detail` only when `event_id` is known; otherwise infer narrative from latest_events + search_news."
+    cli_future_shortcut: "gate-cli news +event-explain --coin {symbol} --time-range {time_range|24h} --format json"
+
+  exchange_listings:
+    intent_keywords: ["listing", "上新", "上币", "announcement", "公告", "delisting", "下架"]
+    required_slots: []
+    optional_slots: [symbol]
+    commands:
+      - id: exchange_announcements
+        cmd: gate-cli news feed get-exchange-announcements
+        args: { limit: 30, format: "json" }
+        parallel_group: A
+    notes:
+      - "When `symbol` is set, add `--coin {symbol}` to the same command if the CLI supports filtering (see `--help`)."
+
+  community_intel:
+    intent_keywords: ["community", "社区", "Reddit", "YouTube", "Twitter", "X上", "舆情", "怎么看"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    commands:
+      - id: ugc_scan
+        cmd: gate-cli news feed search-ugc
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", platform: "all", limit: 25, format: "json" }
+        parallel_group: A
+      - id: search_x
+        cmd: gate-cli news feed search-x
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 25, format: "json" }
+        parallel_group: A
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+    notes:
+      - "UGC, X, Reddit, YouTube, and sentiment are first-class — fill Section 3 before any market snapshot."
+    cli_future_shortcut: "gate-cli news +community-scan --coin {symbol} --time-range {time_range|24h} --format json"
+
+  intel_plus_market:
+    intent_keywords: ["news and market", "新闻 和 大盘", "背景", "market context", "全景"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    commands:
+      - id: search_news
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 12, sort-by: "importance", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+      - id: latest_events
+        cmd: gate-cli news events get-latest-events
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 20, format: "json" }
+        parallel_group: A
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: A
+      - id: market_overview
+        cmd: gate-cli info marketsnapshot get-market-overview
+        args: { format: "json" }
+        parallel_group: B
+        optional: true
+      - id: coin_info
+        cmd: gate-cli info coin get-coin-info
+        args: { query: "{symbol}", scope: "basic", format: "json" }
+        parallel_group: B
+        optional: true
+      - id: market_snapshot
+        cmd: gate-cli info marketsnapshot get-market-snapshot
+        args: { symbol: "{symbol}", scope: "basic", format: "json" }
+        parallel_group: B
+        optional: true
+      - id: technical_analysis
+        cmd: gate-cli info markettrend get-technical-analysis
+        args: { symbol: "{symbol}", format: "json" }
+        parallel_group: B
+        optional: true
+    notes:
+      - "Info group B is optional — if any info command fails, still ship the news-led report (PRD 5.6.8)."
+      - "`info +market-overview` / `+coin-overview` are not shipped; this block is the documented fallback."
+    cli_future_shortcut: "gate-cli news +event-explain … ; gate-cli info +market-overview … ; gate-cli info +coin-overview …"
+
+  market_wide_intel:
+    intent_keywords: ["what happened in crypto", "币圈最近", "overall news", "macro narrative", "大盘 新闻"]
+    required_slots: []
+    optional_slots: [topic_query]
+    commands:
+      - id: open_web
+        cmd: gate-cli news feed web-search
+        args: { query: "{topic_query|cryptocurrency market news last 24 hours}", format: "json" }
+        parallel_group: A
+      - id: market_overview
+        cmd: gate-cli info marketsnapshot get-market-overview
+        args: { format: "json" }
+        parallel_group: A
+        optional: true
+    notes:
+      - "Use when the user does not name a ticker — Section 4 may lean on market_overview when available."
+
+failure_policy:
+  required_failure: abort_with_error
+  optional_failure: mark_section_missing
+
+report_sections:
+  - id: headline_summary
+    title: "事件/新闻结论摘要"
+    source_commands: [search_news, latest_events, open_web, exchange_announcements]
+  - id: facts_timeline
+    title: "关键事实与时间线"
+    source_commands: [latest_events, event_detail, search_news]
+  - id: community_views
+    title: "社区/UGC/X/Reddit/YouTube 观点"
+    source_commands: [ugc_scan, search_x, social_sentiment]
+  - id: market_or_coin_context
+    title: "市场或币种背景（若相关）"
+    source_commands: [market_overview, coin_info, market_snapshot, technical_analysis]
+  - id: follow_up
+    title: "结论与需继续跟踪的事项"
+    source_commands: [search_news, latest_events, social_sentiment]

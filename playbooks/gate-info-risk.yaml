@@ -1,0 +1,146 @@
+# Machine-readable execution contract for the gate-info-risk primary skill.
+# All commands verified against `gate-cli v0.5.2`.
+# Note: gate-cli v0.5.2 does NOT ship `info compliance check-address-risk`.
+# Address-level risk is sourced from `info onchain get-address-info` risk fields
+# (labels / tags / scope=basic summary). Report MUST mark "scope limited" when
+# primary address-risk data is missing.
+
+name: gate-info-risk
+version: "2026.4.18-1"
+updated: "2026-04-18"
+cli_baseline: "gate-cli v0.5.2"
+description: >
+  Unified risk assessment for tokens, addresses, and project-level compliance /
+  event risks. Primary CLI domain: info. Auxiliary CLI domain: news.
+  Report has 5 fixed sections (see SKILL.md).
+
+slot_registry:
+  symbol:            { type: string, description: "Coin ticker if the subject is a listed coin." }
+  token:             { type: string, description: "Subject of token_risk. ACCEPTS EITHER a ticker (`PEPE`, `USDT`) OR a contract address (`0xdAC17F...`, SPL mint, TRX mint, ...). The CLI flag `--token` is polymorphic — pass contract addresses through it directly. Do NOT also pass `--address`; the CLI rejects both being set at once (`token 与 address 二选一，不能同时传`). Agent must normalize any user-supplied address string into this single slot." }
+  address:           { type: string, description: "Wallet address; required for address_risk only. NOT used by token_risk (address-shaped inputs for token_risk belong in the `token` slot — see above)." }
+  chain:             { type: string, description: "Chain id. INPUT normalization: always send the short form on --chain (eth, bsc, polygon, arb, op, base, avax, solana, tron). Long-form user input (ethereum / arbitrum / optimism / avalanche / bnb / matic) MUST be mapped to short form before the call. RESPONSE parsing: `.chain` echo is endpoint-dependent (eth→eth on check-token-security, arb→arbitrum on same endpoint), so parsers MUST accept both alias forms — do NOT assume a fixed shape." }
+  time_range:        { type: string, description: "Background/event window. PER-COMMAND ENUM NARROWING — universal super-set is 1h|1d|24h|7d|30d|90d but individual commands narrow further. See each command's `arg_enums` below. Narrow ones: news events get-latest-events accepts ONLY 1h|24h|7d (substitute --start-time/--end-time for longer windows). news feed search-news accepts 1h|24h|7d|30d. onchain get-address-transactions accepts 1h|1d|24h|7d|30d|90d." }
+  large_tx_usd:      { type: number, description: "Threshold for flagging large transfers in address_risk." }
+
+playbooks:
+
+  token_risk:
+    intent_keywords: ["this token safe", "合约安全", "代币有风险", "honeypot", "蜜罐", "税费"]
+    required_slots: [token, chain]
+    # CLI contract (dev build): check-token-security requires --chain AND exactly ONE of
+    # --token / --address (passing both is rejected: "token 与 address 二选一").
+    # Skill resolution: the `token` slot accepts both tickers and contract addresses
+    # — agent must normalize any user-supplied address into `token`. Playbook only uses --token.
+    optional_slots: [symbol]
+    commands:
+      - id: token_security
+        cmd: gate-cli info compliance check-token-security
+        args: { token: "{token}", chain: "{chain}", scope: "full", format: "json" }
+        arg_enums: { scope: [basic, full], lang: [cn, en, ja, kr, tw] }
+        parallel_group: A
+      - id: coin_info_basic
+        cmd: gate-cli info coin get-coin-info
+        args: { query: "{symbol|{token}}", chain: "{chain}", scope: "basic", format: "json" }
+        arg_enums: { scope: [basic, detailed, full, with_project, with_tokenomics], query-type: [address, auto, gate_symbol, name, project, source_id, symbol] }
+        parallel_group: A
+        optional: true
+      - id: token_onchain
+        cmd: gate-cli info onchain get-token-onchain
+        args: { token: "{token}", chain: "{chain}", scope: "full", format: "json" }
+        arg_enums: { scope: [activity, full, holders, smart_money, transfers], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+        optional: true
+
+  address_risk:
+    intent_keywords: ["this address safe", "地址风险", "会不会被拉黑", "blacklist", "OFAC"]
+    required_slots: [address, chain]
+    optional_slots: [large_tx_usd, time_range]
+    commands:
+      - id: address_info
+        cmd: gate-cli info onchain get-address-info
+        args: { address: "{address}", chain: "{chain}", scope: "basic", format: "json" }
+        arg_enums: { scope: [basic, detailed, full, with_counterparties, with_defi, with_pnl], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+      - id: address_transactions
+        cmd: gate-cli info onchain get-address-transactions
+        args: { address: "{address}", chain: "{chain}", time-range: "{time_range|30d}", min-value-usd: "{large_tx_usd|100000}", limit: 50, format: "json" }
+        arg_enums: { time-range: [1h, 1d, 24h, 7d, 30d, 90d], tx-type: [all, contract_call, token_transfer, transfer], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+        optional: true
+    notes:
+      - "check-address-risk does not exist in gate-cli v0.5.2; skill MUST mark the report 'scope limited' when address_info lacks risk labels."
+    cli_future_shortcut: "gate-cli info compliance check-address-risk --address {address} --chain {chain}"
+
+  project_risk:
+    intent_keywords: ["合规风险", "项目风险", "最近出事了吗", "security incident", "exploit"]
+    required_slots: [symbol]
+    optional_slots: [time_range]
+    commands:
+      - id: project_news
+        cmd: gate-cli news feed search-news
+        args: { coin: "{symbol}", limit: 10, sort-by: "importance", time-range: "{time_range|7d}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d], sort-by: [time, importance, similarity_score] }
+        parallel_group: A
+      - id: project_events
+        cmd: gate-cli news events get-latest-events
+        # NARROW enum (1h|24h|7d). CLI rejects 30d with
+        # `INVALID_ARGUMENTS: time_range 仅支持 1h、24h、7d`.
+        # Orchestrator MUST clamp user `time_range` against `arg_enums` below.
+        # For longer windows use --start-time / --end-time (unix-ms) instead.
+        args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 20, format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d] }
+        parallel_group: A
+      - id: project_announcements
+        cmd: gate-cli news feed get-exchange-announcements
+        args: { coin: "{symbol}", limit: 10, format: "json" }
+        arg_enums: { announcement-type: [all, delisting, listing, maintenance] }
+        parallel_group: A
+        optional: true
+
+failure_policy:
+  # Missing data MUST NOT be reported as "low risk". If a required command
+  # fails, abort with a clear error. If an optional command fails, mark the
+  # section "scope limited" and reduce confidence in the final verdict.
+  required_failure: abort_with_error
+  optional_failure: mark_scope_limited
+
+verdict_rules:
+  # Skill-side rules that must hold regardless of which playbook fired.
+  - "Verdict uses four tiers: 高风险 / 中风险 / 低风险 / 无法判定 (scope limited)."
+  - "Missing data NEVER upgrades the verdict toward 低风险."
+  - "If the primary command for the chosen playbook (check-token-security for token_risk, get-address-info for address_risk, search-news for project_risk) is missing, the verdict MUST be '无法判定' with an explicit retry hint."
+  - "Every risk item MUST be tagged with one of: TECHNICAL_CONTRACT / ADDRESS_COMPLIANCE / PROJECT_LEVEL."
+  - "No buy / sell advice is emitted. Only 'recommend further verification' items."
+
+  # Real JSON field paths — verified against check-token-security v0.5.2 output.
+  # Type contract (two conventions intentionally coexist; do NOT mix them):
+  #   - Top-level .is_honeypot, .is_open_source  → JSON boolean (true / false)
+  #   - Nested *_risk_list[].risk_value         → STRING ("0" / "1")
+  #   - Tax fields (buy_tax, sell_tax, transfer_tax)
+  #     + percent fields under data_analysis    → STRING (cast with tonumber)
+  - "Path: check-token-security.high_risk_list[?risk_key==<K>].risk_value. Known keys in v0.5.2: is_honeypot, is_high_tax, is_open_source."
+  - "Path: check-token-security.middle_risk_list[?risk_key==<K>].risk_value. Known keys: owner_change_balance, can_take_back_ownership, hidden_owner, self_destruct, is_mintable, is_proxy, is_blacklisted, is_scam, is_dev_scam, is_airdrop_scam, anti_whale_modifiable, can_not_sell_all, gas_abuse, has_tax, is_anti_whale, is_mc_error, is_volume_boost_trade, lp_burned, personal_slippage_modifiable, slippage_modifiable, trading_cooldown, is_volume_boost_trade."
+  - "Path: check-token-security.low_risk_list[?risk_key==<K>].risk_value. Known keys: is_whitelisted, is_in_dex."
+  - "Path: check-token-security.data_analysis.top10_percent (or top-level top10_percent); string percent (e.g. \"51.85\"), cast with tonumber."
+  - "Path: check-token-security.buy_tax / sell_tax; string, cast with tonumber before > 10 comparison."
+  - "Path: check-token-security.risk_summary.{high_risk_num, middle_risk_num, low_risk_num, highest_risk_level}. highest_risk_level is an integer aggregate (0..3)."
+  - "Path: onchain get-token-onchain.holders.holder_concentration[?label==\"No.1-10\"].percentage (fraction 0..1)."
+  - "Path: onchain get-address-info.risk_labels[] (array of strings). If this array is empty AND .tags[] is empty, verdict = 无法判定."
+
+report_sections:
+  - id: verdict
+    title: "风险结论"
+    ordering: "高 → 中 → 低；必须前置"
+    source_commands: [token_security, address_info, project_news, project_events]
+  - id: core_risk_items
+    title: "核心风险项"
+    source_commands: [token_security, address_info, address_transactions, token_onchain]
+  - id: onchain_compliance_context
+    title: "链上或合规上下文"
+    source_commands: [address_info, address_transactions, token_onchain, coin_info_basic]
+  - id: event_background
+    title: "事件背景（若有）"
+    source_commands: [project_news, project_events, project_announcements]
+  - id: follow_up
+    title: "建议继续核验的事项"
+    source_commands: [token_security, address_info, project_events]

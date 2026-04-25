@@ -19,13 +19,13 @@ description: "One-click installer for gate-cli and gate-skills on Cursor, Claude
 
 ## Which `gate-cli` runs (agents / shells)
 
-Canonical rules (same text as [gate-runtime-rules.md](../gate-runtime-rules.md) §4):
+Canonical rules (same text as [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) §4):
 
 1. **Prefer the system binary:** If **`command -v gate-cli`** resolves to an executable **and** **`gate-cli --version`** succeeds, use that as **`gate-cli`** everywhere.
 2. **User local bin:** If step 1 fails, **if** **`${HOME}/.local/bin/gate-cli`** exists **and** is executable, **`gate-cli`** refers to **`"${HOME}/.local/bin/gate-cli"`** for this session (invoke with full path when PATH may be incomplete).
 3. **OpenClaw skills bin:** If steps 1–2 fail, **if** **`${HOME}/.openclaw/skills/bin/gate-cli`** exists **and** is executable, **`gate-cli`** refers to **`"${HOME}/.openclaw/skills/bin/gate-cli"`**.
 
-Assume nothing about a single install location — always resolve in this order before reporting “`gate-cli` not found.” The same rules are in shared **[gate-runtime-rules.md](../gate-runtime-rules.md)** §4.
+Assume nothing about a single install location — always resolve in this order before reporting “`gate-cli` not found.” The same rules are in shared **[gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md)** §4.
 
 ---
 

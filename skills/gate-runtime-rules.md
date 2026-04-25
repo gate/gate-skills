@@ -6,7 +6,7 @@ last_updated: 2026-04-22
 # Gate Skills Common Runtime Rules
 
 > Shared runtime rules for all Gate Skills (`gate-exchange-*`, `gate-dex-*`, `gate-info-*`, `gate-news-*`).
-> Each skill's SKILL.md should include: `Read and follow [gate-runtime-rules.md](../gate-runtime-rules.md) first.`
+> Each skill's SKILL.md should include: `Read and follow [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.`
 
 **Versioning:**
 - Patch +1 (v1.0.x): Wording / formatting fixes

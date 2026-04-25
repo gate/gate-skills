@@ -1,0 +1,191 @@
+# Machine-readable execution contract for the gate-info-web3 primary skill.
+# Web3 / on-chain / protocol behavior is the umbrella; DeFi is one subdomain.
+# Every command MUST exist in `gate-cli v0.5.2` (`gate-cli info list` / `gate-cli news list`).
+# Aggregate shortcuts (`info +address-tracker`, `info +token-onchain`, `news +brief`, …)
+# are NOT shipped — use the lower-level recipes below. Record aspirational shortcuts
+# only under `cli_future_shortcut` on the relevant playbook block.
+
+name: gate-info-web3
+version: "2026.4.20-1"
+updated: "2026-04-20"
+cli_baseline: "gate-cli v0.5.2"
+description: >
+  Umbrella skill for on-chain behavior, token flows, smart-money signals, entity-style
+  questions, protocol / platform metrics, reserves, liquidation heatmaps, stablecoins,
+  and bridges — executed via gate-cli info (+ optional news for context). Not a DeFi-only
+  skill. Report has 6 fixed sections (see SKILL.md).
+
+slot_registry:
+  address:         { type: string, description: "Wallet or contract address (chain-dependent)." }
+  chain:           { type: string, description: "Chain id: eth, bsc, arbitrum, base, solana, tron, ..." }
+  token:           { type: string, description: "Ticker or contract for on-chain token analysis." }
+  symbol:          { type: string, description: "Ticker for news / heatmap / reserves (e.g. BTC, ETH, USDC)." }
+  symbols:         { type: string_array, description: "Multiple tickers when comparing flows." }
+  platform:        { type: string, description: "Protocol / platform slug (e.g. uniswap, aave)." }
+  exchange:        { type: string, description: "CEX id for reserves (e.g. binance, okx)." }
+  asset:           { type: string, description: "Asset symbol for reserves or yield (e.g. BTC, USDC)." }
+  entity_query:    { type: string, description: "Named entity / desk / fund (e.g. Jump Trading)." }
+  time_range:      { type: string, description: "News / tx window. PER-COMMAND ENUM NARROWING — universal super-set is 1h|1d|24h|7d|30d|90d|all. Narrow ones: news feed get-social-sentiment accepts ONLY 1h|24h|7d. news feed search-news accepts 1h|24h|7d|30d. search-ugc accepts 1h|24h|7d|30d|all. onchain get-address-transactions accepts 1h|1d|24h|7d|30d|90d. Check each command's `arg_enums` before substituting." }
+  min_value_usd:   { type: number, description: "Large-tx threshold for address tx list." }
+
+playbooks:
+
+  address_tracking:
+    intent_keywords: ["track this address", "追踪地址", "这个地址是谁", "what is this wallet doing", "wallet activity"]
+    required_slots: [address, chain]
+    optional_slots: [min_value_usd, time_range]
+    commands:
+      - id: address_info
+        cmd: gate-cli info onchain get-address-info
+        args: { address: "{address}", chain: "{chain}", scope: "full", format: "json" }
+        arg_enums: { scope: [basic, detailed, full, with_counterparties, with_defi, with_pnl], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+      - id: address_transactions
+        cmd: gate-cli info onchain get-address-transactions
+        args: { address: "{address}", chain: "{chain}", time-range: "{time_range|30d}", min-value-usd: "{min_value_usd|100000}", limit: 50, format: "json" }
+        arg_enums: { time-range: [1h, 1d, 24h, 7d, 30d, 90d], tx-type: [all, contract_call, token_transfer, transfer], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+        optional: true
+    notes:
+      - "PRD `scope with-defi` maps to `scope full` on v0.5.2 (richest on-chain + DeFi context)."
+      - "`info onchain trace-fund-flow` is not in gate-cli v0.5.2 inventory; use address_info + address_transactions for v1."
+    cli_future_shortcut: "gate-cli info +address-tracker --address {address} --chain {chain} --format json"
+
+  token_onchain:
+    intent_keywords: ["on-chain", "链上", "筹码", "holder", "smart money", "巨鲸", "token flow"]
+    required_slots: [token, chain]
+    optional_slots: []
+    commands:
+      - id: token_onchain
+        cmd: gate-cli info onchain get-token-onchain
+        args: { token: "{token}", chain: "{chain}", scope: "full", format: "json" }
+        arg_enums: { scope: [activity, full, holders, smart_money, transfers], upstream-raw-mode: [full, lite, off] }
+        parallel_group: A
+    cli_future_shortcut: "gate-cli info +token-onchain --symbol {token} --format json"
+
+  entity_intel:
+    intent_keywords: ["Jump Trading", "entity", "desk", "fund", "机构", "最近在干什么", "who is"]
+    required_slots: [entity_query]
+    optional_slots: [symbol]
+    commands:
+      - id: open_web_intel
+        cmd: gate-cli news feed web-search
+        args: { query: "{entity_query} cryptocurrency on-chain activity", format: "json" }
+        parallel_group: A
+    notes:
+      - "`info onchain get-entity-profile` is not in gate-cli v0.5.2 `info list`; v1 uses web-search + optional news. Do not invent the tool call."
+    cli_future_shortcut: "gate-cli info onchain get-entity-profile --query \"{entity_query}\" --format json"
+
+  protocol_platform:
+    intent_keywords: ["TVL", "Uniswap", "Aave", "protocol", "协议", "defi overview", "费收", "交易量"]
+    required_slots: [platform]
+    optional_slots: [asset, symbol]
+    commands:
+      - id: defi_overview
+        cmd: gate-cli info platformmetrics get-defi-overview
+        args: { platform: "{platform}", format: "json" }
+        parallel_group: A
+      - id: platform_info
+        cmd: gate-cli info platformmetrics get-platform-info
+        args: { platform: "{platform}", format: "json" }
+        parallel_group: A
+        optional: true
+      - id: platform_history
+        cmd: gate-cli info platformmetrics get-platform-history
+        args: { platform: "{platform}", format: "json" }
+        parallel_group: A
+        optional: true
+      - id: yield_pools
+        cmd: gate-cli info platformmetrics get-yield-pools
+        args: { platform: "{platform}", asset: "{asset|USDC}", format: "json" }
+        parallel_group: B
+        optional: true
+    notes:
+      - "Use `search-platforms` first if the user gives a fuzzy protocol name; pick the best-matching `platform` slug before get-defi-overview."
+
+  exchange_reserves:
+    intent_keywords: ["exchange reserves", "储备", "proof of reserves", "CEX 余额"]
+    required_slots: [exchange, asset]
+    optional_slots: []
+    commands:
+      - id: exchange_reserves
+        cmd: gate-cli info platformmetrics get-exchange-reserves
+        args: { exchange: "{exchange}", asset: "{asset}", format: "json" }
+        parallel_group: A
+
+  liquidation_heatmap:
+    intent_keywords: ["liquidation", "爆仓", "heatmap", "清算", "which price"]
+    required_slots: [symbol]
+    optional_slots: [exchange]
+    commands:
+      - id: liq_heatmap
+        cmd: gate-cli info platformmetrics get-liquidation-heatmap
+        args: { symbol: "{symbol}", format: "json" }
+        parallel_group: A
+    notes:
+      - "If the CLI requires extra flags for this tool, read `gate-cli info platformmetrics get-liquidation-heatmap --help` and add only verified flags."
+
+  stablecoin_bridge:
+    intent_keywords: ["stablecoin", "稳定币", "跨链桥", "bridge ranking", "脱锚"]
+    required_slots: []
+    optional_slots: []
+    commands:
+      - id: stablecoin_info
+        cmd: gate-cli info platformmetrics get-stablecoin-info
+        args: { format: "json" }
+        parallel_group: A
+      - id: bridge_metrics
+        cmd: gate-cli info platformmetrics get-bridge-metrics
+        args: { format: "json" }
+        parallel_group: A
+
+  token_onchain_social:
+    intent_keywords: ["on-chain and news", "链上 和 新闻", "聪明钱 舆情", "地址 最近 新闻"]
+    required_slots: [token, chain]
+    optional_slots: [time_range]
+    extends: token_onchain
+    additional_commands:
+      - id: news_brief
+        cmd: gate-cli news feed search-news
+        args: { coin: "{token}", limit: 10, sort-by: "importance", time-range: "{time_range|7d}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d], sort-by: [time, importance, similarity_score] }
+        parallel_group: B
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{token}", time-range: "{time_range|24h}", format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — no 30d
+        parallel_group: B
+        optional: true
+      - id: ugc_scan
+        cmd: gate-cli news feed search-ugc
+        args: { coin: "{token}", time-range: "7d", platform: "all", limit: 15, format: "json" }
+        arg_enums: { time-range: [1h, 24h, 7d, 30d, all], platform: [all, discord, reddit, telegram, youtube], sort-by: [recent, relevance, upvotes], quality-tier: [A, B, all], domain: [ai_agent, all, crypto, defi, finance, macro, web3_dev] }
+        parallel_group: B
+        optional: true
+    notes:
+      - "Replaces aspirational `news +brief` / `news +community-scan` with real feed tools."
+    cli_future_shortcut: "gate-cli news +brief --coin {token} --format json"
+
+failure_policy:
+  required_failure: abort_with_error
+  optional_failure: mark_section_missing
+
+report_sections:
+  - id: identification_summary
+    title: "对象识别与结论摘要"
+    source_commands: [address_info, token_onchain, open_web_intel, defi_overview, exchange_reserves, liq_heatmap, stablecoin_info, bridge_metrics]
+  - id: key_onchain_behavior
+    title: "关键链上行为"
+    source_commands: [address_info, address_transactions, token_onchain]
+  - id: flows_smart_entity
+    title: "资金流 / 筹码 / 聪明钱 / 实体画像"
+    source_commands: [address_transactions, token_onchain, open_web_intel, news_brief]
+  - id: protocol_platform_metrics
+    title: "协议或平台指标（若相关）"
+    source_commands: [defi_overview, platform_info, platform_history, yield_pools]
+  - id: community_news_context
+    title: "社区或新闻背景（若相关）"
+    source_commands: [news_brief, social_sentiment, ugc_scan]
+  - id: risks_watchpoints
+    title: "风险与观察点"
+    source_commands: [address_info, token_onchain, liq_heatmap, exchange_reserves]
