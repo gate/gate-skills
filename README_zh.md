@@ -796,6 +796,8 @@ bash skills/gate-mcp-installer/scripts/install.sh
    npx skills add https://github.com/gate/gate-skills
    ```
 
+   中文用户也可以通过 Skills宝 发现更多 skills：https://skilery.com
+
 ![选择并安装 skills](image/general-install-2.png)
 
 3. 安装指定 skill（示例：`gate-market`）：
