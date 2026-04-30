@@ -37,6 +37,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-autoinvest](#-gate-exchange-autoinvest) | Gate Earn fast auto-invest (DCA): create/update/stop/top-up plans; coins, min amount, records, plan detail; spot & Simple Earn balance context | `2026.4.2-3` | ✅ Active |
+| [gate-exchange-earn](#-gate-exchange-earn) | Gate Smart Earn (L2) via gate-cli: Simple Earn, dual, staking, yield compare, idle-fund ideas; subscribe/redeem with confirmation | `2026.4.29-3` | ✅ Active |
 | [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
 | [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
 | [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
@@ -50,6 +51,7 @@ These skills are designed to work with any AI agent framework. Whether you're us
 | [gate-news-communityscan](#-gate-news-communityscan) | Community / X sentiment: discussion scan + quantitative social sentiment (UGC beyond X when available; Gate-News; read-only) | `2026.3.30-5` | ✅ Active |
 | [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.25-1` | ✅ Active |
 | [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.25-1` | ✅ Active |
+| [gate-exchange-newcoin](#-gate-exchange-newcoin) | New listing due diligence and event radar via gate-cli: listings, fundamentals, risk, sentiment, tape, LaunchPool calendar; optional first spot/Alpha order after confirmation | `2026.4.29-1` | ✅ Active |
 | [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
 | [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
 | [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
@@ -337,6 +339,20 @@ Gate Simple Earn (Uni) flexible earn read operations: query single/all positions
 
 ---
 
+## 💹 gate-exchange-earn
+
+> **Path**: `skills/gate-exchange-earn/`
+
+Gate Smart Earn (L2) via `gate-cli`: Simple Earn (flexible/fixed), dual products, staking, yield comparison, idle-fund ideas, and positions/history. Subscribe, redeem, dual place, staking swap, and auto-renew changes run only after **Action Draft** and explicit **Y** confirmation. Requires `gate-cli` and Gate API credentials.
+
+**Example Prompts**:
+- `What fixed USDT earn terms are available, sorted by APY?`
+- `Compare dual vs staking for ETH`
+- `How much did I earn on flexible Simple Earn in the last 90 days?`
+- `Subscribe 500 USDT to fixed 30-day earn` (draft + confirm)
+
+---
+
 ## 🏦 gate-exchange-tradfi
 
 > **Path**: `skills/gate-exchange-tradfi/`
@@ -604,6 +620,20 @@ Exchange listing/delisting tracker. Fetches exchange announcements for new listi
 - `What did Binance list this week?`
 - `Show me recent delistings`
 - `New token listings today`
+
+---
+
+## 🆕 gate-exchange-newcoin
+
+> **Path**: `skills/gate-exchange-newcoin/`
+
+New listing due diligence and event radar via `gate-cli` (info / news / cex): listings, fundamentals, risk, sentiment, market tape, LaunchPool calendar; optional first spot or Alpha order only after **Action Draft** and **Y**. Requires `gate-cli` and Gate API credentials.
+
+**Example Prompts**:
+- `Due diligence on this week’s new listings`
+- `LaunchPool calendar and what’s launching soon`
+- `Is this new token a rug? Check risk and sentiment`
+- `First small spot buy on SYMBOL after listing` (draft + confirm)
 
 ---
 
@@ -969,9 +999,11 @@ gate-github-skills/
     ├── gate-exchange-coupon/           # Coupon/voucher management & query
     ├── gate-exchange-crossex/          # CrossEx cross-exchange trading operations
     ├── gate-exchange-dual/             # Dual investment query (read-only)
+    ├── gate-exchange-earn/             # Smart Earn L2 (gate-cli): Uni/fixed, dual, staking; writes after confirm
     ├── gate-exchange-flashswap/        # Flash Swap query: pairs, limits, history
     ├── gate-exchange-futures/          # Futures trading skill
     ├── gate-exchange-marketanalysis/   # Market tape analysis skill
+    ├── gate-exchange-newcoin/          # New listing DD & event radar (gate-cli); optional first buy after confirm
     ├── gate-exchange-pay/              # Gate Pay payment execution skill
     ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
     ├── gate-exchange-smallbalance/     # Dust / small balance: list, convert to GT, history
