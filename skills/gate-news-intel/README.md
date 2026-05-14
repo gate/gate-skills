@@ -2,7 +2,7 @@
 
 ## Overview
 
-Primary **news and intelligence** skill for `gate-cli news`, with optional `gate-cli info` for market or coin context when the playbook says so. Covers briefings, event explanation, exchange announcements/listings, UGC and cross-platform social (X, Reddit, YouTube via `search-ugc` / `search-x`), and social sentiment — aligned to v0.5.2 **without** relying on unshipped shortcuts (`+brief`, `+event-explain`, `+community-scan`, `+market-overview`, `+coin-overview`).
+Primary **news and intelligence** skill for `gate-cli news`, with optional `gate-cli info` for market or coin context when the playbook says so. Covers briefings, event explanation, **market move attribution** (via `explain-market-move`), exchange announcements/listings, UGC and cross-platform social (X, Reddit, YouTube via `search-ugc` / `search-x`), and social sentiment — aligned to v0.5.2 **without** relying on unshipped shortcuts (`+brief`, `+event-explain`, `+community-scan`, `+market-overview`, `+coin-overview`).
 
 ## Runtime requirements
 
@@ -15,7 +15,8 @@ Primary **news and intelligence** skill for `gate-cli news`, with optional `gate
 | Capability | Typical trigger | Playbook id |
 |------------|-----------------|-------------|
 | News briefing | "what happened recently" (with a ticker) | `news_brief` |
-| Event / “why crash” | "why did BTC crash" | `event_explain` |
+| Event / pure timeline | "what events happened" | `event_explain` |
+| **Market move attribution** | "why did BTC crash", "why pump", "market move reason" | `market_move_explain` |
 | Listings / announcements | "new listings", "exchange announcements" | `exchange_listings` |
 | Community / UGC / X / sentiment first | "community take", "Reddit", "YouTube" | `community_intel` |
 | News + market or coin background | "news plus market context" | `intel_plus_market` |
@@ -23,8 +24,8 @@ Primary **news and intelligence** skill for `gate-cli news`, with optional `gate
 
 ## Inputs / outputs
 
-- **Input**: natural language + slots per playbook (`symbol`, `time_range`, optional `event_id`, `topic_query`).
-- **Output**: five-section report (see `SKILL.md` for the template — takeaway, timeline, community, market context, conclusion).
+- **Input**: natural language + slots per playbook (`symbol`, `query`, `time_range`, optional `event_id`, `topic_query`). `query` is required for `market_move_explain`; coin fallback defaults to BTC for broad-market queries with a notice.
+- **Output**: five-section intel briefing report or six-section market move analysis report (see `SKILL.md` for both templates).
 
 ## Routing (when NOT to use)
 

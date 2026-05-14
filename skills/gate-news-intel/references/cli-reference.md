@@ -19,6 +19,7 @@
 |---------|------|
 | `gate-cli news events get-latest-events` | Event timeline |
 | `gate-cli news events get-event-detail` | Single event by id |
+| `gate-cli news events explain-market-move` | Market move attribution: Tavily real-time search + internal event pool. Flags: `--query` (required, user question), `--coin` (required), `--time-range` (enum: `30m`/`1h`/`2h`/`4h`/`24h`, default `2h`). Returns `summary`, `latest_news[]`, `supporting_events[]`, `data_status`. |
 
 ## Info (optional, intel_plus_market / market_wide)
 
