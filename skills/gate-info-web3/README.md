@@ -6,7 +6,7 @@ Umbrella primary skill for **Web3 / on-chain / protocol behavior** via `gate-cli
 
 ## Runtime requirements
 
-- **CLI**: `gate-cli` v0.5.2 on `PATH`.
+- **CLI**: `gate-cli` on `PATH` — legacy v0.5.2+; `+address-tracker` / `+token-onchain` shortcuts at v0.7.6+.
 - **Shell** (optional): `bash` / `powershell` if you run packaged `scripts/update-skill.*` manually.
 - **Network**: outbound calls as required by `gate-cli` and configured credentials.
 
@@ -23,7 +23,7 @@ Umbrella primary skill for **Web3 / on-chain / protocol behavior** via `gate-cli
 | Stablecoins + bridges (market structure) | "stablecoin market share", "bridge rankings" | `stablecoin_bridge` |
 | On-chain + news/social in one pass | "on-chain plus community mood" | `token_onchain_social` |
 
-Execution uses **real v0.5.2 commands** only — see [playbooks/gate-info-web3.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-web3.yaml). Aspirational one-shots (`+address-tracker`, `+token-onchain`, `get-entity-profile`, `trace-fund-flow`) are recorded as `cli_future_shortcut` only.
+Execution uses playbook **legacy** commands; when `shortcuts_enabled` (>= 0.7.6), prefer `shortcut` / `additional_shortcut` blocks — see [playbooks/gate-info-web3.yaml](../../playbooks/gate-info-web3.yaml). Still unshipped: `get-entity-profile`, `trace-fund-flow`.
 
 ## Inputs / outputs
 
@@ -43,7 +43,7 @@ Full matrix: [skills/_shared/routing.md](https://github.com/gate/gate-skills/blo
 ## Acceptance criteria
 
 1. Preflight contract ([skills/_shared/preflight.md](https://github.com/gate/gate-skills/blob/master/skills/_shared/preflight.md)).
-2. Every invoked `gate-cli` subcommand appears under `gate-cli info list` / `gate-cli news list` for v0.5.2.
+2. Every legacy `gate-cli` subcommand appears under `gate-cli info list` / `gate-cli news list` (v0.5.2+); shortcuts (`+address-tracker`, `+token-onchain`, `+community-scan`) at v0.7.6+ per playbook.
 3. Report keeps the six headings; separates **on-chain facts** from **community / media** lines.
 4. Copy does not collapse the skill into “DeFi-only”; Web3 umbrella framing is explicit when multiple subdomains appear.
 

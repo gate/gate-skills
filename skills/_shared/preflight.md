@@ -46,6 +46,17 @@ esac
 | `install_cli_required` | `BLOCK` | Halt. Print `user_message` and a pointer to the CLI install docs. |
 | `run_doctor_required` | `BLOCK` | Halt. Print `user_message` and recommend `gate-cli doctor --format json`. |
 
+## Step 0.5 — CLI version and shortcut gate
+
+After the `CLI` branch succeeds, read `cli_version` from the same `PREFLIGHT_JSON` and set `shortcuts_enabled` per [cli-version-routing.md](cli-version-routing.md):
+
+- `shortcuts_enabled=true` when `cli_version >= 0.7.6` (three-segment integer compare, strip leading `v`).
+- Store `cli_version` for feature-specific gates (e.g. `market_move_explain` needs `>= 0.7.2` in gate-news-intel).
+
+Step 2 uses `shortcuts_enabled` to choose playbook `shortcut` blocks vs legacy `commands`.
+
+**JSON shape note:** preflight stdout has `.status` / `.route`. Info/news leaf and shortcut commands do **not** — success stdout is the business payload only; failures use stderr `{"error":…}`. See [cli-version-routing.md](cli-version-routing.md) § JSON output contract.
+
 ## Hard rules
 
 1. Step 0 MUST run before the first data-collection command.

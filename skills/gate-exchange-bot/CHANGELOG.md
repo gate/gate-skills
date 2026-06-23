@@ -1,5 +1,14 @@
 # Changelog
 
+## [2026.5.12-1] - 2026-05-12
+
+### Changed
+
+- Added unsupported-dimension guidance to `references/strategy-recommend.md`: explain unsupported follower count, running duration, fee-model, and similar criteria without fabricating filters.
+- Clarified the expected fallback semantics: mention Ultra AI no profit-sharing fee, explain that search/sort currently support market, backtest APR, and max drawdown only, and suggest a supported re-filter such as latest backtest APR.
+- Added Scenario 6 to `references/scenarios.md` for unsupported filter/sort requests.
+- Updated `references/gate-cli.md` recommendation flow to explain unsupported dimensions while keeping recommendation calls limited to supported query parameters.
+
 ## [2026.5.6-5] - 2026-05-06
 
 ### Changed

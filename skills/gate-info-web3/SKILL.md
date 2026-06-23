@@ -1,8 +1,8 @@
 ---
 name: gate-info-web3
-version: "2026.4.20-1"
-updated: "2026-04-20"
-description: "Use this skill whenever the user’s main ask is on-chain, protocol, or Web3 behavior (not a pure safety verdict). Covers address and token on-chain analysis, platform metrics, reserves, heatmaps, stablecoins, bridges; optional news/UGC. Legacy alias: gate-info-defianalysis. Delegate: gate-info-risk (safety), gate-info-research (broad research), gate-news-intel (events/sentiment). gate-cli v0.5.2; use playbook commands, not unshipped +shortcuts."
+version: "2026.6.22-1"
+updated: "2026-06-22"
+description: "Use this skill whenever the user’s main ask is on-chain, protocol, or Web3 behavior (not a pure safety verdict). Covers address and token on-chain analysis, platform metrics, reserves, heatmaps, stablecoins, bridges; optional news/UGC. Legacy alias: gate-info-defianalysis. Delegate: gate-info-risk (safety), gate-info-research (broad research), gate-news-intel (events/sentiment). v0.7.6+ shortcuts (+address-tracker, +token-onchain, +community-scan); legacy fallback below 0.7.6."
 ---
 
 # gate-info-web3
@@ -19,7 +19,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ## CLI and playbook contract
 
 1. **Scope naming**: Frame answers as **Web3 / on-chain / protocol behavior**. Do **not** narrow the narrative to “DeFi-only” unless the user’s question is strictly DeFi/TVL/yield. `gate-info-defianalysis` is a **legacy alias** for routing only — the canonical skill id is `gate-info-web3`.
-2. Every CLI command MUST exist under **`gate-cli v0.5.2`**. Call only what appears in [playbooks/gate-info-web3.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-web3.yaml). When preflight `route` is `CLI`, do **not** invoke Gate MCP tools from this skill.
+2. Legacy commands MUST exist under **`gate-cli v0.5.2`**. When `shortcuts_enabled` (`>= 0.7.6`), use playbook `shortcut` / `additional_shortcut` blocks; otherwise legacy `commands`. When preflight `route` is `CLI`, do **not** invoke Gate MCP tools from this skill.
 3. Always pass **`--format json`** on data-collection commands.
 4. **Separate evidence types** in the report: label **on-chain / CLI facts** vs **community or media interpretation** (news, web search, UGC). Never present rumor as chain truth.
 5. Required slots (`address`+`chain`, `token`+`chain`, `platform`, `exchange`+`asset`, `symbol`, `entity_query`) must be explicit; if ambiguous, ask — do not guess chain or contract.
@@ -34,6 +34,7 @@ Follow [skills/_shared/preflight.md](https://github.com/gate/gate-skills/blob/ma
 1. Run `gate-cli preflight --format json`; parse `.route`, `.status`, `.user_message`.
 2. Branch: `CLI` → continue; `MCP_FALLBACK` → emit `__FALLBACK__` and halt; `BLOCK` → echo `user_message` and halt.
 3. When `status == "ready_with_migration_warning"`, Step 3 appends one migrate hint at the end of the report.
+4. **Step 0.5**: Set `cli_version` and `shortcuts_enabled` per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md).
 
 Do NOT run any `info` / `news` data call until `route == "CLI"`.
 
@@ -78,13 +79,24 @@ Map the user query to **exactly one** playbook id from [playbooks/gate-info-web3
 
 ## Step 2 — Data collection
 
-Execute the chosen playbook. Commands in the same `parallel_group` may run concurrently; wait for the group before the next. **Only** use commands defined in the playbook YAML (plus the optional `search-platforms` pre-check for fuzzy `platform` names when Step 1 says so).
+Execute the chosen playbook. Commands in the same `parallel_group` may run concurrently; wait for the group before the next.
 
-### Execution substitutes (v0.5.2)
+### Shortcut routing (gate-cli >= 0.7.6)
 
-- **`info +address-tracker` / `info +token-onchain`**: **not** relied upon. Use the **`address_tracking`** and **`token_onchain`** command blocks in the YAML (see `cli_future_shortcut` there for aspirational one-liners).
-- **`info onchain trace-fund-flow`** and **`info onchain get-entity-profile`**: **not** in the v0.5.2 inventory documented in `docs/gate-cli-commands-summary.md`. Use **`get-address-info` + `get-address-transactions`** for flows; use **`news feed web-search`** for entity-style questions until `get-entity-profile` exists.
-- **News aggregates (`news +brief`, `news +community-scan`)**: use **`search-news`**, **`get-social-sentiment`**, **`search-ugc`** as in `token_onchain_social`.
+When `shortcuts_enabled`, run playbook `shortcut` blocks per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md):
+
+| Playbook | Shortcut |
+|----------|----------|
+| `address_tracking` | `info +address-tracker` |
+| `token_onchain` | `info +token-onchain` |
+| `token_onchain_social` | `+token-onchain` then `+community-scan` when `symbol_present` (`coin: {symbol}`); resolve ticker from `coin_context` when `token` is `contract_address`. `+community-scan` covers UGC/X/sentiment only — `news_brief` (search-news headlines) runs via `post_shortcut_optional_ids`. All news ids require `symbol_present`; skip them if unresolved (do not pass contract to `--coin`). |
+
+Note `missing_sections` may include `trace-fund-flow` or `smart_money` — cite in report.
+
+### Legacy-only paths
+
+- **`info onchain trace-fund-flow`** and **`info onchain get-entity-profile`**: not shipped. Use **`get-address-info` + `get-address-transactions`** or **`news feed web-search`**.
+- Below **0.7.6**, use legacy `commands` in the playbook YAML (plus optional `search-platforms` pre-check for fuzzy `platform` names).
 
 ### Failure policy
 

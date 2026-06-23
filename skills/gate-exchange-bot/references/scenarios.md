@@ -77,3 +77,18 @@ Scenario coverage for the routing-style `gate-exchange-bot` skill.
 3. Present a strategy-type-specific risk and settlement summary.
 4. Require explicit confirmation in the immediately following turn.
 5. Execute `gate-cli cex bot portfolio stop` for one strategy only.
+
+## Scenario 6: Unsupported Filter or Sort Dimensions
+
+**Context**: The user asks for recommendation criteria that the API does not support, such as follower count, running duration, or free/paid fee model.
+
+**Prompt Examples**:
+- "Find free spot grid strategies with over 500 followers"
+- "Find strategies running for more than 30 days"
+- "Find free spot grid strategies with more than 500 followers"
+
+**Expected Behavior**:
+1. Explain that the requested dimensions are not supported by the recommendation API.
+2. Tell the user that official Ultra AI strategies charge no profit-sharing fee.
+3. Explain that current search and sort support market, backtest APR, and max drawdown only.
+4. Ask whether the user wants to re-filter by latest backtest APR or another supported dimension.

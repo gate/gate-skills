@@ -130,10 +130,11 @@ The default proactive pool is:
 ## Workflow
 
 1. Decide whether the request belongs to `top1`, `bundle`, `filter`, or `refresh`.
-2. Ask for the target market only if it is required and still missing.
-3. Execute the recommendation command with query-style parameters only.
-4. Return recommendation results without performing any create action.
-5. If the user chooses a recommended strategy and wants execution, switch to the correct create reference file.
+2. If the user asks for unsupported filter or sort dimensions, explain that those dimensions are not available and suggest a supported re-filter path.
+3. Ask for the target market only if it is required and still missing.
+4. Execute the recommendation command with query-style parameters only.
+5. Return recommendation results without performing any create action.
+6. If the user chooses a recommended strategy and wants execution, switch to the correct create reference file.
 
 `margin_grid` and `infinite_grid` are supported products but should not be treated as the default recommendation pool unless the user explicitly asks for them.
 
@@ -144,9 +145,26 @@ The default proactive pool is:
 - If the user wants to create one of the recommended strategies, switch into the corresponding create reference file.
 - If the current runtime truly lacks write capability, say that the environment is missing create capability; do not misstate that recommendation flows can never continue into creation.
 
+## Unsupported Dimensions
+
+Dimensions the API does not support as filter or sort criteria:
+
+- Follower count / number of copiers
+- Running duration
+- Free / paid fee model
+- Invest amount as a filter (use `invest_amount` only as a passthrough budget)
+
+When the user asks for unsupported dimensions, explain the limitation clearly and offer a supported next step. The reply should adapt to the user's language and should cover these points:
+
+1. Official Ultra AI strategies charge no profit-sharing fee.
+2. Current search and sort support **market**, **backtest APR**, and **max drawdown** only.
+3. Offer to help re-filter by latest backtest APR or other supported dimensions.
+
+If the user also supplied supported inputs such as `market`, `backtest_apr_gte`, `max_drawdown_lte`, or `limit`, use only those supported inputs in any eventual recommendation call. Never fabricate unsupported query flags.
+
 ## Guardrails
 
-- Do not invent unsupported filters.
+- Do not invent unsupported filters or map unsupported dimensions to fake CLI flags.
 - Do not pretend a create flow is part of the recommendation command.
 - Do not block the natural path from recommend → confirm → create once the user chooses a strategy and provides required inputs.
 

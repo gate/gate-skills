@@ -1,8 +1,8 @@
 ---
 name: gate-info-risk
-version: "2026.4.18-1"
-updated: "2026-04-18"
-description: "Use this skill whenever the user needs a risk- or safety-first check for a token, address, or project. Covers contract risk, address compliance labels, and project incidents via gate-cli. Triggers: is this coin safe, honeypot, sanctioned, compliance. Info primary; news auxiliary. Delegate: gate-info-research, gate-info-web3 (on-chain), gate-news-intel (events). v0.5.2; check-address-risk not shipped—use get-address-info; scope-limited if no labels."
+version: "2026.6.12-5"
+updated: "2026-06-12"
+description: "Use this skill whenever the user needs a risk- or safety-first check for a token, address, or project. Covers contract risk, address compliance labels, and project incidents via gate-cli. Triggers: is this coin safe, honeypot, sanctioned, compliance. Info primary; news auxiliary. Delegate: gate-info-research, gate-info-web3 (on-chain), gate-news-intel (events). v0.7.6+ uses info +token-risk shortcut for token_risk; legacy fallback below 0.7.6. check-address-risk not shipped—use get-address-info for address_risk."
 ---
 
 # gate-info-risk
@@ -18,7 +18,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ## CLI and playbook contract
 
-1. Every CLI command MUST exist under `gate-cli v0.5.2`. This skill explicitly does NOT call `info compliance check-address-risk` (not shipped); address risk comes from `info onchain get-address-info`.
+1. Legacy commands MUST exist under `gate-cli v0.5.2`. When `shortcuts_enabled` (`>= 0.7.6`), `token_risk` may use `info +token-risk` per playbook `shortcut`; fall back to `check-token-security` on failure or older CLI. This skill does NOT call `check-address-risk` or `+address-tracker` for `address_risk`.
 2. Call `gate-cli info …` / `gate-cli news …` only as listed in [playbooks/gate-info-risk.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-risk.yaml). When preflight `route` is `CLI`, do **not** call Gate MCP tools from this skill.
 3. Missing data NEVER counts as "low risk". When the primary command for a chosen playbook is unavailable, the verdict is **UNABLE_TO_ASSESS** (scope limited; localized labels may appear in the user report) plus an explicit retry hint.
 4. Always pass `--format json`. Required slots (`token`+`chain`, `address`+`chain`, `symbol`) must be present; if ambiguous, ask the user.
@@ -34,6 +34,7 @@ Follow the shared contract in [skills/_shared/preflight.md](https://github.com/g
 1. Run `gate-cli preflight --format json`; parse `.route`, `.status`, `.user_message`.
 2. Branch: `CLI` → continue; `MCP_FALLBACK` → emit `__FALLBACK__` and halt; `BLOCK` → echo `user_message` and halt.
 3. When `status == "ready_with_migration_warning"`, Step 3 appends one migrate hint at the very end of the report.
+4. **Step 0.5**: Set `cli_version` and `shortcuts_enabled` per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md).
 
 Do NOT run any data-collection command until Step 0 returns `route == "CLI"`.
 
@@ -90,9 +91,15 @@ Pick exactly one playbook id from [playbooks/gate-info-risk.yaml](https://github
 
 All commands use `--format json`. Commands inside the same `parallel_group` run concurrently.
 
+When `shortcuts_enabled` and playbook defines `shortcut`, follow [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md). Map `+token-risk` output (`risk_level`, `risk_items`, `token_identity`) to the same verdict rules as `check-token-security`.
+
+**`token_risk` shortcut args**: use playbook `args` (`--symbol`) for tickers; `args_when` with `when: contract_address` (`--address` + `--chain`) for contract-shaped `token`. After shortcut **success**, still run optional `token_onchain` (`post_shortcut_optional_ids`) — shortcut does **not** include on-chain holder data.
+
 ### 2.A `token_risk`
 
-Required:
+**Shortcut (>= 0.7.6)**: resolve args from playbook `shortcut.args` / `shortcut.args_when` (never default to `--address` for tickers). On native-coin resolution failure, fall back to legacy commands below.
+
+Required (legacy):
 
 - `gate-cli info compliance check-token-security --token {token} --chain {chain} --scope full`
 

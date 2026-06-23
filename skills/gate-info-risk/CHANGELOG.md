@@ -4,6 +4,36 @@
 
 ---
 
+## [2026.6.12-5] - 2026-06-12 — +token-risk JSON path fix
+
+- `references/cli-reference.md`: top-level `risk_level` / `risk_items` (not `.data.*`); document duplicate full security payload.
+
+## [2026.6.12-4] - 2026-06-12 — Structured args_when
+
+- `token_risk` shortcut branch: `when: contract_address` (machine predicate per `_shared/cli-version-routing.md`).
+
+## [2026.6.12-3] - 2026-06-12 — upstream-raw-mode YAML fix
+
+- Quote `"off"` in `upstream-raw-mode` arg_enums so PyYAML does not coerce to boolean `False`.
+
+## [2026.6.12-2] - 2026-06-12 — Review fixes for +token-risk shortcut
+
+- `replaces_command_ids` no longer drops optional `token_onchain`; added `post_shortcut_optional_ids`.
+- Default shortcut args use `--symbol`; `args_when` for contract `--address` + `--chain`.
+
+## [2026.6.12-1] - 2026-06-12 — `info +token-risk` shortcut (v0.7.6+)
+
+### Added
+
+- Playbook `shortcut` for `token_risk` (`info +token-risk`); legacy `check-token-security` path unchanged for fallback.
+
+### Changed
+
+- Step 0.5 / Step 2 shortcut routing per `_shared/cli-version-routing.md`.
+- `address_risk` explicitly does **not** use `+address-tracker`.
+
+---
+
 ## [2026.4.18-1] - 2026-04-18 — Initial release
 
 ### Added

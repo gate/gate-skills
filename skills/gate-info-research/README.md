@@ -6,7 +6,7 @@ Research-oriented primary skill for Gate.info + Gate.news, executed via `gate-cl
 
 ## Runtime requirements
 
-- **CLI**: `gate-cli` v0.5.2 on `PATH` (see `gate-cli --version`).
+- **CLI**: `gate-cli` on `PATH` — legacy commands align to v0.5.2+; aggregates (`+coin-overview`, etc.) require **v0.7.6+** when `shortcuts_enabled`.
 - **Shell** (optional): `bash` or `powershell` only if you run `scripts/update-skill.sh` / `update-skill.ps1` for manual sync — not part of the default agent flow.
 - **Config**: API keys / auth as required by your `gate-cli` profile (`gate-cli preflight`).
 
@@ -21,7 +21,7 @@ Research-oriented primary skill for Gate.info + Gate.news, executed via `gate-cl
 | Macro impact | "CPI impact on markets" / "impact of NFP on BTC" | `macro` |
 | Research + news synthesis | "analyze ETH with news and sentiment" | `research_plus_news` |
 
-Every playbook uses real `gate-cli v0.5.2` lower-level commands — no aggregate `+shortcut` is assumed. See machine-readable contract in [playbooks/gate-info-research.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-research.yaml) and per-command flags in [skills/gate-info-research/references/cli-reference.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/cli-reference.md).
+Playbooks define **legacy** multi-step commands (v0.5.2+) and optional **shortcut** blocks (v0.7.6+). Below 0.7.6 only legacy paths run. See [playbooks/gate-info-research.yaml](../../playbooks/gate-info-research.yaml) and [references/cli-reference.md](references/cli-reference.md).
 
 ## Inputs / outputs
 

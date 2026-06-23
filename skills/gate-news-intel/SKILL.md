@@ -1,8 +1,8 @@
 ---
 name: gate-news-intel
-version: "2026.4.20-2"
-updated: "2026-04-20"
-description: "Use this skill whenever the user’s main ask is news, events, listings, or social/UGC. Primary gate-cli news (optional info for market context). Covers briefings, event explain, exchange announcements, UGC X/Reddit/YouTube, sentiment. Triggers: what happened, why crash, new listings, community take. Delegate: gate-info-research (research-first), gate-info-web3 (on-chain), gate-info-risk (safety). v0.5.2; do not use unshipped +brief +event-explain +community-scan +market +coin shortcuts."
+version: "2026.6.22-1"
+updated: "2026-06-22"
+description: "Use this skill whenever the user’s main ask is news, events, listings, social/UGC, or market move attribution. Primary gate-cli news (optional info for market context). Covers briefings, event explain, market move attribution via explain-market-move, exchange announcements, UGC X/Reddit/YouTube, sentiment. Triggers: what happened, why crash, why pump, market move reason, new listings, community take. Delegate: gate-info-research (research-first), gate-info-web3 (on-chain), gate-info-risk (safety). v0.7.6+ news shortcuts (+brief, +event-explain, +community-scan); legacy fallback below 0.7.6."
 ---
 
 # gate-news-intel
@@ -19,7 +19,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 ## CLI and playbook contract
 
 1. **Primary boundary**: **news, events, announcements, and social/UGC intelligence**. Optional **`info`** calls appear only in playbooks that explicitly add market or coin background (`intel_plus_market`, `market_wide_intel`).
-2. Every command MUST exist under **`gate-cli v0.5.2`**. Call only what is listed in [playbooks/gate-news-intel.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-news-intel.yaml). When preflight `route` is `CLI`, do **not** use Gate MCP from this skill.
+2. Legacy commands MUST exist under **`gate-cli v0.5.2`**. When `shortcuts_enabled` (`>= 0.7.6`), prefer playbook `shortcut` / `info_shortcut` blocks; fall back to legacy `commands` on failure or older CLI. When preflight `route` is `CLI`, do **not** use Gate MCP from this skill.
 3. Always pass **`--format json`** on data-collection commands.
 4. **Separate fact from opinion**: label **facts** (dated events, official announcements, news wires) vs **community / UGC / X / social** (always cite source type: UGC, X, Reddit, YouTube, sentiment index).
 5. **Synthesis order (PRD 5.6.7)**:
@@ -37,6 +37,8 @@ Follow [skills/_shared/preflight.md](https://github.com/gate/gate-skills/blob/ma
 2. Branch: `CLI` → continue; `MCP_FALLBACK` → emit `__FALLBACK__` and halt (legacy MCP fallback is outside this repo’s primary skills); `BLOCK` → echo `user_message` and halt.
 3. When `status == "ready_with_migration_warning"`, remember it — Step 3 appends one migrate hint at the end of the report.
 
+4. **Step 0.5 — Version gate**: From `PREFLIGHT_JSON.cli_version`, set `shortcuts_enabled` per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md). Store `cli_version` for Step 1 (`market_move_explain` needs `>= 0.7.2` for `explain-market-move`).
+
 Do NOT run `news` / `info` data collection until `route == "CLI"`.
 
 ---
@@ -48,18 +50,41 @@ Map the user query to **exactly one** playbook id from [playbooks/gate-news-inte
 | Playbook id | When to pick | Required slots |
 |-------------|----------------|----------------|
 | `news_brief` | Headlines / “what happened recently” **with a named asset** | `symbol` |
-| `event_explain` | “Why did it drop / crash / event explanation / cause” | `symbol` |
+| `event_explain` | Pure event timeline / detail lookup **without** price-move attribution | `symbol` |
+| `market_move_explain` | “Why did X move / crash / pump / dump”, price-move attribution, market move reason | `symbol`, `query` |
 | `exchange_listings` | Listings, delistings, maintenance, **announcements** | — |
 | `community_intel` | “Community take”, Reddit, YouTube, X, social / sentiment (social-first) | `symbol` |
 | `intel_plus_market` | User wants **news + market or coin background** | `symbol` |
 | `market_wide_intel` | Broad “what is happening in crypto” **without** a ticker | — |
 
+#### Version-dependent routing
+
+`market_move_explain` requires `gate-cli` **v0.7.2+** (the earliest version that ships `explain-market-move`). The playbook's `cli_baseline` field documents this. All other playbooks remain compatible with v0.5.2.
+
+**If routed to `market_move_explain` but `cli_version` < 0.7.2**: fall back to `event_explain` and include this notice in the report footer:
+> explain-market-move requires gate-cli v0.7.2+. Falling back to event_explain with manual news/event stitching. Upgrade gate-cli for server-side Tavily-powered attribution with AI summary.
+
 ### Slot extraction
 
 - `symbol`: ticker (`BTC`, `ETH`, ...). Ask if missing when the playbook requires it.
-- `time_range`: `24h` / `7d` / `30d`. Defaults: `24h` for brief/sentiment; `7d` for UGC/X.
+- `query`: user's original natural-language question, e.g. "Why did BTC surge?". Required for `market_move_explain`; extracted verbatim from the user's input.
+- `time_range`: default `24h` / `7d` / `30d` for legacy leaves; **news shortcuts** (`+brief`, `+event-explain`, `+community-scan`) accept only `1h` / `24h` / `7d` — clamp against playbook shortcut `arg_enums` before calling (see `_shared/cli-version-routing.md`). `market_move_explain`: `30m` / `1h` / `2h` / `4h` / `24h` (default `2h`).
 - `event_id`: only when the user references a concrete event for `get-event-detail`.
 - `topic_query`: for `market_wide_intel` web search.
+
+#### Coin fallback rules (market_move_explain)
+
+When the user triggers `market_move_explain` but no coin is explicitly named:
+
+1. **Explicit coin in query**: extract and use it (e.g. "ETH why crash" -> ETH).
+2. **Context coin**: if the conversation has a unique coin, use it.
+3. **Broad-market, no coin**: default to `BTC` and append a notice: "No coin specified; defaulting to BTC as the broad-market representative asset."
+4. **Vague reference** ("this coin", "that altcoin"): ask the user which specific coin.
+5. **Event impact, no coin**: ask the user which coin to analyze.
+6. **Traditional finance** (e.g. "US stocks", "China A-shares", "S&P 500"): pass through as the `coin` value.
+7. **Non-crypto, ambiguous**: ask the user or route to the appropriate domain skill.
+
+When coin defaults to BTC, the notice MUST be visible in the final report (Section 1 of the market move template).
 
 ### Cross-skill routing at Step 1
 
@@ -75,34 +100,57 @@ Map the user query to **exactly one** playbook id from [playbooks/gate-news-inte
 
 Execute the chosen playbook. Same `parallel_group` → concurrent; wait between groups.
 
-**Shortcut fallbacks (not executed as literal commands)** — use the YAML command blocks; see `cli_future_shortcut` in the playbook for `+brief`, `+event-explain`, `+community-scan`, `+market-overview`, `+coin-overview`.
+### Shortcut routing (gate-cli >= 0.7.6)
+
+When `shortcuts_enabled`, run playbook `shortcut` blocks per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md):
+
+| Playbook | Shortcut |
+|----------|----------|
+| `news_brief` | `news +brief` |
+| `event_explain` | `news +event-explain` with `--event-id` when `when: event_id_present`; else `--coin`. Legacy `social_sentiment` still runs (not replaced). Map `market_interpretation` → X, not sentiment index. |
+| `market_wide_intel` | `info +market-overview` replaces legacy `market_overview` only; `open_web` always runs |
+| `community_intel` | `news +community-scan` |
+| `intel_plus_market` | `news +brief` then `info +coin-overview` (`shortcut` → `info_shortcut`; see playbook `shortcut_block_order`) |
+
+`market_move_explain` has **no** `+market-move-explain` shortcut in v0.7.6 — keep the `gate-cli news events explain-market-move` multi-step path.
 
 **`exchange_listings`**: base invocation uses `limit` + `format` only; if the user supplied `symbol`, add `--coin {symbol}` when the CLI supports it (`get-exchange-announcements --help`).
 
-**`event_explain`**: call `get-event-detail` **only** when `event_id` is known; otherwise omit that command.
+**`event_explain`**: when `shortcuts_enabled` and `event_id` is set, pass `--event-id` via shortcut `args_when` — do **not** also run legacy `get-event-detail`. When shortcuts are disabled and `event_id` is known, run legacy `get-event-detail` only. For price-move attribution, route to `market_move_explain`.
 
-**Info failures**: In `intel_plus_market`, `market_overview` / `coin_info` / `market_snapshot` / `technical_analysis` are **optional** — if they fail, still deliver the **news-led** report (PRD 5.6.8).
+**`market_move_explain`**: Execute in **two groups** (use the **full CLI paths** below — `explain-market-move` lives under `news events`, NOT `news feed`):
+- Group A (parallel, core data): `gate-cli news events explain-market-move` (Tavily-based news/event evidence with AI summary) + `gate-cli info marketsnapshot get-market-snapshot` (current price, change%, volume) + `gate-cli info marketdetail get-orderbook` (bid/ask wall, depth imbalance).
+- Group B (after Group A completes, parallel): `gate-cli info markettrend get-technical-analysis` (TA signals across timeframes) + `gate-cli info coin get-coin-info` (fundamentals) + community commands (`gate-cli news feed search-x` + `gate-cli news feed get-social-sentiment`) only when `symbol != BTC`. For BTC, skip community — Tavily already captures macro/geopolitical signals.
+
+After data collection, the agent MUST perform its own final attribution synthesis using ALL collected data. Do not treat any single tool output as the authoritative conclusion. Prioritize events with higher `relevance_score` as primary drivers, cross-referencing with price/volume data from the snapshot and orderbook.
+
+**Info failures**: In `intel_plus_market` and `market_move_explain`, info/community commands are **optional** — if they fail, mark that section as unavailable and still deliver the report.
 
 ---
 
 ## Step 3 — Synthesis
 
+Choose the report template based on the playbook:
+
+- **`market_move_explain`**: use the 6-section **Market move analysis** template below.
+- **All other playbooks**: use the 5-section **Intel briefing** template below.
+
+### Intel briefing template (all playbooks except market_move_explain)
+
 Produce **five sections**, in this order:
 
-### Report template
-
 ```markdown
-## Intel briefing — {subject}
+## Intel briefing -- {subject}
 
 ### 1. Event / news takeaway
-- 3–5 bullets; separate **verified facts** from **unconfirmed** items
+- 3-5 bullets; separate **verified facts** from **unconfirmed** items
 
 ### 2. Key facts and timeline
 - Time-ordered, verifiable items from `search-news` / `get-latest-events` / `get-event-detail` where used
 
 ### 3. Community / UGC / X / Reddit / YouTube
 - **Must** cover, when the playbook includes them: UGC (`search-ugc`), X (`search-x`), and sentiment where applicable (`get-social-sentiment`)
-- Label every bullet with **source type** (e.g. UGC / X / sentiment index) — do not state opinion as on-chain fact
+- Label every bullet with **source type** (e.g. UGC / X / sentiment index) -- do not state opinion as on-chain fact
 
 ### 4. Market or coin background (if any)
 - Only when the playbook includes `info` or `get-market-overview` in `market_wide_intel`; if not used, state **no extra market context**
@@ -112,6 +160,63 @@ Produce **five sections**, in this order:
 
 > This report is based on public data and tool output; it is not investment advice.
 ```
+
+### Market move analysis template (market_move_explain only)
+
+Produce **six sections**, in this order:
+
+```markdown
+## Market move analysis -- {coin} ({time_range})
+
+[If coin was defaulted to BTC, append: "No coin specified; defaulting to BTC as the broad-market representative asset."]
+
+### 1. Summary
+[One concise attribution sentence. Synthesize: explain-market-move outer summary,
+supporting_events summaries, market snapshot change%, and TA signals.
+Prefer events with higher relevance_score as primary drivers.
+Do NOT copy-paste the entire Tavily summary verbatim -- distill the key narrative.]
+
+### 2. Primary drivers
+[2-4 latest_news items from explain-market-move. For each: title, how it likely drove
+the move (from its summary field), source URL, relevance_score.
+Sort by relevance_score descending. If relevance_score < 0.5, note it as weak signal.
+The outer summary in explain-market-move is a concatenation of these items'
+Tavily AI answers; cross-reference with individual item summaries for accuracy.]
+
+### 3. Supporting context
+[1-2 supporting_events from the internal event pool, with first_seen_time.
+Pay special attention to supporting_events[].summary -- these come from the internal
+event pool and are NOT included in the outer summary, making them independent evidence.
+Market snapshot: current price, change%, volume.
+Order book: notable bid/ask walls or depth imbalances that explain the move magnitude.]
+
+### 4. Technical signals
+[Key TA indicators from get-technical-analysis. Trend direction, support/resistance
+levels, RSI/MACD crossovers if available. Coin fundamentals from get-coin-info
+(market cap rank, supply, sector).]
+
+### 5. Community perspective
+[Non-BTC only. X highlights from search-x, sentiment score from get-social-sentiment.
+Label each item with source type (X / sentiment index).
+If BTC, state: "Community data omitted for BTC; macro/geopolitical signals are
+captured in Sections 2 and 3."]
+
+### 6. What to watch
+[Follow-up catalysts, key price levels, upcoming events that could confirm or
+reverse the current move.]
+
+[If data_status.is_partial: append "Partial data notice: {note if available}.
+Missing sources: {missing_sources if listed}."]
+
+> This report is based on public data and tool output; it is not investment advice.
+```
+
+### Synthesis rules for market_move_explain
+
+- The agent MUST perform its own final attribution -- do not treat any single tool output as authoritative.
+- Cross-reference: the outer `summary` in explain-market-move is a concatenation of Tavily AI answers. `supporting_events[].summary` fields are independent evidence from the internal event pool. Both should inform the agent's attribution.
+- `latest_news` items carry `relevance_score` (0-1). Prefer items above 0.5 as primary drivers; note weaker items as background context.
+- Validate news-driven narratives against market snapshot price/volume data -- a large move without matching event evidence should be acknowledged as unexplained.
 
 ### Migrate hint
 

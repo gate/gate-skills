@@ -1,8 +1,20 @@
 # gate-info-research — CLI Command Reference
 
-> Full flag tables for every `gate-cli` command this skill invokes. Verified against `gate-cli dev` (post-v0.5.2, enum/default metadata expansion). Aspirational aggregate shortcuts (`+coin-overview`, etc.) are NOT listed — see ``docs/gate-cli-commands-summary.md`` for the repo-wide rule.
+> Legacy leaf commands verified against `gate-cli v0.5.2+`. **Aggregates** (`info +*`) ship in **v0.7.6+** — use when `shortcuts_enabled`; see [skills/_shared/cli-version-routing.md](../../_shared/cli-version-routing.md).
 >
-> All flags below are real on this version of the CLI; agents MUST pass `--format json` on every data-collection call. Enum and default values below are copied verbatim from `gate-cli <cmd> --help`.
+> All flags below are real on this version of the CLI; agents MUST pass `--format json` on every data-collection call.
+
+## Aggregates (gate-cli >= 0.7.6)
+
+| Command | Required flags | Notes |
+|---------|----------------|-------|
+| `gate-cli info +coin-overview` | `--symbol` | Replaces get-coin-info + get-market-snapshot + get-technical-analysis |
+| `gate-cli info +market-overview` | — | Optional `--benchmark` (default `BTC,ETH,SOL`) |
+| `gate-cli info +coin-compare` | `--symbols` | 2–5 comma-separated tickers. Payload: `compare_matrix[]` (per row: `symbol`, `basic_info`, `market_snapshot`, `technical_view`); optional `dropped_symbols`. |
+| `gate-cli info +trend-analysis` | `--symbol` | Lightweight TA only — **not** full kline / indicator_history |
+| `gate-cli news +brief` | `--coin` or `--query` | Used by `research_plus_news` `additional_shortcut` |
+
+Shortcut / leaf JSON (`--format json`): success stdout is the **payload root** (e.g. `basic_info`, `market_snapshot` on `+coin-overview`) — **not** `{ status, data, meta }`. Failures: non-zero exit + stderr `{"error":…}`. See [cli-version-routing.md](../../_shared/cli-version-routing.md) § JSON output contract.
 
 ## Info · coin
 
@@ -22,7 +34,7 @@
 
 | Flag | Type | Required | Notes |
 |---|---|---|---|
-| `--ranking-type` | string | ✅ | Enum: `popular / top_gainers / top_losers / twitter_hot / airdrop / new_listing`. **Use `top_gainers` / `top_losers` — `gainers` / `losers` are INVALID** (CLI returns `INVALID_ARGUMENTS`). |
+| `--ranking-type` | string | ✅ | Enum: `popular / top_gainers / top_losers / twitter_hot / airdrop / new_listing / market_pulse_hot` (v0.7.6+). **Use `top_gainers` / `top_losers` — `gainers` / `losers` are INVALID** (CLI returns `INVALID_ARGUMENTS`). `time_range` only for gainers/losers. |
 | `--time-range` | string |  | Enum: `1h / 24h / 7d`. Only meaningful for `top_gainers` / `top_losers`. No `30d` option. |
 | `--limit` | int |  | Default `50`, max `100`. |
 | `--listing-from`, `--listing-query`, `--listing-tickers` | various |  | Advanced filters for listing-style boards. |

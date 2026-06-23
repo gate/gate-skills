@@ -1,8 +1,8 @@
 ---
 name: gate-info-research
-version: "2026.4.18-1"
-updated: "2026-04-18"
-description: "Use this skill whenever the user wants Gate.info / Gate.news research via gate-cli: single-coin, market overview, multi-coin compare, TA, macro, or research+news. Trigger phrases include: analyze SOL, how is BTC, compare BTC and ETH, technical analysis, NFP impact, research with news. Info primary; news auxiliary. Delegate: gate-info-risk (safety), gate-info-web3 (on-chain primary), gate-news-intel (news-first). Aligned to gate-cli v0.5.2; no aggregate +shortcut."
+version: "2026.6.22-1"
+updated: "2026-06-22"
+description: "Use this skill whenever the user wants Gate.info / Gate.news research via gate-cli: single-coin, market overview, multi-coin compare, TA, macro, or research+news. Trigger phrases include: analyze SOL, how is BTC, compare BTC and ETH, technical analysis, NFP impact, research with news. Info primary; news auxiliary. Delegate: gate-info-risk (safety), gate-info-web3 (on-chain primary), gate-news-intel (news-first). v0.7.6+ uses playbook shortcuts when available; legacy multi-step fallback below 0.7.6."
 ---
 
 # gate-info-research
@@ -18,7 +18,7 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ## CLI and playbook contract
 
-1. Every CLI command in this skill MUST exist under `gate-cli v0.5.2`. Do not invent `+coin-overview` / `+market-overview` / other aggregate shortcuts. If a shortcut ships in a later CLI, it will be opt-in via the playbook's `cli_future_shortcut` field, not by editing this file.
+1. Legacy commands MUST exist under `gate-cli v0.5.2`. When `shortcuts_enabled` (see Step 0.5, `cli_version >= 0.7.6`), prefer playbook `shortcut` / `additional_shortcut` blocks (`info +coin-overview`, `+market-overview`, etc.); on failure or older CLI, fall back to legacy `commands` in the playbook YAML.
 2. Call `gate-cli info …` / `gate-cli news …` only as listed in [playbooks/gate-info-research.yaml](https://github.com/gate/gate-skills/blob/master/playbooks/gate-info-research.yaml). This primary skill does **not** call Gate MCP tools when preflight `route` is `CLI` (MCP is for legacy wrapper skills only).
 3. Always pass `--format json` on data-collection commands. Never mix JSON and pretty output in the same pipeline.
 4. If a required slot (e.g. `symbol` for `single_coin`) cannot be parsed with high confidence, ask the user to clarify. Never guess a ticker from a project name.
@@ -34,6 +34,7 @@ Follow the shared contract in [skills/_shared/preflight.md](https://github.com/g
 1. Run `gate-cli preflight --format json`; parse `.route`, `.status`, `.user_message`.
 2. Branch: `CLI` → continue; `MCP_FALLBACK` → emit `__FALLBACK__` and halt; `BLOCK` → echo `user_message` and halt.
 3. When `status == "ready_with_migration_warning"`, remember it — Step 3 appends one migrate hint at the end of the report.
+4. **Step 0.5 — Version gate**: From the same `PREFLIGHT_JSON`, set `cli_version` and `shortcuts_enabled` per [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md) (`shortcuts_enabled=true` when `>= 0.7.6`).
 
 Do NOT run the first data-collection command until Step 0 returns `route == "CLI"`.
 
@@ -97,7 +98,23 @@ Map the user's query to exactly one playbook id. Read the playbook definitions f
 
 Execute the chosen playbook. Each command MUST include `--format json`. Commands in the same `parallel_group` run concurrently; the agent waits for the group before entering the next group or synthesis.
 
+### Shortcut routing (gate-cli >= 0.7.6)
+
+When `shortcuts_enabled` and the playbook defines `shortcut` (or `additional_shortcut` for `research_plus_news`):
+
+1. Resolve the full shortcut list per [cli-version-routing.md](../_shared/cli-version-routing.md): **`extends`** ancestors first (info before news), then child blocks in fixed key order (`shortcut` → `additional_shortcut` → `info_shortcut`). Verify each block’s `guards` (e.g. `multi_coin`: `2 <= len(symbols) <= 5`).
+2. Run each shortcut block in order; accumulate every block’s `replaces_command_ids` into a playbook-level **`skip_ids` union** (includes parent `news_addons` when ids match, e.g. `research_plus_news`).
+3. On shortcut failure for a block (**non-zero exit** and/or stderr `{"error":…}`): if `fallback_on_error`, queue legacy commands for **that block’s** replaced ids only. Do **not** expect stdout `status` on info/news calls (unlike `preflight`).
+4. On payload `partial` / `missing_sections` (top-level on stdout): mark affected report subsections; do not auto re-run legacy unless required data is empty.
+5. After all shortcuts succeed: run legacy entries (merged `extends` buckets: `commands`, `news_addons`, `additional_commands`, …) whose `id` ∉ **`skip_ids`**, plus `post_shortcut_optional_ids` and `coin_addon` per playbook.
+
+See [cli-version-routing.md](../_shared/cli-version-routing.md) for multi-shortcut examples (`research_plus_news`: `+coin-overview` then `+brief`).
+
+Shortcut field mapping: [cli-version-routing.md](../_shared/cli-version-routing.md). **`market_overview` shortcut**: no gainers/losers/popular boards — use `benchmark_snapshots` + `trend_anchor` and state rankings unavailable on shortcut path (playbook `synthesis_note`).
+
 ### 2.A `single_coin`
+
+**Shortcut (>= 0.7.6)**: `gate-cli info +coin-overview --symbol {symbol} --format json` replaces the three `info` rows below. Optional news addons unchanged.
 
 | Command                                                   | Required args                        | Notes |
 |-----------------------------------------------------------|--------------------------------------|-------|
@@ -109,6 +126,8 @@ Execute the chosen playbook. Each command MUST include `--format json`. Commands
 
 ### 2.B `market_overview`
 
+**Shortcut (>= 0.7.6)**: `gate-cli info +market-overview --format json` (optional `--benchmark BTC,ETH,SOL`).
+
 | Command                                           | Required args                                     |
 |---------------------------------------------------|---------------------------------------------------|
 | `gate-cli info marketsnapshot get-market-overview` | (no flags)                                       |
@@ -118,7 +137,9 @@ Execute the chosen playbook. Each command MUST include `--format json`. Commands
 
 ### 2.C `multi_coin`
 
-Run once:
+**Shortcut (>= 0.7.6, 2–5 symbols only)**: derive `symbols_csv = join(uppercase(symbols), ",")` then `gate-cli info +coin-compare --symbols {symbols_csv} --format json`. Map payload `compare_matrix[]` (not `comparison_matrix`) per [cli-version-routing.md](../_shared/cli-version-routing.md).
+
+Run once (legacy or >5 symbols):
 
 - `gate-cli info marketsnapshot batch-market-snapshot --symbols {s1} --symbols {s2} … --scope full` (the `--symbols` flag is a repeatable stringArray).
 
@@ -128,6 +149,8 @@ Then run per symbol in parallel:
 - `gate-cli info markettrend get-technical-analysis --symbol {symbol}` *(optional)*
 
 ### 2.D `trend`
+
+**Shortcut (>= 0.7.6)**: `gate-cli info +trend-analysis --symbol {symbol} --format json` (lightweight TA; legacy path below for deep kline/indicator history).
 
 - `gate-cli info markettrend get-technical-analysis --symbol {symbol} --period {period|3d}`
 - `gate-cli info markettrend get-kline --symbol {symbol} --timeframe {timeframe|1d} --size 120 --with-indicators true`
@@ -142,7 +165,17 @@ Then run per symbol in parallel:
 
 ### 2.F `research_plus_news`
 
-Run everything from `single_coin` **plus** (parallel):
+**When `shortcuts_enabled` (>= 0.7.6)**:
+
+1. Inherited `single_coin` shortcut: `gate-cli info +coin-overview --symbol {symbol} --format json`.
+2. Child shortcut: `gate-cli news +brief --coin {symbol} --time-range {time_range|24h} --format json`.
+3. Build **`skip_ids`** = union of both blocks’ `replaces_command_ids` (includes parent `single_coin` `news_addons` ids `news_brief`, `social_sentiment`).
+4. Run **only** legacy commands with `id` ∉ `skip_ids` — typically optional `ugc_scan` from `additional_commands`. Do **not** re-run the three replaced news commands or parent `news_addons`.
+
+**Legacy only** (`shortcuts_enabled == false` OR per-block `fallback_on_error` for failed shortcuts):
+
+- Info: `single_coin` legacy trio (`get-coin-info`, `get-market-snapshot`, `get-technical-analysis`).
+- News: use `additional_commands` below (do **not** also run `single_coin` `news_addons` — duplicate ids):
 
 - `gate-cli news feed search-news --coin {symbol} --limit 10 --sort-by importance --time-range {time_range|24h}`
 - `gate-cli news feed get-social-sentiment --coin {symbol} --time-range {time_range|24h}` — clamp `time_range` to `1h / 24h / 7d` before sending
@@ -188,7 +221,7 @@ Aggregate the JSON payloads into the fixed 6-section report. Section order is ma
 - Medium term (1d / 1w): {bull / bear / neutral}
 - Key support / resistance: ...
 
-Sources: `get-market-snapshot`, `get-technical-analysis`, `get-kline`, `get-indicator-history`, `get-market-overview`, `get-coin-rankings`, `batch-market-snapshot`, `get-macro-summary`, `get-economic-calendar`, `get-macro-indicator` as applicable to the chosen playbook.
+Sources: shortcut aggregates (`agg_coin_overview`, `agg_market_overview`, etc.) or legacy commands (`get-market-snapshot`, `get-technical-analysis`, `get-kline`, `get-indicator-history`, `get-market-overview`, `get-coin-rankings`, `batch-market-snapshot`, `get-macro-summary`, `get-economic-calendar`, `get-macro-indicator`) as applicable. Map shortcut JSON fields per [cli-version-routing.md](../_shared/cli-version-routing.md).
 
 ### 4. Recent news and market tone
 - **Factual events** (from `news feed search-news` / `news events get-latest-events`): ...
@@ -260,6 +293,7 @@ Follow the shared contract in [skills/_shared/report-style.md](https://github.co
 | [skills/gate-info-research/references/cli-reference.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/cli-reference.md) | You need a full flag table (types / required / defaults) for any `gate-cli info` or `gate-cli news` command this skill uses. |
 | [skills/gate-info-research/references/troubleshooting.md](https://github.com/gate/gate-skills/blob/master/skills/gate-info-research/references/troubleshooting.md) | A command failed, a slot is ambiguous, or a report-integrity rule might be about to break. |
 | [skills/_shared/preflight.md](https://github.com/gate/gate-skills/blob/master/skills/_shared/preflight.md) | Step 0 contract (verbatim snippet + 5-status matrix). |
+| [skills/_shared/cli-version-routing.md](../_shared/cli-version-routing.md) | Step 0.5 version gate and shortcut execution / JSON field mapping. |
 | [skills/_shared/routing.md](https://github.com/gate/gate-skills/blob/master/skills/_shared/routing.md) | Cross-skill routing matrix. |
 | [skills/_shared/report-style.md](https://github.com/gate/gate-skills/blob/master/skills/_shared/report-style.md) | Safety + report-format rules shared across all primaries. |
 | [skills/_shared/update-workflow.md](https://github.com/gate/gate-skills/blob/master/skills/_shared/update-workflow.md) | Skill update check/apply workflow. |

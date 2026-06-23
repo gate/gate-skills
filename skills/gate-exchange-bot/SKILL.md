@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-bot
-version: "2026.5.6-5"
-updated: "2026-05-06"
+version: "2026.5.12-1"
+updated: "2026-05-12"
 description: "Gate Exchange AI bot skill. Use this skill whenever the user wants AIHub strategy recommendation, manual spot/margin/infinite/futures grid creation, manual spot/contract martingale creation, or running strategy portfolio query and stop flows. Trigger phrases include recommend strategy, spot grid, futures grid, martingale, running bots, bot detail, and stop bot."
 user-invocable: true
 disable-model-invocation: false

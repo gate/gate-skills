@@ -1,12 +1,12 @@
 # Machine-readable execution contract for the gate-info-research primary skill.
-# Every command below MUST exist in `gate-cli v0.5.2`
-# (verified via `gate-cli info list` / `gate-cli news list` / `--help`).
-# Aspirational aggregate shortcuts (e.g. `info +coin-overview`) are NOT used.
+# Legacy commands verified against `gate-cli v0.5.2`.
+# Aggregate shortcuts (`info +*`) ship in gate-cli v0.7.6+ — see `shortcut` blocks.
+# When shortcuts_enabled (>= 0.7.6), prefer shortcut; else use `commands` below.
 
 name: gate-info-research
-version: "2026.4.18-1"
-updated: "2026-04-18"
-cli_baseline: "gate-cli v0.5.2"
+version: "2026.6.22-1"
+updated: "2026-06-22"
+cli_baseline: "gate-cli v0.7.6 (shortcuts opt-in); legacy v0.5.2"
 description: >
   Research-oriented skill covering single-coin analysis, market overview,
   multi-coin comparison, trend/technical analysis, macro impact, and research +
@@ -16,6 +16,7 @@ description: >
 slot_registry:
   symbol:       { type: string,       description: "Coin ticker, e.g. BTC, ETH, SOL." }
   symbols:      { type: string_array, description: "List of coin tickers (>=2, <=20)." }
+  symbols_csv:  { type: string, derived_from: symbols, resolve: comma_join_upper, description: "For +coin-compare only: join symbols[] with ',' (e.g. BTC,ETH). Legacy batch-market-snapshot uses repeatable --symbols per element instead." }
   time_range:   { type: string,       description: "News/sentiment window. PER-COMMAND ENUM NARROWING — the universal super-set is 1h|24h|7d|30d, but each command's `arg_enums` below is the authoritative allowed set. Orchestrator MUST clamp any user-supplied value against the target command's `arg_enums` before invoking the CLI (see CLAUDE.md rule 9). Narrow ones: news feed get-social-sentiment and news events get-latest-events accept ONLY 1h|24h|7d; coin get-coin-rankings accepts ONLY 1h|24h|7d. search-news accepts 1h|24h|7d|30d. search-ugc accepts 1h|24h|7d|30d|all. Defaults in `{slot|default}` templates are pre-validated against each command's enum." }
   period:       { type: string,       description: "Analysis window for markettrend get-technical-analysis / get-kline. Server enum: 1h|4h|24h|3d|5d|7d|10d|all. Default 3d. NOTE: 1d and 1w are INVALID — substitute 24h and 7d respectively." }
   timeframe:    { type: string,       description: "K-line granularity. For get-kline enum is 1m|5m|15m|1h|4h|1d (required). For get-market-snapshot / get-indicator-history enum narrows to 15m|1h|4h|1d (no 1m/5m)." }
@@ -31,6 +32,13 @@ playbooks:
     intent_keywords: ["analyze", "分析", "how is", "怎么样", "worth", "look at", "fundamentals"]
     required_slots: [symbol]
     optional_slots: [time_range]
+    shortcut:
+      min_cli_version: "0.7.6"
+      id: agg_coin_overview
+      cmd: gate-cli info +coin-overview
+      args: { symbol: "{symbol}", format: "json" }
+      replaces_command_ids: [coin_info, market_snapshot, technical_analysis]
+      fallback_on_error: true
     commands:
       - id: coin_info
         cmd: gate-cli info coin get-coin-info
@@ -55,12 +63,30 @@ playbooks:
         args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
         arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — no 30d
         optional: true
-    cli_future_shortcut: "gate-cli info +coin-overview --symbol {symbol}"   # not shipped yet
 
   market_overview:
     intent_keywords: ["market", "大盘", "现在市场怎么样", "overall market", "dominance", "Fear and Greed"]
     required_slots: []
     optional_slots: []
+    shortcut:
+      min_cli_version: "0.7.6"
+      id: agg_market_overview
+      cmd: gate-cli info +market-overview
+      args: { format: "json" }
+      replaces_command_ids: [market_overview]
+      post_shortcut_optional_ids: [popular_board, gainers_board, losers_board]
+      fallback_on_error: true
+      synthesis_note: >
+        +market-overview only returns market_summary + benchmark_snapshots +
+        trend_anchor (top-level payload fields, not .data.* on default release
+        binary). The popular/gainers/losers ranking boards are NOT part of the
+        shortcut, so they are fetched separately via post_shortcut_optional_ids
+        AFTER the shortcut succeeds — Section 3 keeps full ranking data. Only if
+        those optional board calls fail, add one line:
+        "Coin rankings boards unavailable this run."
+      notes:
+        - "Shortcut replaces ONLY get-market-overview; ranking boards run as post_shortcut_optional_ids to avoid data loss (cost: 3 extra ranking calls vs a pure-shortcut path)."
+        - "Map JSON fields per skills/_shared/cli-version-routing.md."
     commands:
       - id: market_overview
         cmd: gate-cli info marketsnapshot get-market-overview
@@ -69,19 +95,18 @@ playbooks:
       - id: popular_board
         cmd: gate-cli info coin get-coin-rankings
         args: { ranking-type: "popular", limit: 20, format: "json" }
-        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing] }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing, market_pulse_hot] }
         parallel_group: A
       - id: gainers_board
         cmd: gate-cli info coin get-coin-rankings
         args: { ranking-type: "top_gainers", time-range: "24h", limit: 10, format: "json" }
-        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing], time-range: [1h, 24h, 7d] }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing, market_pulse_hot], time-range: [1h, 24h, 7d] }
         parallel_group: A
       - id: losers_board
         cmd: gate-cli info coin get-coin-rankings
         args: { ranking-type: "top_losers", time-range: "24h", limit: 10, format: "json" }
-        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing], time-range: [1h, 24h, 7d] }
+        arg_enums: { ranking-type: [popular, top_gainers, top_losers, twitter_hot, airdrop, new_listing, market_pulse_hot], time-range: [1h, 24h, 7d] }
         parallel_group: A
-    cli_future_shortcut: "gate-cli info +market-overview"
 
   multi_coin:
     intent_keywords: ["compare", "对比", "vs", "哪个更", "which is better"]
@@ -90,6 +115,19 @@ playbooks:
     guards:
       - "len(symbols) >= 2"
       - "len(symbols) <= 20"
+    shortcut:
+      min_cli_version: "0.7.6"
+      id: agg_coin_compare
+      cmd: gate-cli info +coin-compare
+      args: { symbols: "{symbols_csv}", format: "json" }
+      replaces_command_ids: [batch_snapshot, coin_info_each, technical_each]
+      fallback_on_error: true
+      guards:
+        - "len(symbols) >= 2"
+        - "len(symbols) <= 5"
+      notes:
+        - "+coin-compare accepts 2–5 symbols only. When len(symbols) > 5, skip shortcut and use legacy commands."
+        - "Orchestrator MUST derive symbols_csv = join(uppercase(symbols), ',') before invoking +coin-compare."
     commands:
       - id: batch_snapshot
         cmd: gate-cli info marketsnapshot batch-market-snapshot
@@ -108,6 +146,15 @@ playbooks:
     intent_keywords: ["technical", "技术分析", "RSI", "MACD", "走势", "trend"]
     required_slots: [symbol]
     optional_slots: [period, timeframe, indicators]
+    shortcut:
+      min_cli_version: "0.7.6"
+      id: agg_trend_analysis
+      cmd: gate-cli info +trend-analysis
+      args: { symbol: "{symbol}", format: "json" }
+      replaces_command_ids: [technical_analysis, kline, indicator_history]
+      fallback_on_error: true
+      notes:
+        - "Shortcut is lightweight TA (indicator_snapshot + price_context). For deep kline/indicator_history, user must request legacy path or < 0.7.6 CLI."
     commands:
       - id: technical_analysis
         cmd: gate-cli info markettrend get-technical-analysis
@@ -117,14 +164,12 @@ playbooks:
       - id: kline
         cmd: gate-cli info markettrend get-kline
         args: { symbol: "{symbol}", timeframe: "{timeframe|1d}", size: 120, with-indicators: true, format: "json" }
-        arg_enums: { timeframe: [1m, 5m, 15m, 1h, 4h, 1d], period: [1h, 4h, 24h, 3d, 5d, 7d, 10d, all] }
+        arg_enums: { timeframe: [1m, 5m, 15m, 1h, 4h, 1d] }
         parallel_group: A
       - id: indicator_history
         cmd: gate-cli info markettrend get-indicator-history
         args: { symbol: "{symbol}", timeframe: "{timeframe|1d}", indicators: "{indicators|rsi,macd,ma30,ma200}", limit: 120, format: "json" }
         arg_enums: { timeframe: [15m, 1h, 4h, 1d] }   # NARROW — no 1m / 5m
-        # indicators is NOT a closed server enum — any ES _source field name works; use lowercase.
-        # Server-populated: rsi, macd, macd_difference, ma7, ma30, ma120, ma200, ema7, ema30, ema200, boll_upper_band, boll_middle_band, boll_lower_band, adx, cci, sar, wr, di_plus, di_minus.
         parallel_group: A
 
   macro:
@@ -154,7 +199,23 @@ playbooks:
     intent_keywords: ["research and news", "分析 并 看看新闻", "research + sentiment", "帮我分析 顺便看看"]
     required_slots: [symbol]
     optional_slots: [time_range]
-    extends: single_coin                       # inherits all single_coin commands
+    extends: single_coin
+    inherits_shortcuts_from: single_coin
+    additional_shortcut:
+      min_cli_version: "0.7.6"
+      id: agg_news_brief
+      cmd: gate-cli news +brief
+      args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+      arg_enums: { time-range: [1h, 24h, 7d] }
+      replaces_command_ids: [news_brief, social_sentiment, latest_events]
+      fallback_on_error: true
+      notes:
+        - "Clamp time_range to arg_enums before +brief — 30d causes partial missing top_events."
+        - "Replaces the three news feed commands in additional_commands; ugc_scan remains optional legacy."
+        - "skip_ids union also covers parent single_coin.news_addons (same ids: news_brief, social_sentiment)."
+    notes:
+      - "shortcuts_enabled: run +coin-overview then +brief; skip all ids in skip_ids union (includes parent news_addons). Legacy news only on fallback or when shortcuts disabled."
+      - "Legacy path: prefer additional_commands for news depth; do not also run single_coin news_addons (duplicate ids)."
     additional_commands:
       - id: news_brief
         cmd: gate-cli news feed search-news
@@ -164,7 +225,7 @@ playbooks:
       - id: social_sentiment
         cmd: gate-cli news feed get-social-sentiment
         args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
-        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — orchestrator MUST clamp user `time_range` to this set before sending
+        arg_enums: { time-range: [1h, 24h, 7d] }
         parallel_group: B
       - id: ugc_scan
         cmd: gate-cli news feed search-ugc
@@ -175,33 +236,30 @@ playbooks:
       - id: latest_events
         cmd: gate-cli news events get-latest-events
         args: { coin: "{symbol}", time-range: "{time_range|7d}", limit: 15, format: "json" }
-        arg_enums: { time-range: [1h, 24h, 7d] }   # NARROW — orchestrator MUST clamp; for 30d / 90d windows fall back to --start-time/--end-time (unix-ms)
+        arg_enums: { time-range: [1h, 24h, 7d] }
         parallel_group: B
         optional: true
 
 failure_policy:
-  # If any optional command fails, mark the section "暂无数据" in the final
-  # report and continue. If any required command fails, abort the playbook and
-  # surface the error to the user with the actionable CLI message.
   required_failure: abort_with_error
   optional_failure: mark_section_missing
 
 report_sections:
   - id: summary
     title: "结论摘要"
-    source_commands: [coin_info, market_snapshot, technical_analysis, news_brief, social_sentiment]
+    source_commands: [agg_coin_overview, coin_info, market_snapshot, technical_analysis, news_brief, social_sentiment, agg_news_brief]
   - id: fundamentals
     title: "基本面与市场地位"
-    source_commands: [coin_info, market_snapshot]
+    source_commands: [agg_coin_overview, coin_info, market_snapshot]
   - id: market_and_trend
     title: "行情与趋势判断"
-    source_commands: [market_snapshot, technical_analysis, kline, indicator_history, market_overview, popular_board, gainers_board, losers_board, batch_snapshot, technical_each, macro_summary, economic_calendar, macro_indicator, coin_snapshot]
+    source_commands: [agg_coin_overview, agg_market_overview, agg_coin_compare, agg_trend_analysis, market_snapshot, technical_analysis, kline, indicator_history, market_overview, popular_board, gainers_board, losers_board, batch_snapshot, technical_each, macro_summary, economic_calendar, macro_indicator, coin_snapshot]
   - id: news_and_sentiment
     title: "近期新闻与市场情绪"
-    source_commands: [news_brief, social_sentiment, ugc_scan, latest_events]
+    source_commands: [agg_news_brief, news_brief, social_sentiment, ugc_scan, latest_events]
   - id: risks
     title: "风险提示"
-    source_commands: [coin_info, market_snapshot, technical_analysis, latest_events]
+    source_commands: [agg_coin_overview, coin_info, market_snapshot, technical_analysis, latest_events, agg_news_brief]
   - id: watchpoints
     title: "后续值得跟踪的观察点"
-    source_commands: [coin_info, economic_calendar, latest_events, technical_analysis]
+    source_commands: [agg_coin_overview, coin_info, economic_calendar, latest_events, technical_analysis]

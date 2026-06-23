@@ -1,8 +1,30 @@
 # gate-info-risk — CLI Command Reference
 
-> Full flag tables for every `gate-cli` command this skill invokes. Verified against `gate-cli v0.5.2` (`gate-cli info <group> <cmd> --help`). `info compliance check-address-risk` is NOT in this list — it does NOT ship in v0.5.2.
+> Legacy commands verified against `gate-cli v0.5.2+`. **`info +token-risk`** (v0.7.6+) replaces the `token_risk` leaf chain when `shortcuts_enabled`. `check-address-risk` is NOT shipped.
 >
 > All flags below are real on this version of the CLI; agents MUST pass `--format json` on every data-collection call.
+
+## Aggregate · token risk (>= 0.7.6)
+
+### `gate-cli info +token-risk`
+
+| Flag | Notes |
+|------|-------|
+| `--symbol` | Ticker path (resolves contract internally) |
+| `--address` + `--chain` | Contract address path (mutually exclusive with `--symbol`) |
+| `--format` | `json` (required for agents) |
+
+**Stdout (default release binary, `--format json`)**: top-level object — **not** `{ data: … }`. Parse `.risk_level` / `.risk_items` / `.token_identity` at the payload root (agent-tagged build only: use `.data.*`).
+
+| Field | Notes |
+|-------|-------|
+| `risk_level` | Full `check-token-security` payload (same shape as legacy leaf below: `high_risk_list`, `risk_summary`, …). **Not a scalar.** |
+| `risk_items` | **Duplicate of `risk_level`** in v0.7.6 — use either field for verdict rules. |
+| `token_identity` | `get-coin-info` basic context. |
+| `coverage_note` | Constant `"shortcut"`. |
+| `partial` / `missing_sections` | When identity lookup fails on address path. |
+
+Map `risk_level` (or `risk_items`) to the same verdict rules as `check-token-security`. Does **not** include `get-token-onchain` — run `token_onchain` after shortcut per playbook `post_shortcut_optional_ids`. Args: `--symbol` for tickers; `--address` + `--chain` for contracts (`args_when`).
 
 ## Info · compliance
 

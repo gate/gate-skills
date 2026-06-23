@@ -6,7 +6,7 @@
 
 This skill is intended for users aged 18 or above with full civil capacity. Availability may vary by product, account state, and local legal or regulatory restrictions.
 
-## Core Capabilities
+### Core Capabilities
 
 | Module | Description | Example |
 |--------|-------------|---------|

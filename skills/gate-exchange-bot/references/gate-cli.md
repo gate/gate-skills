@@ -1,7 +1,7 @@
 ---
 name: gate-exchange-bot-gate-cli
-version: "2026.5.6-1"
-updated: "2026-05-06"
+version: "2026.5.12-1"
+updated: "2026-05-12"
 description: "gate-cli execution specification for Gate bot workflows: strategy recommendation, manual grid or martingale creation, running strategy detail, and single-strategy stop."
 ---
 
@@ -86,8 +86,9 @@ No bundled auxiliary resources are required for this skill.
 
 ### 6.2 Recommendation flow
 1. Determine `scene`: `top1`, `bundle`, `filter`, or `refresh`.
-2. Use query-style parameters only.
-3. Return recommendations exactly from backend results; do not invent unsupported strategy types.
+2. If the user asks for unsupported dimensions such as follower count, running duration, or fee model, explain that limitation using the guidance in `references/strategy-recommend.md` → Unsupported Dimensions.
+3. Use query-style parameters only, and only for supported dimensions.
+4. Return recommendations exactly from backend results; do not invent unsupported strategy types or fake filter flags.
 
 ### 6.3 Mandatory confirmation gate for writes
 Before any create or stop command:
