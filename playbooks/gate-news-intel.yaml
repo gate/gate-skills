@@ -153,6 +153,60 @@ playbooks:
       - "No +market-move-explain shortcut in v0.7.6; keep explain-market-move multi-step path."
       - "Group A runs first; Group B after. Agent synthesizes final attribution from ALL outputs."
 
+  market_move_explain:
+    cli_baseline: "gate-cli v0.7.2"
+    intent_keywords: ["why did", "why crash", "why dump", "why pump", "what caused", "reason for", "行情为什么", "为什么大涨", "为什么大跌", "怎么回事", "这波", "异动", "归因", "market move", "price movement explanation", "why is it pumping", "why is it dumping", "what drove", "是什么原因", "涨跌原因", "价格波动原因"]
+    required_slots: [symbol, query]
+    optional_slots: [time_range]
+    coin_fallback_rules:
+      explicit_coin: "use the coin the user explicitly named"
+      context_coin: "use the only coin from conversation context"
+      broad_market_no_coin: "default to BTC and append notice: 'No coin specified; defaulting to BTC as the broad-market representative asset.'"
+      vague_reference: "ask the user which specific coin they mean (e.g. 'this coin', 'that altcoin')"
+      event_impact_no_coin: "ask the user which coin to analyze for this event"
+      non_crypto_pass_through: "accept traditional finance names (e.g. 美股, A股, S&P 500) as the coin value and pass through to the CLI"
+      non_crypto_ambiguous: "ask the user or route to the appropriate domain skill"
+    commands:
+      - id: explain_market_move
+        cmd: gate-cli news events explain-market-move
+        args: { query: "{query}", coin: "{symbol}", time-range: "{time_range|2h}", format: "json" }
+        arg_enums: { time-range: [30m, 1h, 2h, 4h, 24h] }
+        parallel_group: A
+      - id: market_snapshot
+        cmd: gate-cli info marketsnapshot get-market-snapshot
+        args: { symbol: "{symbol}", scope: "basic", format: "json" }
+        parallel_group: A
+      - id: orderbook
+        cmd: gate-cli info marketdetail get-orderbook
+        args: { symbol: "{symbol}", depth: 20, format: "json" }
+        parallel_group: A
+      - id: technical_analysis
+        cmd: gate-cli info markettrend get-technical-analysis
+        args: { symbol: "{symbol}", format: "json" }
+        parallel_group: B
+      - id: coin_info
+        cmd: gate-cli info coin get-coin-info
+        args: { query: "{symbol}", scope: "basic", format: "json" }
+        parallel_group: B
+      - id: search_x
+        cmd: gate-cli news feed search-x
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", limit: 15, format: "json" }
+        parallel_group: B
+        conditional: "symbol != BTC"
+      - id: social_sentiment
+        cmd: gate-cli news feed get-social-sentiment
+        args: { coin: "{symbol}", time-range: "{time_range|24h}", format: "json" }
+        parallel_group: B
+        conditional: "symbol != BTC"
+    notes:
+      - "Group A (core data) runs first: explain-market-move provides Tavily-based news/event evidence with AI summary; market snapshot and orderbook provide live price/volume/liquidity context."
+      - "Group B runs after Group A completes: TA, coin fundamentals, and community signals (non-BTC only)."
+      - "For BTC, skip search-x and social-sentiment — Tavily already captures macro/geopolitical signals; community adds noise for BTC."
+      - "The agent MUST perform its own final attribution synthesis using ALL collected data. Do not treat any single tool output as the authoritative conclusion."
+      - "When explain-market-move returns data_status.is_partial=true, surface the degraded-data notice in the report footer."
+      - "If any companion command fails (market_snapshot, orderbook, TA, coin_info, community), mark that section as unavailable — do not abort the entire report."
+    cli_future_shortcut: "gate-cli news +market-move-explain --coin {symbol} --query {query} --time-range {time_range|2h} --format json"
+
   exchange_listings:
     intent_keywords: ["listing", "上新", "上币", "announcement", "公告", "delisting", "下架"]
     required_slots: []
