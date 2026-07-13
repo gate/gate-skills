@@ -1,94 +1,115 @@
-# Alpha Quant — Methodology Reference
+# Alpha Quant v2 — Methodology Reference
 
-Exact formulas for the five factors. All computed per symbol on the chosen timeframe over
-`W` bars, then cross-sectionally normalized across the universe.
+Alpha158-derived factor library + IC/IR adaptive weighting. All factors are plain-arithmetic
+ports of Microsoft Qlib's public Alpha158 expressions (see `alpha158-catalog.md` for the full
+158). Computed per symbol on the chosen timeframe over `W` bars, then normalized
+cross-sectionally across the universe and weighted by measured predictive power.
 
-Notation: `C[t]` = close, `V[t]` = quote volume, `t=0` most recent bar.
+Notation: `C`=close, `O`=open, `H`=high, `L`=low, `V`=volume. `Ref(x,n)`=value n bars ago.
+`Mean/Std/Max/Min(x,n)`=rolling window stat. All ratios divide by `C` to be scale-free.
 
-## 1. MOM — Momentum
+## Factor formulas (the 17 used)
 
-Trailing return, skipping the most recent bar to reduce microstructure noise:
-
+### Momentum
 ```
-MOM_raw = C[1] / C[W-1] - 1
-```
-
-Use `C[1]` (not `C[0]`) as the near leg. Longer window → slower signal.
-
-## 2. TREND — Trend quality
-
-Combine EMA-slope sign and above-EMA fraction:
-
-```
-ema = EMA(C, span=20)
-above_frac = mean( C[t] > ema[t]  for t in 0..W-1 )      # 0..1
-slope_sign = sign( ema[0] - ema[min(20, W-1)] )          # -1/0/+1
-TREND_raw  = above_frac * slope_sign
+ROC5  = Ref(C,5)/C
+ROC20 = Ref(C,20)/C
+ROC60 = Ref(C,60)/C
 ```
 
-Rewards symbols that spend most bars above a *rising* EMA; punishes choppy/declining.
-
-## 3. VOL — Volatility (inverted)
-
-Annualized realized volatility of log returns, negated so lower vol scores higher:
-
+### Trend quality
 ```
-r[t]      = ln(C[t] / C[t+1])
-sigma     = std(r) * sqrt(bars_per_year)   # 365 for 1d, 365*6 for 4h, 52 for 1w
-VOL_raw   = -sigma
+BETA20 = Slope(C,20)/C          # OLS slope of close over 20 bars, scaled
+RSQR20 = Rsquare(C,20)          # R^2 of linear fit over 20 bars (0..1) — trend cleanliness
+RSQR60 = Rsquare(C,60)
 ```
 
-## 4. LIQ — Liquidity / volume thrust
-
-Recent participation vs the symbol's own history (self-referential z, then used raw
-before cross-sectional z):
-
+### Volatility
 ```
-v_recent  = mean(V[0..9])       # last 10 bars
-v_base    = mean(V[10..W-1])
-LIQ_raw   = (v_recent - v_base) / (std(V[10..W-1]) + eps)
+STD5  = Std(C,5)/C
+STD20 = Std(C,20)/C
 ```
 
-Captures volume expansion / conviction.
-
-## 5. MR — Mean-reversion guard
-
-Penalize overbought extremes using RSI(14) distance from neutral 50:
-
+### Price structure
 ```
-rsi       = RSI(C, 14)[0]
-MR_raw    = -(abs(rsi - 50) if rsi > 70 or rsi < 30 else 0) / 50
+MA5   = Mean(C,5)/C
+MA20  = Mean(C,20)/C
+MAX20 = Max(H,20)/C
+MIN20 = Min(L,20)/C
+RSV20 = (C - Min(L,20)) / (Max(H,20) - Min(L,20) + 1e-12)   # stochastic position 0..1
 ```
 
-Only bites at extremes; neutral in the normal 30–70 band.
+### Candle / volume
+```
+KMID   = (C - O)/O                          # body
+KSFT   = (2C - H - L)/O                      # close pressure within bar
+VMA20  = Mean(V,20)/(V + 1e-12)              # volume vs its 20-bar average
+CORR20 = Corr(C, log(V+1), 20)              # price-volume co-movement
+```
+
+Adding more from the 158 catalog is a drop-in: implement the expression, register it in the
+factor map. No sign assumptions are baked in — direction is data-driven (below).
 
 ## Cross-sectional normalization
 
-For each factor F across the universe:
+For each factor F, on each date t, across the universe:
+```
+z_F,t = clip( (F - mean_x(F)) / (std_x(F) + eps), -3, +3 )
+```
+(`mean_x` / `std_x` are taken across symbols at that date — the cross-section.)
+
+## IC / IR (the core upgrade)
+
+For each factor, measure how well its cross-section predicts the **forward H-bar return**
+`r_fwd,t = C[t+H]/C[t] - 1` (default H=5):
 
 ```
-z_F = (F_raw - mean(F_raw)) / (std(F_raw) + eps)
-z_F = clip(z_F, -3, +3)          # winsorize
+IC_t = Spearman( z_F,t  ,  r_fwd,t )     # rank correlation across symbols, per date
+IC   = mean_t(IC_t)                       # average information coefficient
+IR   = mean_t(IC_t) / std_t(IC_t)         # information ratio — strength AND consistency
 ```
 
-## Composite
+Require ≥10 valid dated IC observations, else fall back to equal weight (disclose it).
+
+## Adaptive weighting
 
 ```
-Alpha = 0.30*z_MOM + 0.25*z_TREND + 0.15*z_VOL + 0.15*z_LIQ + 0.15*z_MR
+w_F = IR_F / Σ|IR|            # signed, normalized
 ```
 
-Weights are user-overridable. Rank descending.
+- A factor with **negative IC** gets a **negative weight** → the engine automatically flips
+  factors that are working in reverse for the current regime.
+- Strong, *consistent* signals (high |IR|) dominate; noisy ones are damped.
+
+## Composite & ranking
+
+```
+Alpha_s = Σ_F  w_F × z_F,latest(s)
+```
+Rank symbols by `Alpha` descending. Report per-symbol top +/− factor contributors.
+
+## Regime read
+
+```
+mom_weight = w_ROC5 + w_ROC20 + w_ROC60
+mom_weight < 0  → MEAN-REVERTING regime (past winners underperform)
+mom_weight > 0  → TRENDING regime (momentum persists)
+```
+State this explicitly — it is the single most useful line for the user.
 
 ## Edge cases
 
-- **Symbol not listed on Gate** → drop symbol, list under "Dropped" with reason (e.g. `TON_USDT (not listed on Gate)`). Never fail the whole run for one bad symbol.
-- **< 30 bars available** → drop symbol, list under "Dropped".
-- **Single-symbol universe** → cross-sectional z undefined; return raw factors + a note that ranking needs ≥3 symbols.
-- **Zero-volume bars** → forward-fill volume; if >30% zero, drop symbol.
-- **NaN / gaps** → linear-interpolate ≤2 consecutive gaps, else drop.
-- **MR silent in neutral regimes** → the mean-reversion guard is 0 for every symbol whose RSI(14) sits in the 30–70 band. This is by design: MR only penalizes true overbought/oversold extremes. In a calm, range-bound market MR contributes nothing and the composite is effectively driven by MOM/TREND/VOL/LIQ. Note this in the report when MR is zero across the board.
+- **Symbol not listed on Gate** → drop, list under "Dropped"; never fail the whole run.
+- **< 80 bars available** → drop symbol (need history for W + IC horizon).
+- **< 8 symbols** → cross-section thin; IC/IR unreliable → equal-weight fallback + note.
+- **< 10 IC observations for a factor** → drop that factor from the blend.
+- **NaN factor cells** → treated as 0 contribution after z-scoring; note if pervasive.
+- **Determinism** → same inputs + same data snapshot → identical output. No randomness.
+  Timestamp every report with the fetch time (UTC) for reproducibility.
 
-## Determinism
+## Honesty on magnitudes
 
-Same inputs + same data snapshot → identical output. No randomness. Timestamp every report
-with the data fetch time (UTC) so results are reproducible and auditable.
+Real single factors on a ~10-symbol crypto daily basket produce IC ≈ 0.05–0.15 and
+IR ≈ 0.15–0.40. These are legitimate, non-overfit levels. Never present inflated IC or a
+suspiciously smooth equity curve — the value is the *adaptive, explainable* blend, not a
+fantasy number.
