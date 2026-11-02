@@ -1,2 +1,0 @@
-# Skill Test Framework Dependencies
-anthropic>=0.80.0

@@ -1,7 +1,0 @@
-{
-  "mcp_server": "lpro",
-  "cursor_mcp_config": "~/.cursor/mcp.json",
-  "mcps_cache_dir": "auto",
-  "timeout_seconds": 60,
-  "report_dir": "reports"
-}
