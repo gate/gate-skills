@@ -130,13 +130,22 @@ resolve_platform() {
   PLATFORM="${PLATFORM_CANDIDATES[0]}"
 }
 
+should_install_skill_source() {
+  # Keep Pay's existing identity; CEX source directories require the separate CLI package build.
+  case "$1" in
+    gate-exchange-pay) return 0 ;;
+    ""|gate-cex-*|gate-exchange-*) return 1 ;;
+    *) return 0 ;;
+  esac
+}
+
 install_gate_skills_to() {
   local SKILLS_DIR="$1"
   if [[ $INSTALL_SKILLS -eq 0 ]]; then
     echo "Skipped gate-skills installation (--no-skills)."
     return 0
   fi
-  echo "Installing gate-skills (all)..."
+  echo "Installing non-CEX gate-skills..."
   if ! command -v git &>/dev/null; then
     echo "git is required to clone gate-skills. Use --no-skills for MCP only." >&2
     exit 1
@@ -156,6 +165,8 @@ install_gate_skills_to() {
     [[ -d "$dir" ]] || continue
     local name
     name=$(basename "$dir")
+    # Filter before touching the destination so an existing user installation is preserved.
+    should_install_skill_source "$name" || continue
     local dst="$SKILLS_DIR/$name"
     [[ -d "$dst" ]] && rm -rf "$dst"
     cp -R "$dir" "$dst"

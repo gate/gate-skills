@@ -9,4 +9,4 @@ gate-dex-sec|http|https://api.gatemcp.ai/mcp/dex/sec|none|Gate Verify (tx check-
 gate-info|http|https://api.gatemcp.ai/mcp/info|none|Info & Analysis
 gate-news|http|https://api.gatemcp.ai/mcp/news|none|News Feed
 gatepay-local-mcp|stdio|npx -y gatepay-local-mcp|gatepay_env|Gate Pay x402 (stdio; env placeholders — see gate-pay-x402)
-gatepay-merchant-discovery|http|http://dev.halftrust.xyz/pay-mcp-server/mcp|none|Gate Pay merchant catalog (discoveryResource)
+gatepay-merchant-discovery|http|https://openplatform.gateapi.io/pay-mcp-server/mcp|none|Gate Pay merchant catalog (discoveryResource)

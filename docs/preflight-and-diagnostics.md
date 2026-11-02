@@ -4,10 +4,21 @@ This document details the JSON contracts for the three diagnostic commands
 provided by `gate-cli` — `preflight`, `doctor`, `migrate` — and the strategies
 that AI skills / agents MUST use when interacting with them.
 
-> **All new skills MUST run `gate-cli preflight --format json` in their
-> "Step 0" to verify environment health before executing business logic.**
+## Applicability
 
-Samples may show **`gate-cli v0.5.2`** or **`v0.7.6`**; field names are stable.
+This diagnostic/fallback contract applies only to products that explicitly adopt
+it. The six `gate-cex-*` skills use their own [CEX preflight](../skills/_shared/cex/preflight.md),
+[setup](../skills/_shared/cex/cli-setup.md) and [authentication](../skills/_shared/cex/cli-auth.md)
+contracts. They verify the actual required leaf and stop an unavailable action;
+they never emit `__FALLBACK__` to enter an Exchange MCP flow. This guide does not
+authorize installing, removing or migrating Pay's Exchange connection.
+
+For products that adopt this guide, run `gate-cli preflight --format json` before
+business logic and apply the status handling below. These historical samples are
+illustrations, not proof of identical fields in every installed version; verify
+the actual diagnostic contract before consuming it.
+
+Samples below are historical; they do not certify the installed CLI contract.
 
 ### Shortcut version gate (Step 0.5)
 

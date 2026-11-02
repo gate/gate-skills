@@ -1,6 +1,6 @@
 {
   "gatepay-merchant-discovery": {
-    "url": "http://dev.halftrust.xyz/pay-mcp-server/mcp",
+    "url": "https://openplatform.gateapi.io/pay-mcp-server/mcp",
     "transport": "streamable-http"
   }
 }

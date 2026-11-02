@@ -6,237 +6,86 @@ Gate Skills is an open skills marketplace that empowers AI agents with native ac
 
 Built by Gate. Built for the crypto community.
 
-### One-Click Installation
+## Gate CEX Skill 2.0
 
-Get started in seconds with our unified installer skill:
+The six CEX source skills are [trade](skills/gate-cex-trade/SKILL.md), [earn](skills/gate-cex-earn/SKILL.md), [assets](skills/gate-cex-assets/SKILL.md), [subaccount](skills/gate-cex-subaccount/SKILL.md), [affiliate](skills/gate-cex-affiliate/SKILL.md) and [bot](skills/gate-cex-bot/SKILL.md). Alpha is included in trade. The six profiles document 379 unique owned command paths within the approved authoring scope (trade 282, earn 32, assets 29, subaccount 12, affiliate 12, bot 12). Trade also reuses one asset-owned read-only command, which is not counted twice. Use the official [Gate CLI](https://github.com/gate/gate-cli) and verify each required capability in the installed public release; the catalog is not a release guarantee. Their single shared source is `skills/_shared/cex/`.
 
-- **All Platforms (Cursor / Claude Code / Codex / OpenClaw)**: Use `gate-cli-installer` — one-click install all Gate MCP servers + Skills for your environment
+Private reads and all writes use Gate CLI. Trade also permits the approved bounded public [GET compatibility reads](skills/gate-cex-trade/references/markets.md) and [WS helper](skills/gate-cex-trade/references/streams.md); these exceptions do not authorize private HTTP, MCP fallback, arbitrary endpoints or environment changes.
 
-**Quick Start**: Just say to your AI assistant:
+Build standalone packages before installation. Copy an entire generated skill directory to the host's skill directory; install only the requested packages. Do not install these source directories directly: their source links use the shared directory. The builder explicitly includes only the six CEX business packages.
 
-> **"Help me auto install Gate Skills and MCPs: https://github.com/gate/gate-skills"**
+Use an activated Python 3.11+ virtual environment for authoring tools. From the repository root:
 
-Or run the install script directly from the repository.
+```bash
+# Install the pinned authoring dependencies in that environment.
+python -m pip install -r scripts/requirements-cex.txt
+# These isolated regressions build/check packages; they make no business API calls.
+python -B -m unittest discover -s tests/cex -p 'test_*.py'
+# Choose a new output directory; existing output is never overwritten.
+python scripts/cex_skills.py build --source . --contract tests/cex/cli-contract.json --output dist/gate-cex-2.0
+# Check one independently installed package against the approved CLI contract.
+python scripts/cex_skills.py check --target dist/gate-cex-2.0/gate-cex-trade --package --contract tests/cex/cli-contract.json
+```
+
+Use [gate-cex-skill-audit](gate-cex-skill-audit/SKILL.md) for the nine-dimension review; the deterministic tool above covers structure, links and registered CLI contracts, not financial correctness or legal certification. Real transactions are never part of the default checks.
+
+### Installation by product
+
+| Product | Required installation |
+|---------|-----------------------|
+| Six CEX skills | Install [Gate CLI](skills/gate-cli-installer/SKILL.md), then copy only the requested generated standalone packages using the build instructions above. |
+| Legacy Gate Pay | Retain the Exchange connection modes in [gate-mcp-installer](skills/gate-mcp-installer/SKILL.md); follow the payment skill's declared authorization. |
+| Gate Pay x402 | Select [gatepay-local and optional merchant discovery](skills/gate-mcp-installer/README.md); configure the wallet and payment consent using [gate-pay-x402](skills/gate-pay-x402/SKILL.md). These MCPs are opt-in. |
+| DEX / Info / News | Follow the selected product's CLI or MCP prerequisites. The MCP installer preserves Exchange modes for Pay but excludes CEX business skill directories from its source-copy step. |
+
+Select the product and required skills first. The CLI installer installs the CLI binary; it does not install MCP servers. Keep existing user installations unless their removal is separately requested.
 
 ### Framework Compatibility
 
-These skills are designed to work with any AI agent framework. Whether you're using Cursor, OpenClaw, or your own stack, your agents can plug into Gate crypto intelligence with minimal configuration.
+Use a host that can load the selected SKILL.md and its references, provide its declared CLI/MCP tools, and enforce the required permissions. Setup and reload steps depend on the host.
 
 ---
 
 ## Skills Overview
 
-| Skill | Description | Version | Status |
-|-------|-------------|---------|--------|
-| [gate-exchange-tradfi](#-gate-exchange-tradfi) | Gate TradFi (traditional finance) read-only queries: orders, positions, market data, assets and MT5 account info | `2026.3.13-6` | ✅ Active |
-| [gate-exchange-simpleearn](#-gate-exchange-simpleearn) | Gate Simple Earn (Uni) flexible earn queries: positions, interest, top APY rate lookup (subscribe/redeem not supported) | `2026.3.12-2` | ✅ Active |
-| [gate-exchange-affiliate](#-gate-exchange-affiliate) | Gate Exchange affiliate/partner program: commission, volume, net fees, customer count, trading users query and application guidance | `2026.3.13` | ✅ Active |
-| [gate-exchange-unified](#-gate-exchange-unified) | Gate unified account: equity, borrow/repay, loan & interest, mode switch, leverage & collateral | `2026.3.13-4` | ✅ Active |
-| [gate-exchange-assets](#-gate-exchange-assets) | Gate Exchange asset queries: total balance, spot holdings, account valuation, account book (read-only) | `2026.3.12-3` | ✅ Active |
-| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.3.25-1` | ✅ Active |
-| [gate-exchange-dual](#-gate-exchange-dual) | Gate dual investment: product discovery, settlement simulation, position summary, balance (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-staking](#-gate-exchange-staking) | Gate staking (earn): positions, rewards, products, order history (read-only) | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-autoinvest](#-gate-exchange-autoinvest) | Gate Earn fast auto-invest (DCA): create/update/stop/top-up plans; coins, min amount, records, plan detail; spot & Simple Earn balance context | `2026.4.2-3` | ✅ Active |
-| [gate-exchange-earn](#-gate-exchange-earn) | Gate Smart Earn (L2) via gate-cli: Simple Earn, dual, staking, yield compare, idle-fund ideas; subscribe/redeem with confirmation | `2026.4.29-3` | ✅ Active |
-| [gate-exchange-subaccount](#-gate-exchange-subaccount) | Gate sub-account management: query status, list, create, lock/unlock (write ops need confirmation) | `2026.3.12-1` | ✅ Active |
-| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.3.25-1` | ✅ Active |
-| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.3.25-1` | ✅ Active |
-| [gate-info-defianalysis](#-gate-info-defianalysis) | DeFi ecosystem: TVL rankings, protocol metrics, yield/APY, stablecoins, bridges, exchange reserves, liquidation heatmaps (Gate-Info; read-only) | `2026.3.30-6` | ✅ Active |
-| [gate-info-macroimpact](#-gate-info-macroimpact) | Macro ↔ crypto: economic calendar, indicators, related news, and market snapshot linkage (Gate-Info + Gate-News; read-only) | `2026.3.30-6` | ✅ Active |
-| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.3.25-1` | ✅ Active |
-| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.3.25-1` | ✅ Active |
-| [gate-info-tokenonchain](#-gate-info-tokenonchain) | Token on-chain: holder distribution, activity, large transfers (Smart Money not in this version; Gate-Info; read-only) | `2026.3.30-5` | ✅ Active |
-| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.3.25-1` | ✅ Active |
-| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.3.25-1` | ✅ Active |
-| [gate-news-communityscan](#-gate-news-communityscan) | Community / X sentiment: discussion scan + quantitative social sentiment (UGC beyond X when available; Gate-News; read-only) | `2026.3.30-5` | ✅ Active |
-| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.3.25-1` | ✅ Active |
-| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.3.25-1` | ✅ Active |
-| [gate-exchange-newcoin](#-gate-exchange-newcoin) | New listing due diligence and event radar via gate-cli: listings, fundamentals, risk, sentiment, tape, LaunchPool calendar; optional first spot/Alpha order after confirmation | `2026.4.29-1` | ✅ Active |
-| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.3.12-1` | ✅ Active |
-| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-marketanalysis](#-gate-exchange-marketanalysis) | Market tape analysis: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, breakout, and weekend vs weekday | `2026.3.11-1` | ✅ Active |
-| [gate-exchange-pay](#-gate-exchange-pay) | Gate Pay payment execution: complete merchant charges, pay-first flows, and output receipts | `2026.3.27-2` | ✅ Active |
-| [gate-mcp-installer](#-gate-mcp-installer) | One-click installer for Gate MCP servers and Skills for Cursor, Claude Code, Codex, and OpenClaw | `2026.4.1-1` | ✅ Active |
-| [gate-exchange-spot](#-gate-exchange-spot) | Gate spot trading: buy/sell, order management, account queries, and asset swaps | `2026.3.10-1` | ✅ Active |
-| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.3.10-1` | ✅ Active |
-| [gate-exchange-trading](#-gate-exchange-trading) | End-to-end trading: market judgment, risk control, order drafting, execution, and post-trade management | `2026.3.14-3` | ✅ Active |
-| [gate-exchange-alpha](#-gate-exchange-alpha) | Gate Alpha token discovery, market viewing, and account holdings query | `2026.3.13-1` | ✅ Active |
-| [gate-exchange-coupon](#-gate-exchange-coupon) | Gate coupon/voucher management: list, detail, usage rules, and acquisition source query | `2026.3.13-1` | ✅ Active |
-| [gate-exchange-crossex](#-gate-exchange-crossex) | Gate CrossEx cross-exchange operations: orders, positions, and history across Gate, Binance, OKX | `2026.3.12-1` | ✅ Active |
-| [gate-exchange-transfer](#-gate-exchange-transfer) | Gate internal transfer: move funds between spot, margin, perpetual, delivery, and options accounts | `2026.3.16-2` | ✅ Active |
-| [gate-exchange-flashswap](#-gate-exchange-flashswap) | Gate Flash Swap query: currency pairs, swap limits, order history, and order details | `2026.3.11-5` | ✅ Active |
-| [gate-exchange-smallbalance](#-gate-exchange-smallbalance) | Gate small balance (dust): list eligible assets, convert to GT, conversion history | `2026.3.20-1` | ✅ Active |
-| [gate-exchange-vipfee](#-gate-exchange-vipfee) | Gate VIP tier and trading fee rate query: spot fees, futures fees, VIP level | `2026.3.11-2` | ✅ Active |
-| [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.3.13-1` | ✅ Active |
-| [gate-exchange-futures](#-gate-exchange-futures) | USDT perpetual futures trading: open/close position, cancel/amend order | `2026.3.5-1` | ✅ Active |
-| [gate-exchange-referral](#-gate-exchange-referral) | Invite-friends campaigns and rules: Earn Together, Help & Get Coupons, Super Commission; read-only guidance | `2026.3.26-1` | ✅ Active |
-| [gate-exchange-assets-manager](#-gate-exchange-assets-manager) | L2 composite: multi-account assets, margin/liquidation risk, earn/staking/affiliate, unified borrow & collateral | `2026.3.25-1` | ✅ Active |
-| [gate-info-research](#-gate-info-research) | L2 Market Research Copilot: Gate-Info + Gate-News read-only briefs, comparisons, and risk checks | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-welfare](#-gate-exchange-welfare) | Welfare center newcomer tasks: identity, task list, task claim, reward claim, and completion guidance (MCP-backed; no fabricated numbers) | `2026.4.10-1` | ✅ Active |
-| [gate-exchange-launchpool](#-gate-exchange-launchpool) | LaunchPool: browse projects, stake/redeem, pledge records, airdrop reward history | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-kyc](#-gate-exchange-kyc) | KYC portal guidance (complete verification on the official site only) | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-collateralloan](#-gate-exchange-collateralloan) | Multi-collateral loan: query, repay, add collateral, redeem collateral | `2026.3.23-1` | ✅ Active |
-| [gate-exchange-activitycenter](#-gate-exchange-activitycenter) | Platform activity center: campaigns, recommendations, and my activities | `2026.3.23-1` | ✅ Active |
+Versions below are Skill metadata, not CLI releases or proof of live service availability. Start Info/News requests with the CLI-primary entries; compatibility entries keep their own prerequisites and fallback rules.
 
----
-
-## 🤝 gate-exchange-affiliate
-
-> **Path**: `skills/gate-exchange-affiliate/`
-
-Gate Exchange affiliate/partner program data query and management: commission tracking, team performance analysis, and application guidance. Supports up to 30 days per request and up to 180 days total (agent splits requests when >30 days). Requires partner-privilege authentication.
-
-**Example Prompts**:
-- `Show my affiliate data`
-- `Commission this week`
-- `Partner earnings`
-- `Team performance`
-- `Customer trading volume`
-- `Rebate income`
-- `Apply for affiliate program`
-
----
-
-## 📈 gate-exchange-marketanalysis
-
-> **Path**: `skills/gate-exchange-marketanalysis/`
-
-Read-only market tape analysis across ten scenarios: liquidity, momentum, liquidation, funding arbitrage, basis, manipulation risk, order book explainer, slippage simulation, K-line breakout/support–resistance, and weekend vs weekday volume comparison.
-
-**Example Prompts**:
-- `Check BTC liquidity and slippage`
-- `What is the momentum of ETH?`
-- `Simulate a $10K market buy on ETH`
-- `Is there manipulation risk on DOGE?`
-- `Compare BTC weekend vs weekday volume`
-
----
-
-## 📊 gate-exchange-futures
-
-> **Path**: `skills/gate-exchange-futures/`
-
-USDT perpetual futures trading on Gate Exchange. Supports four operations: open position, close position, cancel order, and amend order — with pre-flight checks, margin/leverage handling, and confirmation before execution.
-
-**Example Prompts**:
-- `Long BTC 1 contract with 10x leverage`
-- `Close all ETH positions`
-- `Cancel my BTC buy order`
-- `Change order price to 60000`
-
----
-
-## 🤖 gate-exchange-trading
-
-> **Path**: `skills/gate-exchange-trading/`
-
-End-to-end cryptocurrency trading for Gate Exchange. Completes the full trading loop in one skill: market judgment → risk control → order drafting → explicit confirmation → execution → post-trade management. Works with both spot and futures.
-
-**Example Prompts**:
-- `Analyze BTC before placing an order`
-- `Is it safe to buy ETH now? If yes, help me buy`
-- `Check risk and then long BTC futures 10x`
-- `Analyze before buying SOL`
-
----
-
-## 🔮 gate-exchange-alpha
-
-> **Path**: `skills/gate-exchange-alpha/`
-
-Gate Alpha token discovery, market viewing, and account operations. Browse tradable Alpha tokens, check Alpha market tickers/prices, and view Alpha holdings and portfolio value.
-
-**Example Prompts**:
-- `What coins are on Alpha?`
-- `Alpha token price for SOL`
-- `Show my Alpha holdings`
-- `Alpha portfolio value`
-- `Which Alpha tokens are on Solana?`
-
----
-
-## 🎟️ gate-exchange-coupon
-
-> **Path**: `skills/gate-exchange-coupon/`
-
-Gate coupon/voucher management: list available coupons, search by type, view expired/used history, check coupon details, read usage rules, and trace acquisition source.
-
-**Example Prompts**:
-- `My coupons`
-- `Do I have any coupons?`
-- `Coupon details`
-- `When does my coupon expire?`
-- `How did I get this coupon?`
-
----
-
-## 🌐 gate-exchange-crossex
-
-> **Path**: `skills/gate-exchange-crossex/`
-
-Gate CrossEx cross-exchange operations: order queries, position queries, and history queries across Gate, Binance, and OKX. Supports order management, position monitoring, and trade/interest history retrieval.
-
-**Example Prompts**:
-- `Query all open CrossEx orders`
-- `Check my CrossEx positions`
-- `CrossEx order history`
-- `CrossEx trade history`
-
----
-
-## 💸 gate-exchange-transfer
-
-> **Path**: `skills/gate-exchange-transfer/`
-
-Gate same-UID internal transfer between trading accounts: spot, isolated margin, perpetual (USDT/BTC-margined), delivery, and options. Execution requires explicit user confirmation and source balance pre-check.
-
-**Example Prompts**:
-- `Transfer 100 USDT from spot to futures`
-- `Move funds from spot to perpetual`
-- `Transfer BTC to delivery account`
-- `Move USDT from margin to spot`
-
----
-
-## ⚡ gate-exchange-flashswap
-
-> **Path**: `skills/gate-exchange-flashswap/`
-
-Gate Flash Swap query: browse supported currency pairs, validate swap amount limits, view flash swap order history, and look up specific order details. Read-only; no swap execution.
-
-**Example Prompts**:
-- `What pairs support flash swap?`
-- `Flash swap limits for BTC/USDT`
-- `Show my flash swap order history`
-- `Look up flash swap order #12345`
-
----
-
-## 🪙 gate-exchange-smallbalance
-
-> **Path**: `skills/gate-exchange-smallbalance/`
-
-List spot **dust / small-balance** holdings eligible under the platform threshold, **convert** selected or all eligible balances to **GT** (irreversible; confirm before write), and query **conversion history**. Requires authentication; convert needs wallet write-capable API access.
-
-**Example Prompts**:
-- `What small balances can I convert to GT?`
-- `Convert all my dust to GT`
-- `Convert FLOKI dust to GT`
-- `Show my small balance conversion history`
-
----
-
-## 👑 gate-exchange-vipfee
-
-> **Path**: `skills/gate-exchange-vipfee/`
-
-Query Gate VIP tier and trading fee rates, including spot and futures fee information.
-
-**Example Prompts**:
-- `What is my VIP level?`
-- `Show me the spot and futures trading fees`
-- `Check my VIP level and trading fees`
-- `What's my fee rate?`
+| Skill | Description | Version | Entry / installation |
+|-------|-------------|---------|----------------------|
+| [gate-cex-trade](skills/gate-cex-trade/SKILL.md) | Trading and market/account trading context | `0.1.2` | Standalone packages |
+| [gate-cex-earn](skills/gate-cex-earn/SKILL.md) | Earn products and collateral loans | — | Standalone packages |
+| [gate-cex-assets](skills/gate-cex-assets/SKILL.md) | Balances, transfers, deposits and withdrawals | — | Standalone packages |
+| [gate-cex-subaccount](skills/gate-cex-subaccount/SKILL.md) | Subaccount and API-key administration | — | Standalone packages |
+| [gate-cex-affiliate](skills/gate-cex-affiliate/SKILL.md) | Relationships, commissions and statistics | — | Standalone packages |
+| [gate-cex-bot](skills/gate-cex-bot/SKILL.md) | Grid, martingale and portfolio bots | — | Standalone packages |
+| [gate-info-coinanalysis](#-gate-info-coinanalysis) | Single-coin comprehensive analysis: fundamentals, technicals, news, sentiment | `2026.4.6-1` | Compatibility entry |
+| [gate-info-addresstracker](#-gate-info-addresstracker) | On-chain address tracking: profile, transaction history, fund flow analysis | `2026.4.3-1` | Compatibility entry |
+| [gate-info-coincompare](#-gate-info-coincompare) | Multi-coin comparison with multi-dimensional analysis table | `2026.4.6-1` | Compatibility entry |
+| [gate-info-defianalysis](#-gate-info-defianalysis) | DeFi ecosystem: TVL rankings, protocol metrics, yield/APY, stablecoins, bridges, exchange reserves, liquidation heatmaps (Gate-Info; read-only) | `2026.4.7-1` | Compatibility entry |
+| [gate-info-macroimpact](#-gate-info-macroimpact) | Macro ↔ crypto: economic calendar, indicators, related news, and market snapshot linkage (Gate-Info + Gate-News; read-only) | `2026.4.6-1` | Compatibility entry |
+| [gate-info-marketoverview](#-gate-info-marketoverview) | Crypto market overview: sector rankings, DeFi, events, macro summary | `2026.4.6-1` | Compatibility entry |
+| [gate-info-riskcheck](#-gate-info-riskcheck) | Token & contract risk assessment: honeypot, rug pull, tax, holder concentration | `2026.4.3-1` | Compatibility entry |
+| [gate-info-tokenonchain](#-gate-info-tokenonchain) | Token on-chain: holder distribution, activity, large transfers (Smart Money not in this version; Gate-Info; read-only) | `2026.4.7-1` | Compatibility entry |
+| [gate-info-trendanalysis](#-gate-info-trendanalysis) | Trend & technical analysis: K-line, RSI, MACD, multi-timeframe signals | `2026.4.3-1` | Compatibility entry |
+| [gate-news-briefing](#-gate-news-briefing) | Crypto news briefing: major events, trending news, social sentiment | `2026.4.7-1` | Compatibility entry |
+| [gate-news-communityscan](#-gate-news-communityscan) | Community / X sentiment: discussion scan + quantitative social sentiment (UGC beyond X when available; Gate-News; read-only) | `2026.4.7-1` | Compatibility entry |
+| [gate-news-eventexplain](#-gate-news-eventexplain) | Event attribution & explanation: why did X crash/pump, impact chain analysis | `2026.4.3-1` | Compatibility entry |
+| [gate-news-listing](#-gate-news-listing) | Exchange listing/delisting tracker with fundamental supplements | `2026.4.6-1` | Compatibility entry |
+| [gate-dex-market](#-gate-dex-market) | Gate DEX market data via OpenAPI: token info, K-line, rankings, security audit | `2026.4.8-1` | ✅ Active |
+| [gate-dex-trade](#-gate-dex-trade) | Gate DEX trading: MCP + OpenAPI dual mode, smart routing for Swap execution | `2026.5.6-1` | ✅ Active |
+| [gate-exchange-pay](#-gate-exchange-pay) | Gate Pay payment execution: complete merchant charges, pay-first flows, and output receipts | — | ✅ Active |
+| [gate-mcp-installer](#-gate-mcp-installer) | One-click installer for Gate MCP servers and Skills for Cursor, Claude Code, Codex, and OpenClaw | `2026.11.2-1` | ✅ Active |
+| [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.5.6-1` | ✅ Active |
+| [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.4.8-1` | ✅ Active |
+| [gate-info-research](#-gate-info-research) | CLI-first market research and playbook routing | `2026.6.22-1` | CLI primary |
+| [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | Install the Gate CLI binary | `2026.11.2-1` | CLI installer |
+| [gate-dex-market-cli](skills/gate-dex-market-cli/SKILL.md) | DEX market and token queries through gate-dex | `2026.5.7-1` | DEX CLI |
+| [gate-dex-trade-cli](skills/gate-dex-trade-cli/SKILL.md) | DEX swap execution through gate-dex | `2026.5.7-1` | DEX CLI |
+| [gate-dex-wallet-cli](skills/gate-dex-wallet-cli/SKILL.md) | DEX wallet, transfers and signing through gate-dex | `2026.5.7-1` | DEX CLI |
+| [gate-info-risk](skills/gate-info-risk/SKILL.md) | CLI-first token, address and project risk checks | `2026.6.12-5` | CLI primary |
+| [gate-info-web3](skills/gate-info-web3/SKILL.md) | CLI-first on-chain and Web3 queries | `2026.6.22-1` | CLI primary |
+| [gate-news-intel](skills/gate-news-intel/SKILL.md) | CLI-first news, events and sentiment | `2026.6.22-1` | CLI primary |
+| [gate-pay-x402](skills/gate-pay-x402/SKILL.md) | HTTP 402 payments, wallet setup and merchant discovery | `2026.4.10-1` | Optional Pay setup |
 
 ---
 
@@ -251,149 +100,6 @@ Gate live stream and replay listing. Filter by business type (Market Analysis, H
 - `Find 5 SOL-related live rooms`
 - `Latest market analysis replays`
 - `Any live streams about BTC?`
-
----
-
-## 💱 gate-exchange-spot
-
-> **Path**: `skills/gate-exchange-spot/`
-
-Gate spot trading covering buy/sell (market & limit), smart condition-based orders, order management (amend/cancel), account queries, fill verification, and coin-to-coin swaps. All order placements require explicit user confirmation.
-
-**Example Prompts**:
-- `Buy 100 USDT worth of BTC`
-- `Sell ETH when price hits 3500`
-- `Cancel my unfilled BTC order and check balance`
-- `Swap USDT to SOL`
-
----
-
-## 📦 gate-exchange-assets
-
-> **Path**: `skills/gate-exchange-assets/`
-
-Read-only asset and balance queries for Gate Exchange: total account balance, spot holdings, account valuation in USDT, and account book. No trading or transfers.
-
-**Example Prompts**:
-- `How much is my account worth?`
-- `Check my USDT balance`
-- `Show my total assets`
-- `What's my BTC balance?`
-- `Show recent BTC account book and current balance`
-
----
-
-## 📋 gate-exchange-dual
-
-> **Path**: `skills/gate-exchange-dual/`
-
-Dual investment on Gate Exchange: browse plans (APY, target price), simulate settlement outcomes, view positions and balance. Read-only; no order placement.
-
-**Example Prompts**:
-- `What BTC dual investment plans are available?`
-- `Sell-high target 62000 — what if price goes to 65000?`
-- `Dual position summary`
-- `How much is locked in dual?`
-
----
-
-## 🪙 gate-exchange-staking
-
-> **Path**: `skills/gate-exchange-staking/`
-
-Staking (earn) query on Gate: positions, rewards, product discovery, and order history. Read-only; no stake/redeem execution.
-
-**Example Prompts**:
-- `Show my staking positions`
-- `What are my staking rewards?`
-- `Find BTC staking products`
-- `Show staking history`
-
----
-
-## 📗 gate-exchange-autoinvest
-
-> **Path**: `skills/gate-exchange-autoinvest/`
-
-Gate Exchange Earn **fast auto-invest (极速定投 / DCA)**: plan lifecycle, queries, and balance checks via **named MCP tools** (see `SKILL.md` → **MCP tools**); **11** earn auto-invest tools plus supporting `cex_spot_get_spot_accounts` and `cex_earn_list_user_uni_lends`. This skill does not document REST paths.
-
-**Example Prompts**:
-- `Create a weekly 100 USDT DCA into BTC`
-- `Stop my ETH auto-invest plan`
-- `Minimum amount for USDT auto-invest?`
-
----
-
-## 💸 gate-exchange-simpleearn
-
-> **Path**: `skills/gate-exchange-simpleearn/`
-
-Gate Simple Earn (Uni) flexible earn read operations: query single/all positions, single-currency interest, and top APY rate data. Subscribe and redeem APIs are currently disabled in this skill.
-
-**Example Prompts**:
-- `My USDT Simple Earn position`
-- `Show all Simple Earn positions`
-- `How much USDT interest have I earned?`
-- `Which Simple Earn currency has the top APY?`
-- `Subscribe 100 USDT to Simple Earn` (will reply not supported)
-
----
-
-## 💹 gate-exchange-earn
-
-> **Path**: `skills/gate-exchange-earn/`
-
-Gate Smart Earn (L2) via `gate-cli`: Simple Earn (flexible/fixed), dual products, staking, yield comparison, idle-fund ideas, and positions/history. Subscribe, redeem, dual place, staking swap, and auto-renew changes run only after **Action Draft** and explicit **Y** confirmation. Requires `gate-cli` and Gate API credentials.
-
-**Example Prompts**:
-- `What fixed USDT earn terms are available, sorted by APY?`
-- `Compare dual vs staking for ETH`
-- `How much did I earn on flexible Simple Earn in the last 90 days?`
-- `Subscribe 500 USDT to fixed 30-day earn` (draft + confirm)
-
----
-
-## 🏦 gate-exchange-tradfi
-
-> **Path**: `skills/gate-exchange-tradfi/`
-
-Gate TradFi (traditional finance) read-only query skill for orders, positions, market data, assets, and MT5 account information. This skill does not place/cancel orders or transfer funds.
-
-**Example Prompts**:
-- `My TradFi open orders`
-- `Show my position history`
-- `TradFi category list`
-- `Ticker for EURUSD`
-- `Show my MT5 account info`
-
----
-
-## 🔗 gate-exchange-unified
-
-> **Path**: `skills/gate-exchange-unified/`
-
-Gate unified account: account overview & mode, borrow/repay, loan & interest records, transferable limits, leverage and collateral settings. Mutation actions require explicit user confirmation.
-
-**Example Prompts**:
-- `Query my unified account total equity and current mode`
-- `How much USDT can I borrow?`
-- `Borrow 200 USDT — check max borrowable first`
-- `Repay all my BTC loan`
-- `Set my ETH leverage to 5x`
-
----
-
-## 👥 gate-exchange-subaccount
-
-> **Path**: `skills/gate-exchange-subaccount/`
-
-Sub-account management on Gate Exchange: query status by UID, list all sub-accounts, create sub-account, lock/unlock. Write operations require explicit user confirmation.
-
-**Example Prompts**:
-- `Show me all my sub-accounts`
-- `What is the status of sub-account UID 123456?`
-- `Create a new sub-account`
-- `Lock sub-account UID 123456`
 
 ---
 
@@ -623,25 +329,11 @@ Exchange listing/delisting tracker. Fetches exchange announcements for new listi
 
 ---
 
-## 🆕 gate-exchange-newcoin
-
-> **Path**: `skills/gate-exchange-newcoin/`
-
-New listing due diligence and event radar via `gate-cli` (info / news / cex): listings, fundamentals, risk, sentiment, market tape, LaunchPool calendar; optional first spot or Alpha order only after **Action Draft** and **Y**. Requires `gate-cli` and Gate API credentials.
-
-**Example Prompts**:
-- `Due diligence on this week’s new listings`
-- `LaunchPool calendar and what’s launching soon`
-- `Is this new token a rug? Check risk and sentiment`
-- `First small spot buy on SYMBOL after listing` (draft + confirm)
-
----
-
 ## 🛠️ gate-mcp-installer
 
 > **Path**: `skills/gate-mcp-installer/`
 
-Unified one-click installer for Gate MCP servers and Skills. Supports Cursor, Claude Code, Codex, and OpenClaw/mcporter.
+Unified installer for selected Gate MCP servers and non-CEX source skills. Supports Cursor, Claude Code, Codex, and OpenClaw/mcporter; CEX uses the standalone-package flow above.
 
 **Quick Start**:
 ```bash
@@ -653,114 +345,17 @@ Optional: `--no-skills` to install MCP only; `--mcp main --mcp dex` etc. to inst
 
 ---
 
-## 🎁 gate-exchange-referral
-
-> **Path**: `skills/gate-exchange-referral/`
-
-Invite-friends activity recommendation and rule interpretation. Introduces Gate's main referral programs (Earn Together, Help & Get Coupons, Super Commission), explains rules and rewards, and links to the official invite page.
-
-**Example Prompts**:
-- `How does the referral program work?`
-- `Earn Together referral rules`
-- `Where is my referral link?`
-- `What rewards do I get for inviting friends?`
-
----
-
-## 🗂️ gate-exchange-assets-manager
-
-> **Path**: `skills/gate-exchange-assets-manager/`
-
-L2 composite skill: orchestrates multi-account balance overview, margin and liquidation risk, SimpleEarn/staking snapshots, affiliate commissions, and unified-account borrow/collateral/leverage actions (writes require confirmation).
-
-**Example Prompts**:
-- `Show my total assets across all accounts`
-- `What's my liquidation risk on ETH?`
-- `Summarize my staking and SimpleEarn earnings`
-- `I want to borrow USDT on unified account`
-
----
-
 ## 🔬 gate-info-research
 
 > **Path**: `skills/gate-info-research/`
 
-Market Research Copilot — an L2 composite skill that combines Gate-Info and Gate-News tools for structured market briefs, single-coin deep dives, multi-coin comparisons, trends, events, and risk checks (read-only; no trading).
+CLI-first research entry for structured market briefs, single-coin research, comparisons, trends and macro context. It routes risk-first, on-chain-first and news-first questions to the corresponding primary entries; follow its declared fallback rules.
 
 **Example Prompts**:
 - `Give me a market research brief`
 - `Compare BTC and ETH fundamentals and risk`
 - `Why is SOL pumping today?`
 - `Daily brief on the crypto market`
-
----
-
-## 🎉 gate-exchange-welfare
-
-> **Path**: `skills/gate-exchange-welfare/`
-
-Welfare center newcomer workflow using MCP data: identity gate, newcomer task list, single task claim, reward claim, and completion guidance. Never fabricates reward amounts.
-
-**Example Prompts**:
-- `What welfare tasks can I do?`
-- `Claim the download task`
-- `Claim all my newcomer rewards`
-- `How do I claim new user rewards?`
-- `What benefits are available for new users?`
-
----
-
-## 🌊 gate-exchange-launchpool
-
-> **Path**: `skills/gate-exchange-launchpool/`
-
-LaunchPool suite: browse projects, stake and redeem, query pledge history, and airdrop reward records.
-
-**Example Prompts**:
-- `What LaunchPool projects are running?`
-- `Stake into LaunchPool for project X`
-- `My LaunchPool airdrop history`
-- `Redeem my staked tokens from LaunchPool`
-
----
-
-## 🪪 gate-exchange-kyc
-
-> **Path**: `skills/gate-exchange-kyc/`
-
-Guides users to the Gate KYC portal for identity verification. Does not perform KYC inside chat.
-
-**Example Prompts**:
-- `Where do I complete KYC?`
-- `Why can't I withdraw?`
-- `Link to verify my identity`
-
----
-
-## 💰 gate-exchange-collateralloan
-
-> **Path**: `skills/gate-exchange-collateralloan/`
-
-Multi-collateral loan: flexible or fixed-term loans, repay, add collateral, or redeem collateral (writes require explicit confirmation).
-
-**Example Prompts**:
-- `My collateral loan orders`
-- `Repay part of my loan`
-- `Add collateral to loan order ...`
-- `Current loan interest rate and LTV`
-
----
-
-## 🎯 gate-exchange-activitycenter
-
-> **Path**: `skills/gate-exchange-activitycenter/`
-
-Platform activity center: campaign types, hot recommendations, activity lists, and my entries (trading competitions, airdrops, newcomer events, etc.).
-
-**Example Prompts**:
-- `What activities are running on Gate?`
-- `Recommend trading competitions`
-- `Show my activity entries`
 
 ---
 
@@ -782,11 +377,12 @@ Gate Pay payment execution skill. Complete merchant charges, satisfy pay-first f
 ### Prerequisites
 
 - An AI agent environment that supports skill loading (e.g., Cursor, OpenClaw)
-- Node.js & npm
+- Gate CLI for the six CEX skills; install their generated standalone packages as described above
+- Node.js & npm only for workflows that use Node-based installers or MCP services
 
 ### Setup
 
-Use the unified `gate-mcp-installer` skill. It auto-detects your environment (Cursor, Claude Code, Codex, or OpenClaw):
+For CEX, use the Gate CLI and standalone package instructions above. For Pay or other MCP-dependent products, use `gate-mcp-installer`; it auto-detects Cursor, Claude Code, Codex, or OpenClaw:
 
 ```bash
 # From repo root
@@ -800,6 +396,17 @@ Help me install Gate MCP
 
 MCP only: `bash skills/gate-mcp-installer/scripts/install.sh --no-skills`
 
+After loading `gate-pay-x402`, configure its optional payment and merchant-discovery
+services explicitly. The installer README lists the public HTTPS catalog URL:
+
+```bash
+# Configure only the two x402 services for Cursor; skip source-skill copying.
+bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp gatepay-local --mcp gatepay-discovery --no-skills
+```
+
+Configure the wallet locally following [gate-pay-x402](skills/gate-pay-x402/SKILL.md).
+The six CEX skills use their own CLI setup/authentication rules.
+
 ### Start Using Skills
 
 After installation, ask your AI agent any market or trading question in natural language.
@@ -808,7 +415,11 @@ After installation, ask your AI agent any market or trading question in natural 
 
 ## Skills Installation Guide
 
-### General Skills Installation (Recommended)
+Verify the selected skill names against their actual `SKILL.md` frontmatter. Do not use a historical screenshot or a fixed skill count as proof of installation. CEX installation uses generated standalone packages.
+
+### General Skills Installation (non-CEX)
+
+The source-copy and marketplace examples below apply to non-CEX skills. Install CEX from the generated packages described above; copying all source directories does not produce standalone CEX packages.
 
 1. Check whether `npx` is already installed (if not, see the appendix):
 
@@ -818,20 +429,16 @@ After installation, ask your AI agent any market or trading question in natural 
 
    If a version number is returned (for example, `11.8.0`), `npx` is installed.
 
-![Check npx version](image/general-install-1.png)
-
 2. Install skills with interactive selection:
 
    ```bash
    npx skills add https://github.com/gate/gate-skills
    ```
-   
-![Select and install skills](image/general-install-2.png)
 
-3. Install a specific skill (example: `gate-market`):
+3. Install a specific skill (example: `gate-info-coinanalysis`):
 
    ```bash
-   npx skills add https://github.com/gate/gate-skills --skill gate-market
+   npx skills add https://github.com/gate/gate-skills --skill gate-info-coinanalysis
    ```
    
 ![Install a specific skill](image/general-install-3.png)
@@ -844,11 +451,7 @@ After installation, ask your AI agent any market or trading question in natural 
 help me to install skills, github url is: https://github.com/gate/gate-skills
 ```
 
-![Claude natural language installation](image/claude-install-1.png)
-
-Installation complete.
-
-![Claude installation complete](image/claude-install-2.png)
+Verify that the selected skill is loaded under its actual name.
 
 #### Option 2: Manual Installation
 
@@ -857,8 +460,8 @@ Step 1: Download the skills package (GitHub: <https://github.com/gate/gate-skill
 Step 2: Unzip the package and copy it to `~/.claude/skills/`.
 
 - Show hidden folders: open your user home folder, then press `Command + Shift + .` (press again to hide)
-- Copy folders to target path: copy the `skills` subfolders from `gate-skills-master` into `~/.claude/skills/`
-- Verify installation: run `/skills` in Claude CLI, or ask `how many skills have I installed?`
+- Copy folders to target path: copy only the selected non-CEX `skills` subfolders from `gate-skills-master` into `~/.claude/skills/`
+- Verify installation: run `/skills` in Claude CLI, and verify the selected names
 
 ### Install Skills in Codex CLI
 
@@ -868,24 +471,17 @@ Step 2: Unzip the package and copy it to `~/.claude/skills/`.
 help me to install skills, github url is: https://github.com/gate/gate-skills
 ```
 
-![Codex natural language installation step](image/codex-nl-install-1.png)
-
 Changes take effect after restarting Codex.
-
-![Codex natural language installation complete](image/codex-nl-install-2.png)
 
 #### Option 2: Terminal Installation
 
 1. In terminal, type `/skills`, choose `1. List skills`, select `Skill Installer`, and enter `https://github.com/gate/gate-skills`
 
-   ![Codex terminal install - open skills menu](image/codex-terminal-install-1.png)
    ![Codex terminal install - select Skill Installer](image/codex-terminal-install-2.png)
    ![Codex terminal install - input repository URL](image/codex-terminal-install-3.png)
    ![Codex terminal install - installation process](image/codex-terminal-install-4.png)
 
 2. Verify installation: restart the terminal and run `/skills` -> `List Skills`
-
-   ![Codex terminal install - verify installed skills](image/codex-terminal-install-5.png)
 
 #### Option 3: Manual Installation
 
@@ -899,13 +495,9 @@ Step 2: Unzip the package and copy it to `~/.codex/skills/`.
 
    ![Codex manual install - show hidden folders](image/codex-manual-install-2.png)
 
-2. Copy folders to target path: copy all `skills` subfolders from `gate-skills-master` into `~/.codex/skills/`
-
-   ![Codex manual install - copy skills subfolders](image/codex-manual-install-3.png)
+2. Copy folders to target path: copy only the selected non-CEX `skills` subfolders from `gate-skills-master` into `~/.codex/skills/`
 
 3. Verify installation: restart the terminal and run `/skills` -> `List Skills`
-
-   ![Codex manual install - verify installation](image/codex-manual-install-4.png)
 
 ### Install Skills in OpenClaw
 
@@ -937,12 +529,12 @@ The assistant will automatically pull the repository, configure the environment,
 
 Step 1: Download the skills package (GitHub: <https://github.com/gate/gate-skills>)
 
-![OpenClaw manual install - download repository](image/openclaw-manual-install-1.png)
+![OpenClaw manual install - download repository](image/codex-manual-install-1.png)
 
 Step 2: Unzip the package and copy it to `~/.openclaw/skills/`.
 
 1. Show hidden folders: open your user home folder, then press `Command + Shift + .` (press again to hide)
-2. Copy folders to target path: copy all `skills` subfolders from `gate-skills-master` into `~/.openclaw/skills/`
+2. Copy folders to target path: copy only the selected non-CEX `skills` subfolders from `gate-skills-master` into `~/.openclaw/skills/`
 
 Step 3: Restart OpenClaw Gateway.
 
@@ -988,34 +580,31 @@ Step 3: Restart OpenClaw Gateway.
 gate-github-skills/
 ├── README.md
 ├── README_zh.md
+├── gate-cex-skill-audit/                # Development-only audit skill
 ├── image/                              # Installation screenshots
+├── scripts/                            # Package build and contract tools
+├── tests/                              # Offline regression suites
+├── docs/                               # Guides and review records
 └── skills/
+    ├── gate-cex-trade/
+    ├── gate-cex-earn/
+    ├── gate-cex-assets/
+    ├── gate-cex-subaccount/
+    ├── gate-cex-affiliate/
+    ├── gate-cex-bot/
+    ├── gate-pay-x402/
+    ├── gate-news-intel/
+    ├── gate-info-web3/
+    ├── gate-info-risk/
+    ├── gate-dex-wallet-cli/
+    ├── gate-dex-trade-cli/
+    ├── gate-dex-market-cli/
+    ├── gate-cli-installer/
+    ├── gate-exchange-pay/             # Gate Pay payment execution (independent of CEX)
+    ├── _shared/cex/                    # Shared CEX source; bundled per package
     ├── gate-dex-market/                # DEX market data skill (OpenAPI mode)
     ├── gate-dex-trade/                 # DEX trading skill (MCP + OpenAPI dual mode)
     ├── gate-dex-wallet/                # DEX comprehensive wallet skill
-    ├── gate-exchange-affiliate/        # Exchange affiliate/partner program
-    ├── gate-exchange-alpha/            # Alpha token discovery, market & account
-    ├── gate-exchange-assets/           # Exchange asset/balance queries (read-only)
-    ├── gate-exchange-coupon/           # Coupon/voucher management & query
-    ├── gate-exchange-crossex/          # CrossEx cross-exchange trading operations
-    ├── gate-exchange-dual/             # Dual investment query (read-only)
-    ├── gate-exchange-earn/             # Smart Earn L2 (gate-cli): Uni/fixed, dual, staking; writes after confirm
-    ├── gate-exchange-flashswap/        # Flash Swap query: pairs, limits, history
-    ├── gate-exchange-futures/          # Futures trading skill
-    ├── gate-exchange-marketanalysis/   # Market tape analysis skill
-    ├── gate-exchange-newcoin/          # New listing DD & event radar (gate-cli); optional first buy after confirm
-    ├── gate-exchange-pay/              # Gate Pay payment execution skill
-    ├── gate-exchange-simpleearn/       # Simple Earn (Uni) query: positions, interest, rates (read-only)
-    ├── gate-exchange-smallbalance/     # Dust / small balance: list, convert to GT, history
-    ├── gate-exchange-autoinvest/       # Earn fast auto-invest (DCA): plans, records, spot & Uni context
-    ├── gate-exchange-spot/             # Spot trading skill
-    ├── gate-exchange-staking/          # Staking (earn) query (read-only)
-    ├── gate-exchange-subaccount/       # Sub-account management: list, create, lock/unlock
-    ├── gate-exchange-tradfi/           # TradFi query: orders, positions, market, assets, MT5 (read-only)
-    ├── gate-exchange-trading/          # End-to-end trading (judgment → execution)
-    ├── gate-exchange-transfer/         # Internal transfer between trading accounts
-    ├── gate-exchange-unified/          # Unified account: borrow/repay, leverage, collateral
-    ├── gate-exchange-vipfee/           # VIP tier & trading fee rate query
     ├── gate-info-addresstracker/       # On-chain address tracking skill
     ├── gate-info-coinanalysis/         # Single-coin analysis skill
     ├── gate-info-coincompare/          # Multi-coin comparison skill
@@ -1037,15 +626,21 @@ gate-github-skills/
 
 ## About This Repository
 
-Each skill lives in its own folder under `skills/` and contains:
+Business skills live in their own folders under `skills/`. The development-only `gate-cex-skill-audit/` lives at the repository root and is excluded from business packages. Each skill contains:
 
-- **`SKILL.md`** — Skill definition with YAML frontmatter (name, version, description, trigger phrases) and structured instructions including routing rules and workflows.
-- **`references/`** — Detailed sub-module documentation with step-by-step workflows and report templates.
-- **`CHANGELOG.md`** — Version history and change log.
+- **`SKILL.md`** — Skill definition with required YAML name/description and product-specific optional metadata and structured instructions including routing rules and workflows.
+- **`references/`** — Optional product references, workflows and templates when needed.
+- **`CHANGELOG.md`** — Optional version history for actual interface/parameter changes.
 
 ---
 
 ## Contribution
+
+Use the [development guide](docs/skill-development-guide.md) for product-specific
+authoring, the [test guide](tests/README.md) for formal offline regression commands,
+and [gate-cex-skill-audit](gate-cex-skill-audit/SKILL.md) for CEX content reviews.
+Keep public instructions and screenshots free of personal checkout paths,
+internal repository/service locations and private credential values.
 
 We welcome contributions! To add a new skill:
 
@@ -1060,8 +655,6 @@ We welcome contributions! To add a new skill:
    ```markdown
    ---
    name: <skill-name>
-   version: "<version>"
-   updated: "<YYYY-MM-DD>"
    description: A clear description of what the skill does and when to trigger it.
    ---
 
@@ -1070,9 +663,12 @@ We welcome contributions! To add a new skill:
    [Add instructions, routing rules, workflows, and report templates here]
    ```
 
+   Add optional version/compatibility/host metadata only when the selected product
+   uses it. Required fields and file conventions follow that product's contract.
+
 4. **Add reference documents** in a `references/` subfolder for complex sub-modules.
 
-5. **Open a Pull Request** to `main` for review.
+5. **Open a Pull Request** to `master` for review.
 
 ---
 

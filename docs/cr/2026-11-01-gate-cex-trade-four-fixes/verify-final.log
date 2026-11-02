@@ -1,0 +1,5 @@
+Earn pre-existing: FAIL 36 True
+Trade: PASS 283 []
+Inventory: 56 628724 bytes; tables []
+Package: PASS 57 283
+Source/package equivalence: 56 files, no missing/extra/changed

@@ -3,7 +3,6 @@ name: gate-dex-trade-cli
 version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "gate-dex CLI swap skill: one-shot DEX swap (quote → GV checkin → sign → broadcast) via the swap command. GV checkin built in — no external binary. Supports EVM multi-chain and Solana, with ERC20 approve flow. Use this skill whenever the user wants to swap, exchange, buy, sell, convert, or bridge tokens via the gate-dex CLI. Trigger phrases include swap, exchange, buy, sell, convert, bridge, cross-chain, quote, swap history, swap detail, swap-tokens, bridge-tokens."
-homepage: https://git.fulltrust.link/web3/ai/gate-dex-cli
 user-invocable: true
 metadata:
   {

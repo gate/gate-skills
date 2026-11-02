@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "level": "offline-structural-and-contract",
+  "target": "gate-cex-trade",
+  "mode": "package",
+  "files": 57,
+  "commands": 283,
+  "findings": [],
+  "not_evaluated": [
+    "agent behavior",
+    "backend integration",
+    "product eligibility",
+    "human compliance approval",
+    "jurisdiction-specific legal applicability"
+  ]
+}

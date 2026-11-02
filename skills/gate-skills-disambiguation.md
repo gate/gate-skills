@@ -1,8 +1,8 @@
 ---
 title: Gate Skills Intent Disambiguation Rules
-version: v1.1.0
-last_updated: 2026-04-02
-scope: "gate-mcp / CEX × DEX × Pay × Info × News"
+version: v1.2.0
+last_updated: 2026-11-02
+scope: "Gate Skills / CEX × DEX × Pay × Info × News"
 ---
 
 # Intent Disambiguation Rules
@@ -103,7 +103,7 @@ When identifying user intent, prioritize matching the following signal words to 
 1. "futures price" / "perpetual price" / "contract price" → **CEX** (futures)
 2. "on-chain price" / mentions specific DEX trading pair → **DEX** (on-chain queries)
 3. Needs market overview (market cap, fear & greed index, etc.) → **Info**
-4. **Default (no qualifier) → CEX** (use exchange spot price as baseline)
+4. **Default (no qualifier) → CEX** public market capabilities; use [the declared Spot-first resolution](gate-cex-trade/references/markets.md#missing-inputs-and-default-resolution) when only a base asset is supplied
 
 ---
 
@@ -115,8 +115,8 @@ When identifying user intent, prioritize matching the following signal words to 
 
 1. "futures K-line" / "perpetual K-line" / "options K-line" → **CEX** (corresponding category)
 2. "on-chain K-line" / mentions specific DEX trading pair → **DEX** (on-chain queries)
-3. **Default (no qualifier) → Info** (more comprehensive data, multi-timeframe)
-4. Within CEX, if category not specified, default to **spot** K-line
+3. Public exchange OHLC interfaces are available through CEX [markets.md](gate-cex-trade/references/markets.md); indicator/research capabilities remain under Info.
+4. For a base asset without a product/quote, use the [declared Spot-first resolution](gate-cex-trade/references/markets.md#missing-inputs-and-default-resolution); preserve the requested interval and continue after clarification.
 
 ---
 
@@ -340,16 +340,18 @@ First identify if there's a price trigger condition, then determine domain:
 
 ### Scenario 19: CLI / Command-Line Operations
 
-**Trigger words:** gate-wallet, CLI, command line, terminal, openapi-swap, hybrid swap, script automation
+**Trigger words:** gate-wallet, gate-cli, CLI, command line, terminal, openapi-swap, hybrid swap, script automation
 
-**Background:** The gate-wallet CLI provides dual-channel command-line access to wallet operations including auth, balance, transfer, swap, approve, and market data.
+**Background:** A command-line interface is a transport, not a business domain. Determine the business object and explicit command namespace before selecting a skill.
 
 **Rules:**
 
-1. Any mention of "gate-wallet", "CLI", "command line", "terminal", "openapi-swap", "hybrid swap" → **DEX** (CLI)
-2. "use openapi" / "AK/SK" / "DEX API" with logged-in MCP session → **DEX** (CLI hybrid mode)
-3. "self-signing" / "use private key" → **DEX** (OpenAPI signing channel, not wallet CLI)
-4. **Do NOT route to CEX** — gate-wallet CLI is an on-chain wallet tool
+1. Explicit `gate-cli cex …`, or exchange trading/account/earn/assets intent → the matching **CEX** skill.
+2. Explicit `gate-cli info …` → **Info**; explicit `gate-cli news …` → **News**. Preserve the primary intent for research/news combinations.
+3. Explicit `gate-wallet`, on-chain wallet/swap intent, `openapi-swap` or `hybrid swap` → **DEX**. Self-signing/private-key requests stay in the DEX signing workflow.
+4. Payment/merchant-order intent → **Pay** under Scenario 20, even when the user asks to use a terminal. A transport keyword does not authorize a payment or change its channel.
+5. Bare "CLI", "command line", "terminal", "script automation", "OpenAPI" or "AK/SK" is insufficient to choose a domain. Use the stated business object; if it is missing or ambiguous, clarify before selecting a business skill.
+6. Keep existing cross-domain intent rules. Do not substitute a DEX or Pay operation when the requested CEX/Info/News capability is unavailable.
 
 ---
 

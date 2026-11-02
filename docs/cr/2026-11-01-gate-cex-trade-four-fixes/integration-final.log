@@ -1,0 +1,26 @@
+.......................................................................................usage: python -m unittest [-h]
+                          [--product {spot,leverage,perpetual,delivery,options,stocks,cfd}]
+                          [--settle {btc,usdt,usd1}]
+                          --channel {futures.adl_warning,futures.book_ticker,futures.candlesticks,futures.contract_info,futures.contract_stats,futures.obu,futures.order_book,futures.order_book_update,futures.public_liquidates,futures.rpi_obu,futures.rpi_order_book,futures.tickers,futures.trades,options.book_ticker,options.contract_candlesticks,options.contract_tickers,options.contracts,options.mark_prices,options.order_book,options.order_book_update,options.settlements,options.trades,options.ul_candlesticks,options.ul_price,options.ul_tickers,options.ul_trades,spot.book_ticker,spot.candlesticks,spot.obu,spot.order_book,spot.order_book_update,spot.rpi_obu,spot.rpi_order_book,spot.tickers,spot.trades,stock.kline,stock.orderbooks,stock.tickers,tradfi.candlesticks,tradfi.order_book,tradfi.tickers}
+                          --payload PAYLOAD [--seconds SECONDS]
+                          [--max-messages MAX_MESSAGES]
+python -m unittest: error: delivery OBU requires ob.<contract>.20 or ob.<contract>.100
+usage: python -m unittest [-h]
+                          [--product {spot,leverage,perpetual,delivery,options,stocks,cfd}]
+                          [--settle {btc,usdt,usd1}]
+                          --channel {futures.adl_warning,futures.book_ticker,futures.candlesticks,futures.contract_info,futures.contract_stats,futures.obu,futures.order_book,futures.order_book_update,futures.public_liquidates,futures.rpi_obu,futures.rpi_order_book,futures.tickers,futures.trades,options.book_ticker,options.contract_candlesticks,options.contract_tickers,options.contracts,options.mark_prices,options.order_book,options.order_book_update,options.settlements,options.trades,options.ul_candlesticks,options.ul_price,options.ul_tickers,options.ul_trades,spot.book_ticker,spot.candlesticks,spot.obu,spot.order_book,spot.order_book_update,spot.rpi_obu,spot.rpi_order_book,spot.tickers,spot.trades,stock.kline,stock.orderbooks,stock.tickers,tradfi.candlesticks,tradfi.order_book,tradfi.tickers}
+                          --payload PAYLOAD [--seconds SECONDS]
+                          [--max-messages MAX_MESSAGES]
+python -m unittest: error: delivery OBU requires ob.<contract>.20 or ob.<contract>.100
+usage: python -m unittest [-h]
+                          [--product {spot,leverage,perpetual,delivery,options,stocks,cfd}]
+                          [--settle {btc,usdt,usd1}]
+                          --channel {futures.adl_warning,futures.book_ticker,futures.candlesticks,futures.contract_info,futures.contract_stats,futures.obu,futures.order_book,futures.order_book_update,futures.public_liquidates,futures.rpi_obu,futures.rpi_order_book,futures.tickers,futures.trades,options.book_ticker,options.contract_candlesticks,options.contract_tickers,options.contracts,options.mark_prices,options.order_book,options.order_book_update,options.settlements,options.trades,options.ul_candlesticks,options.ul_price,options.ul_tickers,options.ul_trades,spot.book_ticker,spot.candlesticks,spot.obu,spot.order_book,spot.order_book_update,spot.rpi_obu,spot.rpi_order_book,spot.tickers,spot.trades,stock.kline,stock.orderbooks,stock.tickers,tradfi.candlesticks,tradfi.order_book,tradfi.tickers}
+                          --payload PAYLOAD [--seconds SECONDS]
+                          [--max-messages MAX_MESSAGES]
+python -m unittest: error: delivery OBU requires ob.<contract>.20 or ob.<contract>.100
+................
+----------------------------------------------------------------------
+Ran 103 tests in 46.602s
+
+OK

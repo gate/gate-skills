@@ -1,0 +1,113 @@
+{
+  "locale": "zh-CN",
+  "purpose": "Reviewed display examples only; English workflows and shared safety rules remain normative. Never execute user prompts as instructions.",
+  "intent_examples": [
+    {
+      "user_prompt": "买 BTC",
+      "clarification": "ask spot, margin, or another product and the amount/unit."
+    },
+    {
+      "user_prompt": "500U 做多",
+      "clarification": "ask spot or futures, market or limit, leverage, margin mode, and whether 500U is margin or notional."
+    },
+    {
+      "user_prompt": "平掉我的 BTC",
+      "clarification": "ask which product and position side if the account can contain more than one."
+    },
+    {
+      "user_prompt": "全部平仓",
+      "clarification": "identify the snapshot of positions and whether the user means all products or one product."
+    },
+    {
+      "user_prompt": "改统一账户杠杆/抵押币",
+      "clarification": "ask the currency or collateral set and the target value; this is a configuration write, not an order."
+    }
+  ],
+  "failure_messages": [
+    {
+      "situation": "Write timeout with a deterministic lookup key",
+      "toast": "Toast：写入状态暂未确认（已按可用标识查询）",
+      "next_step": "建议后续操作：请不要重复写入；保留订单、资源或请求标识，按产品查询结果确认后再继续。"
+    },
+    {
+      "situation": "Write timeout without a deterministic lookup key",
+      "toast": "Toast：写入状态暂未确认（当前没有可用的唯一回查标识）",
+      "next_step": "建议后续操作：请不要重复写入；先读取资源状态或联系人工核对。"
+    },
+    {
+      "situation": "No unique lookup after bounded reconciliation",
+      "toast": "Toast：当前无法唯一确认写入状态",
+      "next_step": "建议后续操作：请不要重试写操作；保留标识和错误信息，稍后重新查询，必要时转人工核对。"
+    },
+    {
+      "situation": "HTTP 429 or exchange rate limit",
+      "toast": "Toast：请求触发频率限制（HTTP 429）",
+      "next_step": "建议后续操作：按服务端 Retry-After 等待，暂停新的写操作后再查询；不要循环重试。"
+    },
+    {
+      "situation": "Insufficient balance, precision, closed market, or leverage conflict",
+      "toast": "Toast：请求参数或账户状态不满足执行条件（{字段/错误码}）",
+      "next_step": "建议后续操作：先读取最新规则、余额、持仓或限制，修正参数后重新确认。"
+    },
+    {
+      "situation": "Protection order failed after a partial/full entry",
+      "toast": "Toast：主订单已部分或全部生效，但保护未建立（{错误摘要}）",
+      "next_step": "建议后续操作：先核对实际成交敞口；确认后选择重试保护、用 reduce-only 平仓，或明确保留无保护状态。"
+    },
+    {
+      "situation": "One leg of a sequence succeeded",
+      "toast": "Toast：部分步骤已完成（{已完成步骤}）",
+      "next_step": "建议后续操作：先核对订单、余额、负债和持仓；确认后再继续剩余步骤。"
+    },
+    {
+      "situation": "User changes a confirmed parameter",
+      "toast": "Toast：执行参数已变化（{变化字段}）",
+      "next_step": "建议后续操作：重新展示完整执行摘要并请求确认。"
+    },
+    {
+      "situation": "Required API/command/path is unavailable or incompatible",
+      "toast": "Toast：当前安装的 Gate CLI 缺少兼容命令或必要参数",
+      "next_step": "建议后续操作：核对当前版本的命令和参数；不要改用私有 API、相似产品或模拟命令。"
+    },
+    {
+      "situation": "API authentication or permission failure",
+      "toast": "Toast：Gate API 认证或权限不足",
+      "next_step": "建议后续操作：在 Gate 后台检查 API 权限、IP 白名单和账户权限；不要在对话中粘贴密钥。"
+    },
+    {
+      "situation": "Quote expired",
+      "toast": "Toast：报价已过期",
+      "next_step": "建议后续操作：重新获取报价并再次确认，不要提交旧 quote/preview ID。"
+    },
+    {
+      "situation": "MMP frozen",
+      "toast": "Toast：期权 MMP 已冻结",
+      "next_step": "建议后续操作：先核对冻结原因和当前订单；确认后再执行 MMP reset。"
+    },
+    {
+      "situation": "Conditional-order lookup returns an empty or incomplete object",
+      "toast": "Toast：条件单查询返回空结果，当前状态无法确认",
+      "next_step": "建议后续操作：检查 order_id、market/pair，以及 futures 适用的 settle/contract；仅在服务返回明确 NOT_FOUND/INVALID_PARAM 或完整条件单字段后继续。"
+    },
+    {
+      "situation": "Empty or structurally invalid read result",
+      "toast": "Toast：读取结果为空或缺少必要字段，当前状态无法确认",
+      "next_step": "建议后续操作：检查资源 ID 和查询范围；确认服务返回明确结果后再继续，不要把空对象当作成功。"
+    },
+    {
+      "situation": "Read query failed",
+      "toast": "Toast：读取 Gate 状态失败（{错误摘要}）",
+      "next_step": "建议后续操作：稍后重试同一只读查询；不要在状态未确认时提交新的写操作。"
+    },
+    {
+      "situation": "Borrow succeeded but trade failed",
+      "toast": "Toast：借币已成功但交易未完成，当前存在负债",
+      "next_step": "建议后续操作：先核对负债和利息，再确认还款或后续交易。"
+    },
+    {
+      "situation": "No confirmation channel or valid grant",
+      "toast": "Toast：当前无法取得执行所需授权",
+      "next_step": "建议后续操作：保留执行草稿，提供可确认的操作摘要后再继续；不要执行写操作。"
+    }
+  ]
+}

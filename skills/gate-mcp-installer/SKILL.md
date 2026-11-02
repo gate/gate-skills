@@ -1,7 +1,7 @@
 ---
 name: gate-mcp-installer
-version: "2026.4.14-4"
-updated: "2026-04-14"
+version: "2026.11.2-1"
+updated: "2026-11-02"
 description: "One-click installer for Gate MCP servers and gate-skills on Cursor, Claude Code, Codex, or OpenClaw/mcporter. When gate-dex is installed, also wires Gate Verify HTTP MCP as gate-dex-sec for MCP tool tx_checkin before wallet signing per gate-dex-wallet. Triggers on 'install Gate MCP', 'Gate skills', 'Gate Verify', 'tx check-in', 'setup Gate Cursor', 'Gate Claude Code', 'Gate Codex', 'OpenClaw Gate', 'mcporter Gate'."
 ---
 
@@ -22,9 +22,9 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 | MCP Server | Status |
 |------------|--------|
-| Gate (main) | ✅ For local CEX (stdio) |
+| Gate (main) | ✅ Legacy Pay transport (stdio) |
 | gate-cex-pub | ✅ Remote public |
-| gate-cex-ex | ✅ Remote private (OAuth2) |
+| gate-cex-ex | ✅ Legacy Pay transport (OAuth2) |
 | gate-dex | ✅ DEX |
 | gate-info | ✅ Info |
 | gate-news | ✅ News |
@@ -59,13 +59,15 @@ Do NOT select or call any tool until all rules are read. These rules have the hi
 
 ---
 
-## CEX MCP modes
+## Exchange transport modes for legacy Pay
+
+Retain these modes for `gate-exchange-pay`. The six `gate-cex-*` skills use their own Gate CLI installation, authentication and execution rules; this section does not apply to them.
 
 See [gate-mcp](https://github.com/gate/gate-mcp):
 
 | Mode | What | Auth |
 |------|------|------|
-| **Local CEX** | stdio `npx -y gate-mcp` (or global `gate-mcp`) | Optional `GATE_API_KEY` / `GATE_API_SECRET` |
+| **Local exchange** | stdio `npx -y gate-mcp` (or global `gate-mcp`) | Optional `GATE_API_KEY` / `GATE_API_SECRET` |
 | **Remote public** | `https://api.gatemcp.ai/mcp` | None |
 | **Remote exchange** | `https://api.gatemcp.ai/mcp/exchange` | Gate OAuth2 in client / `mcporter auth gate-cex-ex` |
 
@@ -97,7 +99,7 @@ This installer **adds the Verify MCP whenever `--mcp dex` is included** (default
 | MCP | **gate-dex-sec** | HTTP `https://api.gatemcp.ai/mcp/dex/sec`; **`tx_checkin`** before signing — bundled with **`dex`** install |
 | MCP | **gate-info** / **gate-news** | HTTP |
 | MCP | **gatepay-local-mcp** | stdio `npx -y gatepay-local-mcp`; wallet **`env`** per **gate-pay-x402** |
-| MCP | **gatepay-merchant-discovery** | HTTP `http://dev.halftrust.xyz/pay-mcp-server/mcp`; catalog only (**gate-pay-x402**) |
+| MCP | **gatepay-merchant-discovery** | HTTPS `https://openplatform.gateapi.io/pay-mcp-server/mcp`; catalog only (**gate-pay-x402**) |
 | Skill | **gate-dex-wallet** | Routing for Verify MCP + wallet flows — `references/tx-checkin.md` |
 | Skills | gate-skills | https://github.com/gate/gate-skills |
 
@@ -105,7 +107,9 @@ This installer **adds the Verify MCP whenever `--mcp dex` is included** (default
 
 ## Behavior rules
 
-1. **Default**: Install **all six** trading MCP surfaces + **Gate Verify** (bundled with **`dex`**) + **all gate-skills** unless the user opts out. **Gate Pay** MCPs are **not** included by default: add **`--mcp gatepay-local`** (x402 stdio) and/or **`--mcp gatepay-discovery`** (remote merchant catalog) when needed. Omitting **`dex`** also omits the Verify MCP entry.
+CEX business skills use the separate CLI standalone-package flow. Source copying skips `gate-cex-*` and legacy `gate-exchange-*` directories except `gate-exchange-pay`; existing installations are left in place. Exchange server configuration modes remain available for Pay.
+
+1. **Default**: Install **all six** trading MCP surfaces + **Gate Verify** (bundled with **`dex`**) + **non-CEX gate-skills** unless the user opts out. **Gate Pay** MCPs are **not** included by default: add **`--mcp gatepay-local`** (x402 stdio) and/or **`--mcp gatepay-discovery`** (remote merchant catalog) when needed. Omitting **`dex`** also omits the Verify MCP entry.
 2. **Selectable**: `--mcp main|cex-public|cex-exchange|dex|info|news|gatepay-local|gatepay-discovery` (repeatable).
 3. **Skills**: `--no-skills` installs MCP configuration only.
 4. **OpenClaw**: `--select` / `-s` keeps the interactive single-server menu (mcporter legacy UX).
@@ -131,7 +135,7 @@ bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp main -
 
 # Gate Pay x402 (stdio) alongside trading MCPs
 bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp gatepay-local
-# With --mcp main, the script prompts for GATE_API_KEY (CEX local MCP only); gatepay-local-mcp env is separate (gate-pay-x402).
+# With --mcp main, the script prompts for GATE_API_KEY (local Exchange connection only); gatepay-local-mcp env is separate (gate-pay-x402).
 bash skills/gate-mcp-installer/scripts/install.sh --platform cursor --mcp main --mcp gatepay-local
 
 # Gate Pay merchant discovery (HTTP; discoveryResource) — often paired with gatepay-local

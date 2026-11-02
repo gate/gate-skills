@@ -1,0 +1,21 @@
+test_baseline_models_are_bundled_and_checked (test_build_cex_bot.StandaloneBotPackageTests.test_baseline_models_are_bundled_and_checked)
+A real source build must retain the four baseline model contracts and their links. ... ok
+test_existing_artifact_is_not_overwritten (test_build_cex_bot.StandaloneBotPackageTests.test_existing_artifact_is_not_overwritten)
+A repeated destination fails without replacing the user's existing files. ... ok
+test_json_cannot_hide_private_sources (test_build_cex_bot.StandaloneBotPackageTests.test_json_cannot_hide_private_sources)
+Decoded attachments use the same public-content scan as Markdown. ... ok
+test_missing_common_rule_cannot_produce_a_package (test_build_cex_bot.StandaloneBotPackageTests.test_missing_common_rule_cannot_produce_a_package)
+Each required common rule must be local before any installable output exists. ... ok
+test_package_is_reproducible_and_independent_of_source_checkout (test_build_cex_bot.StandaloneBotPackageTests.test_package_is_reproducible_and_independent_of_source_checkout)
+Two builds have identical content and retain all six rules after checkout removal. ... ok
+test_public_content_failures_leave_no_partial_installation (test_build_cex_bot.StandaloneBotPackageTests.test_public_content_failures_leave_no_partial_installation)
+Private URLs, personal paths, branch provenance and broken links cannot publish a package. ... ok
+test_rejects_symlinked_source_roots_and_parents (test_build_cex_bot.StandaloneBotPackageTests.test_rejects_symlinked_source_roots_and_parents)
+An approved-looking directory path must not import rules through a symlink. ... ok
+test_wrong_installation_name_is_rejected (test_build_cex_bot.StandaloneBotPackageTests.test_wrong_installation_name_is_rejected)
+A successful artifact must keep the registered skill-directory identity. ... ok
+
+----------------------------------------------------------------------
+Ran 8 tests in 6.078s
+
+OK

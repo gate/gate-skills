@@ -4,7 +4,7 @@
 
 ### Changed
 
-- **gate-dex-sec** (Gate Verify check-in) MCP URL: **`https://api.gatemcp.ai/mcp/dex/sec`** (replaces `https://ai-higress-dev.fulltrust.link/gate-mcp/dex/sec`) in Cursor/Claude JSON fragments, Codex TOML, OpenClaw **servers.manifest**, and docs.
+- **gate-dex-sec** (Gate Verify check-in) MCP URL: **`https://api.gatemcp.ai/mcp/dex/sec`** in Cursor/Claude JSON fragments, Codex TOML, OpenClaw **servers.manifest**, and docs.
 
 ## [2026.4.14-3] - 2026-04-14
 
@@ -33,7 +33,7 @@
 
 ### Added
 
-- **gatepay-merchant-discovery** (Gate Pay merchant catalog, HTTP): optional install via `--mcp gatepay-discovery`. URL `http://dev.halftrust.xyz/pay-mcp-server/mcp`; Cursor/Claude JSON uses `transport: streamable-http` aligned with other remote MCP fragments. OpenClaw: **servers.manifest** entry + `mcporter` URL registration.
+- **gatepay-merchant-discovery** (Gate Pay merchant catalog, HTTP): optional install via `--mcp gatepay-discovery`. Cursor/Claude JSON uses `transport: streamable-http` aligned with other remote MCP fragments. OpenClaw: **servers.manifest** entry + `mcporter` URL registration.
 
 ## [2026.4.10-1] - 2026-04-10
 

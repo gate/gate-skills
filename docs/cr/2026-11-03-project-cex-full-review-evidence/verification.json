@@ -1,0 +1,80 @@
+{
+  "revision": "bb6a3f7f9857a6e343190581d830b7c12804645f",
+  "date": "2026-11-03 Asia/Shanghai",
+  "level": "static-plus-isolated-synthetic-probes",
+  "source_mutations": false,
+  "push": false,
+  "commands": [
+    {
+      "command": "python -B -m unittest discover -s tests -p 'test_*.py' -v",
+      "exit": 0,
+      "tests": 31,
+      "seconds": 20.922,
+      "log_sha256": "2f7b3916de1e0a8116f244ab9ed08cb6132697b26d776acfe94b417d44e0e1b6"
+    },
+    {
+      "command": "python -B -m unittest discover -s tests/cex -p 'test_*.py' -v",
+      "exit": 0,
+      "tests": 113,
+      "seconds": 53.34,
+      "log_sha256": "dd6a2155577503ef76b77d8a452f5d2b21184a2f5fceb30e94bbc1f9c8dd97f1"
+    },
+    {
+      "command": "python -B scripts/cex_skills.py build --source . --contract tests/cex/cli-contract.json --output <isolated-output>",
+      "exit": 0,
+      "packages": 6
+    },
+    {
+      "command": "gofmt -l scripts/export_cex_cli.go",
+      "exit": 0,
+      "stdout": ""
+    }
+  ],
+  "dependencies": {
+    "markdown-it-py": "4.0.0",
+    "PyYAML": "6.0.2",
+    "mdurl": "0.1.2",
+    "websockets": "15.0.1"
+  },
+  "contract_sha256": "6bb837d2b973bcbf4a2144aaa8da15e104d5f126b654cfa41752cba8969dd286",
+  "evidence_sha256": {
+    "audit-evidence.json": "94dd940fb0e8cd33489a730a9f8d6884a5a77b6f4a414192da243c17c9cec02e",
+    "probe-results.json": "7222411cd8ead65c448c554409c9b813cfa8ba72b1d00eb28213664376fe4c90"
+  },
+  "public_sources": [
+    {
+      "url": "https://agentskills.io/specification",
+      "access": "web read; 2026-11-03"
+    },
+    {
+      "url": "https://github.com/gate/gate-cli/releases",
+      "access": "web read; visible v0.8.0 release"
+    },
+    {
+      "url": "https://api.github.com/repos/gate/gate-cli/git/trees/v0.8.0?recursive=1",
+      "access": "curl TLS verification enabled; JSON parsed",
+      "sha256": "9fca47cc74804b1b3f3431503df518ea1220c2cfd5d0480b9d1d796a27b9bebc",
+      "tree_truncated": false,
+      "git_tree": "8cb3ef2d92f3447f01c7e302454f6eba0ed6ffb9"
+    },
+    {
+      "url": "https://raw.githubusercontent.com/gate/gate-cli/v0.8.0/cmd/cex/spot/order.go",
+      "access": "curl TLS verification enabled; static sample only",
+      "sha256": "0be3a0e6f0adf66461bd598ddccb3443a8cf622d3840193a7d9bedee6dab0f70"
+    }
+  ],
+  "not_evaluated": [
+    "Full public CLI binary availability",
+    "CLI exporter build/vet/test/race/lint in an approved external module",
+    "Live business APIs and settlement",
+    "Real agent skill-load and ordered business execution",
+    "Independent reviewer regression corpus accuracy",
+    "Jurisdiction/service-entity compliance"
+  ],
+  "scope_limits": {
+    "excluded_skills_paths": 275,
+    "excluded_rule_copies": 18,
+    "historical_review_evidence_inventory_only": 25,
+    "images_visually_viewed": 15
+  }
+}

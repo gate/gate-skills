@@ -4,6 +4,20 @@
 
 ---
 
+## 适用范围：先选择产品契约
+
+| 对象 | 编写、检查与安装入口 |
+|------|--------------------|
+| 六个 gate-cex-* | 使用 [gate-cex-skill-audit](../gate-cex-skill-audit/SKILL.md)、专属共享规则及正式 CEX 套件；先构建独立包，不使用下文旧模板或会话执行器。 |
+| Info/News | 优先复用四个 CLI primary；旧兼容入口继续按各自 Step 0 处理 fallback。 |
+| DEX | 按具体 Skill 声明的 CLI/OpenAPI/MCP 方式编写，不将一种渠道强加给所有 DEX。 |
+| Pay | 两个支付产品独立；保留旧 Pay 所需的 Exchange 安装，业务调用与认证按支付产品契约。 |
+
+先检索现有 Skill 和共享能力，优先复用或扩展，再决定是否需要新入口。
+本文后续旧模板与 tester 流程仅适用于其明确支持的非 CEX 目标；占位名称不是已发布 Skill。
+所有外部写操作均需明确授权及可靠隔离，私有地址、HTTP 或服务器名称不能单独证明测试环境。
+`test-for-skill/test_skill.py` 是旧场景格式会话执行器，仅接受其声明的旧格式；不要因目录存在就认为它能解析当前 Skill 的场景。
+
 ## 目录
 
 ### 第一部分：开发指南
@@ -45,54 +59,31 @@ cd gate-github-skills
 ```bash
 git checkout test
 git pull origin test
-git checkout -b feature/gate-exchange-yourskill
+git checkout -b feature/gate-info-yourskill
 ```
 
 ---
 
 ## 2. 配置本地 MCP 环境
 
-开发和调试 Skill 时需要连接 Gate MCP Server 来验证工具调用。请使用**测试环境**，不要连接生产环境。
+本章仅适用于所选非 CEX Skill 明确声明的 MCP 依赖。
+CEX 使用 Gate CLI，参考 [gate-cli-installer](../skills/gate-cli-installer/SKILL.md)，不执行本章配置。
 
 ### 2.1 配置 MCP Server
 
-在你使用的 AI IDE（Cursor / Claude / Codex 等）中配置本地 MCP Server。
+使用 [gate-mcp-installer](../skills/gate-mcp-installer/SKILL.md) 选择当前客户端和所需服务。
+Exchange 连接模式保留给旧 Pay；DEX、Info、News 按产品说明选择。
+不要在聊天或文档中填写真实密钥，也不要从安装完成推断已经获得业务写入授权。
 
-**Cursor 配置方式**：在项目根目录创建或编辑 `.cursor/mcp.json`：
+### 2.2 测试凭据与环境
 
-```json
-{
-  "mcpServers": {
-    "gate": {
-      "command": "npx",
-      "args": ["-y", "gate-mcp"],
-      "env": {
-        "GATE_BASE_URL": "http://43.135.84.13:8201",
-        "GATE_API_KEY": "your-testnet-key",
-        "GATE_API_SECRET": "your-testnet-secret"
-      }
-    }
-  }
-}
-```
+默认使用本地合成响应或明确隔离的 mock 服务。确需外部集成时，先确认目标端点、
+账号、权限、数据和清理范围并取得相应授权。密钥只通过产品支持的安全渠道配置。
 
-> **注意**：将 `your-testnet-key` 和 `your-testnet-secret` 替换为你在测试环境中生成的 API Key 和 Secret。
+### 2.3 验证连接
 
-### 2.2 获取测试环境 API Key
-
-1. 访问 Gate 测试环境，注册或登录测试账号
-2. 在 API 管理页面生成 Key / Secret
-3. 将生成的 Key / Secret 填入上方配置中
-
-### 2.3 验证 MCP 连接
-
-配置完成后，在 AI IDE 中尝试调用一个简单的 MCP 工具来验证连接是否正常：
-
-```
-请帮我调用 get_spot_tickers 查看 BTC_USDT 的行情
-```
-
-如果返回正常的行情数据，说明 MCP 配置成功。
+先核对客户端暴露的工具名称及 schema；只执行已授权的只读验证。
+工具不存在时停止或按产品约定降级，不为了测试新建订单、转账或付款。
 
 ---
 
@@ -102,7 +93,7 @@ git checkout -b feature/gate-exchange-yourskill
 
 ```bash
 # 确保在自己的开发分支上
-git checkout feature/gate-exchange-yourskill
+git checkout feature/gate-info-yourskill
 
 # 从 test 分支拉取 skill-validator 和 skill-tester
 git checkout origin/test -- test-for-skill/
@@ -134,20 +125,18 @@ test-for-skill/
 
 **描述示例**：
 
-> 我要开发一个 Gate 现货网格交易 Skill，功能包括：
-> 1. 根据用户设定的价格区间和网格数量自动计算网格线
-> 2. 按网格线批量挂限价买卖单
-> 3. 查询当前网格运行状态（挂单分布、成交情况）
-> 4. 支持一键停止网格（撤销所有相关挂单）
+> 先检查现有 Info/News Skill 是否已覆盖所需研究任务。
+> 如需独立的新入口，声明精确触发意图、公开数据来源、只读范围与失败降级；
+> 使用所选产品的现行契约编写，不复制交易或支付授权规则。
 
 AI 会根据 skill-validator 的规范自动生成符合格式要求的 Skill 文件。
 
 ### 4.2 目录结构要求
 
-每个 Skill 必须在 `skills/` 目录下创建独立文件夹，命名规范为 `gate-{category}-{title}`：
+业务 Skill 使用独立目录。以下是非 CEX 旧模板；六个 CEX 的最小入口与文件清单由专属 auditor 规定：
 
 ```
-skills/gate-exchange-yourskill/
+skills/gate-info-yourskill/
 ├── SKILL.md                    # [必需] AI Agent 运行时指令
 ├── README.md                   # [必需] 面向人类的说明文档
 ├── CHANGELOG.md                # [必需] 版本变更记录
@@ -157,17 +146,17 @@ skills/gate-exchange-yourskill/
 
 ### 4.3 命名规范
 
-Skill 名称格式：`gate-{category}-{title}`
+先遵守 Agent Skills 的名称与目录一致规则；现有非 CEX 旧模板采用 `gate-{category}-{title}`。六个 CEX、安装器及开发审计工具使用各自已登记的身份，不套用此枚举。
 
 | 部分 | 规则 | 说明 |
 |------|------|------|
 | `gate` | 固定前缀 | 品牌标识 |
-| `category` | 枚举值 | `exchange` / `dex` / `wallet` / `news` / `info` |
+| `category` | 枚举值 | `dex` / `wallet` / `news` / `info`；已有 `gate-exchange-pay` 保留身份，不新增旧 CEX 类别 |
 | `title` | 全小写英文，无特殊字符 | 产品/功能名称 |
 
-**合法示例**：`gate-exchange-spot`、`gate-dex-market`、`gate-wallet-transfer`
+**现存示例**：`gate-dex-market`、`gate-info-coinanalysis`、`gate-news-briefing`；CEX 使用 `gate-cex-trade` 等六个已登记名称。
 
-**非法示例**：`gate-exchange-activity-center`（title 中有短横线）、`gate-invalid-test`（category 不在枚举中）
+**名称检查**：目录名与 frontmatter 不一致、大小写或下划线不合规范应报错；不能仅因名称多于三段就否定现有已登记 Skill。
 
 ### 4.4 SKILL.md 编写要求
 
@@ -175,7 +164,7 @@ Skill 名称格式：`gate-{category}-{title}`
 
 ```yaml
 ---
-name: gate-exchange-yourskill
+name: gate-info-yourskill
 version: "2026.3.11-1"
 updated: "2026-03-11"
 description: "功能描述。Use this skill whenever ... Trigger phrases include '...', '...'"
@@ -283,13 +272,13 @@ Skill 开发完成后，使用 skill-validator 进行规范校验。
 在 AI IDE 中输入：
 
 ```
-请校验 skills/gate-exchange-yourskill 这个 skill
+请校验 skills/gate-info-yourskill 这个 skill
 ```
 
 或：
 
 ```
-帮我检查 skills/gate-exchange-yourskill 是否符合 skill 规范
+帮我检查 skills/gate-info-yourskill 是否符合 skill 规范
 ```
 
 ### 5.2 校验覆盖范围
@@ -337,13 +326,13 @@ skill-validator 会依次检查：
 ### 6.2 触发测试
 
 ```
-帮我测试 gate-exchange-yourskill 这个 skill
+帮我测试 gate-info-yourskill 这个 skill
 ```
 
 默认执行 L0 + L1。如需更多层级：
 
 ```
-测试 gate-exchange-yourskill 到 L3
+测试 gate-info-yourskill 到 L3
 ```
 
 ### 6.3 测试产出
@@ -398,23 +387,8 @@ git pull origin test
 
 ### 7.3 配置本地 MCP 环境
 
-参考 [第 2 章：配置本地 MCP 环境](#2-配置本地-mcp-环境)，使用测试环境的 Key / Secret 配置 MCP Server：
-
-```json
-{
-  "mcpServers": {
-    "gate": {
-      "command": "npx",
-      "args": ["-y", "gate-mcp"],
-      "env": {
-        "GATE_BASE_URL": "http://43.135.84.13:8201",
-        "GATE_API_KEY": "your-testnet-key",
-        "GATE_API_SECRET": "your-testnet-secret"
-      }
-    }
-  }
-}
-```
+先按开头的产品表选择执行契约。仅 MCP 目标参考[第 2 章](#2-配置本地-mcp-环境)；
+CEX 直接运行正式离线套件。不要把旧会话执行器或真实交易当作 CEX 的默认验证。
 
 ### 7.4 确认测试工具已就绪
 
@@ -455,8 +429,8 @@ git checkout origin/develop -- skills/
 如果只需拉取某个特定 Skill：
 
 ```bash
-# 仅拉取指定 skill，例如 gate-exchange-yourskill
-git checkout origin/develop -- skills/gate-exchange-yourskill/
+# 仅拉取指定 skill，例如 gate-info-yourskill
+git checkout origin/develop -- skills/gate-info-yourskill/
 ```
 
 ### 8.2 方式二：从开发的特性分支拉取
@@ -468,7 +442,7 @@ git checkout origin/develop -- skills/gate-exchange-yourskill/
 git fetch origin
 
 # 从开发的特性分支拉取指定 skill
-git checkout origin/feature/gate-exchange-yourskill -- skills/gate-exchange-yourskill/
+git checkout origin/feature/gate-info-yourskill -- skills/gate-info-yourskill/
 ```
 
 ### 8.3 验证拉取结果
@@ -476,13 +450,13 @@ git checkout origin/feature/gate-exchange-yourskill -- skills/gate-exchange-your
 拉取完成后，确认 Skill 文件完整：
 
 ```bash
-ls -la skills/gate-exchange-yourskill/
+ls -la skills/gate-info-yourskill/
 ```
 
 应至少包含以下文件：
 
 ```
-skills/gate-exchange-yourskill/
+skills/gate-info-yourskill/
 ├── SKILL.md
 ├── README.md
 ├── CHANGELOG.md
@@ -501,7 +475,7 @@ skill-tester 是 AI 驱动的自动化测试框架，能够根据 Skill 定义�
 在 AI IDE（Cursor / Claude 等）中输入：
 
 ```
-请读取 test-for-skill/skill-tester/SKILL.md，然后帮我测试 skills/gate-exchange-yourskill 这个 skill
+请读取 test-for-skill/skill-tester/SKILL.md，然后帮我测试 skills/gate-info-yourskill 这个 skill
 ```
 
 AI 会自动执行以下流程：
@@ -522,10 +496,10 @@ Step 4: 生成测试报告
 
 | 指令示例 | 执行范围 |
 |---------|---------|
-| `测试 gate-exchange-yourskill` | L0 + L1（默认） |
-| `检查 gate-exchange-yourskill 的 skill 编写规范` | 仅 L0 |
-| `测试 gate-exchange-yourskill 到 L2，包含多语言` | L0 + L1 + L2 |
-| `端到端跑一下 gate-exchange-yourskill 的完整流程` | L0 ~ L3 |
+| `测试 gate-info-yourskill` | L0 + L1（默认） |
+| `检查 gate-info-yourskill 的 skill 编写规范` | 仅 L0 |
+| `测试 gate-info-yourskill 到 L2，包含多语言` | L0 + L1 + L2 |
+| `端到端跑一下 gate-info-yourskill 的完整流程` | L0 ~ L3 |
 | `只看失败的用例` | 生成精简报告 |
 
 ### 9.3 测试层级说明
@@ -535,7 +509,7 @@ Step 4: 生成测试报告
 | **L0** | 规范校验 | P0 | AI 自动 | SKILL.md 结构、YAML frontmatter、必填字段、二次确认机制 |
 | **L1** | 文本/逻辑测试 | P0 | AI 自动 | 触发词路由准确性、Prompt 理解、工具调用链、输出格式 |
 | **L2** | 相似问法 & 多语言 | P1 | AI 自动 | 同义改写、口语化、英文/中英混合 Prompt |
-| **L3** | 业务端到端 | P1 | 人 + AI | 真实业务流程（下单→查仓→平仓），需测试环境 MCP |
+| **L3** | 业务端到端 | P1 | 人 + AI | 业务入口到最终结果；默认使用合成依赖，真实外部写操作需单独授权 |
 | **L4** | 跨 Skill 联动 | P2 | 人 + AI | 多 Skill 协同（现货查价 + 合约下单） |
 | **L5** | 多模型对比 | P2 | AI 自动 | 同一用例集在不同模型上执行，对比通过率 |
 
@@ -608,7 +582,7 @@ Step 4: 生成测试报告
 
 测试报告中会自动标记涉及 Gate 生产环境的调用。手工复核时注意：
 
-- 所有 MCP 工具调用应指向**测试环境** (`GATE_BASE_URL` 为测试地址)
+- 外部调用必须属于已确认的隔离环境与授权范围；仅凭地址或 server 名不能判定安全
 - 如果报告中出现 `⚠️ 生产环境调用` 标记，需确认是否为误报
 
 ---
@@ -642,11 +616,11 @@ Step 4: 生成测试报告
 ```bash
 # 重新拉取修复后的代码
 git fetch origin
-git checkout origin/develop -- skills/gate-exchange-yourskill/
+git checkout origin/develop -- skills/gate-info-yourskill/
 
 # 重新运行自动化测试
 # 在 AI IDE 中输入：
-# "帮我测试 skills/gate-exchange-yourskill"
+# "帮我测试 skills/gate-info-yourskill"
 ```
 
 ---
@@ -677,7 +651,7 @@ skill-tester 自动化测试（L0 + L1，可扩展到 L2/L3）
 
 | Skill | 架构类型 | 路径 | 参考价值 |
 |-------|---------|------|---------|
-| gate-exchange-spot | 路由架构 | `skills/gate-exchange-spot/` | 完整的路由架构示例，31 个场景 |
-| gate-exchange-futures | 路由架构 | `skills/gate-exchange-futures/` | 交易类 Skill，含安全规则 |
-| gate-dex-market | 路由架构 | `skills/gate-dex-market/` | 只读数据查询类 Skill |
-| gate-exchange-marketanalysis | 标准架构 | `skills/gate-exchange-marketanalysis/` | 市场分析类 Skill |
+| gate-cex-trade | CLI 业务入口 | `skills/gate-cex-trade/` | 当前 CEX 路由与共享规则，使用专属 auditor |
+| gate-cex-bot | CLI 策略入口 | `skills/gate-cex-bot/` | 当前机器人边界与独立包 |
+| gate-dex-market | 只读查询 | `skills/gate-dex-market/` | 非 CEX 产品契约 |
+| gate-info-research | CLI primary | `skills/gate-info-research/` | Info/News 研究与 playbook 路由 |

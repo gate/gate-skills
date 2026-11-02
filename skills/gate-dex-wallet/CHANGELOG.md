@@ -53,7 +53,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Added
 
 - **references/tx-checkin.md**: New mandatory terminal tx check-in module — documents CLI usage (`-tx-bundle-file`, `-message`, `-intent-file`, `-body-file`), `txBundle` preview field flow, `checkin_token` session binding, OTP handling, and credential auto-discovery from `~/.cursor/mcp.json`
-- **tools/tx-checkin/**: Pre-built `tx-checkin` binary (Go); gateway URL fixed to `https://test-api.web3gate.io/api/app/v1/web3-gv-api`
+- **tools/tx-checkin/**: Pre-built `tx-checkin` binary (Go)
 
 ### Changed
 

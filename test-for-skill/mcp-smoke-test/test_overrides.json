@@ -1,0 +1,119 @@
+{
+  "_comment": "Override auto-generated params or skip specific tools.",
+  "cex_fx_update_fx_price_triggered_order": {
+    "params": { "settle": "usdt" }
+  },
+  "cex_spot_create_spot_order": {
+    "params": { "currency_pair": "BTC_USDT", "side": "buy", "amount": "0.0001", "price": "10000", "type": "limit", "account": "spot" }
+  },
+  "cex_spot_create_spot_batch_orders": {
+    "params": { "orders": [{"currency_pair": "BTC_USDT", "side": "buy", "amount": "0.0001", "price": "10000", "type": "limit", "account": "spot"}] }
+  },
+  "cex_spot_create_spot_price_triggered_order": {
+    "params": {
+      "market": "BTC_USDT",
+      "account": "normal",
+      "trigger": {"price": "100000", "rule": ">=", "expiration": 3600},
+      "put": {"type": "limit", "side": "buy", "price": "10000", "amount": "0.0001", "account": "normal", "time_in_force": "gtc"}
+    }
+  },
+  "cex_spot_amend_spot_order": {
+    "params": { "order_id": "123456789", "currency_pair": "BTC_USDT", "price": "50000" }
+  },
+  "cex_wallet_create_transfer": {
+    "params": { "currency": "USDT", "from": "spot", "to": "futures", "amount": "0.01", "settle": "usdt" }
+  },
+  "cex_fx_create_fx_bbo_order": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "size": 1, "direction": "buy" }
+  },
+  "cex_fx_create_fx_order": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "size": "1", "price": "10000" }
+  },
+  "cex_fx_create_fx_batch_orders": {
+    "params": { "settle": "usdt", "orders": [{"contract": "BTC_USDT", "size": "1", "price": "10000"}] }
+  },
+  "cex_fx_amend_batch_fx_orders": {
+    "params": { "settle": "usdt", "orders": [{"order_id": "123456789", "size": "1", "price": "10000"}] }
+  },
+  "cex_fx_get_index_constituents": {
+    "params": { "settle": "usdt", "index": "BTC_USDT" }
+  },
+  "cex_fx_get_leverage": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT" }
+  },
+  "cex_fx_set_position_mode": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "mode": "single" }
+  },
+  "cex_fx_update_fx_contract_position_leverage": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "leverage": "10" }
+  },
+  "cex_fx_update_fx_dual_position_cross_mode": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT" }
+  },
+  "cex_fx_update_fx_dual_position_margin": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "change": "0.01" }
+  },
+  "cex_fx_update_fx_dual_position_risk_limit": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "risk_limit": "100" }
+  },
+  "cex_fx_update_fx_position_cross_mode": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT" }
+  },
+  "cex_fx_update_fx_position_margin": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "change": "0.01" }
+  },
+  "cex_fx_update_fx_position_risk_limit": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "risk_limit": "100" }
+  },
+  "cex_fx_create_fx_price_triggered_order": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "trigger_price": "100000", "trigger_rule": ">=", "order_size": 1, "order_price": "10000" }
+  },
+  "cex_options_create_options_order": {
+    "params": { "contract": "BTC_USDT-20260320-80000-C", "size": 1, "price": "0.01", "underlying": "BTC_USDT" }
+  },
+  "cex_options_set_options_mmp": {
+    "params": { "underlying": "BTC_USDT", "window": 5000, "frozen_period": 5000 }
+  },
+  "cex_earn_create_uni_lend": {
+    "params": { "currency": "USDT", "amount": "1", "min_rate": "0.0001" }
+  },
+  "cex_margin_list_margin_account_book": {
+    "params": { "currency_pair": "BTC_USDT" }
+  },
+  "cex_tradfi_create_transaction": {
+    "params": { "asset": "USDT", "change": "1", "type": "deposit" }
+  },
+  "cex_tradfi_query_position_history_list": {
+    "params": {}
+  },
+  "cex_unified_get_unified_accounts": {
+    "params": { "currency": "USDT" }
+  },
+  "cex_unified_get_unified_risk_units": {
+    "params": {}
+  },
+  "cex_unified_list_unified_loan_records": {
+    "params": { "type": "borrow" }
+  },
+  "cex_unified_set_user_leverage_currency_setting": {
+    "params": { "currency": "BTC", "leverage": "5" }
+  },
+  "cex_wallet_list_sa_balances": {
+    "params": {}
+  },
+  "cex_fx_list_batch_fx_funding_rates": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT" }
+  },
+  "cex_fx_update_fx_dual_position_leverage": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "leverage": "10" }
+  },
+  "cex_fx_update_fx_position_leverage": {
+    "params": { "settle": "usdt", "contract": "BTC_USDT", "leverage": "10" }
+  },
+  "cex_unified_get_unified_estimate_rate": {
+    "params": { "currencies": ["USDT"] }
+  },
+  "cex_wallet_get_transfer_order_status": {
+    "params": { "client_order_id": "test123" }
+  }
+}

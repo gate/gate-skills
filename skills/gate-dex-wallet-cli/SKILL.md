@@ -3,7 +3,6 @@ name: gate-dex-wallet-cli
 version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "Gate DEX CLI wallet skill (pure REST). Auth via OAuth, balance, wallet/account addresses, token list, tx history, transfers, and signing. GV checkin is built into signing commands. Use this skill whenever the user wants to log in, check balance/address, view tx history, transfer tokens, or sign messages via the gate-dex CLI. Trigger phrases include login, logout, balance, address, tokens, tx history, transfer, send, sign-msg, sign-tx. For swaps use gate-dex-trade-cli; for market data use gate-dex-market-cli."
-homepage: https://git.fulltrust.link/web3/ai/gate-dex-cli
 user-invocable: true
 metadata:
   {

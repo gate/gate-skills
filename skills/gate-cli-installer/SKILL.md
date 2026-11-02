@@ -1,7 +1,7 @@
 ---
 name: gate-cli-installer
-version: "2026.4.22-2"
-updated: "2026-04-22"
+version: "2026.11.2-1"
+updated: "2026-11-02"
 description: "One-click installer for gate-cli and gate-skills on Cursor, Claude Code, Codex, or OpenClaw/mcporter. Triggers on 'install gate-cli', 'Gate skills', 'Gate Verify', 'tx check-in', 'setup Gate Cursor', 'Gate Claude Code', 'Gate Codex', 'OpenClaw Gate', 'mcporter Gate'."
 ---
 
@@ -70,6 +70,8 @@ gate-cli --version
 ---
 
 ## 2. Install **gate-skills** (per client)
+
+For the six `gate-cex-*` skills, build the standalone packages using the repository README and install only the selected generated directories. Source directories rely on sibling shared files and must not be copied directly. The source/marketplace examples below apply to other products.
 
 | Client | Typical skills location | Common approach |
 |--------|-------------------------|-----------------|

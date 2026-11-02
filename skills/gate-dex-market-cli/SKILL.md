@@ -3,7 +3,6 @@ name: gate-dex-market-cli
 version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "gate-dex CLI market & token data skill: K-line, liquidity, trading stats, token info, security audit, rankings, new listings, chain config, and raw RPC. Read-only; no signing. Use this skill whenever the user asks for on-chain market data, token info, or security audits via the gate-dex CLI. Trigger phrases include K-line, token price, market cap, token risk, honeypot check, token rankings, new tokens, liquidity, tx stats, chain config, rpc."
-homepage: https://git.fulltrust.link/web3/ai/gate-dex-cli
 user-invocable: true
 metadata:
   {

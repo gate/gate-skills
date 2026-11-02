@@ -1,0 +1,7 @@
+# Capability and result compatibility
+
+Use a trusted installed [Gate CLI](https://github.com/gate/gate-cli) and shared [preflight](../../_shared/cex/preflight.md). An existing trusted dev label alone does not require replacement. Use official public releases when an installation or approved update is needed. Verify the selected binary's exact action help and required fields before execution. Documentation coverage is not proof that every public release exposes every operation. If a capability is missing, keep that action as a draft and report the gap; do not obtain an internal branch or private artifact.
+
+The twelve documented leaves cover recommend, running, detail, stop, four grid products, two martingales and smart-position/futures-combo creation. Creation accepts --json business objects. Another-candidate selection needs separate refresh-context and exclusion flags. A fixed contract-martingale stop needs its price basis; smart-position stop needs mode/options. Detail must preserve actual saved configuration, positions and progress before those facts are claimed.
+
+Use the selected origin, account context and verified authority throughout. A successful read does not establish creation, protection execution, lifecycle completion or funds return. Missing response fields remain unverified. Rollback or package replacement does not stop, recreate or migrate existing instances. Tests with simulated state cannot certify deployed routes, real settlement or product eligibility.

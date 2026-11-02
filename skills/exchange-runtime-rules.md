@@ -1,11 +1,11 @@
 ---
-version: v1.1.3
-last_updated: 2026-04-22
+version: v1.2.0
+last_updated: 2026-11-02
 ---
 
 # Gate Skills Common Runtime Rules
 
-> Shared runtime rules for all Gate Skills (`gate-exchange-*`, `gate-dex-*`, `gate-info-*`, `gate-news-*`).
+> Shared runtime rules for legacy Pay, DEX, Info and News. The six `gate-cex-*` skills use their bundled `references/_shared/cex/` rules instead.
 > Each skill's SKILL.md should include: `Read and follow [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.`
 
 **Versioning:**
@@ -50,9 +50,9 @@ Before using MCP-dependent capabilities, check whether Gate MCP is installed.
 
 When an error occurs, read the documentation first and try documented solutions before asking the user for more action.
 
-### CEX (`gate-exchange-*`)
+### Legacy Pay authorization (`gate-exchange-pay`)
 
-CEX 有两种部署方式，授权方式不同：
+These existing authorization modes are retained only for the payment product. Retain `gate-mcp-installer` for these payment transport modes. Do not use these rules for the six CLI CEX skills.
 
 | | Local MCP (`gate-mcp` npm) | Remote MCP (`api.gatemcp.ai/mcp/exchange`) |
 |------|---------------------------|-------------------------------------------|
@@ -77,7 +77,7 @@ CEX 有两种部署方式，授权方式不同：
 
 ---
 
-## 4. Resolving which `gate-cli` to run (`gate-exchange-*`, installers)
+## 4. Resolving which `gate-cli` to run (legacy Pay, installers)
 
 When invoking **`gate-cli`** from a shell or script (the command name **`gate-cli`**), resolve the executable **strictly in this order**:
 
@@ -90,15 +90,3 @@ When invoking **`gate-cli`** from a shell or script (the command name **`gate-cl
 Do **not** assume a single global install location; agents and scripts MUST follow this detection order.
 
 ---
-
-## 5. `gate-cli cex …` execution flow (`gate-exchange-*`)
-
-For any **`gate-cli cex …`** leaf command on the host, **strictly**:
-
-1. Run **`gate-cli cex … --help`** first (same subcommand path, **`--help`** before other flags) to see if the CLI documents **required** flags or arguments.
-2. **If there are required fields** (e.g. `--currency`): gather values (never API secrets in chat), then run the real command **without** `--help`, e.g. `gate-cli cex spot account get --currency BTC`.
-3. **If there are no required fields** beyond auth: run **`gate-cli cex …`** directly (add only optional flags the task still needs).
-
-**Example:** `gate-cli cex spot account get` → `gate-cli cex spot account get --help` → if `--currency` is required, then `gate-cli cex spot account get --currency BTC`; otherwise `gate-cli cex spot account get` as documented.
-
-If `--help` is ambiguous, use a read-only probe or explicit user clarification—especially before writes.

@@ -1,0 +1,49 @@
+{
+  "nested_build": {
+    "exit": 0,
+    "result": "{\"exception\": \"Error\", \"recursive_paths_in_error\": true, \"file_name_too_long\": true, \"output_exists\": false}",
+    "stderr_bytes": 0
+  },
+  "silent_peer": {
+    "blocked": true,
+    "guard_seconds": 0.8,
+    "elapsed": 0.807,
+    "stdout": "initialized; configured_timeout=0.1"
+  },
+  "failure_exit": {
+    "exit": 0,
+    "summary": [
+      "\u2705 Pass: 0  \u274c Fail: 1  \ud83d\udca5 Error: 0  \u23ed Skip: 0",
+      "Pass Rate: 0% (0/1)"
+    ],
+    "reports_generated": true
+  },
+  "ungranted_write": {
+    "exit": 0,
+    "calls": [
+      {
+        "name": "fixture_transfer_funds",
+        "arguments": {
+          "amount": "0.0001"
+        }
+      }
+    ]
+  },
+  "reversed_order": {
+    "expected": [
+      "get_quote",
+      "create_order"
+    ],
+    "actual": [
+      "create_order",
+      "get_quote"
+    ],
+    "overall_pass": true,
+    "external_boundary": "synthetic model response; no real API"
+  },
+  "html_label": {
+    "raw_script_element_present": true,
+    "fixture_only": true,
+    "browser_execution": "NOT_EXECUTED"
+  }
+}

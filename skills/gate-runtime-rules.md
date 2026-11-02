@@ -1,11 +1,11 @@
 ---
-version: v1.2.5
-last_updated: 2026-04-22
+version: v1.3.0
+last_updated: 2026-11-02
 ---
 
 # Gate Skills Common Runtime Rules
 
-> Shared runtime rules for all Gate Skills (`gate-exchange-*`, `gate-dex-*`, `gate-info-*`, `gate-news-*`).
+> Shared runtime rules for legacy Pay, DEX, Info and News. The six `gate-cex-*` skills use their bundled `references/_shared/cex/` rules instead.
 > Each skill's SKILL.md should include: `Read and follow [gate-runtime-rules.md](https://github.com/gate/gate-skills/blob/master/skills/gate-runtime-rules.md) first.`
 
 **Versioning:**
@@ -43,7 +43,6 @@ Before using MCP-dependent capabilities, detect whether the required Gate MCP is
 
 **Detection method:**
 - List available MCP tools (e.g. `tools/list` or client's MCP panel)
-- If tools with `cex_` prefix exist → CEX MCP is configured
 - If tools with `dex_` prefix exist → DEX MCP is configured
 - If tools with `info_` / `news_` prefix exist → Info / News MCP is configured
 
@@ -58,32 +57,13 @@ Before using MCP-dependent capabilities, detect whether the required Gate MCP is
 
 Before selecting tools, follow the decision flow below to determine the correct MCP endpoint. When an authorization error occurs during use, consult the authorization details tables to guide recovery.
 
-### CEX (`gate-exchange-*`)
+### CEX (`gate-cex-*`)
 
-CEX supports two deployment methods. **Prefer Remote MCP; fall back to Local MCP when the environment does not support OAuth.**
+Route CEX requests to the matching one of the six CLI skills. Follow its bundled setup, authentication and execution rules. Use `gate-cli-installer` for the CLI; this document does not supply an alternate CEX execution path.
 
-| | Remote MCP | Local MCP |
-|------|-----------|-----------|
-| **When to use** | Client supports OAuth (Cursor, Claude Desktop, Claude Code CLI, Trae, Qoder, etc.) | No OAuth support, enterprise intranet, CI/CD, or scripts |
-| **Auth method** | Gate OAuth2 — requires opening a browser for login and authorization on first connect | API Key / API Secret — configure via `GATE_API_KEY` / `GATE_API_SECRET` env vars or `--api-key` / `--api-secret` args (config only, no browser needed) |
-| **On auth failure** | Guide user to re-authorize via browser OAuth flow | Guide user to verify env vars or args are correctly set |
-| **API Key setup** | Not needed (OAuth handles auth) | https://www.gate.com/myaccount/profile/api-key/manage |
+### Legacy Pay (`gate-exchange-pay`)
 
-**Agent decision flow (execute in order):**
-
-```
-1. Already configured?
-   → If tools with `cex_` prefix exist in tools/list → use the existing MCP.
-   → On auth error → consult the table above for recovery steps.
-
-2. Not configured → choose deployment method:
-   a. Client supports OAuth → recommend Remote MCP
-   b. No OAuth / intranet / CI → recommend Local MCP
-
-3. Guide installation:
-   → Direct the user to the setup guide: https://github.com/gate/gate-mcp
-   → Or suggest one-click install: https://github.com/gate/gate-skills
-```
+Follow the payment product's declared authentication and prior payment authorization. Retain the Exchange installation modes in `gate-mcp-installer` for this payment product. Do not substitute another payment channel or infer authorization from a configured connection.
 
 ### DEX (`gate-dex-*`)
 
@@ -101,7 +81,7 @@ CEX supports two deployment methods. **Prefer Remote MCP; fall back to Local MCP
 
 ---
 
-## 4. Resolving which `gate-cli` to run (`gate-exchange-*`, installers)
+## 4. Resolving which `gate-cli` to run (legacy Pay, installers)
 
 When invoking **`gate-cli`** from a shell or script (the command name **`gate-cli`**), resolve the executable **strictly in this order**:
 
@@ -114,15 +94,3 @@ When invoking **`gate-cli`** from a shell or script (the command name **`gate-cl
 Do **not** assume a single global install location; agents and scripts MUST follow this detection order.
 
 ---
-
-## 5. `gate-cli cex …` execution flow (`gate-exchange-*`)
-
-When a workflow uses **`gate-cli cex …`** on the host (typical of `gate-exchange-*` skills), **strictly**:
-
-1. Run **`gate-cli cex … --help`** first (same subcommand path, **`--help`** before other flags) to see if the CLI documents **required** flags or arguments.
-2. **If there are required fields** (e.g. `--currency`): gather values (never API secrets in chat), then run the real command **without** `--help`, e.g. `gate-cli cex spot account get --currency BTC`.
-3. **If there are no required fields** beyond auth: run **`gate-cli cex …`** directly (add only optional flags the task still needs).
-
-**Example:** `gate-cli cex spot account get` → `gate-cli cex spot account get --help` → if `--currency` is required, then `gate-cli cex spot account get --currency BTC`; otherwise `gate-cli cex spot account get` as documented.
-
-If `--help` is ambiguous, use a documented read-only call or explicit user clarification—especially before writes.

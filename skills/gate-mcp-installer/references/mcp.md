@@ -1,13 +1,15 @@
 ---
 name: gate-mcp-installer-mcp
-version: "2026.4.14-4"
-updated: "2026-04-14"
+version: "2026.11.2-1"
+updated: "2026-11-02"
 description: "Execution specification for unified Gate MCP + gate-skills installer (Cursor, Claude Code, Codex, OpenClaw). Gate Verify is HTTP MCP gate-dex-sec (tx_checkin), merged when dex is installed; gate-dex-wallet references/tx-checkin.md."
 ---
 
 # Gate MCP Installer — execution specification
 
 ## 1. Scope
+
+CEX business skills use the separate CLI standalone-package flow. Source copying skips `gate-cex-*` and legacy `gate-exchange-*` directories except `gate-exchange-pay`; existing installations are left in place. Exchange server configuration modes remain available for Pay.
 
 **In scope**
 

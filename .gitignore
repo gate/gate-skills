@@ -25,7 +25,6 @@ dist/
 
 # JetBrains IDE
 .idea/
-.cursor/
 # Unit test reports
 TEST*.xml
 
@@ -37,7 +36,7 @@ Thumbs.db
 
 # Applications
 *.app
-# *.exe
+
 *.war
 test-for-skill
 # Large media files
@@ -47,5 +46,10 @@ test-for-skill
 *.flv
 *.mov
 *.wmv
-.cursor/
+docs/
+doc/
 
+/docs/
+
+# pdf files
+*.pdf
