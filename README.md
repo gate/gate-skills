@@ -85,7 +85,7 @@ Versions below are Skill metadata, not CLI releases or proof of live service ava
 | [gate-info-risk](skills/gate-info-risk/SKILL.md) | CLI-first token, address and project risk checks | `2026.6.12-5` | CLI primary |
 | [gate-info-web3](skills/gate-info-web3/SKILL.md) | CLI-first on-chain and Web3 queries | `2026.6.22-1` | CLI primary |
 | [gate-news-intel](skills/gate-news-intel/SKILL.md) | CLI-first news, events and sentiment | `2026.6.22-1` | CLI primary |
-| [gate-pay-x402](skills/gate-pay-x402/SKILL.md) | HTTP 402 payments, wallet setup and merchant discovery | `2026.4.10-1` | Optional Pay setup |
+| [gate-pay-x402](skills/gate-pay-x402/SKILL.md) | HTTP 402 payments, wallet setup and merchant discovery | `2026.11.3-2` | Optional Pay setup |
 
 ---
 

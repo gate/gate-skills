@@ -1,12 +1,26 @@
 # Changelog
 
+## [2026.11.3-1] - 2026-11-03
+
+### Added
+
+- MPP tool interfaces: `mpp_init_session` (`max_deposit`, `sign_mode`), `mpp_fetch`,
+  `mpp_close_session`, `mpp_request_close`, and `mpp_withdraw` (`channel_id`).
+
+### Changed
+
+- `x402_place_order`: response handling recognizes `paymentType=mpp` and `WWW-Authenticate`
+  challenges in addition to x402 `PAYMENT-REQUIRED` challenges.
+- `x402_centralized_payment`: documented inputs include `payment_required_header`, `resource_url`,
+  and the original merchant request method/body.
+
 ## [2026.4.10-1] - 2026-04-10
 
 ### Added
 
 - **SKILL.md**: **`## MCP host setup (discovery + payment)`** — split **payment** (`gatepay-local-mcp` stdio) vs **discovery** (optional remote HTTP MCP); Cursor-style **`mcp.json`** example; reload guidance.
 - **SKILL.md**: **MCP Server Connection Detection** split into **§A Payment MCP** and **§B Discovery MCP**; separate **Setup guide — payment MCP** and **Setup guide — discovery MCP**.
-- **SKILL.md**: **When `discoveryResource` is mandatory** — order intent without sufficient merchant HTTP fields → call catalog on the **discovery server** before **`x402_place_order`** / **`x402_request`** on the **payment MCP**; exclusions documented.
+- **SKILL.md**: **When `discoveryResource` is mandatory** — order intent without sufficient merchant HTTP fields → call catalog on the **discovery server** before **`x402_place_order`** on the **payment MCP**; exclusions documented.
 - **SKILL.md**: **GatePay merchant discovery** — two-MCP model (catalog may live only on discovery server); **`discoveryResource`** logical args table (`resourceDes`, `resourceType`, pagination, `tenantId`); response mapping notes; **Error handling** row for catalog failures / empty items.
 
 ### Changed
@@ -16,7 +30,7 @@
 - **SKILL.md**: Allowlisted **merchant discovery** — may be on a **separate** MCP; typical tool **`discoveryResource`**; scan **all** servers; invoke on the server that lists the tool.
 - **SKILL.md**: **Same-server rule** clarified as **payment-only** for **`x402_*`**; discovery may use another server id. **Workflow**, **Judgment Logic**, **Cross-Skill Collaboration**, and **Data handling** updated for pay vs discovery traffic.
 - **SKILL.md**: **Routing Rules** — Chinese keyword hints in the table; MCP connectivity points to **MCP host setup** then connection detection; note that **`references/scenarios.md`** is QA-only, not runtime routing.
-- **SKILL.md**: **Wallet configuration procedure** — localized Quick Wallet labels (**快捷钱包**, **gate/Gate钱包**); **payment MCP** wording in auth steps; note on npm single-tool builds listing only **`x402_request`**.
+- **SKILL.md**: **Wallet configuration procedure** — localized Quick Wallet labels (**快捷钱包**, **gate/Gate钱包**); **payment MCP** wording in auth steps.
 - **SKILL.md**: **How to build `arguments`** — resolve tool on **correct server** (discovery vs payment).
 - **SKILL.md**: Tools table — **`discoveryResource`** row with parameter summary (still **`inputSchema`-first**).
 - **SKILL.md**: **`## Execution`** renamed back to **`## Execution workflow`**; steps and x402 flow diagram reference dual MCP detection and mandatory discovery path.
@@ -37,8 +51,8 @@
 
 ### Changed
 
-- **SKILL.md**: Gate Pay MCP allowlist aligned with typical **`gatepay-local-mcp`** tool set: primary HTTP tool **`x402_place_order`**; **`x402_request`** documented only when listed on the server; added **`x402_gate_pay_auth`** for centralized_payment OAuth; merchant discovery no longer uses a placeholder tool name — call only tools present on the live list.
-- **SKILL.md**: **MCP Server Connection Detection** accepts any valid **`x402_*`** entry point per package docs, not only `x402_place_order` / `x402_request`.
+- **SKILL.md**: Gate Pay MCP allowlist aligned with typical **`gatepay-local-mcp`** tool set: primary HTTP tool **`x402_place_order`**; added **`x402_gate_pay_auth`** for centralized_payment OAuth; merchant discovery no longer uses a placeholder tool name — call only tools present on the live list.
+- **SKILL.md**: **MCP Server Connection Detection** accepts any valid **`x402_*`** entry point per package docs, not only `x402_place_order`.
 - **SKILL.md**: **Sub-Modules** section updated to reference **README**, **CHANGELOG**, and **scenarios.md**.
 
 ### Fixed

@@ -1,44 +1,107 @@
-# Gate Pay x402 Skill
+# Gate Pay protected HTTP payment skill
 
-## Overview
+`gate-pay-x402` guides agents through paid HTTP resources using the local stdio package
+`gatepay-local-mcp`.
 
-An AI agent skill for **Gate Pay x402** flows through **`gatepay-local-mcp`**: MCP server discovery, wallet rail configuration (MCP Wallet, plugin wallet, local private key), merchant HTTP and **402 Payment Required** handling, explicit pay consent before signing, and optional routing to **Gate Exchange** MCP when the user selects the **`gate_exchange` rail**. All tool arguments must follow each tool’s live **`inputSchema`**.
+It is the agent-side orchestration and safety layer for a protected HTTP request: probe the
+resource, identify x402 or MPP, show the price, obtain payment consent, use the selected local
+payment method, retry the resource, and report whether access was actually obtained. It is not a
+merchant service, wallet, or general Gate Exchange trading skill.
 
-### Core Capabilities
+## Scope
 
-| Capability | Description | User examples |
-|------------|-------------|----------------|
-| MCP connectivity | Detect Gate Pay MCP, surface setup guidance when missing | "Gate Pay MCP not working", "tools not found" |
-| Wallet setup | Plain-language rail choice, then env and tool-driven auth | "Configure wallet", "add Quick Wallet", "PAYMENT_METHOD_PRIORITY" |
-| x402 payment | Place order / handle 402, confirm price, then sign or submit per server tools | "Pay this 402", "x402", "sign payment" |
-| Schema-first orchestration | Build `arguments` only from `inputSchema` | (implicit in all flows) |
-| Safety | No private keys in chat; consent before write tools | (guardrails across flows) |
+- Probe merchant requests with `x402_place_order`.
+- Complete wallet-signed x402 flows.
+- Complete Gate Pay centralized flows through the local MCP OAuth/helper tools.
+- Run Base + USDC MPP sessions, including normal HTTP settlement and optional on-chain teardown.
+- Configure Quick Wallet, plugin wallet, or local private-key signing without exposing secrets in
+  chat.
+- Use an optional, separate discovery MCP to find payable resources when the user has no URL.
 
-## Architecture
+## Gate Exchange boundary
 
+Use this skill when the task starts from a protected resource URL or requires x402/MPP protocol
+handling and merchant-resource retry through `gatepay-local-mcp`.
+
+Route to `gate-exchange-pay` when the user explicitly chooses Gate Exchange/Gate account balance,
+an upstream checkout already has the structured inputs for `cex_pay_create_ai_order_pay`, and the
+task is the direct charge/receipt rather than protected-URL negotiation.
+
+Do not switch between local and Exchange payment tool families silently for one charge.
+
+## Runtime
+
+The current package exposes MCP tools only; there is no business CLI. Tool names, required fields,
+enums, and argument types come from each live MCP `inputSchema`. The skill documents the 12 tools
+exposed by the current public registry.
+
+## Install
+
+Prerequisites: a Skill-capable host, Node.js, and `npx`.
+
+Install this Skill from the public repository:
+
+```bash
+npx skills add https://github.com/gate/gate-skills --skill gate-pay-x402
 ```
+
+Register the required local payment MCP in the host's MCP configuration:
+
+```json
+{
+  "command": "npx",
+  "args": ["-y", "gatepay-local-mcp"],
+  "env": {}
+}
+```
+
+Optionally register the public merchant-discovery MCP when users need to find a payable service
+without already having its URL:
+
+```json
+{
+  "url": "https://openplatform.gateapi.io/pay-mcp-server/mcp",
+  "transport": "streamable-http"
+}
+```
+
+Keep the two servers separate. Configure payment credentials only on `gatepay-local-mcp`:
+
+- Quick Wallet: no private-key environment variable; authenticate through the MCP tool.
+- Plugin wallet: set `PLUGIN_WALLET_TOKEN` locally.
+- Local private key for x402: the current implementation requires both `EVM_PRIVATE_KEY` and
+  `SVM_PRIVATE_KEY` to mark the mode ready.
+- Local private key for MPP/Base: `EVM_PRIVATE_KEY` is required; `SVM_PRIVATE_KEY` is not.
+
+Never paste keys or full tokens into chat. Restart the host after changing MCP configuration, then
+verify that `x402_place_order` is available. Discovery is ready when its live tool list exposes a
+catalog tool such as `discoveryResource`.
+
+## Use
+
+Ask the agent in natural language. It will probe first and request confirmation after displaying
+the payment details. Example prompts:
+
+```text
+Use Quick Wallet to access https://api.example.com/paid-report.
+Configure my local-private-key wallet for x402 payments.
+Find a payable weather API, show me the price, and ask before paying.
+Use this MPP endpoint with a maximum deposit of 2 USDC.
+```
+
+For a direct structured charge from Gate account balance, use `gate-exchange-pay` instead.
+
+## Files
+
+```text
 gate-pay-x402/
-├── SKILL.md                 # Agent runtime: routing, workflow, tools, safety
-├── README.md                # Human-readable overview (this file)
-├── CHANGELOG.md             # Version history
+├── SKILL.md
+├── README.md
+├── CHANGELOG.md
 └── references/
-    └── scenarios.md         # QA scenarios (Context → Prompt Examples → Expected Behavior)
+    └── scenarios.md
 ```
 
-**Design pattern:** Single-file **routing** architecture — procedural logic and **Routing Rules** live in **`SKILL.md`**. **`references/scenarios.md`** is for testing and review, not a runtime submodule.
-
-## Usage
-
-1. Register **`gatepay-local-mcp`** (or your vendor package) in the host’s MCP settings.
-2. Load this skill so the agent follows **SKILL.md** (including shared **gate-runtime-rules**).
-3. User requests wallet setup or x402 pay; the agent reads the **live** tool list and **`inputSchema`** for each call.
-
-For detailed workflows, tool allowlisting, and error handling, see **SKILL.md**.
-
-## Trigger phrases
-
-See **SKILL.md** frontmatter `description` and **Trigger Scenarios** — e.g. x402, 402 payment, wallet configuration, merchant discovery, `PAYMENT_METHOD_PRIORITY`, Gate Exchange pay.
-
-## Auto-update
-
-**SKILL.md** may self-check against the registry URL in **Auto-Update (Session Start Only)** inside **SKILL.md**; mirror URL changes here when publishing from a different org/branch.
+`SKILL.md` contains runtime routing and safety rules. `references/scenarios.md` contains regression
+cases for x402, MPP, centralized payment, Gate Exchange routing, wallet setup, discovery, and
+untrusted merchant content.

@@ -83,7 +83,7 @@ python scripts/cex_skills.py check --target dist/gate-cex-2.0/gate-cex-trade --p
 | [gate-info-risk](skills/gate-info-risk/SKILL.md) | CLI 优先的代币、地址与项目风险检查 | `2026.6.12-5` | CLI 主入口 |
 | [gate-info-web3](skills/gate-info-web3/SKILL.md) | CLI 优先的链上与 Web3 查询 | `2026.6.22-1` | CLI 主入口 |
 | [gate-news-intel](skills/gate-news-intel/SKILL.md) | CLI 优先的新闻、事件与情绪查询 | `2026.6.22-1` | CLI 主入口 |
-| [gate-pay-x402](skills/gate-pay-x402/SKILL.md) | HTTP 402 支付、钱包配置与商户发现 | `2026.4.10-1` | Pay 可选安装 |
+| [gate-pay-x402](skills/gate-pay-x402/SKILL.md) | HTTP 402 支付、钱包配置与商户发现 | `2026.11.3-2` | Pay 可选安装 |
 
 ---
 
