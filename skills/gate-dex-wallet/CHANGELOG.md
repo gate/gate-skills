@@ -46,7 +46,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 - **references/cli.md**: version `2026.4.3-1`; tx-checkin integrated as mandatory step in On-Chain Operation Flow (preview → confirm → tx-checkin → execute); `send`, `swap`, `openapi-swap` commands annotated with tx-checkin requirement; new "tx-checkin Binary for CLI Operations" section with step-by-step flows; Security Rules updated (rule 3: terminal tx-checkin before signing); Common Pitfall #24 added; Capability Boundaries updated with signing prerequisite note
 - **install.sh**: Removed misleading placeholder Bearer token from Cursor and Codex MCP configs (OAuth login populates at runtime); Claude Code install now appends to existing CLAUDE.md instead of overwriting; Codex config.toml checks for existing gate-dex entry before appending; AGENTS.md uses same append-not-overwrite logic; OpenClaw removed hardcoded default API key and unused key prompt
-- **install_cli.sh**: OpenAPI credential input now escaped via `jq` (with `sed` fallback) to prevent JSON injection from special characters in API keys
+- CLI credential handling was hardened with escaped JSON values
 
 ## [2026.3.31-2] - 2026-03-31
 
@@ -183,23 +183,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- **CLI Command Line Module**: `references/cli.md` — gate-wallet dual-channel CLI complete specification
+- **CLI Command Line Module**: `references/cli.md` — direct CLI routing note
   - MCP channel (OAuth managed signing) + OpenAPI hybrid mode (AK/SK + MCP signing)
   - Covers authentication, asset query, transfer, swap, market data, and approval full functionality
   - Dual-channel routing rules (explicit specification / login status determination / automatic selection)
   - Hybrid Swap (`openapi-swap`) supports EVM + Solana
   - 23 common pitfalls and best practices
-- **CLI Installation Script**: `install_cli.sh` — One-click installation of gate-wallet CLI
+- **CLI command-line module**: documented direct wallet command usage
   - Detects Node.js / npm environment
-  - Global installation of `gate-wallet-cli` via npm
+  - Documented the CLI command and its runtime configuration
   - Optional OpenAPI credential configuration (`~/.gate-dex-openapi/config.json`)
   - Automatic update of CLAUDE.md / AGENTS.md routing files
 
 ### Changed
 
-- **Routing File Template**: `install.sh` generated CLAUDE.md / AGENTS.md adds CLI routing entries
+- **Routing File Template**: `install.sh` generated CLAUDE.md / AGENTS.md adds CLI routing entries.
 - **Cross-Skill Collaboration Table**: CLI caller name in SKILL.md corrected to `gate-dex-wallet-cli`
-- **npm Package Name Unification**: All files unified to use `gate-wallet-cli`
+- **CLI command naming**: wallet command references were unified
 
 ## [2026.3.11-1] - 2026-03-11
 

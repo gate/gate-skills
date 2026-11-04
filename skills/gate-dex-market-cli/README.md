@@ -29,11 +29,16 @@ The skill uses a single-file (standard) architecture:
 - `SKILL.md` is the runtime entry point with skill boundaries, command reference, security rules, and risk disclosure.
 - `references/scenarios.md` contains scenario-style examples for review and testing.
 
-## Runtime and Installation Requirements
+## CLI usage flow
 
-- A `gate-dex` binary must be on PATH.
-- **GateClaw / OpenClaw**: the manifest `install` block downloads a pre-built binary for the host OS automatically.
-- **Manual install**: download the platform binary from the URL declared in `SKILL.md` frontmatter and place it on PATH.
+1. Run one read-only command from the command reference in `SKILL.md`.
+2. If the CLI reports `Not logged in`, route to `gate-dex-wallet-cli` for login, then retry.
+3. Keep this skill read-only; route transfers and swaps to the wallet or trade CLI skills.
+
+## Runtime Requirements
+
+- The `gate-dex` executable must already be available on `PATH`.
+- This skill documents CLI usage only; installation and distribution are managed by the host or project tooling.
 
 ## Credentials
 
@@ -57,7 +62,6 @@ gate-dex-market-cli/
 ├── README.md
 ├── SKILL.md
 ├── CHANGELOG.md
-├── setup.sh
 └── references/
     └── scenarios.md
 ```

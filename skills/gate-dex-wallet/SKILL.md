@@ -2,7 +2,7 @@
 name: gate-dex-wallet
 version: "2026.5.6-1"
 updated: "2026-05-06"
-description: "Manages Gate DEX wallet accounts, identity, assets, and connectivity. Use when the user asks to 'log in with Google' or Gate, 'check my balance', 'show my wallet address', 'view tx history', 'send USDT', 'withdraw to Gate', 'pay an x402 URL', 'connect wallet', or 'use gate-wallet CLI'. Handles authentication, portfolio and swap history, transfers, Gate deposit flows, x402, DApp signing, approvals, contract calls, and wallet connection checks. Do NOT use for market data or token swap execution."
+description: "Manages Gate DEX wallet accounts, identity, assets, and connectivity. Use when the user asks to 'log in with Google' or Gate, 'check my balance', 'show my wallet address', 'view tx history', 'send USDT', 'withdraw to Gate', 'pay an x402 URL', 'connect wallet', or 'use the gate-dex CLI'. Handles authentication, portfolio and swap history, transfers, Gate deposit flows, x402, DApp signing, approvals, contract calls, and wallet connection checks. Do NOT use for market data or token swap execution."
 ---
 
 # Gate DEX Wallet
@@ -38,7 +38,7 @@ Use this skill when the user wants to **manage their on-chain wallet account, id
 - Withdraw or cash out **on-chain** to their Gate Exchange account (deposit address resolved for their UID; not CEX-internal balance moves from this skill)
 - Pay for HTTP 402 resources via x402 protocol (EVM exact/upto, Solana exact/upto); **`dex_tx_x402_checkin_preview`** (EVM EIP-3009) then **Gate Verify MCP check-in** then **`dex_tx_x402_fetch`** (`references/x402.md`, `references/tx-checkin.md`)
 - Interact with DApps (connect wallet, sign messages, approve tokens, call contracts)
-- Use the gate-wallet CLI tool for any of the above
+- Use the `gate-dex` CLI for any of the above when the user explicitly requests command-line operations
 - Detect or configure MCP Server connectivity
 
 ---
@@ -70,7 +70,7 @@ Route to the corresponding sub-module based on user intent:
 | Any signing: before `dex_wallet_sign_transaction` / `dex_wallet_sign_message`; checkin_token; Gate Verify `/v1/tx/checkin` | `references/tx-checkin.md` (read **before** signing) |
 | 402 payment, x402 pay, payment required, pay for API, pay for URL, "fetch and pay", "call this URL and pay", "paid endpoint", "pay for access", "HTTP 402", Permit2 payment, upto payment | `references/x402.md` (`dex_tx_x402_checkin_preview` → `references/tx-checkin.md` → `dex_tx_x402_fetch`) |
 | DApp connect, connect wallet, sign message, approve, revoke approval, contract call, EIP-712, Permit, personal_sign, "interact with Uniswap", "add liquidity", "stake on Lido", "mint NFT", "sign for DApp login", authorize contract | `references/dapp.md` + `references/tx-checkin.md` before every sign |
-| gate-wallet CLI, command line, terminal, openapi-swap, hybrid swap, "use CLI", "run command", "gate-wallet balance", script automation, npm gate-wallet | `references/cli.md` |
+| gate-dex CLI, command line, terminal, script automation, "use CLI", "run command", "gate-dex balance" | `references/cli.md` |
 
 ---
 
@@ -151,7 +151,7 @@ After completing an operation, **proactively suggest 2-4 relevant next actions**
 | Interact with a DApp, connect wallet, sign, approve | `references/dapp.md` |
 | Mandatory Gate Verify MCP check-in before any signing, checkin_token | `references/tx-checkin.md` |
 | Login, re-login, fix expired auth, switch account | `references/auth.md` |
-| Use CLI commands, gate-wallet terminal operations | `references/cli.md` |
+| Use `gate-dex` CLI commands | `../gate-dex-wallet-cli/SKILL.md` |
 | Check balance, view assets, transaction history | `references/asset-query.md` |
 
 ---

@@ -186,7 +186,7 @@ When users request the following operations, read the corresponding SKILL.md fil
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
 - 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`'
+- 🖥️ `gate-dex` CLI → `gate-dex-wallet-cli/SKILL.md`'
 
     if [ -f "CLAUDE.md" ]; then
         if grep -q "gate-dex-wallet" "CLAUDE.md"; then
@@ -253,7 +253,7 @@ When users request the following operations, read the corresponding SKILL.md fil
 - 🎯 DApp interaction, signing, contract calls → `gate-dex-wallet/references/dapp.md`
 - 📊 Check quotes, token info, security audits → `gate-dex-market/SKILL.md`
 - 🔄 Swap, exchange, trading → `gate-dex-trade/SKILL.md`
-- 🖥️ CLI, gate-wallet, openapi-swap → `gate-dex-wallet/references/cli.md`'
+- 🖥️ `gate-dex` CLI → `gate-dex-wallet-cli/SKILL.md`'
 
     if [ -f "AGENTS.md" ]; then
         if grep -q "gate-dex-wallet" "AGENTS.md"; then
@@ -330,7 +330,6 @@ main() {
     echo -e "${CYAN}💡 Tips:${NC}"
     echo "  First-time use requires logging in via Google OAuth or Gate OAuth to get mcp_token"
     echo "  Signing flows need the gate-dex-sec MCP (tx check-in); pass the same mcp_token as tool arg authorization — gate-dex-wallet/references/tx-checkin.md"
-    echo "  For CLI command line tool (gate-wallet command), run: ./gate-dex-wallet/install_cli.sh"
     echo "  Detailed documentation: ./gate-dex-wallet/README.md"
     echo ""
 }

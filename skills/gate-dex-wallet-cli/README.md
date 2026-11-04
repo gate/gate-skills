@@ -31,13 +31,19 @@ The skill uses a routing architecture. `SKILL.md` is a thin router that delegate
 - `references/asset-query.md` — balance, address, tokens, tx-history, tx-detail.
 - `references/transfer.md` — preview, send (one-shot), sign-msg, sign-tx, sol-tx, gas.
 
-`SKILL.md` retains skill boundaries, install/credentials notes, security rules, follow-up routing tables, and the risk disclosure block.
+`SKILL.md` retains skill boundaries, runtime and credentials notes, security rules, follow-up routing tables, and the risk disclosure block.
 
-## Runtime and Installation Requirements
+## CLI usage flow
 
-- A `gate-dex` binary must be on PATH.
-- **GateClaw / OpenClaw**: the manifest `install` block downloads a pre-built binary for the host OS automatically; the `setup.sh` script in this skill drops a Linux binary into `/home/node/.openclaw/skills/bin/gate-dex` for managed pods.
-- **Manual install**: download the platform binary from the URL declared in `SKILL.md` frontmatter and place it on PATH.
+1. Run `login` or `status` to establish and verify the session.
+2. Use `balance`, `address`, `tokens`, and history commands for read-only queries.
+3. Run `transfer` as a preview, confirm the chain, recipient, asset, and amount in chat, then run `send`.
+4. Route swaps to `gate-dex-trade-cli` and market or token queries to `gate-dex-market-cli`.
+
+## Runtime Requirements
+
+- The `gate-dex` executable must already be available on `PATH`.
+- This skill documents CLI usage only; installation and distribution are managed by the host or project tooling.
 
 ## Credentials
 
@@ -71,7 +77,6 @@ gate-dex-wallet-cli/
 ├── README.md
 ├── SKILL.md
 ├── CHANGELOG.md
-├── setup.sh
 └── references/
     ├── auth.md
     ├── asset-query.md

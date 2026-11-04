@@ -77,9 +77,9 @@ python scripts/cex_skills.py check --target dist/gate-cex-2.0/gate-cex-trade --p
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate 直播与回放列表：按分类、币种、热度/最新排序筛选 | `2026.4.8-1` | ✅ Active |
 | [gate-info-research](#-gate-info-research) | CLI 优先的市场研究与 playbook 路由 | `2026.6.22-1` | CLI 主入口 |
 | [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | 安装 Gate CLI 二进制 | `2026.11.2-1` | CLI 安装器 |
-| [gate-dex-market-cli](skills/gate-dex-market-cli/SKILL.md) | 通过 gate-dex 查询 DEX 行情和代币 | `2026.5.7-1` | DEX CLI |
-| [gate-dex-trade-cli](skills/gate-dex-trade-cli/SKILL.md) | 通过 gate-dex 执行 DEX Swap | `2026.5.7-1` | DEX CLI |
-| [gate-dex-wallet-cli](skills/gate-dex-wallet-cli/SKILL.md) | 通过 gate-dex 管理钱包、转账与签名 | `2026.5.7-1` | DEX CLI |
+| [gate-dex-market-cli](skills/gate-dex-market-cli/SKILL.md) | 通过 gate-dex 查询 DEX 行情和代币 | `2026.5.7-1` | CLI 使用 |
+| [gate-dex-trade-cli](skills/gate-dex-trade-cli/SKILL.md) | 通过 gate-dex 执行 DEX Swap | `2026.5.7-1` | CLI 使用 |
+| [gate-dex-wallet-cli](skills/gate-dex-wallet-cli/SKILL.md) | 通过 gate-dex 管理钱包、转账与签名 | `2026.5.7-1` | CLI 使用 |
 | [gate-info-risk](skills/gate-info-risk/SKILL.md) | CLI 优先的代币、地址与项目风险检查 | `2026.6.12-5` | CLI 主入口 |
 | [gate-info-web3](skills/gate-info-web3/SKILL.md) | CLI 优先的链上与 Web3 查询 | `2026.6.22-1` | CLI 主入口 |
 | [gate-news-intel](skills/gate-news-intel/SKILL.md) | CLI 优先的新闻、事件与情绪查询 | `2026.6.22-1` | CLI 主入口 |

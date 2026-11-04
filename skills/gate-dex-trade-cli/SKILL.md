@@ -4,35 +4,6 @@ version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "gate-dex CLI swap skill: one-shot DEX swap (quote → GV checkin → sign → broadcast) via the swap command. GV checkin built in — no external binary. Supports EVM multi-chain and Solana, with ERC20 approve flow. Use this skill whenever the user wants to swap, exchange, buy, sell, convert, or bridge tokens via the gate-dex CLI. Trigger phrases include swap, exchange, buy, sell, convert, bridge, cross-chain, quote, swap history, swap detail, swap-tokens, bridge-tokens."
 user-invocable: true
-metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "🔄",
-        "os": ["linux", "darwin"],
-        "requires": {
-          "bins": ["gate-dex"]
-        },
-        "install": [
-          {
-            "id": "download-linux-x64",
-            "kind": "download",
-            "os": ["linux"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-linux-x64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (Linux x64)"
-          },
-          {
-            "id": "download-macos-arm64",
-            "kind": "download",
-            "os": ["darwin"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-darwin-arm64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (macOS arm64)"
-          }
-        ]
-      }
-  }
 ---
 
 # Gate DEX CLI — Swap

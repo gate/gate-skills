@@ -4,35 +4,6 @@ version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "Gate DEX CLI wallet skill (pure REST). Auth via OAuth, balance, wallet/account addresses, token list, tx history, transfers, and signing. GV checkin is built into signing commands. Use this skill whenever the user wants to log in, check balance/address, view tx history, transfer tokens, or sign messages via the gate-dex CLI. Trigger phrases include login, logout, balance, address, tokens, tx history, transfer, send, sign-msg, sign-tx. For swaps use gate-dex-trade-cli; for market data use gate-dex-market-cli."
 user-invocable: true
-metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "💼",
-        "os": ["linux", "darwin"],
-        "requires": {
-          "bins": ["gate-dex"]
-        },
-        "install": [
-          {
-            "id": "download-linux-x64",
-            "kind": "download",
-            "os": ["linux"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-linux-x64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (Linux x64)"
-          },
-          {
-            "id": "download-macos-arm64",
-            "kind": "download",
-            "os": ["darwin"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-darwin-arm64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (macOS arm64)"
-          }
-        ]
-      }
-  }
 ---
 
 # Gate DEX CLI
@@ -79,34 +50,10 @@ Use this skill when the user wants to:
 | Token transfers (EVM + Solana) | x402 payments → `gate-dex-wallet` skill (MCP-based) |
 | Sign 32-byte hex messages / raw tx | MCP tool calls → `gate-dex-wallet` skill (MCP-based) |
 
-**Prerequisites**: A `gate-dex` binary on PATH.
+## Runtime Requirements
 
-- **GateClaw managed scenario** — `skill/setup.sh` runs automatically on install and drops a pre-built Linux binary into `/home/node/.openclaw/skills/bin/gate-dex`. Environment variables (`RUN_ENV`, `*_URL`) are collected via the GateClaw Web form and injected into `process.env` at runtime.
-- **Personal OpenClaw scenario** — the frontmatter `install` spec downloads the binary for the host OS automatically (no Node.js required).
-- **Local development** — build from source:
-  ```bash
-  cd cli && pnpm install
-  pnpm build:binary                  # production binary (no baked env)
-  pnpm build:binary -- --bake-env    # bake root .env into the binary (test env)
-  ```
-
----
-
-## Installation
-
-The published binary is a single self-contained executable (no Node.js runtime required).
-
-```bash
-# GateClaw / OpenClaw: auto-installed via setup.sh or frontmatter.install
-# Manual download (example):
-curl -fsSL https://gate-dex-cli.gateweb3.cc/latest/gate-dex-linux-x64 \
-  -o /usr/local/bin/gate-dex
-chmod +x /usr/local/bin/gate-dex
-
-# Login
-gate-dex login           # Gate OAuth (default)
-gate-dex login --google  # Google OAuth
-```
+- The `gate-dex` executable must already be available on `PATH`.
+- This skill documents CLI usage only; installation and distribution are managed by the host or project tooling.
 
 **Storage**:
 - Auth token → `~/.gate-dex/auth.json`

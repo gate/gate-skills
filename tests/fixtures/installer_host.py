@@ -30,6 +30,20 @@ def main():
             return 0
         if arguments[:1] == ["list"]:
             return 0
+    if mode in {"claude", "codex"}:
+        # Mock only vendor registration; routing and fallback files remain real.
+        endpoints = {
+            "gate-dex": "https://api.gatemcp.ai/mcp/dex",
+            "gate-dex-sec": "https://api.gatemcp.ai/mcp/dex/sec",
+        }
+        for name, url in endpoints.items():
+            expected = (["mcp", "add", "--transport", "http", name, "--scope", "project", url]
+                        if mode == "claude" else
+                        ["mcp", "add", name, "--transport", "http", "--url", url])
+            if arguments == expected:
+                failed = os.environ.get("INSTALL_TEST_FAIL_CLIENT") in {mode, "all"}
+                failed = failed or os.environ.get("INSTALL_TEST_FAIL_SERVER") == name
+                return 1 if failed else 0
     # Availability checks may find npx/gate-mcp, but the installer must not execute them.
     return 99
 

@@ -91,3 +91,20 @@ from the three user-facing READMEs and executed through the actual installer;
 only the established external boundaries are synthetic. It must produce exactly
 the two opt-in Pay services, preserve unrelated entries and existing CEX installs,
 and avoid source downloads or launching package managers.
+
+DEX CLI usage-only contracts and wallet-installer regressions are maintained in
+`test_dex_cli_usage.py`, included by the root unittest discovery command above.
+Unit cases invoke the real Claude/Codex installer functions and cover route-file
+creation, preserving existing guidance, repeated runs, registration fallback,
+secondary check-in registration failure and invalid fixture requests. Full
+installer E2E cases retain platform detection, selection, configuration and
+route-file writes, and cover normal registration, client failure, help and invalid
+options. They also check removed binary installers, absent download metadata and
+resolvable links to the existing CLI skills.
+
+Only vendor client registration and mcporter are synthetic, using the existing
+`fixtures/installer_host.py` boundary. Child homes and project directories are
+disposable; package managers, downloaders and wallet executables are guarded
+fixtures that must never run. Fixture-only failure controls are not product
+configuration. These tests do not claim real vendor-client compatibility or
+wallet/network execution.

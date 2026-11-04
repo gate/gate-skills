@@ -26,11 +26,17 @@ The skill uses a single-file (standard) architecture:
 - `SKILL.md` is the runtime entry point with skill boundaries, command reference, agent execution flow, confirmation gates, error handling, and risk disclosure.
 - `references/scenarios.md` contains scenario-style examples for review and testing.
 
-## Runtime and Installation Requirements
+## CLI usage flow
 
-- A `gate-dex` binary must be on PATH.
-- **GateClaw / OpenClaw**: the manifest `install` block downloads a pre-built binary for the host OS automatically.
-- **Manual install**: download the platform binary from the URL declared in `SKILL.md` frontmatter and place it on PATH.
+1. Resolve token addresses with `swap-tokens` or `bridge-tokens` when needed.
+2. Run `quote` and present the route, amount, fees, and slippage.
+3. Require explicit confirmation before `swap`; the CLI performs check-in, signing, and broadcast internally.
+4. Track a cross-chain order with `swap-detail` and review past orders with `swap-history`.
+
+## Runtime Requirements
+
+- The `gate-dex` executable must already be available on `PATH`.
+- This skill documents CLI usage only; installation and distribution are managed by the host or project tooling.
 
 ## Credentials
 
@@ -64,7 +70,6 @@ gate-dex-trade-cli/
 ├── README.md
 ├── SKILL.md
 ├── CHANGELOG.md
-├── setup.sh
 └── references/
     └── scenarios.md
 ```

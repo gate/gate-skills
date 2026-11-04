@@ -4,35 +4,6 @@ version: "2026.5.7-1"
 updated: "2026-05-07"
 description: "gate-dex CLI market & token data skill: K-line, liquidity, trading stats, token info, security audit, rankings, new listings, chain config, and raw RPC. Read-only; no signing. Use this skill whenever the user asks for on-chain market data, token info, or security audits via the gate-dex CLI. Trigger phrases include K-line, token price, market cap, token risk, honeypot check, token rankings, new tokens, liquidity, tx stats, chain config, rpc."
 user-invocable: true
-metadata:
-  {
-    "openclaw":
-      {
-        "emoji": "📊",
-        "os": ["linux", "darwin"],
-        "requires": {
-          "bins": ["gate-dex"]
-        },
-        "install": [
-          {
-            "id": "download-linux-x64",
-            "kind": "download",
-            "os": ["linux"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-linux-x64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (Linux x64)"
-          },
-          {
-            "id": "download-macos-arm64",
-            "kind": "download",
-            "os": ["darwin"],
-            "url": "https://gate-dex-cli.gateweb3.cc/latest/gate-dex-darwin-arm64",
-            "bins": ["gate-dex"],
-            "label": "Download gate-dex (macOS arm64)"
-          }
-        ]
-      }
-  }
 ---
 
 # Gate DEX CLI — Market & Token Data
