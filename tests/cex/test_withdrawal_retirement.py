@@ -16,7 +16,8 @@ SPEC = importlib.util.spec_from_file_location('withdrawal_builder', ROOT / 'scri
 TOOLS = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(TOOLS)
 CONTRACT = json.loads((ROOT / 'tests/cex/cli-contract.json').read_text())
-REMOVED = {'gate-cli cex withdrawal create', 'gate-cli cex withdrawal cancel'}
+REMOVED = {'gate-cli cex withdrawal create', 'gate-cli cex withdrawal cancel',
+           'gate-cli cex withdrawal push-order'}
 
 
 class WithdrawalRetirementTests(unittest.TestCase):
@@ -28,6 +29,9 @@ class WithdrawalRetirementTests(unittest.TestCase):
                 self.assertNotIn(command, body, str(path))
             self.assertNotIn('Create a new withdrawal', body, str(path))
             self.assertNotIn('Cancel a pending withdrawal', body, str(path))
+            for stale in ('UidPushWithdrawal', 'send a UID transfer',
+                          'UID transfers move funds', 'withdrawal.push-order'):
+                self.assertNotIn(stale, body, str(path))
         entry = (target / 'SKILL.md').read_text()
         self.assertNotIn('internal transfers, withdrawals and', entry)
         workflow = (target / 'references/asset-workflows.md').read_text()
@@ -37,7 +41,7 @@ class WithdrawalRetirementTests(unittest.TestCase):
         self.assertTrue(REMOVED.isdisjoint(row['path'] for row in CONTRACT['commands']))
         self.assert_retired(ROOT / 'skills/gate-cex-assets')
 
-    def test_retained_asset_actions_and_transfer_safeguards(self):
+    def test_retained_asset_actions_and_read_safeguards(self):
         """Freeze the remaining inventory independently of the edited skill index."""
         expected = {'gate-cli cex ' + path for path in (
             'stock account transactions', 'stock account transfer',
@@ -53,7 +57,6 @@ class WithdrawalRetirementTests(unittest.TestCase):
             'wallet market withdraw-status', 'wallet transfer create',
             'wallet transfer status', 'wallet transfer sub-list',
             'wallet transfer sub-to-sub', 'wallet transfer to-sub',
-            'withdrawal push-order',
         )}
         actual = {row['path'] for row in CONTRACT['commands']
                   if row['owner'] == 'gate-cex-assets'}
@@ -61,8 +64,7 @@ class WithdrawalRetirementTests(unittest.TestCase):
         target = ROOT / 'skills/gate-cex-assets'
         self.assertEqual(TOOLS.inspect(target, CONTRACT)['status'], 'PASS')
         body = (target / 'references/withdrawals-commands.md').read_text()
-        for safeguard in ('KYC/AML', 'sanctions', 'fee interpretation',
-                          'transfer-information requirements', 'not proof of receipt'):
+        for safeguard in ('bounded time window', 'withdrawal records', 'withdrawal status'):
             self.assertIn(safeguard, body)
 
     def test_asset_package_end_to_end_and_other_profiles_still_validate(self):

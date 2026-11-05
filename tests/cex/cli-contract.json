@@ -12739,41 +12739,6 @@
       "operation_id": "wallet.transfer.to-sub"
     },
     {
-      "path": "gate-cli cex withdrawal push-order",
-      "use": "push-order",
-      "short": "UID transfer between main spot accounts",
-      "long": "",
-      "flags": [
-        {
-          "name": "amount",
-          "type": "string",
-          "default": "",
-          "usage": "Transfer amount (required)",
-          "required": true
-        },
-        {
-          "name": "currency",
-          "type": "string",
-          "default": "",
-          "usage": "Currency name (required)",
-          "required": true
-        },
-        {
-          "name": "receive-uid",
-          "type": "int64",
-          "default": "0",
-          "usage": "Recipient UID (required)",
-          "required": true
-        }
-      ],
-      "owner": "gate-cex-assets",
-      "reference": "withdrawals-commands.md",
-      "exclusion": null,
-      "api": "`POST /api/v4/withdrawals/push` (private).",
-      "effect": "write",
-      "operation_id": "withdrawal.push-order"
-    },
-    {
       "path": "gate-cli cex launch projects",
       "use": "projects",
       "short": "List LaunchPool projects (public)",
@@ -13213,9 +13178,10 @@
       "owner": "gate-cex-assets",
       "removed_commands": [
         "gate-cli cex withdrawal cancel",
-        "gate-cli cex withdrawal create"
+        "gate-cli cex withdrawal create",
+        "gate-cli cex withdrawal push-order"
       ],
-      "scope": "Remove on-chain withdrawal submission and cancellation; retain withdrawal queries, UID transfers and every other existing command contract."
+      "scope": "Remove on-chain withdrawal submission/cancellation and UID Push submission; retain withdrawal and UID history queries and every other existing command contract."
     }
   ],
   "required_variants": [

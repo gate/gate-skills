@@ -8,9 +8,9 @@ python3 -B -m unittest discover -s tests/cex -p 'test_*.py' -v
 ```
 
 `cex/test_withdrawal_retirement.py` covers removal of on-chain withdrawal
-submission/cancellation from the assets instructions and independent CLI
-contract. It freezes the remaining 27 asset commands, checks UID-transfer
-authorization/compliance safeguards, and runs the real builder and checker for
+submission/cancellation and UID Push submission from the assets instructions and independent CLI
+contract. It freezes the remaining 26 asset commands, checks query
+boundaries and retained transfer safeguards, and runs the real builder and checker for
 all six standalone packages. These artifact E2E tests execute no business CLI,
 financial API or LLM; link rewriting, manifests, packaging and validation are
 real. The historical CEX unittest entry above includes all new cases.

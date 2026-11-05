@@ -8,9 +8,9 @@ Use [balances](balances-commands.md) for the requested account/currency only. Fo
 
 Use [transfers](transfers-commands.md). Confirm the selected account context, source/destination and subaccount UID if any, currency, exact amount/unit and permission. Check available/transferable balance and product availability. Preserve a supported stable reference, invoke once, then query transfer status or product transactions. Only a verified transfer result permits the next cross-skill trade. No unique reference means an ambiguous result remains unknown; do not sweep funds or replay.
 
-## Read withdrawal history or transfer by UID
+## Read withdrawal history and status
 
-Use [withdrawal queries and UID transfers](withdrawals-commands.md) to read existing withdrawal history/status or send a UID transfer between main spot accounts. For UID transfers, confirm the recipient UID, currency and amount, submit once under explicit authority, retain the reference and verify the transfer result. Resolve ambiguous outcomes before retrying.
+Use [withdrawal queries](withdrawals-commands.md) to read existing withdrawal history and status within the requested account/currency and time window. Query results do not initiate a transfer or prove settlement. For UID transfer history, use [deposit records](deposits-commands.md).
 
 ## Convert small balances
 

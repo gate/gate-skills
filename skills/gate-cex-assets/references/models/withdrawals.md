@@ -2,18 +2,6 @@
 
 Read only models linked by the selected action. These are CLI/SDK field contracts, not display templates. `?` means Go JSON omission (`omitempty`); it does not waive required API fields. String amounts preserve decimal precision. Response-only fields must not be copied into requests.
 
-<a id="model-uidpushwithdrawal"></a>
-### UidPushWithdrawal
-
-`receive_uid`: `int64`; `currency`: `string`; `amount`: `string`.
-
-<a id="model-uidpushwithdrawalresp"></a>
-### UidPushWithdrawalResp
-
-`id?`: `string`.
-
-Field semantics: `id` — Order ID.
-
 <a id="model-withdrawalrecord"></a>
 ### WithdrawalRecord
 
