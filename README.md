@@ -8,7 +8,7 @@ Built by Gate. Built for the crypto community.
 
 ## Gate CEX Skill 2.0
 
-The six CEX source skills are [trade](skills/gate-cex-trade/SKILL.md), [earn](skills/gate-cex-earn/SKILL.md), [assets](skills/gate-cex-assets/SKILL.md), [subaccount](skills/gate-cex-subaccount/SKILL.md), [affiliate](skills/gate-cex-affiliate/SKILL.md) and [bot](skills/gate-cex-bot/SKILL.md). Alpha is included in trade. The six profiles document 379 unique owned command paths within the approved authoring scope (trade 282, earn 32, assets 29, subaccount 12, affiliate 12, bot 12). Trade also reuses one asset-owned read-only command, which is not counted twice. Use the official [Gate CLI](https://github.com/gate/gate-cli) and verify each required capability in the installed public release; the catalog is not a release guarantee. Their single shared source is `skills/_shared/cex/`.
+The six CEX source skills are [trade](skills/gate-cex-trade/SKILL.md), [earn](skills/gate-cex-earn/SKILL.md), [assets](skills/gate-cex-assets/SKILL.md), [subaccount](skills/gate-cex-subaccount/SKILL.md), [affiliate](skills/gate-cex-affiliate/SKILL.md) and [bot](skills/gate-cex-bot/SKILL.md). Alpha is included in trade. The six profiles document 377 unique owned command paths within the approved authoring scope (trade 282, earn 32, assets 27, subaccount 12, affiliate 12, bot 12). Trade also reuses one asset-owned read-only command, which is not counted twice. Use the official [Gate CLI](https://github.com/gate/gate-cli) and verify each required capability in the installed public release; the catalog is not a release guarantee. Their single shared source is `skills/_shared/cex/`.
 
 Private reads and all writes use Gate CLI. Trade also permits the approved bounded public [GET compatibility reads](skills/gate-cex-trade/references/markets.md) and [WS helper](skills/gate-cex-trade/references/streams.md); these exceptions do not authorize private HTTP, MCP fallback, arbitrary endpoints or environment changes.
 
@@ -54,7 +54,7 @@ Versions below are Skill metadata, not CLI releases or proof of live service ava
 |-------|-------------|---------|----------------------|
 | [gate-cex-trade](skills/gate-cex-trade/SKILL.md) | Trading and market/account trading context | `0.1.2` | Standalone packages |
 | [gate-cex-earn](skills/gate-cex-earn/SKILL.md) | Earn products and collateral loans | — | Standalone packages |
-| [gate-cex-assets](skills/gate-cex-assets/SKILL.md) | Balances, transfers, deposits and withdrawals | — | Standalone packages |
+| [gate-cex-assets](skills/gate-cex-assets/SKILL.md) | Balances, transfers, deposits and withdrawal queries | — | Standalone packages |
 | [gate-cex-subaccount](skills/gate-cex-subaccount/SKILL.md) | Subaccount and API-key administration | — | Standalone packages |
 | [gate-cex-affiliate](skills/gate-cex-affiliate/SKILL.md) | Relationships, commissions and statistics | — | Standalone packages |
 | [gate-cex-bot](skills/gate-cex-bot/SKILL.md) | Grid, martingale and portfolio bots | — | Standalone packages |

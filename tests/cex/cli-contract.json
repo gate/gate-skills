@@ -12739,76 +12739,6 @@
       "operation_id": "wallet.transfer.to-sub"
     },
     {
-      "path": "gate-cli cex withdrawal cancel",
-      "use": "cancel",
-      "short": "Cancel a pending withdrawal",
-      "long": "",
-      "flags": [
-        {
-          "name": "id",
-          "type": "string",
-          "default": "",
-          "usage": "Withdrawal ID (required)",
-          "required": true
-        }
-      ],
-      "owner": "gate-cex-assets",
-      "reference": "withdrawals-commands.md",
-      "exclusion": null,
-      "api": "`DELETE /api/v4/withdrawals/{withdrawal_id}` (private).",
-      "effect": "write",
-      "operation_id": "withdrawal.cancel"
-    },
-    {
-      "path": "gate-cli cex withdrawal create",
-      "use": "create",
-      "short": "Create a new withdrawal",
-      "long": "",
-      "flags": [
-        {
-          "name": "address",
-          "type": "string",
-          "default": "",
-          "usage": "Withdrawal address (required)",
-          "required": true
-        },
-        {
-          "name": "amount",
-          "type": "string",
-          "default": "",
-          "usage": "Withdrawal amount (required)",
-          "required": true
-        },
-        {
-          "name": "chain",
-          "type": "string",
-          "default": "",
-          "usage": "Chain name",
-          "required": false
-        },
-        {
-          "name": "currency",
-          "type": "string",
-          "default": "",
-          "usage": "Currency name (required)",
-          "required": true
-        },
-        {
-          "name": "memo",
-          "type": "string",
-          "default": "",
-          "usage": "Memo/tag for the withdrawal",
-          "required": false
-        }
-      ],
-      "owner": "gate-cex-assets",
-      "reference": "withdrawals-commands.md",
-      "exclusion": null,
-      "api": "`POST /api/v4/withdrawals` (private).",
-      "effect": "write",
-      "operation_id": "withdrawal.create"
-    },
-    {
       "path": "gate-cli cex withdrawal push-order",
       "use": "push-order",
       "short": "UID transfer between main spot accounts",
@@ -13278,6 +13208,14 @@
         "gate-cli cex earn auto-invest min-amount"
       ],
       "scope": "Retained Earn parameters and reviewed request/response model fields; no new operations or scope changes."
+    },
+    {
+      "owner": "gate-cex-assets",
+      "removed_commands": [
+        "gate-cli cex withdrawal cancel",
+        "gate-cli cex withdrawal create"
+      ],
+      "scope": "Remove on-chain withdrawal submission and cancellation; retain withdrawal queries, UID transfers and every other existing command contract."
     }
   ],
   "required_variants": [

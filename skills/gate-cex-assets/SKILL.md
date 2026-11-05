@@ -1,6 +1,6 @@
 ---
 name: gate-cex-assets
-description: Inspect Gate assets, deposit information and records; perform explicitly authorized internal transfers, withdrawals and small-balance conversion through Gate CLI. Use for fund movement, not ordinary trading.
+description: Inspect Gate assets, deposit information and records; perform explicitly authorized internal transfers and small-balance conversion through Gate CLI. Use for fund movement, not ordinary trading.
 ---
 
 # Gate CEX Assets
@@ -14,7 +14,7 @@ Use only the official [Gate CLI](https://github.com/gate/gate-cli). Follow share
 | Asset balances and histories | [balances-commands.md](references/balances-commands.md) |
 | Internal and product transfers | [transfers-commands.md](references/transfers-commands.md) |
 | Deposit information and records | [deposits-commands.md](references/deposits-commands.md) |
-| Withdrawals | [withdrawals-commands.md](references/withdrawals-commands.md) |
+| Withdrawal records/status and UID transfers | [withdrawals-commands.md](references/withdrawals-commands.md) |
 | Small-balance conversion | [small-balance-commands.md](references/small-balance-commands.md) |
 | A multi-step assets task | [asset-workflows.md](references/asset-workflows.md) |
 

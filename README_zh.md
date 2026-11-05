@@ -8,7 +8,7 @@ Gate Skills 是一个开放的技能市场，让 AI Agent 能够原生接入 Gat
 
 ## Gate CEX Skill 2.0
 
-新版分为交易、理财、资产与充提、子账号、返佣、策略机器人六个 CLI Skill。Alpha 已纳入交易；六包在已批准编写范围内描述 379 个唯一归属命令路径（交易 282、理财 32、资产 29、子账号 12、返佣 12、机器人 12）；交易另复用资产的一项只读命令，不重复计数。对外使用 [Gate CLI 官方项目](https://github.com/gate/gate-cli)，运行前核实所需命令、参数与认证方式；文档覆盖不代表公开版本已支持。Pay 独立于 CEX，`gate-exchange-pay`、`gate-pay-x402` 及全部 DEX Skill 保留。
+新版分为交易、理财、资产与充提查询、子账号、返佣、策略机器人六个 CLI Skill。Alpha 已纳入交易；六包在已批准编写范围内描述 377 个唯一归属命令路径（交易 282、理财 32、资产 27、子账号 12、返佣 12、机器人 12）；交易另复用资产的一项只读命令，不重复计数。对外使用 [Gate CLI 官方项目](https://github.com/gate/gate-cli)，运行前核实所需命令、参数与认证方式；文档覆盖不代表公开版本已支持。Pay 独立于 CEX，`gate-exchange-pay`、`gate-pay-x402` 及全部 DEX Skill 保留。
 
 私有读取和所有写操作使用 Gate CLI。交易另有已批准的有界公共 [GET 兼容读取](skills/gate-cex-trade/references/markets.md)与 [WS helper](skills/gate-cex-trade/references/streams.md)；例外不允许私有 HTTP、MCP fallback、任意端点或切换环境。
 
@@ -52,7 +52,7 @@ python scripts/cex_skills.py check --target dist/gate-cex-2.0/gate-cex-trade --p
 |-------|------|------|----------------|
 | [gate-cex-trade](skills/gate-cex-trade/SKILL.md) | 交易与行情、账户交易设置 | `0.1.2` | 新版独立包 |
 | [gate-cex-earn](skills/gate-cex-earn/SKILL.md) | 理财与独立抵押借贷 | — | 新版独立包 |
-| [gate-cex-assets](skills/gate-cex-assets/SKILL.md) | 资产、划转与充值提现 | — | 新版独立包 |
+| [gate-cex-assets](skills/gate-cex-assets/SKILL.md) | 资产、划转、充值与提现查询 | — | 新版独立包 |
 | [gate-cex-subaccount](skills/gate-cex-subaccount/SKILL.md) | 子账号与 API Key 管理 | — | 新版独立包 |
 | [gate-cex-affiliate](skills/gate-cex-affiliate/SKILL.md) | 关系、返佣与统计 | — | 新版独立包 |
 | [gate-cex-bot](skills/gate-cex-bot/SKILL.md) | 网格、马丁与组合策略机器人 | — | 新版独立包 |

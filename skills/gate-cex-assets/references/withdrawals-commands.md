@@ -1,8 +1,8 @@
-# Withdrawals
+# Withdrawal Queries and UID Transfers
 
 ## Scope and source
 
-Before a withdrawal, establish the exact destination, network, tag/memo, currency, amount, fee interpretation, recipient/account context and authority. Read chain/withdraw-status and saved destination information where available. Create, cancel and push-order are writes. Follow existing official KYC/AML, sanctions and applicable transfer-information requirements; there is no invented Travel Rule bypass or address-book editor here. Query withdrawal records and status after submission. A cancelled request or accepted withdrawal is not proof of chain settlement.
+Read withdrawal records and currency withdrawal status for the requested account/currency and bounded time window. UID transfers move funds between main spot accounts; establish the recipient UID, currency, exact amount, fee interpretation, recipient/account context and authority before submitting once. Follow existing official KYC/AML, sanctions and applicable transfer-information requirements; there is no invented Travel Rule bypass or address-book editor here. An accepted transfer is not proof of receipt. On-chain withdrawal submission and cancellation are unavailable through this skill.
 
 CLI reference: [Gate CLI](https://github.com/gate/gate-cli). Check the installed official release for the exact command and parameters before execution; this catalog does not establish release availability.
 
@@ -14,8 +14,6 @@ Read [shared execution](../../_shared/cex/execution-cli.md) and [safety](../../_
 |---|---|---|
 | `wallet.deposit.withdrawals` | `gate-cli cex wallet deposit withdrawals` | read |
 | `wallet.market.withdraw-status` | `gate-cli cex wallet market withdraw-status` | read |
-| `withdrawal.cancel` | `gate-cli cex withdrawal cancel` | write |
-| `withdrawal.create` | `gate-cli cex withdrawal create` | write |
 | `withdrawal.push-order` | `gate-cli cex withdrawal push-order` | write |
 
 ## Invocation and parameter rules
@@ -66,50 +64,6 @@ Returns: [][WithdrawStatus](models/withdrawals.md#model-withdrawstatus).
 | --- | --- | --- | --- | --- |
 | `--currency` | `string` | No | Unset | Filter by currency name |
 
-<a id="withdrawal.cancel"></a>
-### `gate-cli cex withdrawal cancel`
-
-Operation ID: `withdrawal.cancel`. Effect: **write**.
-
-Cancel a pending withdrawal
-
-```text
-gate-cli cex withdrawal cancel [flags]
-```
-
-API: `DELETE /api/v4/withdrawals/{withdrawal_id}` (private).
-
-Returns: [WithdrawalsDel](models/withdrawals.md#model-withdrawalsdel).
-
-| Parameter | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `--id` | `string` | Yes | Unset | Withdrawal ID (required) |
-
-<a id="withdrawal.create"></a>
-### `gate-cli cex withdrawal create`
-
-Operation ID: `withdrawal.create`. Effect: **write**.
-
-Create a new withdrawal
-
-```text
-gate-cli cex withdrawal create [flags]
-```
-
-API: `POST /api/v4/withdrawals` (private).
-
-Returns: [LedgerRecord](models/withdrawals.md#model-ledgerrecord).
-
-API request model(s), assembled by the command: [LedgerRecord](models/withdrawals.md#model-ledgerrecord). JSON flags supply only the field described by that flag.
-
-| Parameter | Type | Required | Default | Description |
-| --- | --- | --- | --- | --- |
-| `--address` | `string` | Yes | Unset | Withdrawal address (required) |
-| `--amount` | `string` | Yes | Unset | Withdrawal amount (required) |
-| `--chain` | `string` | No | Unset | Chain name |
-| `--currency` | `string` | Yes | Unset | Currency name (required) |
-| `--memo` | `string` | No | Unset | Memo/tag for the withdrawal |
-
 <a id="withdrawal.push-order"></a>
 ### `gate-cli cex withdrawal push-order`
 
@@ -154,5 +108,5 @@ gate-cli cex wallet deposit withdrawals  --format json
 Write template (fill required and conditional fields from the action contract):
 
 ```text
-gate-cli cex withdrawal cancel --id <id> --format json
+gate-cli cex withdrawal push-order --receive-uid <receive-uid> --currency <currency> --amount <amount> --format json
 ```
