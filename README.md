@@ -78,7 +78,7 @@ Versions below are Skill metadata, not CLI releases or proof of live service ava
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX comprehensive wallet: authentication, assets, transfers, DApp interactions | `2026.5.6-1` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate live stream & replay listing: filter by tag, coin, sort order, and count | `2026.4.8-1` | ✅ Active |
 | [gate-info-research](#-gate-info-research) | CLI-first market research and playbook routing | `2026.6.22-1` | CLI primary |
-| [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | Install the Gate CLI binary | `2026.11.2-1` | CLI installer |
+| [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | Install the Gate CLI binary | `2026.11.5-1` | CLI installer |
 | [gate-dex-market-cli](skills/gate-dex-market-cli/SKILL.md) | DEX market and token queries through gate-dex | `2026.5.7-1` | CLI usage |
 | [gate-dex-trade-cli](skills/gate-dex-trade-cli/SKILL.md) | DEX swap execution through gate-dex | `2026.5.7-1` | CLI usage |
 | [gate-dex-wallet-cli](skills/gate-dex-wallet-cli/SKILL.md) | DEX wallet, transfers and signing through gate-dex | `2026.5.7-1` | CLI usage |
@@ -577,7 +577,7 @@ Step 3: Restart OpenClaw Gateway.
 ## Repository Structure
 
 ```
-gate-github-skills/
+gate-skills/
 ├── README.md
 ├── README_zh.md
 ├── gate-cex-skill-audit/                # Development-only audit skill

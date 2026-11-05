@@ -76,7 +76,7 @@ python scripts/cex_skills.py check --target dist/gate-cex-2.0/gate-cex-trade --p
 | [gate-dex-wallet](#-gate-dex-wallet) | Gate DEX 综合钱包：身份认证、资产查询、转账执行、DApp 交互 | `2026.5.6-1` | ✅ Active |
 | [gate-info-liveroomlocation](#-gate-info-liveroomlocation) | Gate 直播与回放列表：按分类、币种、热度/最新排序筛选 | `2026.4.8-1` | ✅ Active |
 | [gate-info-research](#-gate-info-research) | CLI 优先的市场研究与 playbook 路由 | `2026.6.22-1` | CLI 主入口 |
-| [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | 安装 Gate CLI 二进制 | `2026.11.2-1` | CLI 安装器 |
+| [gate-cli-installer](skills/gate-cli-installer/SKILL.md) | 安装 Gate CLI 二进制 | `2026.11.5-1` | CLI 安装器 |
 | [gate-dex-market-cli](skills/gate-dex-market-cli/SKILL.md) | 通过 gate-dex 查询 DEX 行情和代币 | `2026.5.7-1` | CLI 使用 |
 | [gate-dex-trade-cli](skills/gate-dex-trade-cli/SKILL.md) | 通过 gate-dex 执行 DEX Swap | `2026.5.7-1` | CLI 使用 |
 | [gate-dex-wallet-cli](skills/gate-dex-wallet-cli/SKILL.md) | 通过 gate-dex 管理钱包、转账与签名 | `2026.5.7-1` | CLI 使用 |
@@ -575,7 +575,7 @@ Step 3：重启 OpenClaw Gateway。
 ## 仓库结构
 
 ```
-gate-github-skills/
+gate-skills/
 ├── README.md
 ├── README_zh.md
 ├── gate-cex-skill-audit/                # 开发审核 Skill，不进入业务包
