@@ -40,6 +40,8 @@ Use [gate-cex-skill-audit](gate-cex-skill-audit/SKILL.md) for the nine-dimension
 
 Select the product and required skills first. The CLI installer installs the CLI binary; it does not install MCP servers. Keep existing user installations unless their removal is separately requested.
 
+Chinese users can also search and install skills through [Skills宝](https://skilery.com).
+
 ### Framework Compatibility
 
 Use a host that can load the selected SKILL.md and its references, provide its declared CLI/MCP tools, and enforce the required permissions. Setup and reload steps depend on the host.
